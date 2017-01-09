@@ -1,4 +1,4 @@
-#include <Renderer/Renderer.hpp>
+﻿#include <Renderer/Renderer.hpp>
 #include <Renderer/Texture2D.hpp>
 #include <Renderer/Shader.hpp>
 #include <Input/InputManager.hpp>
@@ -123,7 +123,7 @@ struct Vertex {
     math::vec3 normal;
     math::vec2 tex_coords;
 };
-#include <iostream>
+
 int main(int argc, char* argv[]) {
     Renderer render;
     InputManager input;
