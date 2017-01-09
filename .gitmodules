@@ -1,0 +1,17 @@
+[submodule "third_party/sdl2"]
+	path = third_party/sdl2
+	url = https://github.com/spurious/SDL-mirror.git
+    ignore = dirty
+[submodule "third_party/glew"]
+	path = third_party/glew
+	url = https://github.com/edoren/glew.git
+    ignore = dirty
+[submodule "third_party/mathfu"]
+	path = third_party/mathfu
+	url = https://github.com/google/mathfu.git
+[submodule "third_party/stb"]
+	path = third_party/stb
+	url = https://github.com/nothings/stb
+[submodule "third_party/utfcpp"]
+	path = third_party/utfcpp
+	url = https://github.com/nemtrif/utfcpp.git
