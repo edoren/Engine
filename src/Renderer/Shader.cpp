@@ -89,9 +89,10 @@ GLuint Shader::Compile(GLenum shader_type, const char* source) {
     if (success == GL_FALSE) {
         GLint log_size = 0;
         GL_CALL(glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_size));
-        String error;
-        GL_CALL(glGetShaderInfoLog(shader, log_size, &log_size, &error[0]));
-        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "%s", error.ToUtf8().c_str());
+        char* error = new char[log_size];
+        GL_CALL(glGetShaderInfoLog(shader, log_size, &log_size, error));
+        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "%s", error);
+        delete[] error;
         GL_CALL(glDeleteShader(shader));
         return 0;
     }
@@ -124,9 +125,10 @@ int Shader::CompileAndLink(const char* vertex_source,
     if (success == GL_FALSE) {
         GLint log_size = 0;
         GL_CALL(glGetProgramiv(program_, GL_INFO_LOG_LENGTH, &log_size));
-        String error;
-        GL_CALL(glGetProgramInfoLog(program_, log_size, &log_size, &error[0]));
-        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "%s", error.ToUtf8().c_str());
+        char* error = new char[log_size];
+        GL_CALL(glGetProgramInfoLog(program_, log_size, &log_size, error));
+        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "%s", error);
+        delete[] error;
         GL_CALL(glDeleteProgram(program_));
         GL_CALL(glDeleteShader(vertex_shader));
         GL_CALL(glDeleteShader(fragment_shader));
