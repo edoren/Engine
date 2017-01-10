@@ -26,7 +26,6 @@
 
 #include <System/String.hpp>
 
-#include <iterator>
 #include <cstring>
 
 #include <utf8.h>
@@ -51,19 +50,19 @@ String::String(char32_t utf32Char) {
     utf8::utf32to8(iterator, iterator + 1, std::back_inserter(string_));
 }
 
-String::String(const char* ansiString) {
-    if (ansiString) {
-        std::size_t length = strlen(ansiString);
-        if (length > 0 && utf8::is_valid(ansiString, ansiString + length)) {
-            string_.assign(ansiString);
+String::String(const char* utf8String) {
+    if (utf8String) {
+        std::size_t length = strlen(utf8String);
+        if (length > 0 && utf8::is_valid(utf8String, utf8String + length)) {
+            string_.assign(utf8String);
         };
     }
 }
 
-String::String(const std::string& ansiString) {
-    if (ansiString.size() > 0 &&
-        utf8::is_valid(ansiString.cbegin(), ansiString.cend())) {
-        string_.assign(ansiString);
+String::String(const std::string& utf8String) {
+    if (utf8String.size() > 0 &&
+        utf8::is_valid(utf8String.cbegin(), utf8String.cend())) {
+        string_.assign(utf8String);
     };
 }
 
@@ -77,7 +76,9 @@ String::String(const std::u32string& utf32String) {
                    std::back_inserter(string_));
 }
 
-String::String(const String& copy) : string_(copy.string_) {}
+String::String(const String& other) : string_(other.string_) {}
+
+String::String(String&& other) : string_(std::move(other.string_)) {}
 
 String::operator std::string() const {
     return ToUtf8();
@@ -114,6 +115,11 @@ String& String::operator=(const String& right) {
     return *this;
 }
 
+String& String::operator=(String&& right) {
+    string_ = std::move(right.string_);
+    return *this;
+}
+
 String& String::operator+=(const String& right) {
     string_ += right.string_;
     return *this;
@@ -145,7 +151,8 @@ void String::Erase(std::size_t position, std::size_t count) {
         try {
             utf8::next(start_it, string_.end());
         } catch (utf8::not_enough_room) {
-            throw std::out_of_range("the specified position is out of the string range");
+            throw std::out_of_range(
+                "the specified position is out of the string range");
         }
     }
     std::string::iterator end_it(start_it);
@@ -155,9 +162,18 @@ void String::Erase(std::size_t position, std::size_t count) {
     }
     string_.erase(start_it, end_it);
 }
-// TODO
+
 void String::Insert(std::size_t position, const String& str) {
-    string_.insert(position, str.string_);
+    std::string::iterator start_it(string_.begin());
+    for (std::size_t i = 0; i < position; ++i) {
+        try {
+            utf8::next(start_it, string_.end());
+        } catch (utf8::not_enough_room) {
+            throw std::out_of_range(
+                "the specified position is out of the string range");
+        }
+    }
+    string_.insert(start_it, str.string_.cbegin(), str.string_.cend());
 }
 // TODO
 std::size_t String::Find(const String& str, std::size_t start) const {
@@ -187,7 +203,8 @@ String String::SubString(std::size_t position, std::size_t length) const {
         try {
             utf8::next(start_it, string_.end());
         } catch (utf8::not_enough_room) {
-            throw std::out_of_range("the specified position is out of the string range");
+            throw std::out_of_range(
+                "the specified position is out of the string range");
         }
     }
     std::string::const_iterator end_it(start_it);
@@ -204,19 +221,19 @@ const std::string::value_type* String::GetData() const {
 
 /////////////////////////// TODO
 
-String::Iterator String::Begin() {
+String::iterator String::Begin() {
     return string_.begin();
 }
 
-String::ConstInterator String::Begin() const {
+String::const_iterator String::Begin() const {
     return string_.begin();
 }
 
-String::Iterator String::End() {
+String::iterator String::End() {
     return string_.end();
 }
 
-String::ConstInterator String::End() const {
+String::const_iterator String::End() const {
     return string_.end();
 }
 

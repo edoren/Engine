@@ -31,6 +31,8 @@
 #include <iterator>
 #include <string>
 
+#include <utf8.h>
+
 namespace engine {
 ////////////////////////////////////////////////////////////
 /// \brief Utility string class that automatically handles
@@ -42,9 +44,9 @@ public:
     ////////////////////////////////////////////////////////////
     // Types
     ////////////////////////////////////////////////////////////
-    typedef std::string::iterator Iterator;  ///< Iterator type
+    typedef std::string::iterator iterator;  ///< Iterator type
     typedef std::string::const_iterator
-        ConstInterator;  ///< Read-only iterator type
+        const_iterator;  ///< Read-only iterator type
 
     ////////////////////////////////////////////////////////////
     // Static member data
@@ -85,33 +87,25 @@ public:
     String(char32_t utf32Char);
 
     ////////////////////////////////////////////////////////////
-    /// \brief Construct from a null-terminated C-style ASCII string and a locale
+    /// \brief Construct from a null-terminated UTF-8 string
     ///
-    /// The source string is converted to UTF-8 according
-    /// to the given locale.
-    ///
-    /// \param asciiString ASCII string to convert
-    /// \param locale     Locale to use for conversion
+    /// \param utf8String ASCII string to convert
     ///
     ////////////////////////////////////////////////////////////
-    String(const char* asciiString);
+    String(const char* utf8String);
 
     ////////////////////////////////////////////////////////////
-    /// \brief Construct from an ASCII string and a locale
+    /// \brief Construct from an UTF-8 string
     ///
-    /// The source string is converted to UTF-8 according
-    /// to the given locale.
-    ///
-    /// \param asciiString ASCII string to convert
-    /// \param locale     Locale to use for conversion
+    /// \param utf8String ASCII string to convert
     ///
     ////////////////////////////////////////////////////////////
-    String(const std::string& asciiString);
+    String(const std::string& utf8String);
 
     ////////////////////////////////////////////////////////////
     /// \brief Construct from a UTF-16 string
     ///
-    /// \param wideString Wide string to convert
+    /// \param utf16String Wide string to convert
     ///
     ////////////////////////////////////////////////////////////
     String(const std::u16string& utf16String);
@@ -127,13 +121,21 @@ public:
     ////////////////////////////////////////////////////////////
     /// \brief Copy constructor
     ///
-    /// \param copy Instance to copy
+    /// \param other Instance to copy
     ///
     ////////////////////////////////////////////////////////////
-    String(const String& copy);
+    String(const String& other);
 
     ////////////////////////////////////////////////////////////
-    /// \brief Create a new sf::String from a UTF-8 encoded string
+    /// \brief Move constructor
+    ///
+    /// \param other Instance to move
+    ///
+    ////////////////////////////////////////////////////////////
+    String(String&& other);
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Create a new String from a UTF-8 encoded string
     ///
     /// This function is provided for consistency, it is equivalent to
     /// using the constructors that takes a const char* or a std::string.
@@ -141,7 +143,7 @@ public:
     /// \param begin Forward iterator to the beginning of the UTF-8 sequence
     /// \param end   Forward iterator to the end of the UTF-8 sequence
     ///
-    /// \return A sf::String containing the source string
+    /// \return A String containing the source string
     ///
     /// \see FromUtf16, FromUtf32
     ///
@@ -156,12 +158,12 @@ public:
     }
 
     ////////////////////////////////////////////////////////////
-    /// \brief Create a new sf::String from a UTF-16 encoded string
+    /// \brief Create a new String from a UTF-16 encoded string
     ///
     /// \param begin Forward iterator to the beginning of the UTF-16 sequence
     /// \param end   Forward iterator to the end of the UTF-16 sequence
     ///
-    /// \return A sf::String containing the source string
+    /// \return A String containing the source string
     ///
     /// \see FromUtf8, FromUtf32
     ///
@@ -174,12 +176,12 @@ public:
     }
 
     ////////////////////////////////////////////////////////////
-    /// \brief Create a new sf::String from a UTF-32 encoded string
+    /// \brief Create a new String from a UTF-32 encoded string
     ///
     /// \param begin Forward iterator to the beginning of the UTF-32 sequence
     /// \param end   Forward iterator to the end of the UTF-32 sequence
     ///
-    /// \return A sf::String containing the source string
+    /// \return A String containing the source string
     ///
     /// \see FromUtf8, FromUtf16
     ///
@@ -196,7 +198,7 @@ public:
     ///
     /// \return Converted UTF-8 string
     ///
-    /// \see toUtf8, operator std::u16string, operator std::u32string
+    /// \see ToUtf8, operator std::u16string, operator std::u32string
     ///
     ////////////////////////////////////////////////////////////
     operator std::string() const;
@@ -206,7 +208,7 @@ public:
     ///
     /// \return Converted UTF-16 string
     ///
-    /// \see toUtf16, operator std::string, operator std::u32string
+    /// \see ToUtf16, operator std::string, operator std::u32string
     ///
     ////////////////////////////////////////////////////////////
     operator std::u16string() const;
@@ -216,7 +218,7 @@ public:
     ///
     /// \return Converted UTF-32 string
     ///
-    /// \see toUtf32, , operator std::string, operator std::u16string
+    /// \see ToUtf32,, operator std::string, operator std::u16string
     ///
     ////////////////////////////////////////////////////////////
     operator std::u32string() const;
@@ -224,9 +226,12 @@ public:
     ////////////////////////////////////////////////////////////
     /// \brief Convert the Unicode string to a UTF-8 string
     ///
+    /// This function doesn't perform any conversion, since the
+    /// string is already stored as UTF-8 internally.
+    ///
     /// \return Converted UTF-8 string
     ///
-    /// \see toUtf16, toUtf32
+    /// \see ToUtf16, ToUtf32
     ///
     ////////////////////////////////////////////////////////////
     const std::string& ToUtf8() const;
@@ -236,7 +241,7 @@ public:
     ///
     /// \return Converted UTF-16 string
     ///
-    /// \see toUtf8, toUtf32
+    /// \see ToUtf8, ToUtf32
     ///
     ////////////////////////////////////////////////////////////
     std::u16string ToUtf16() const;
@@ -244,12 +249,9 @@ public:
     ////////////////////////////////////////////////////////////
     /// \brief Convert the Unicode string to a UTF-32 string
     ///
-    /// This function doesn't perform any conversion, since the
-    /// string is already stored as UTF-32 internally.
-    ///
     /// \return Converted UTF-32 string
     ///
-    /// \see toUtf8, toUtf16
+    /// \see ToUtf8, ToUtf16
     ///
     ////////////////////////////////////////////////////////////
     std::u32string ToUtf32() const;
@@ -263,6 +265,16 @@ public:
     ///
     ////////////////////////////////////////////////////////////
     String& operator=(const String& right);
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Overload of move assignment operator
+    ///
+    /// \param right Instance to move
+    ///
+    /// \return Reference to self
+    ///
+    ////////////////////////////////////////////////////////////
+    String& operator=(String&& right);
 
     ////////////////////////////////////////////////////////////
     /// \brief Overload of += operator to append an UTF-8 string
@@ -437,7 +449,7 @@ public:
     /// \see end
     ///
     ////////////////////////////////////////////////////////////
-    Iterator Begin();
+    iterator Begin();
 
     ////////////////////////////////////////////////////////////
     /// \brief Return an iterator to the beginning of the string
@@ -447,7 +459,7 @@ public:
     /// \see end
     ///
     ////////////////////////////////////////////////////////////
-    ConstInterator Begin() const;
+    const_iterator Begin() const;
 
     ////////////////////////////////////////////////////////////
     /// \brief Return an iterator to the end of the string
@@ -461,7 +473,7 @@ public:
     /// \see begin
     ///
     ////////////////////////////////////////////////////////////
-    Iterator End();
+    iterator End();
 
     ////////////////////////////////////////////////////////////
     /// \brief Return an iterator to the end of the string
@@ -475,24 +487,21 @@ public:
     /// \see begin
     ///
     ////////////////////////////////////////////////////////////
-    ConstInterator End() const;
+    const_iterator End() const;
 
 private:
-    friend ENGINE_API bool operator==(const String& left,
-                                      const String& right);
-    friend ENGINE_API bool operator<(const String& left,
-                                     const String& right);
+    friend ENGINE_API bool operator==(const String& left, const String& right);
+    friend ENGINE_API bool operator<(const String& left, const String& right);
 
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-    std::string
-        string_;  ///< Internal string of UTF-8 characters
+    std::string string_;  ///< Internal string of UTF-8 characters
 };
 
 ////////////////////////////////////////////////////////////
 /// \relates String
-/// \brief Overload of == operator to compare two UTF-32 strings
+/// \brief Overload of == operator to compare two UTF-8 strings
 ///
 /// \param left  Left operand (a string)
 /// \param right Right operand (a string)
@@ -504,7 +513,7 @@ ENGINE_API bool operator==(const String& left, const String& right);
 
 ////////////////////////////////////////////////////////////
 /// \relates String
-/// \brief Overload of != operator to compare two UTF-32 strings
+/// \brief Overload of != operator to compare two UTF-8 strings
 ///
 /// \param left  Left operand (a string)
 /// \param right Right operand (a string)
@@ -516,7 +525,7 @@ ENGINE_API bool operator!=(const String& left, const String& right);
 
 ////////////////////////////////////////////////////////////
 /// \relates String
-/// \brief Overload of < operator to compare two UTF-32 strings
+/// \brief Overload of < operator to compare two UTF-8 strings
 ///
 /// \param left  Left operand (a string)
 /// \param right Right operand (a string)
@@ -528,7 +537,7 @@ ENGINE_API bool operator<(const String& left, const String& right);
 
 ////////////////////////////////////////////////////////////
 /// \relates String
-/// \brief Overload of > operator to compare two UTF-32 strings
+/// \brief Overload of > operator to compare two UTF-8 strings
 ///
 /// \param left  Left operand (a string)
 /// \param right Right operand (a string)
@@ -540,7 +549,7 @@ ENGINE_API bool operator>(const String& left, const String& right);
 
 ////////////////////////////////////////////////////////////
 /// \relates String
-/// \brief Overload of <= operator to compare two UTF-32 strings
+/// \brief Overload of <= operator to compare two UTF-8 strings
 ///
 /// \param left  Left operand (a string)
 /// \param right Right operand (a string)
@@ -553,7 +562,7 @@ ENGINE_API bool operator<=(const String& left, const String& right);
 
 ////////////////////////////////////////////////////////////
 /// \relates String
-/// \brief Overload of >= operator to compare two UTF-32 strings
+/// \brief Overload of >= operator to compare two UTF-8 strings
 ///
 /// \param left  Left operand (a string)
 /// \param right Right operand (a string)
@@ -578,10 +587,10 @@ ENGINE_API String operator+(const String& left, const String& right);
 }  // namespace engine
 
 ////////////////////////////////////////////////////////////
-/// \class sf::String
+/// \class String
 /// \ingroup system
 ///
-/// sf::String is a utility string class defined mainly for
+/// String is a utility string class defined mainly for
 /// convenience. It is a Unicode string (implemented using
 /// UTF-8), thus it can store any character in the world
 /// (European, Chinese, Arabic, Hebrew, etc.).
@@ -589,10 +598,10 @@ ENGINE_API String operator+(const String& left, const String& right);
 /// It automatically handles conversions from/to ASCII and
 /// wide strings, so that you can work with standard string
 /// classes and still be compatible with functions taking a
-/// sf::String.
+/// String.
 ///
 /// \code
-/// sf::String s;
+/// String s;
 ///
 /// std::string s1 = s;  // automatically converted to ASCII string
 /// std::wstring s2 = s; // automatically converted to wide string
@@ -602,7 +611,7 @@ ENGINE_API String operator+(const String& left, const String& right);
 /// s += L'a';           // automatically converted from wide string
 /// \endcode
 ///
-/// sf::String defines the most important functions of the
+/// String defines the most important functions of the
 /// standard std::string class: removing, random access, iterating,
 /// appending, comparing, etc.
 ///
