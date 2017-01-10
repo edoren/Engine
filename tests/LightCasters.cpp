@@ -1,4 +1,4 @@
-﻿#include <Renderer/Renderer.hpp>
+#include <Renderer/Renderer.hpp>
 #include <Renderer/Texture2D.hpp>
 #include <Renderer/Shader.hpp>
 #include <Input/InputManager.hpp>
@@ -361,7 +361,7 @@ int main(int argc, char* argv[]) {
         // emissionTexture->Use();
 
         glBindVertexArray(cube_VAO);
-        for (size_t i = 0; i < cube_positions.size(); i++) {
+        for (std::size_t i = 0; i < cube_positions.size(); i++) {
             // Calculate the model matrix for each object and pass it to shader before drawing
             Model = math::Translate(cube_positions[i] * 2);
             Model *= math::Rotate(math::Radians(10.f * i), { 1.0f, 0.3f, 0.5f });

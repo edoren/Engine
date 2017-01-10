@@ -214,7 +214,7 @@ int main(int argc, char* argv[]) {
         shader.SetUniform("MVP", Projection * View * Model);
 
         angle += math::Radians(delta_time * 90.f);
-        for(size_t  i = 0; i < cube_positions.size(); i++) {
+        for(std::size_t  i = 0; i < cube_positions.size(); i++) {
             // Calculate the model matrix for each object and pass it to shader before drawing
             Model = math::Translate(cube_positions[i] * 2);
             Model *= math::Rotate(angle * (1 / (i+1.f)), { 1.0f, 0.3f, 0.5f });

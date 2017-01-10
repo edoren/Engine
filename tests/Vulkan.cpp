@@ -340,7 +340,7 @@ private:
         return true;
     }
 
-    static VkBool32 debugCallback(VkDebugReportFlagsEXT flags, VkDebugReportObjectTypeEXT objType, uint64_t obj, size_t location, int32_t code, const char* layerPrefix, const char* msg, void* userData) {
+    static VkBool32 debugCallback(VkDebugReportFlagsEXT flags, VkDebugReportObjectTypeEXT objType, uint64_t obj, std::size_t location, int32_t code, const char* layerPrefix, const char* msg, void* userData) {
         std::cerr << "validation layer: " << msg << std::endl;
 
         return VK_FALSE;
