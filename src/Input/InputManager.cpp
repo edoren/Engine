@@ -2,15 +2,6 @@
 
 namespace engine {
 
-void Button::Update(bool down) {
-    if (!is_down_ && down) {
-        went_down_ = true;
-    } else if (is_down_ && !down) {
-        went_up_ = true;
-    }
-    is_down_ = down;
-}
-
 InputManager::InputManager()
       : minimized_(false),
         exit_requested_(false),
