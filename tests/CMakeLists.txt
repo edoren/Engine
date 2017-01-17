@@ -27,7 +27,7 @@ foreach(TEST ${TESTS})
         ${VULKAN_LIBRARIES}
         ${SDL2_LIBRARIES}
         ${GLEW_LIBRARIES}
-        ${ENGINE_NAME}
+        ${ENGINE_LIBRARIES}
     )
 endforeach()
 

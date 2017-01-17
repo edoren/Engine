@@ -4,12 +4,11 @@
 cmake_minimum_required(VERSION 3.1)
 
 # Engine directory
-set(ENGINE_NAME Engine)
 if (NOT DEFINED ENGINE_DIR)
 	set (ENGINE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 endif()
 
-project(${ENGINE_NAME})
+project(Engine)
 
 # Configure the projects to use folders
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -26,10 +25,10 @@ endif()
 
 # Set the custom module path
 list(APPEND CMAKE_MODULE_PATH "${ENGINE_DIR}/cmake/Modules")
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} )
 
-# Include the config file
+# Include the config and macros file
 include("${ENGINE_DIR}/cmake/Config.cmake")
+include("${ENGINE_DIR}/cmake/Macros.cmake")
 
 ###############################################################################
 ## Compiler configuration
@@ -62,7 +61,7 @@ option(USE_SHARED_GLEW "Use your installed copy of GLEW" ${DEFAULT_OPTION})
 ###############################################################################
 ## Engine configuration
 
-
+set(ENGINE_NAME Engine)
 
 ###############################################################################
 ## Directories configuration

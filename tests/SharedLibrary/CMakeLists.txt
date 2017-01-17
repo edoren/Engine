@@ -10,7 +10,7 @@ target_link_libraries(SharedLibTest
     ${VULKAN_LIBRARIES}
     ${SDL2_LIBRARIES}
     ${GLEW_LIBRARIES}
-    ${ENGINE_NAME}
+    ${ENGINE_LIBRARIES}
 )
 
 set_property(TARGET SharedLibTest Impl1 Impl2 PROPERTY FOLDER "Tests/SharedLibrary")

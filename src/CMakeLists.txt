@@ -1,45 +1,55 @@
-set(ENGINE_RENDER_DIR "${ENGINE_SOURCE_DIR}/Renderer")
-set(ENGINE_MATH_DIR "${ENGINE_SOURCE_DIR}/Math")
-set(ENGINE_GRAPHICS_DIR "${ENGINE_SOURCE_DIR}/Graphics")
-set(ENGINE_INPUT_DIR "${ENGINE_SOURCE_DIR}/Input")
-set(ENGINE_SYSTEM_DIR "${ENGINE_SOURCE_DIR}/System")
-set(ENGINE_UTIL_DIR "${ENGINE_SOURCE_DIR}/Util")
+set(EXTENSIONS c cpp h hpp)
 
-file(GLOB_RECURSE ENGINE_RENDER_SRC "${ENGINE_RENDER_DIR}/*.cpp" "${ENGINE_RENDER_DIR}/*.hpp")
-file(GLOB_RECURSE ENGINE_MATH_SRC "${ENGINE_MATH_DIR}/*.cpp" "${ENGINE_MATH_DIR}/*.hpp")
-file(GLOB_RECURSE ENGINE_GRAPHICS_SRC "${ENGINE_GRAPHICS_DIR}/*.cpp" "${ENGINE_GRAPHICS_DIR}/*.hpp")
-file(GLOB_RECURSE ENGINE_INPUT_SRC "${ENGINE_INPUT_DIR}/*.cpp" "${ENGINE_INPUT_DIR}/*.hpp")
-file(GLOB_RECURSE ENGINE_SYSTEM_SRC "${ENGINE_SYSTEM_DIR}/*.cpp" "${ENGINE_SYSTEM_DIR}/*.hpp")
-file(GLOB_RECURSE ENGINE_UTIL_SRC "${ENGINE_UTIL_DIR}/*.cpp" "${ENGINE_UTIL_DIR}/*.hpp")
+## Math sources
+engine_add_sources(TARGET ENGINE_MATH_SRCS
+                   BASE_FOLDER "${ENGINE_SOURCE_DIR}/Math"
+                   MODULES Noise
+                   EXTENSIONS "${EXTENSIONS}")
+
+## System sources
+engine_add_sources(TARGET ENGINE_SYSTEM_SRCS
+                   BASE_FOLDER "${ENGINE_SOURCE_DIR}/System"
+                   MODULES DLL FileSystem IO
+                   EXTENSIONS "${EXTENSIONS}")
+
+## Utils sources
+engine_add_sources(TARGET ENGINE_UTIL_SRCS
+                   BASE_FOLDER "${ENGINE_SOURCE_DIR}/Util"
+                   EXTENSIONS "${EXTENSIONS}")
+
+## Render sources
+engine_add_sources(TARGET ENGINE_RENDER_SRCS
+                   BASE_FOLDER "${ENGINE_SOURCE_DIR}/Renderer"
+                   EXTENSIONS "${EXTENSIONS}")
+
+## Graphic sources
+engine_add_sources(TARGET ENGINE_GRAPHICS_SRCS
+                   BASE_FOLDER "${ENGINE_SOURCE_DIR}/Graphics"
+                   MODULES 3D
+                   EXTENSIONS "${EXTENSIONS}")
+
+## Input sources
+engine_add_sources(TARGET ENGINE_INPUT_SRCS
+                   BASE_FOLDER "${ENGINE_SOURCE_DIR}/Input"
+                   EXTENSIONS "${EXTENSIONS}")
 
 set(ENGINE_SRCS
-    ${ENGINE_RENDER_SRC}
-    ${ENGINE_MATH_SRC}
-    ${ENGINE_GRAPHICS_SRC}
-    ${ENGINE_INPUT_SRC}
-    ${ENGINE_SYSTEM_SRC}
-    ${ENGINE_UTIL_SRC}
+    ${ENGINE_MATH_SRCS}
+    ${ENGINE_SYSTEM_SRCS}
+    ${ENGINE_UTIL_SRCS}
+    ${ENGINE_RENDER_SRCS}
+    ${ENGINE_GRAPHICS_SRCS}
+    ${ENGINE_INPUT_SRCS}
 )
 
-add_library(${ENGINE_NAME} ${ENGINE_SRCS})
+engine_create_filters("${ENGINE_SRCS}")
 
-foreach(FILE ${ENGINE_SRCS})
-    get_filename_component(FILE_EXTENSION "${FILE}" EXT)
-    get_filename_component(FILE_DIRECTORY "${FILE}" DIRECTORY)
-    file(RELATIVE_PATH FILE_RELATIVE_DIR ${ENGINE_SOURCE_DIR} ${FILE_DIRECTORY})
+set(ENGINE_LIBRARY engine)
+engine_add_library(TARGET ${ENGINE_LIBRARY} STATIC
+                   SOURCES "${ENGINE_SRCS}"
+                   DEPENDENCIES ${OPENGL_LIBRARIES}
+                                ${SDL2_LIBRARIES}
+                                ${GLEW_LIBRARIES})
+set_target_properties(${ENGINE_LIBRARY} PROPERTIES DEFINE_SYMBOL "ENGINE_EXPORTS")
 
-    string(REPLACE "/" "\\" FILTER ${FILE_RELATIVE_DIR})
-    if(${FILE_EXTENSION} STREQUAL ".c" OR ${FILE_EXTENSION} STREQUAL ".cpp")
-        set(FILTER "Source Files\\${FILTER}")
-    elseif(${FILE_EXTENSION} STREQUAL ".h" OR ${FILE_EXTENSION} STREQUAL ".hpp")
-        set(FILTER "Header Files\\${FILTER}")
-    endif()
-
-    source_group(${FILTER} FILES ${FILE})
-endforeach()
-
-target_link_libraries(${ENGINE_NAME}
-    ${OPENGL_LIBRARIES}
-    ${SDL2_LIBRARIES}
-    ${GLEW_LIBRARIES}
-)
+set(ENGINE_LIBRARIES ${ENGINE_LIBRARY} PARENT_SCOPE)
