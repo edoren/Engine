@@ -1,13 +1,7 @@
 #include <string>
-#include <Util/Platform.hpp>
+#include <Util/Config.hpp>
 
-#if PLATFORM_IS(PLATFORM_WINDOWS)
-#define EXPORTS __declspec(dllexport)
-#else
-#define EXPORTS
-#endif
-
-class EXPORTS Operation {
+class ENGINE_SYMBOL_EXPORTS Operation {
 public:
     virtual void Operate(float a, float b) = 0;
 

@@ -1,6 +1,6 @@
 #include "Interface.hpp"
 
-class EXPORTS OperationMult : public Operation {
+class ENGINE_SYMBOL_EXPORTS OperationMult : public Operation {
 public:
     OperationMult() {}
 
@@ -14,5 +14,5 @@ public:
 };
 
 extern "C" {
-EXPORTS OperationMult impl;
+ENGINE_SYMBOL_EXPORTS OperationMult impl;
 };

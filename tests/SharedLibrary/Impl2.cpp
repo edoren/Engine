@@ -1,6 +1,6 @@
 #include "Interface.hpp"
 
-class EXPORTS OperationAdd : public Operation {
+class ENGINE_SYMBOL_EXPORTS OperationAdd : public Operation {
 public:
     OperationAdd() {}
 
@@ -14,5 +14,5 @@ public:
 };
 
 extern "C" {
-EXPORTS OperationAdd impl;
+ENGINE_SYMBOL_EXPORTS OperationAdd impl;
 };

@@ -1,6 +1,6 @@
 #include "Interface.hpp"
 
-#include <System/DLL/SharedLibrary.hpp>
+#include <System/SharedLibrary.hpp>
 #include <System/FileSystem.hpp>
 
 #include <iostream>
@@ -11,8 +11,9 @@ using namespace engine;
 int main(int argc, char* argv[]) {
     filesystem::Path basedir = filesystem::Absolute(argv[0]).ParentPath();
 
-    SharedLibrary library(basedir / "Impl2");
-    Operation* op = library.LoadSymbol<Operation>("impl");
+    SharedLibrary library(basedir / "Impl1");
+    library.Load();
+    Operation* op = static_cast<Operation*>(library.GetSymbol("impl"));
 
     op->Operate(2, 5);
 
