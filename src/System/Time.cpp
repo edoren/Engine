@@ -2,8 +2,6 @@
 
 #include <System/Time.hpp>
 
-#include <Util/Precompiled.hpp>
-
 namespace engine {
 
 const Time Time::ZERO = Time(0);

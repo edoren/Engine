@@ -39,7 +39,7 @@ namespace engine {
 ///        conversions between types and encodings
 ///
 ////////////////////////////////////////////////////////////
-class ENGINE_API String {
+class ENGINE_SYMBOL_EXPORTS String {
 public:
     ////////////////////////////////////////////////////////////
     // Types
@@ -490,8 +490,10 @@ public:
     const_iterator End() const;
 
 private:
-    friend ENGINE_API bool operator==(const String& left, const String& right);
-    friend ENGINE_API bool operator<(const String& left, const String& right);
+    friend ENGINE_SYMBOL_EXPORTS bool operator==(const String& left,
+                                                 const String& right);
+    friend ENGINE_SYMBOL_EXPORTS bool operator<(const String& left,
+                                                const String& right);
 
     ////////////////////////////////////////////////////////////
     // Member data
@@ -509,7 +511,7 @@ private:
 /// \return True if both strings are equal
 ///
 ////////////////////////////////////////////////////////////
-ENGINE_API bool operator==(const String& left, const String& right);
+ENGINE_SYMBOL_EXPORTS bool operator==(const String& left, const String& right);
 
 ////////////////////////////////////////////////////////////
 /// \relates String
@@ -521,7 +523,7 @@ ENGINE_API bool operator==(const String& left, const String& right);
 /// \return True if both strings are different
 ///
 ////////////////////////////////////////////////////////////
-ENGINE_API bool operator!=(const String& left, const String& right);
+ENGINE_SYMBOL_EXPORTS bool operator!=(const String& left, const String& right);
 
 ////////////////////////////////////////////////////////////
 /// \relates String
@@ -533,7 +535,7 @@ ENGINE_API bool operator!=(const String& left, const String& right);
 /// \return True if \a left is lexicographically before \a right
 ///
 ////////////////////////////////////////////////////////////
-ENGINE_API bool operator<(const String& left, const String& right);
+ENGINE_SYMBOL_EXPORTS bool operator<(const String& left, const String& right);
 
 ////////////////////////////////////////////////////////////
 /// \relates String
@@ -545,7 +547,7 @@ ENGINE_API bool operator<(const String& left, const String& right);
 /// \return True if \a left is lexicographically after \a right
 ///
 ////////////////////////////////////////////////////////////
-ENGINE_API bool operator>(const String& left, const String& right);
+ENGINE_SYMBOL_EXPORTS bool operator>(const String& left, const String& right);
 
 ////////////////////////////////////////////////////////////
 /// \relates String
@@ -558,7 +560,7 @@ ENGINE_API bool operator>(const String& left, const String& right);
 /// right
 ///
 ////////////////////////////////////////////////////////////
-ENGINE_API bool operator<=(const String& left, const String& right);
+ENGINE_SYMBOL_EXPORTS bool operator<=(const String& left, const String& right);
 
 ////////////////////////////////////////////////////////////
 /// \relates String
@@ -570,7 +572,7 @@ ENGINE_API bool operator<=(const String& left, const String& right);
 /// \return True if \a left is lexicographically after or equivalent to \a right
 ///
 ////////////////////////////////////////////////////////////
-ENGINE_API bool operator>=(const String& left, const String& right);
+ENGINE_SYMBOL_EXPORTS bool operator>=(const String& left, const String& right);
 
 ////////////////////////////////////////////////////////////
 /// \relates String
@@ -582,7 +584,7 @@ ENGINE_API bool operator>=(const String& left, const String& right);
 /// \return Concatenated string
 ///
 ////////////////////////////////////////////////////////////
-ENGINE_API String operator+(const String& left, const String& right);
+ENGINE_SYMBOL_EXPORTS String operator+(const String& left, const String& right);
 
 }  // namespace engine
 
