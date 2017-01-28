@@ -3,7 +3,6 @@
 #include <Util/Precompiled.hpp>
 #include <System/FileSystem.hpp>
 
-
 namespace engine {
 
 class SharedLibrary : NonCopyable {
@@ -11,7 +10,7 @@ public:
     explicit SharedLibrary(const filesystem::Path& path);
     ~SharedLibrary();
 
-    void Load();
+    bool Load();
     void Unload();
 
     void* GetSymbol(const String& symbol);
