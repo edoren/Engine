@@ -2,46 +2,29 @@
 
 #include <string>
 
+#include <Renderer/RenderWindow.hpp>
 #include <Graphics/Color.hpp>
-#include <Util/Precompiled.hpp>
 
 namespace engine {
 
 class Renderer {
 public:
     Renderer();
-    ~Renderer();
 
-    bool Initialize(const String& window_title = "",
-                    const math::ivec2& window_size = math::ivec2(800, 600));
+    virtual ~Renderer();
 
-    void AdvanceFrame(bool minimized);
+    virtual bool Initialize() = 0;
 
-    void ClearFrameBuffer(const Color& color);
+    virtual void ShutDown() = 0;
 
-    void ShutDown();
+    virtual void AdvanceFrame();
 
-    void DepthTest(bool on);
+    RenderWindow* GetRenderWindow() {
+        return render_window_;
+    };
 
-    inline math::ivec2& window_size() {
-        return window_size_;
-    }
-    inline const math::ivec2& window_size() const {
-        return window_size_;
-    }
-
-    inline String& last_error() {
-        return last_error_;
-    }
-    inline const String& last_error() const {
-        return last_error_;
-    }
-
-private:
-    SDL_Window* window_;
-    SDL_GLContext context_;
-    math::ivec2 window_size_;
-    String last_error_;
+protected:
+    RenderWindow* render_window_;
 };
 
 }  // namespace engine

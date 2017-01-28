@@ -9,7 +9,7 @@ engine_add_sources(TARGET ENGINE_MATH_SRCS
 ## System sources
 engine_add_sources(TARGET ENGINE_SYSTEM_SRCS
                    BASE_FOLDER "${ENGINE_SOURCE_DIR}/System"
-                   MODULES DLL FileSystem IO
+                   MODULES FileSystem IO
                    EXTENSIONS "${EXTENSIONS}")
 
 ## Utils sources
@@ -20,6 +20,7 @@ engine_add_sources(TARGET ENGINE_UTIL_SRCS
 ## Render sources
 engine_add_sources(TARGET ENGINE_RENDER_SRCS
                    BASE_FOLDER "${ENGINE_SOURCE_DIR}/Renderer"
+                   MODULES OpenGL
                    EXTENSIONS "${EXTENSIONS}")
 
 ## Graphic sources
@@ -33,6 +34,11 @@ engine_add_sources(TARGET ENGINE_INPUT_SRCS
                    BASE_FOLDER "${ENGINE_SOURCE_DIR}/Input"
                    EXTENSIONS "${EXTENSIONS}")
 
+## Core sources
+engine_add_sources(TARGET ENGINE_CORE_SRCS
+                   BASE_FOLDER "${ENGINE_SOURCE_DIR}/Core"
+                   EXTENSIONS "${EXTENSIONS}")
+
 set(ENGINE_SRCS
     ${ENGINE_MATH_SRCS}
     ${ENGINE_SYSTEM_SRCS}
@@ -40,6 +46,7 @@ set(ENGINE_SRCS
     ${ENGINE_RENDER_SRCS}
     ${ENGINE_GRAPHICS_SRCS}
     ${ENGINE_INPUT_SRCS}
+    ${ENGINE_CORE_SRCS}
 )
 
 engine_create_filters("${ENGINE_SRCS}")

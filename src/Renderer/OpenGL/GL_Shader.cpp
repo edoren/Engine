@@ -1,5 +1,5 @@
-#include <Renderer/GLUtilities.hpp>
-#include <Renderer/Shader.hpp>
+#include <Renderer/OpenGL/GL_Utilities.hpp>
+#include <Renderer/OpenGL/GL_Shader.hpp>
 
 namespace engine {
 

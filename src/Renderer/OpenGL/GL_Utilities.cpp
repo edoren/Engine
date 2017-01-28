@@ -1,4 +1,4 @@
-#include <Renderer/GLUtilities.hpp>
+#include <Renderer/OpenGL/GL_Utilities.hpp>
 
 namespace engine {
 

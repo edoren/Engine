@@ -1,24 +1,24 @@
 set(TEST_DIR "${CMAKE_SOURCE_DIR}/tests")
 
 # Create a test executable
-add_executable(ColorCube "${TEST_DIR}/ColorCube.cpp")
-add_executable(PerlinMap "${TEST_DIR}/PerlinMap.cpp")
-add_executable(Camera "${TEST_DIR}/Camera.cpp")
-add_executable(Light "${TEST_DIR}/Light.cpp")
-add_executable(Materials "${TEST_DIR}/Materials.cpp")
-add_executable(LightingMaps "${TEST_DIR}/LightingMaps.cpp")
+# add_executable(ColorCube "${TEST_DIR}/ColorCube.cpp")
+# add_executable(PerlinMap "${TEST_DIR}/PerlinMap.cpp")
+# add_executable(Camera "${TEST_DIR}/Camera.cpp")
+# add_executable(Light "${TEST_DIR}/Light.cpp")
+# add_executable(Materials "${TEST_DIR}/Materials.cpp")
+# add_executable(LightingMaps "${TEST_DIR}/LightingMaps.cpp")
 add_executable(LightCasters "${TEST_DIR}/LightCasters.cpp")
-add_executable(Vulkan "${TEST_DIR}/Vulkan.cpp")
+# add_executable(Vulkan "${TEST_DIR}/Vulkan.cpp")
 
 set(TESTS
-    ColorCube
-    PerlinMap
-    Camera
-    Light
-    Materials
-    LightingMaps
+    # ColorCube
+    # PerlinMap
+    # Camera
+    # Light
+    # Materials
+    # LightingMaps
     LightCasters
-    Vulkan
+    # Vulkan
 )
 
 foreach(TEST ${TESTS})

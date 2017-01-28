@@ -1,5 +1,5 @@
-#include <Renderer/GLUtilities.hpp>
-#include <Renderer/Texture2D.hpp>
+#include <Renderer/OpenGL/GL_Utilities.hpp>
+#include <Renderer/OpenGL/GL_Texture2D.hpp>
 
 namespace engine {
 
