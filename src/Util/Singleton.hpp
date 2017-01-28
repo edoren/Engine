@@ -8,29 +8,26 @@ template <class T>
 class Singleton : NonCopyable {
 public:
     Singleton() {
-        assert(!instance_);
-        instance_ = static_cast<T*>(this);
+        assert(!s_instance);
+        s_instance = static_cast<T*>(this);
     }
 
     ~Singleton() {
-        assert(instance_);
-        instance_ = nullptr;
+        assert(s_instance);
+        s_instance = nullptr;
     }
 
     static T& GetInstance() {
-        assert(instance_);
-        return (*instance_);
+        assert(s_instance);
+        return (*s_instance);
     }
 
     static T* GetInstancePtr() {
-        return instance_;
+        return s_instance;
     }
 
 protected:
-    static T* instance_;
+    static T* s_instance;
 };
-
-template <class T>
-T* Singleton<T>::instance_ = nullptr;
 
 }  // namespace engine
