@@ -1,10 +1,21 @@
 #include <Graphics/ResourceManager.hpp>
-#include <Renderer/GLUtilities.hpp>
 #include <System/IO/FileLoader.hpp>
 
 #include <iostream>
 
 namespace engine {
+
+template <>
+ResourceManager* Singleton<ResourceManager>::s_instance = nullptr;
+
+ResourceManager& ResourceManager::GetInstance() {
+    assert(s_instance);
+    return (*s_instance);
+}
+
+ResourceManager* ResourceManager::GetInstancePtr() {
+    return s_instance;
+}
 
 template <typename T>
 T* FindInMap(std::map<String, T>& map, const String& name) {
@@ -12,16 +23,19 @@ T* FindInMap(std::map<String, T>& map, const String& name) {
     return it != map.end() ? &(it->second) : nullptr;
 }
 
-ResourceManager::ResourceManager() {
+ResourceManager::ResourceManager(const filesystem::Path& resource_dir) {
+    basedir_ = resource_dir;
 }
 
 ResourceManager::~ResourceManager() {
 }
 
-bool ResourceManager::Initialize(int argc, char *argv[]) {
-    basedir_ = filesystem::Absolute(argv[0]).ParentPath();
+bool ResourceManager::Initialize() {
     return true;
 }
+
+void ResourceManager::ShutDown() {
+};
 
 Shader* ResourceManager::FindShader(const String& basename) {
     return FindInMap(shader_map_, basename);

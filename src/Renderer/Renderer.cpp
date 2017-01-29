@@ -6,7 +6,7 @@
 
 namespace engine {
 
-Renderer::Renderer() {
+Renderer::Renderer() : render_window_(nullptr) {
     SDL_InitSubSystem(SDL_INIT_VIDEO);
 }
 
@@ -17,11 +17,19 @@ Renderer::~Renderer() {
 void Renderer::AdvanceFrame() {
     if (!render_window_) return;
     if (!render_window_->IsVisible()) {
-        std::cout << "NOT VISIBLE!" << std::endl;
         SDL_Delay(10);
     } else {
         render_window_->SwapBuffers();
     }
+}
+
+RenderWindow& Renderer::GetRenderWindow() {
+    assert(render_window_);
+    return *render_window_;
+}
+
+RenderWindow* Renderer::GetRenderWindowPtr() {
+    return render_window_;
 }
 
 }  // namespace engine

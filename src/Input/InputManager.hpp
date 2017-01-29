@@ -3,12 +3,12 @@
 #include <Util/Precompiled.hpp>
 
 #include <Input/Button.hpp>
-#include <Input/Pointer.hpp>
 #include <Input/Mouse.hpp>
+#include <Input/Pointer.hpp>
 
 namespace engine {
 
-class InputManager {
+class InputManager : public Singleton<InputManager> {
 public:
     // Type definitions
     typedef std::function<void(SDL_Event*)> AppEventCallback;
@@ -18,7 +18,11 @@ public:
 
     InputManager();
 
-    void Initialize();
+    ~InputManager();
+
+    bool Initialize();
+
+    void ShutDown();
 
     void AdvanceFrame(math::ivec2* window_size);
 
@@ -40,6 +44,38 @@ public:
     inline bool exit_requested() {
         return exit_requested_;
     }
+
+    // Override standard Singleton retrieval.
+    //     @remarks
+    //         Why do we do this? Well, it's because the Singleton
+    //         implementation is in a .h file, which means it gets compiled
+    //         into anybody who includes it. This is needed for the
+    //         Singleton template to work, but we actually only want it
+    //         compiled into the implementation of the class based on the
+    //         Singleton, not all of them. If we don't change this, we get
+    //         link errors when trying to use the Singleton-based class from
+    //         an outside dll.
+    //     @par
+    //         This method just delegates to the template version anyway,
+    //         but the implementation stays in this single compilation unit,
+    //         preventing link errors.
+    static InputManager& GetInstance();
+
+    // Override standard Singleton retrieval.
+    //     @remarks
+    //         Why do we do this? Well, it's because the Singleton
+    //         implementation is in a .h file, which means it gets compiled
+    //         into anybody who includes it. This is needed for the
+    //         Singleton template to work, but we actually only want it
+    //         compiled into the implementation of the class based on the
+    //         Singleton, not all of them. If we don't change this, we get
+    //         link errors when trying to use the Singleton-based class from
+    //         an outside dll.
+    //     @par
+    //         This method just delegates to the template version anyway,
+    //         but the implementation stays in this single compilation unit,
+    //         preventing link errors.
+    static InputManager* GetInstancePtr();
 
 private:
     static int HandleAppEvents(void* userdata, SDL_Event* event);

@@ -1,7 +1,7 @@
+#include <Core/Main.hpp>
 #include <Graphics/3D/Camera.hpp>
 #include <Graphics/ResourceManager.hpp>
 #include <Input/InputManager.hpp>
-#include <Core/Main.hpp>
 #include <Renderer/Renderer.hpp>
 #include <Renderer/Shader.hpp>
 #include <Renderer/Texture2D.hpp>
@@ -124,25 +124,22 @@ struct Vertex {
 };
 
 int main(int argc, char* argv[]) {
-    InputManager input;
+    Main engine(argc, argv);
+    engine.Initialize();
 
-    ResourceManager res;
-    res.Initialize(argc, argv);
-
-    Renderer* render = new GL_Renderer();
-    render->Initialize();
+    InputManager& input = InputManager::GetInstance();
+    ResourceManager& res = ResourceManager::GetInstance();
+    Renderer& render = engine.GetRenderer();
 
     {
         math::ivec2 window_size = {800, 600};
-        RenderWindow* window = render->GetRenderWindow();
+        RenderWindow& window = render.GetRenderWindow();
 
-        bool ok = window->Create("My Game Test", window_size);
+        bool ok = window.Create("My Game Test", window_size);
         if (!ok) {
             SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Init failed, exiting!");
             return 1;
         }
-
-        input.Initialize();
 
         math::mat4 Projection =
             math::Perspective(45.0f, 16.0f / 9.0f, 0.1f, 100.0f);
@@ -300,7 +297,7 @@ int main(int argc, char* argv[]) {
             delta_time = timer.GetElapsedTime().AsSeconds();
             timer.Restart();
 
-            window->Clear(Color::MAGENTA);
+            window.Clear(Color::MAGENTA);
 
             // Camera movement
             const math::vec3& camera_front = camera.GetFrontVector();
@@ -329,7 +326,7 @@ int main(int argc, char* argv[]) {
 
             View = camera.GetViewMatrix();
 
-            auto window_size = window->GetSize();
+            auto window_size = window.GetSize();
 
             float aspect_ratio =
                 window_size.x / static_cast<float>(window_size.y);
@@ -399,7 +396,7 @@ int main(int argc, char* argv[]) {
             glBindVertexArray(0);
 
             input.AdvanceFrame(&window_size);
-            render->AdvanceFrame();
+            render.AdvanceFrame();
             // render.DepthTest(false);
         }
 
@@ -408,7 +405,7 @@ int main(int argc, char* argv[]) {
         glDeleteVertexArrays(1, &light_VAO);
     }
 
-    delete render;
+    engine.ShutDown();
 
     return 0;
 }

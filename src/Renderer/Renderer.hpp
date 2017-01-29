@@ -19,9 +19,9 @@ public:
 
     virtual void AdvanceFrame();
 
-    RenderWindow* GetRenderWindow() {
-        return render_window_;
-    };
+    RenderWindow& GetRenderWindow();
+
+    RenderWindow* GetRenderWindowPtr();
 
 protected:
     RenderWindow* render_window_;

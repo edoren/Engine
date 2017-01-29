@@ -2,14 +2,36 @@
 
 namespace engine {
 
+template <>
+InputManager* Singleton<InputManager>::s_instance = nullptr;
+
+InputManager& InputManager::GetInstance() {
+    assert(s_instance);
+    return (*s_instance);
+}
+
+InputManager* InputManager::GetInstancePtr() {
+    return s_instance;
+}
+
 InputManager::InputManager()
       : minimized_(false),
         exit_requested_(false),
         pointers_(kMaxSimultanuousPointers),
         mousewheel_delta_(math::ivec2(0, 0)) {}
 
-void InputManager::Initialize() {
+InputManager::~InputManager() {
+    ShutDown();
+}
+
+bool InputManager::Initialize() {
+    int status = SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER);
     SDL_SetEventFilter(HandleAppEvents, this);
+    return status == 0;
+}
+
+void InputManager::ShutDown() {
+    SDL_QuitSubSystem(SDL_INIT_GAMECONTROLLER);
 }
 
 int InputManager::HandleAppEvents(void* userdata, SDL_Event* event) {
@@ -37,12 +59,12 @@ void InputManager::AddEventCallback(AppEventCallback callback) {
 
 void InputManager::AdvanceFrame(math::ivec2* window_size) {
     // Reset our per-frame input state.
-    mousewheel_delta_ = math::ivec2(0, 0);
+    mousewheel_delta_.x = mousewheel_delta_.y = 0;
     for (auto& button : button_map_) {
         button.second.AdvanceFrame();
     }
     for (auto& pointer : pointers_) {
-        pointer.mousedelta = math::ivec2(0, 0);
+        pointer.mousedelta.x = pointer.mousedelta.y = 0;
     }
 
     SDL_Event event;

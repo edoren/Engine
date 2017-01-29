@@ -16,6 +16,7 @@ bool GL_Renderer::Initialize() {
 
 void GL_Renderer::ShutDown() {
     delete render_window_;
+    render_window_ = nullptr;
 }
 
 void GL_Renderer::AdvanceFrame() {
