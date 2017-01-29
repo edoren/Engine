@@ -136,6 +136,7 @@ int main(int argc, char* argv[]) {
         RenderWindow& window = render.GetRenderWindow();
 
         bool ok = window.Create("My Game Test", window_size);
+        glewInit();  // TMP FIX
         if (!ok) {
             SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Init failed, exiting!");
             return 1;
