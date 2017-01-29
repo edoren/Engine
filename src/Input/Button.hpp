@@ -30,7 +30,7 @@ enum {
 
 class InputManager;
 
-class Button {
+class ENGINE_API Button {
     friend class InputManager;
 
 public:

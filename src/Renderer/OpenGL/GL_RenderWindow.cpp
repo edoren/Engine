@@ -16,8 +16,6 @@ GL_RenderWindow::~GL_RenderWindow() {
 }
 
 bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
-    SDL_LogSetAllPriority(SDL_LOG_PRIORITY_INFO);  // TMP
-
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
@@ -50,7 +48,7 @@ bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
     GLenum status = glewInit();
     if (status != GLEW_OK) {
         // TODO: Log error
-        LOG_SHIT(String("glewInit fail."));
+        LOG_SHIT(String("GLEW initialization failed."));
         // TODO: Raise exception
         return false;
     }

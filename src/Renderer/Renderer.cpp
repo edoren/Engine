@@ -7,7 +7,7 @@
 namespace engine {
 
 Renderer::Renderer() : render_window_(nullptr) {
-    SDL_InitSubSystem(SDL_INIT_VIDEO);
+    int result = SDL_InitSubSystem(SDL_INIT_VIDEO);
 }
 
 Renderer::~Renderer() {

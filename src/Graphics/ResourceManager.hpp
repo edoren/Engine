@@ -9,7 +9,7 @@
 
 namespace engine {
 
-class ResourceManager : public Singleton<ResourceManager> {
+class ENGINE_API ResourceManager : public Singleton<ResourceManager> {
 public:
     ResourceManager(const filesystem::Path& resource_dir);
     ~ResourceManager();

@@ -5,7 +5,7 @@
 
 namespace engine {
 
-class Camera {
+class ENGINE_API Camera {
 public:
     Camera();
 

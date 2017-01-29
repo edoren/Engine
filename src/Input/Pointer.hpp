@@ -4,7 +4,7 @@
 
 namespace engine {
 
-struct Pointer {
+struct ENGINE_API Pointer {
     SDL_FingerID id;
     math::ivec2 mousepos;
     math::ivec2 mousedelta;

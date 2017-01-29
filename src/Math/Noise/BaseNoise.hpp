@@ -1,13 +1,12 @@
 #pragma once
 
-#include <algorithm>
-#include <vector>
+#include <Util/Precompiled.hpp>
 
 namespace engine {
 
 namespace math {
 
-class BaseNoise {
+class ENGINE_API BaseNoise {
 public:
     BaseNoise(int seed);
 

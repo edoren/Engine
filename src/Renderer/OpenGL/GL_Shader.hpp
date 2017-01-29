@@ -4,7 +4,7 @@
 
 namespace engine {
 
-class Shader : NonCopyable {
+class ENGINE_API Shader : NonCopyable {
 public:
     Shader();
     Shader(Shader&& other);

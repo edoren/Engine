@@ -33,6 +33,8 @@ bool Main::Initialize() {
     if (!is_initialized_) {
         SDL_Init(0);
 
+        // SDL_LogSetAllPriority(SDL_LOG_PRIORITY_INFO);  // TMP
+
         m_renderer = new GL_Renderer();
 
         m_input->Initialize();
@@ -57,6 +59,15 @@ void Main::ShutDown() {
 
         is_initialized_ = false;
     }
+}
+
+Renderer& Main::GetRenderer() {
+    assert(m_renderer);
+    return *m_renderer;
+}
+
+Renderer* Main::GetRendererPtr() {
+    return m_renderer;
 }
 
 }  // namespace engine

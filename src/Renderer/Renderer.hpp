@@ -7,7 +7,7 @@
 
 namespace engine {
 
-class Renderer {
+class ENGINE_API Renderer {
 public:
     Renderer();
 

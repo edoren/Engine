@@ -7,7 +7,7 @@ namespace engine {
 
 class InputManager;
 
-class Mouse : NonCopyable {
+class ENGINE_API Mouse : NonCopyable {
     friend class InputManager;
 
 private:

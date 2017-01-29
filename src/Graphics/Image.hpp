@@ -5,7 +5,7 @@
 
 namespace engine {
 
-class Image {
+class ENGINE_API Image {
 public:
     Image();
 

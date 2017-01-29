@@ -17,14 +17,18 @@ find_package(Vulkan REQUIRED)
 # SDL2
 if (USE_SHARED_SDL2)
     find_package(SDL2 REQUIRED)
-    set(SDL2_LIBRARIES ${SDL2_LIBRARY})
+    set(SDL2_LIBRARY ${SDL2_LIBRARY})
 else()
-    set(SDL_SHARED_ENABLED_BY_DEFAULT OFF)
+    # set(SDL_SHARED_ENABLED_BY_DEFAULT OFF)
     add_subdirectory(${SDL2_DIR} "${TEMP_DIR}/sdl2" EXCLUDE_FROM_ALL)
     set(SDL2_INCLUDE_DIR "${SDL2_BINARY_DIR}/include"
                          "${SDL2_SOURCE_DIR}/include")
-    set(SDL2_LIBRARIES SDL2main SDL2-static)
-    set(COMPILED_DEPENDENCIES ${COMPILED_DEPENDENCIES} ${SDL2_LIBRARIES})
+    set(SDL2_MAIN_LIBRARY SDL2main)
+    set(SDL2_SHARED_LIBRARY SDL2)
+    set(SDL2_STATIC_LIBRARY SDL2-static)
+    list(APPEND COMPILED_THIRD_PARTY ${SDL2_SHARED_LIBRARY}
+                                     ${SDL2_MAIN_LIBRARY}
+                                     ${SDL2_STATIC_LIBRARY})
     # (hack) We redefine install to stop SDL's CMakeLists.txt from
     # referring to SDL2 lib
     function(install)
@@ -41,8 +45,8 @@ else()
         EXCLUDE_FROM_ALL
     )
     set(GLEW_INCLUDE_DIR "${GLEW_DIRECTORY}/include")
-    set(GLEW_LIBRARIES glew_s)
-    set(COMPILED_DEPENDENCIES ${COMPILED_DEPENDENCIES} ${GLEW_LIBRARIES})
+    set(GLEW_LIBRARY glew_s)
+    list(APPEND COMPILED_THIRD_PARTY ${GLEW_LIBRARY})
     add_definitions(-DGLEW_STATIC)
 endif()
 
@@ -58,14 +62,16 @@ set(UTFCPP_INCLUDE_DIR "${UTFCPP_DIR}/source")
 
 ###############################################################################
 
-# Set the dependencies folder
-set_property(TARGET ${COMPILED_DEPENDENCIES} PROPERTY FOLDER "Dependencies")
+# Set the thirdparty folder
+set_property(TARGET ${COMPILED_THIRD_PARTY} PROPERTY FOLDER "ThirdParty")
 
 # Add the dependencies to the parent scope
-set(OPENGL_LIBRARIES ${OPENGL_LIBRARIES} PARENT_SCOPE)
-set(VULKAN_LIBRARIES ${VULKAN_LIBRARIES} PARENT_SCOPE)
-set(SDL2_LIBRARIES ${SDL2_LIBRARIES} PARENT_SCOPE)
-set(GLEW_LIBRARIES ${GLEW_LIBRARIES} PARENT_SCOPE)
+set(OPENGL_LIBRARY ${OPENGL_LIBRARY} PARENT_SCOPE)
+set(VULKAN_LIBRARY ${VULKAN_LIBRARY} PARENT_SCOPE)
+set(SDL2_MAIN_LIBRARY ${SDL2_MAIN_LIBRARY} PARENT_SCOPE)
+set(SDL2_SHARED_LIBRARY ${SDL2_SHARED_LIBRARY} PARENT_SCOPE)
+set(SDL2_STATIC_LIBRARY ${SDL2_STATIC_LIBRARY} PARENT_SCOPE)
+set(GLEW_LIBRARY ${GLEW_LIBRARY} PARENT_SCOPE)
 
 # Set the third party include directories
 set(THIRD_PARTY_INCLUDES

@@ -5,7 +5,7 @@
 namespace engine {
 
 template <class T>
-class Singleton : NonCopyable {
+class ENGINE_API Singleton : NonCopyable {
 public:
     Singleton() {
         assert(!s_instance);

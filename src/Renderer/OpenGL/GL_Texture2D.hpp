@@ -5,7 +5,7 @@
 
 namespace engine {
 
-class Texture2D : NonCopyable {
+class ENGINE_API Texture2D : NonCopyable {
 public:
     Texture2D();
     Texture2D(Texture2D&& other);

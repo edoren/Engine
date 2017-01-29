@@ -9,7 +9,7 @@
 
 namespace engine {
 
-class GL_Renderer : public Renderer {
+class ENGINE_API GL_Renderer : public Renderer {
 public:
     GL_Renderer();
 

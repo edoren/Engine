@@ -8,7 +8,7 @@
 
 namespace engine {
 
-class InputManager : public Singleton<InputManager> {
+class ENGINE_API InputManager : public Singleton<InputManager> {
 public:
     // Type definitions
     typedef std::function<void(SDL_Event*)> AppEventCallback;

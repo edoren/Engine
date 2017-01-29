@@ -6,7 +6,7 @@ namespace engine {
 
 class Color;
 
-class Color32 {
+class ENGINE_API Color32 {
 public:
     static const Color32 BLACK;
     static const Color32 BLUE;

@@ -1,15 +1,12 @@
 #pragma once
 
-#include <algorithm>
-#include <vector>
-
-#include "BaseNoise.hpp"
+#include <Math/Noise/BaseNoise.hpp>
 
 namespace engine {
 
 namespace math {
 
-class RidgedMultiNoise : public BaseNoise {
+class ENGINE_API RidgedMultiNoise : public BaseNoise {
 public:
     static const int DEFAULT_SEED;
     static const int DEFAULT_OCTAVE_COUNT;

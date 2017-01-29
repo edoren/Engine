@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "Platform.hpp"
+#include <Util/Precompiled.hpp>
 
 #if (PLATFORM == PLATFORM_WINDOWS)
 #define VK_USE_PLATFORM_WIN32_KHR
@@ -17,7 +17,7 @@
 
 namespace SDL {
 
-    SDL_bool GetVulkanInstanceExtensions(std::vector<const char*>& out);
-    SDL_bool CreateVulkanSurface(SDL_Window* window, VkInstance instance, VkSurfaceKHR* surface);
-
+ENGINE_API SDL_bool GetVulkanInstanceExtensions(std::vector<const char*>& out);
+ENGINE_API SDL_bool CreateVulkanSurface(SDL_Window* window, VkInstance instance,
+                                        VkSurfaceKHR* surface);
 }

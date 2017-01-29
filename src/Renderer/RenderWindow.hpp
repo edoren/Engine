@@ -5,7 +5,7 @@
 
 namespace engine {
 
-class RenderWindow {
+class ENGINE_API RenderWindow {
 public:
     RenderWindow();
     virtual ~RenderWindow();

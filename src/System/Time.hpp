@@ -4,7 +4,7 @@
 
 namespace engine {
 
-class Time {
+class ENGINE_API Time {
 public:
     ////////////////////////////////////////////////////
     /// Static member variables
@@ -51,31 +51,43 @@ public:
     ////////////////////////////////////////////////////////////
     /// Operator overload
     ////////////////////////////////////////////////////////////
-    friend bool operator==(const Time& left, const Time& right);
+    friend ENGINE_API bool operator==(const Time& left,
+                                                 const Time& right);
 
-    friend bool operator!=(const Time& left, const Time& right);
+    friend ENGINE_API bool operator!=(const Time& left,
+                                                 const Time& right);
 
-    friend bool operator<(const Time& left, const Time& right);
+    friend ENGINE_API bool operator<(const Time& left,
+                                                const Time& right);
 
-    friend bool operator>(const Time& left, const Time& right);
+    friend ENGINE_API bool operator>(const Time& left,
+                                                const Time& right);
 
-    friend bool operator<=(const Time& left, const Time& right);
+    friend ENGINE_API bool operator<=(const Time& left,
+                                                 const Time& right);
 
-    friend bool operator>=(const Time& left, const Time& right);
+    friend ENGINE_API bool operator>=(const Time& left,
+                                                 const Time& right);
 
-    friend Time operator-(const Time& right);
+    friend ENGINE_API Time operator-(const Time& right);
 
-    friend Time operator+(const Time& left, const Time& right);
+    friend ENGINE_API Time operator+(const Time& left,
+                                                const Time& right);
 
-    friend Time& operator+=(Time& left, const Time& right);
+    friend ENGINE_API Time& operator+=(Time& left,
+                                                  const Time& right);
 
-    friend Time operator-(const Time& left, const Time& right);
+    friend ENGINE_API Time operator-(const Time& left,
+                                                const Time& right);
 
-    friend Time& operator-=(Time& left, const Time& right);
+    friend ENGINE_API Time& operator-=(Time& left,
+                                                  const Time& right);
 
-    friend Time operator%(const Time& left, const Time& right);
+    friend ENGINE_API Time operator%(const Time& left,
+                                                const Time& right);
 
-    friend Time& operator%=(Time& left, const Time& right);
+    friend ENGINE_API Time& operator%=(Time& left,
+                                                  const Time& right);
 
     template <typename T>
     friend Time operator*(Time left, T right) {

@@ -8,7 +8,7 @@ namespace engine {
 
 namespace filesystem {
 
-class Path {
+class ENGINE_API Path {
 public:
     typedef char value_type;
     typedef std::basic_string<value_type> string_type;
@@ -34,19 +34,23 @@ public:
 
     Path& operator/=(const Path& p);
 
-    friend Path Absolute(const Path& path, const Path& base);
-    friend Path CurrentDirectory();
+    friend ENGINE_API Path Absolute(const Path& path,
+                                               const Path& base);
+    friend ENGINE_API Path CurrentDirectory();
 
-    friend Path operator/(const Path& lhs, const Path& rhs);
-    friend std::ostream& operator<<(std::ostream& os, const Path& path);
+    friend ENGINE_API Path operator/(const Path& lhs,
+                                                const Path& rhs);
+    friend ENGINE_API std::ostream& operator<<(std::ostream& os,
+                                                          const Path& path);
 
 private:
     external::fs::path path_;
 };
 
-Path operator/(const Path& lhs, const Path& rhs);
+ENGINE_API Path operator/(const Path& lhs, const Path& rhs);
 
-std::ostream& operator<<(std::ostream& os, const Path& path);
+ENGINE_API std::ostream& operator<<(std::ostream& os,
+                                               const Path& path);
 
 }  // namespace filesystem
 

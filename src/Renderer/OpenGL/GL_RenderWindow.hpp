@@ -7,7 +7,7 @@
 
 namespace engine {
 
-class GL_RenderWindow : public RenderWindow {
+class ENGINE_API GL_RenderWindow : public RenderWindow {
 public:
     GL_RenderWindow();
     ~GL_RenderWindow();

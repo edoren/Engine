@@ -1,15 +1,12 @@
 #pragma once
 
-#include <algorithm>
-#include <vector>
-
-#include "BaseNoise.hpp"
+#include <Math/Noise/BaseNoise.hpp>
 
 namespace engine {
 
 namespace math {
 
-class PerlinNoise : public BaseNoise {
+class ENGINE_API PerlinNoise : public BaseNoise {
 public:
     static const int DEFAULT_SEED;
     static const int DEFAULT_OCTAVE_COUNT;

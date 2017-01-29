@@ -5,7 +5,7 @@
 
 namespace engine {
 
-class SharedLibrary : NonCopyable {
+class ENGINE_API SharedLibrary : NonCopyable {
 public:
     explicit SharedLibrary(const filesystem::Path& path);
     ~SharedLibrary();

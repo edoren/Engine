@@ -5,7 +5,7 @@
 
 namespace engine {
 
-class Material {
+class ENGINE_API Material {
 public:
     Color ambient;
     Color diffuse;

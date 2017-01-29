@@ -50,9 +50,9 @@ endif()
 ###############################################################################
 ## Third party libraries configuration
 
-set(DEFAULT_OPTION on)
+set(DEFAULT_OPTION ON)
 if(${OS} STREQUAL "Windows")
-    set(DEFAULT_OPTION off)
+    set(DEFAULT_OPTION OFF)
 endif()
 
 option(USE_SHARED_SDL2 "Use your installed copy of SDL2" ${DEFAULT_OPTION})
@@ -62,6 +62,12 @@ option(USE_SHARED_GLEW "Use your installed copy of GLEW" ${DEFAULT_OPTION})
 ## Engine configuration
 
 set(ENGINE_NAME Engine)
+
+option(ENGINE_BUILD_STATIC "Build the Engine as an static library" OFF)
+
+if(ENGINE_BUILD_STATIC)
+    add_definitions(-DENGINE_STATIC)
+endif()
 
 ###############################################################################
 ## Directories configuration

@@ -2,7 +2,7 @@
 
 namespace engine {
 
-class NonCopyable {
+class ENGINE_API NonCopyable {
 protected:
     NonCopyable() {}
     ~NonCopyable() {}

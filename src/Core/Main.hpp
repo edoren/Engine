@@ -8,7 +8,7 @@
 
 namespace engine {
 
-class Main : public Singleton<Main> {
+class ENGINE_API Main : public Singleton<Main> {
 public:
     Main(int argc, char* argv[]);
 
@@ -18,13 +18,9 @@ public:
 
     void ShutDown();
 
-    Renderer& GetRenderer() {
-        return *m_renderer;
-    }
+    Renderer& GetRenderer();
 
-    Renderer* GetRendererPtr() {
-        return m_renderer;
-    }
+    Renderer* GetRendererPtr();
 
     // Override standard Singleton retrieval.
     //     @remarks

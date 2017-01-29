@@ -11,6 +11,12 @@
 #pragma warning(disable: 4251)
 #endif  // _MSC_VER
 #else
-#define ENGINE_SYMBOL_EXPORTS
+#define ENGINE_API
 #define ENGINE_SYMBOL_IMPORTS
+#endif
+
+#ifdef ENGINE_EXPORTS
+#define ENGINE_API ENGINE_SYMBOL_EXPORTS
+#else
+#define ENGINE_API ENGINE_SYMBOL_IMPORTS
 #endif

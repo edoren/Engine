@@ -6,7 +6,7 @@
 
 namespace engine {
 
-class Stopwatch {
+class ENGINE_API Stopwatch {
 public:
     Stopwatch();
 
