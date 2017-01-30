@@ -1,7 +1,8 @@
 #pragma once
 
+#include <Util/Prerequisites.hpp>
+
 #include <Input/InputManager.hpp>
-#include <Util/Precompiled.hpp>
 
 namespace engine {
 

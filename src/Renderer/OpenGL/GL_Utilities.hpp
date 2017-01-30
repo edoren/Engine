@@ -1,4 +1,4 @@
-#include <Util/Precompiled.hpp>
+#include <Util/Prerequisites.hpp>
 #include <Renderer/OpenGL/GL_Prerequisites.hpp>
 
 #pragma once

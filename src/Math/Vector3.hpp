@@ -1,6 +1,6 @@
 #pragma once
 
-#include <mathfu/vector_3.h>
+#include <Util/Prerequisites.hpp>
 
 namespace engine {
 

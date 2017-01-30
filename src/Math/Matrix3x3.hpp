@@ -1,8 +1,8 @@
 #pragma once
 
-#include <mathfu/matrix.h>
+#include <Util/Prerequisites.hpp>
 
-#include "Vector3.hpp"
+#include <Math/Vector3.hpp>
 
 namespace engine {
 

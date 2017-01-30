@@ -1,7 +1,8 @@
 #pragma once
 
+#include <Util/Prerequisites.hpp>
+
 #include <System/FileSystem/Path.hpp>
-#include <Util/Precompiled.hpp>
 
 namespace engine {
 
@@ -10,7 +11,7 @@ namespace filesystem {
 ENGINE_API Path CurrentDirectory();
 
 ENGINE_API Path Absolute(const Path& path,
-                                    const Path& base = CurrentDirectory());
+                         const Path& base = CurrentDirectory());
 
 }  // namespace filesystem
 

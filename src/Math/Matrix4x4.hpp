@@ -1,9 +1,8 @@
 #pragma once
 
-#include <mathfu/matrix.h>
-#include <mathfu/matrix_4x4.h>
+#include <Util/Prerequisites.hpp>
 
-#include "Vector4.hpp"
+#include <Math/Vector4.hpp>
 
 namespace engine {
 

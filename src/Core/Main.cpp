@@ -1,6 +1,6 @@
-#include "Core/Main.hpp"
+#include <Core/Main.hpp>
 
-#include <Renderer/OpenGL/GL_Renderer.hpp>
+#include <Renderer/OpenGL/GL_Renderer.hpp>  // TMP
 
 namespace engine {
 

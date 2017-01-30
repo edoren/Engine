@@ -1,5 +1,3 @@
-#pragma once
-
 #include <System/Time.hpp>
 
 namespace engine {

@@ -1,6 +1,4 @@
-
 #include <System/IO/FileLoader.hpp>
-#include <Util/Precompiled.hpp>
 
 namespace engine {
 

@@ -1,7 +1,9 @@
 #pragma once
 
+#include <Util/Prerequisites.hpp>
+
 #include <Graphics/Color.hpp>
-#include <Util/Precompiled.hpp>
+#include <System/String.hpp>
 
 namespace engine {
 

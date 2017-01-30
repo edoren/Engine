@@ -1,9 +1,5 @@
 #include <Renderer/Renderer.hpp>
 
-#include <Util/Precompiled.hpp>
-
-#include <iostream>
-
 namespace engine {
 
 Renderer::Renderer() : render_window_(nullptr) {

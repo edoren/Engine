@@ -5,24 +5,28 @@
 #include <cstdio>
 #include <cstring>
 
-#include <algorithm>
+#include <bitset>
+#include <deque>
 #include <functional>
-#include <unordered_map>
+#include <list>
 #include <map>
+#include <queue>
+#include <set>
+#include <string>
+#include <unordered_map>
 #include <vector>
 
-#include <Util/Platform.hpp>
+#include <algorithm>
+#include <chrono>
+#include <numeric>
+#include <random>
+#include <type_traits>
+
 #include <Util/Config.hpp>
 #include <Util/NonCopyable.hpp>
+#include <Util/Platform.hpp>
 #include <Util/Singleton.hpp>
 #include <Util/Types.hpp>
-
-#include <System/String.hpp>
-
-#include <Math/GLSLMappings.hpp>
-#include <Math/Geometric.hpp>
-#include <Math/MatrixTransform.hpp>
-#include <Math/Trigonometric.hpp>
 
 #define USING_STD_FILESYSTEM
 
@@ -37,3 +41,11 @@ namespace fs = std::experimental::filesystem;
 
 #include <SDL.h>
 #include <SDL_log.h>
+
+#include <mathfu/matrix.h>
+#include <mathfu/matrix_4x4.h>
+#include <mathfu/vector_2.h>
+#include <mathfu/vector_3.h>
+#include <mathfu/vector_4.h>
+
+#include <utf8.h>

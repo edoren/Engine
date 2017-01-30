@@ -1,7 +1,9 @@
 #pragma once
 
-#include <Util/Precompiled.hpp>
+#include <Util/Prerequisites.hpp>
+
 #include <System/FileSystem.hpp>
+#include <System/String.hpp>
 
 namespace engine {
 

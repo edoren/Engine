@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string>
+#include <Util/Prerequisites.hpp>
 
 #include <Renderer/RenderWindow.hpp>
 #include <Graphics/Color.hpp>

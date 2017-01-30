@@ -1,6 +1,8 @@
 #pragma once
 
-#include <Util/Precompiled.hpp>
+#include <Util/Prerequisites.hpp>
+
+#include <Math/Math.hpp>
 
 namespace engine {
 

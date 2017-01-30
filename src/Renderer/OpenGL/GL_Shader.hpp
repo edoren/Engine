@@ -1,5 +1,10 @@
 #pragma once
 
+#include <Util/Prerequisites.hpp>
+
+#include <Math/Math.hpp>
+#include <System/String.hpp>
+
 #include <Renderer/OpenGL/GL_Utilities.hpp>
 
 namespace engine {

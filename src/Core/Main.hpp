@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Util/Precompiled.hpp"
+#include <Util/Prerequisites.hpp>
 
-#include <Input/InputManager.hpp>
 #include <Graphics/ResourceManager.hpp>
+#include <Input/InputManager.hpp>
 #include <Renderer/Renderer.hpp>
 
 namespace engine {

@@ -1,10 +1,11 @@
 #pragma once
 
-#include <Util/Precompiled.hpp>
+#include <Util/Prerequisites.hpp>
 
 #include <Input/Button.hpp>
 #include <Input/Mouse.hpp>
 #include <Input/Pointer.hpp>
+#include <Math/Math.hpp>
 
 namespace engine {
 

@@ -1,9 +1,5 @@
 #include <Math/Noise/RidgedMultiNoise.hpp>
 
-#include <algorithm>
-#include <numeric>
-#include <random>
-
 namespace engine {
 
 namespace math {

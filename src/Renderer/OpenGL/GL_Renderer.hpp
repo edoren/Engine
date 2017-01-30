@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include <Util/Precompiled.hpp>
+#include <Util/Prerequisites.hpp>
 
 #include <Renderer/Renderer.hpp>
 #include <Renderer/OpenGL/GL_RenderWindow.hpp>

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <ostream>
+#include <Util/Prerequisites.hpp>
 
-#include <Util/Precompiled.hpp>
+#include <System/String.hpp>
 
 namespace engine {
 
@@ -34,14 +34,12 @@ public:
 
     Path& operator/=(const Path& p);
 
-    friend ENGINE_API Path Absolute(const Path& path,
-                                               const Path& base);
+    friend ENGINE_API Path Absolute(const Path& path, const Path& base);
     friend ENGINE_API Path CurrentDirectory();
 
-    friend ENGINE_API Path operator/(const Path& lhs,
-                                                const Path& rhs);
+    friend ENGINE_API Path operator/(const Path& lhs, const Path& rhs);
     friend ENGINE_API std::ostream& operator<<(std::ostream& os,
-                                                          const Path& path);
+                                               const Path& path);
 
 private:
     external::fs::path path_;
@@ -49,8 +47,7 @@ private:
 
 ENGINE_API Path operator/(const Path& lhs, const Path& rhs);
 
-ENGINE_API std::ostream& operator<<(std::ostream& os,
-                                               const Path& path);
+ENGINE_API std::ostream& operator<<(std::ostream& os, const Path& path);
 
 }  // namespace filesystem
 

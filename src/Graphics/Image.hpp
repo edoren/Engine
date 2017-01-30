@@ -1,7 +1,10 @@
 #pragma once
 
+#include <Util/Prerequisites.hpp>
+
 #include <Graphics/Color32.hpp>
-#include <Util/Precompiled.hpp>
+#include <Math/Math.hpp>
+#include <System/String.hpp>
 
 namespace engine {
 

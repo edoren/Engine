@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Util/Prerequisites.hpp>
+
 #include <Math/Noise/BaseNoise.hpp>
 
 namespace engine {

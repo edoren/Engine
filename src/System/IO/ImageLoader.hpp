@@ -1,15 +1,18 @@
 #pragma once
 
-#include <Util/Precompiled.hpp>
+#include <Util/Prerequisites.hpp>
+
+#include <Math/Math.hpp>
+#include <System/String.hpp>
 
 namespace engine {
 
 namespace io {
 
-class ImageLoader {
+class ENGINE_API ImageLoader {
 public:
-    static bool LoadFromFile(const String& filename,
-                             std::vector<byte>& pixels, math::uvec2& size);
+    static bool LoadFromFile(const String& filename, std::vector<byte>& pixels,
+                             math::uvec2& size);
 
     static bool LoadFromFileInMemory(const byte* buffer, uint32 len,
                                      std::vector<byte>& pixels,

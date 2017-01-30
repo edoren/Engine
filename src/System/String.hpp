@@ -26,12 +26,7 @@
 
 #pragma once
 
-#include <Util/Precompiled.hpp>
-
-#include <iterator>
-#include <string>
-
-#include <utf8.h>
+#include <Util/Prerequisites.hpp>
 
 namespace engine {
 ////////////////////////////////////////////////////////////

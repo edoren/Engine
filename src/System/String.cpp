@@ -26,10 +26,6 @@
 
 #include <System/String.hpp>
 
-#include <cstring>
-
-#include <utf8.h>
-
 namespace engine {
 
 const std::size_t String::InvalidPos = std::string::npos;

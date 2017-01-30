@@ -1,12 +1,11 @@
 #pragma once
 
-#include "Vector3.hpp"
-#include "Vector4.hpp"
+#include <Util/Prerequisites.hpp>
 
-#include "Matrix4x4.hpp"
-#include "Matrix3x3.hpp"
-
-#include <cmath>
+#include <Math/Matrix3x3.hpp>
+#include <Math/Matrix4x4.hpp>
+#include <Math/Vector3.hpp>
+#include <Math/Vector4.hpp>
 
 namespace engine {
 
