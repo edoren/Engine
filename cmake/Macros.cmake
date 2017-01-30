@@ -61,7 +61,7 @@ endfunction(engine_add_sources)
 
 macro(engine_add_library)
     set(options SHARED STATIC)
-    set(one_val_args TARGET)
+    set(one_val_args TARGET NAME FOLDER)
     set(multi_val_args SOURCES DEPENDENCIES)
 
     cmake_parse_arguments(THIS "${options}" "${one_val_args}" "${multi_val_args}" ${ARGN})
@@ -70,13 +70,18 @@ macro(engine_add_library)
         message(FATAL_ERROR "TARGET argument not specified.")
     endif()
 
+    if(NOT THIS_NAME)
+        string(TOLOWER "${THIS_TARGET}" THIS_NAME)
+    endif()
+
     if(THIS_SHARED STREQUAL THIS_STATIC)
         message(FATAL_ERROR "Library should be STATIC or SHARED but not both.")
     endif()
 
+    # Create the library
     if(THIS_SHARED)
         add_library(${THIS_TARGET} SHARED "${THIS_SOURCES}")
-        set_target_properties(${THIS_TARGET} PROPERTIES DEBUG_POSTFIX "_d")
+        set_target_properties(${THIS_TARGET} PROPERTIES DEBUG_POSTFIX "-d")
         if (OS STREQUAL "Windows" AND COMPILER STREQUAL "GCC")
             # On Windows using GCC get rid of "lib" prefix for shared libraries,
             # and transform the ".dll.a" suffix into ".a" for import libraries
@@ -85,10 +90,24 @@ macro(engine_add_library)
         endif()
     elseif(THIS_STATIC)
         add_library(${THIS_TARGET} STATIC "${THIS_SOURCES}")
-        set_target_properties(${THIS_TARGET} PROPERTIES DEBUG_POSTFIX "_s_d")
+        set_target_properties(${THIS_TARGET} PROPERTIES DEBUG_POSTFIX "-s-d")
         set_target_properties(${THIS_TARGET} PROPERTIES RELEASE_POSTFIX "_s")
     endif()
 
+    # Set the library name
+    set_target_properties(${THIS_TARGET} PROPERTIES OUTPUT_NAME ${THIS_NAME})
+
+    # Create the exports symbol
+    string(REPLACE "-" "_" NAME_UPPER "${THIS_NAME}")
+    string(TOUPPER "${NAME_UPPER}" NAME_UPPER)
+    set_target_properties(${THIS_TARGET} PROPERTIES DEFINE_SYMBOL ${NAME_UPPER}_EXPORTS)
+
+    # Add the library to a folder
+    if(THIS_FOLDER)
+        set_target_properties(${THIS_TARGET} PROPERTIES FOLDER ${THIS_FOLDER})
+    endif()
+
+    # Link the dependencies
     if(THIS_DEPENDENCIES)
         target_link_libraries(${THIS_TARGET} "${THIS_DEPENDENCIES}")
     endif()

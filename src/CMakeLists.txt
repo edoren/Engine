@@ -51,7 +51,7 @@ set(ENGINE_SRCS
 
 engine_create_filters("${ENGINE_SRCS}")
 
-set(ENGINE_LIBRARY engine)
+set(ENGINE_LIBRARY Engine)
 
 if(ENGINE_BUILD_STATIC)
     set(ENGINE_LIBRARY_TYPE STATIC)
@@ -66,6 +66,5 @@ engine_add_library(TARGET ${ENGINE_LIBRARY} ${ENGINE_LIBRARY_TYPE}
                                 ${SDL2_MAIN_LIBRARY}
                                 "${SDL2_${ENGINE_LIBRARY_TYPE}_LIBRARY}"
                                 ${GLEW_LIBRARY})
-set_target_properties(${ENGINE_LIBRARY} PROPERTIES DEFINE_SYMBOL "ENGINE_EXPORTS")
 
 set(ENGINE_LIBRARY ${ENGINE_LIBRARY} PARENT_SCOPE)
