@@ -148,6 +148,8 @@ public:
         String string;
         if (utf8::is_valid(begin, end)) {
             string.string_.assign(begin, end);
+        } else {
+            throw std::exception("invalid utf8 convertion.");
         }
         return string;
     }

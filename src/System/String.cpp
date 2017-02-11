@@ -49,16 +49,23 @@ String::String(char32_t utf32Char) {
 String::String(const char* utf8String) {
     if (utf8String) {
         std::size_t length = strlen(utf8String);
-        if (length > 0 && utf8::is_valid(utf8String, utf8String + length)) {
-            string_.assign(utf8String);
+        if (length > 0) {
+            if (utf8::is_valid(utf8String, utf8String + length)) {
+                string_.assign(utf8String);
+            } else {
+                throw std::exception("invalid utf8 convertion.");
+            }
         };
     }
 }
 
 String::String(const std::string& utf8String) {
-    if (utf8String.size() > 0 &&
-        utf8::is_valid(utf8String.cbegin(), utf8String.cend())) {
-        string_.assign(utf8String);
+    if (utf8String.size() > 0) {
+        if (utf8::is_valid(utf8String.cbegin(), utf8String.cend())) {
+            string_.assign(utf8String);
+        } else {
+            throw std::exception("invalid utf8 convertion.");
+        }
     };
 }
 
