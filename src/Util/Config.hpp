@@ -20,3 +20,7 @@
 #else
 #define ENGINE_API ENGINE_SYMBOL_IMPORTS
 #endif
+
+#if defined(DEBUG) || !defined(NDEBUG) || defined(_DEBUG)
+#define ENGINE_DEBUG
+#endif
