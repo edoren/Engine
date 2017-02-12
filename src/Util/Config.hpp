@@ -24,3 +24,9 @@
 #if defined(DEBUG) || !defined(NDEBUG) || defined(_DEBUG)
 #define ENGINE_DEBUG
 #endif
+
+// Disable warning for not using CRT secure functions
+#ifdef _MSC_VER
+#define _CRT_SECURE_NO_WARNINGS
+#pragma warning(disable: 4996)
+#endif
