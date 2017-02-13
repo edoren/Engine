@@ -1,7 +1,6 @@
 #include <Graphics/ResourceManager.hpp>
 #include <System/IO/FileLoader.hpp>
-
-#include <iostream>  // TMP
+#include <System/LogManager.hpp>
 
 namespace engine {
 
@@ -27,21 +26,19 @@ ResourceManager::ResourceManager(const filesystem::Path& resource_dir) {
     basedir_ = resource_dir;
 }
 
-ResourceManager::~ResourceManager() {
-}
+ResourceManager::~ResourceManager() {}
 
 bool ResourceManager::Initialize() {
     return true;
 }
 
-void ResourceManager::ShutDown() {
-};
+void ResourceManager::ShutDown() {}
 
 Shader* ResourceManager::FindShader(const String& basename) {
     return FindInMap(shader_map_, basename);
 }
 
-Texture2D * ResourceManager::FindTexture2D(const String& basename) {
+Texture2D* ResourceManager::FindTexture2D(const String& basename) {
     return FindInMap(texture_2d_map_, basename);
 }
 
@@ -57,15 +54,15 @@ Shader* ResourceManager::LoadShader(const String& basename) {
             int status;
             status = shader.LoadFromMemory(vs_file, ps_file);
             if (status) {
-                shader_map_.emplace(basename, std::move(shader)); // TODO: check insertion
+                shader_map_.emplace(
+                    basename, std::move(shader));  // TODO: check insertion
             } else {
-                SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Shader Error");
+                LogError("ResourceManager", "Shader Error");
             }
             return FindShader(basename);
         }
     }
-    SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Can\'t load shader: %s",
-                 filename.ToUtf8().c_str());
+    LogError("ResourceManager", "Can\'t load shader: " + filename);
     // renderer_.last_error() = "Couldn\'t load: " + filename;
     return nullptr;
 }
@@ -74,12 +71,14 @@ Texture2D* ResourceManager::LoadTexture2D(const String& basename) {
     Image img;
     filesystem::Path filepath = filesystem::Absolute(basename, basedir_);
     if (img.LoadFromFile(filepath.Str())) {
-        std::cerr << "Loading Texture: " << filepath << std::endl;
+        LogInfo("ResourceManager", "Loading Texture: " + filepath.Str());
         Texture2D texture;
         texture.LoadFromImage(img);
-        texture_2d_map_.emplace(basename, std::move(texture)); // TODO: check insertion
+        texture_2d_map_.emplace(basename,
+                                std::move(texture));  // TODO: check insertion
     } else {
-        std::cerr << "Could not load Texture: " << filepath << std::endl;
+        LogError("ResourceManager",
+                 "Could not load Texture: " + filepath.Str());
     }
     return FindTexture2D(basename);
 }

@@ -1,4 +1,5 @@
 #include <System/IO/ImageLoader.hpp>
+#include <System/LogManager.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -14,7 +15,7 @@ bool ImageLoader::LoadFromFile(const String& filename,
     int comp;
 
     byte* data =
-        stbi_load(filename.ToUtf8().c_str(), &width, &height, &comp, STBI_rgb_alpha);
+        stbi_load(filename.Data(), &width, &height, &comp, STBI_rgb_alpha);
 
     if (data != nullptr && comp == STBI_rgb_alpha) {
         // Fill the vector with the pixels
@@ -22,7 +23,8 @@ bool ImageLoader::LoadFromFile(const String& filename,
         size.x = static_cast<uint32>(width);
         size.y = static_cast<uint32>(height);
     } else {
-        std::cerr << "STB_Image error: " << stbi_failure_reason() << std::endl;
+        String error = String("STB_Image error: ") + stbi_failure_reason();
+        LogError("ImageLoader", error);
         return false;
     }
 
@@ -47,7 +49,8 @@ bool ImageLoader::LoadFromFileInMemory(const byte* buffer, uint32 len,
         size.x = static_cast<uint32>(width);
         size.y = static_cast<uint32>(height);
     } else {
-        // TODO: Print errors
+        String error = String("STB_Image error: ") + stbi_failure_reason();
+        LogError("ImageLoader", error);
         return false;
     }
 
@@ -57,4 +60,3 @@ bool ImageLoader::LoadFromFileInMemory(const byte* buffer, uint32 len,
 }  // namespace io
 
 }  // namespace engine
-

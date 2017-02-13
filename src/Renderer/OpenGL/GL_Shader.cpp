@@ -1,5 +1,6 @@
-#include <Renderer/OpenGL/GL_Utilities.hpp>
 #include <Renderer/OpenGL/GL_Shader.hpp>
+#include <Renderer/OpenGL/GL_Utilities.hpp>
+#include <System/LogManager.hpp>
 
 namespace engine {
 
@@ -91,7 +92,7 @@ GLuint Shader::Compile(GLenum shader_type, const char* source) {
         GL_CALL(glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_size));
         char* error = new char[log_size];
         GL_CALL(glGetShaderInfoLog(shader, log_size, &log_size, error));
-        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "%s", error);
+        LogError("GL_Shader", error);
         delete[] error;
         GL_CALL(glDeleteShader(shader));
         return 0;
@@ -127,7 +128,7 @@ int Shader::CompileAndLink(const char* vertex_source,
         GL_CALL(glGetProgramiv(program_, GL_INFO_LOG_LENGTH, &log_size));
         char* error = new char[log_size];
         GL_CALL(glGetProgramInfoLog(program_, log_size, &log_size, error));
-        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "%s", error);
+        LogError("GL_Shader", error);
         delete[] error;
         GL_CALL(glDeleteProgram(program_));
         GL_CALL(glDeleteShader(vertex_shader));
@@ -153,8 +154,8 @@ GLint Shader::GetUniformLocation(const String& name) {
         uniforms_.insert(std::make_pair(name, location));
 
         if (location == -1) {
-            SDL_LogError(SDL_LOG_CATEGORY_ERROR,
-                         "Parameter \"%s\" not found in shader", name.ToUtf8().c_str());
+            LogError("GL_Shader",
+                     "Parameter \"" + name + "\" not found in shader");
         }
 
         return location;

@@ -1,4 +1,5 @@
 #include <Renderer/OpenGL/GL_Utilities.hpp>
+#include <System/LogManager.hpp>
 
 namespace engine {
 
@@ -23,8 +24,12 @@ void LogGLError(const char* file, int line, const char* call) {
             err_str = "GL_OUT_OF_MEMORY";
             break;
     }
-    SDL_LogError(SDL_LOG_CATEGORY_ERROR, "%s(%d): OpenGL Error: %s from %s",
-                 file, line, err_str, call);
+
+    char buffer[512];
+    sprintf(buffer, "%s(%d): OpenGL Error: %s from %s", file, line, err_str,
+            call);
+
+    LogError("GL_Utilities", buffer);
     assert(0);
 };
 

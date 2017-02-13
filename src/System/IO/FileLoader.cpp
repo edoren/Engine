@@ -1,4 +1,5 @@
 #include <System/IO/FileLoader.hpp>
+#include <System/LogManager.hpp>
 
 namespace engine {
 
@@ -7,7 +8,7 @@ namespace io {
 bool FileLoader::LoadFile(const String& filename, String* dest) {
     SDL_RWops* handle = SDL_RWFromFile(filename.GetData(), "rb");
     if (!handle) {
-        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "LoadFile fail on %s", filename);
+        LogError("FileLoader", "LoadFile fail on " + filename);
         return false;
     }
     std::size_t len =

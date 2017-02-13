@@ -1,13 +1,9 @@
 #include <Renderer/OpenGL/GL_RenderWindow.hpp>
 #include <Renderer/OpenGL/GL_Utilities.hpp>
 
-#include <iostream>  // TMP
+#include <System/LogManager.hpp>
 
 namespace engine {
-
-void LOG_SHIT(const String& str) {
-    std::cout << str.ToUtf8() << std::endl;
-}
 
 GL_RenderWindow::GL_RenderWindow() : window_(nullptr), context_(nullptr) {}
 
@@ -29,9 +25,8 @@ bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
     window_ = SDL_CreateWindow(name.GetData(), initial_pos.x, initial_pos.y,
                                size.x, size.y, window_flags);
     if (!window_) {
-        // TODO: Log error
-        LOG_SHIT(String("SDL_CreateWindow fail: ") + SDL_GetError());
-        // TODO: Raise exception
+        String error = String("SDL_CreateWindow fail: ") + SDL_GetError();
+        LogError("GL_RenderWindow", error);
         return false;
     }
 
@@ -39,17 +34,14 @@ bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
 
     context_ = SDL_GL_CreateContext(window_);
     if (!context_) {
-        // TODO: Log error
-        LOG_SHIT(String("SDL_GL_CreateContext fail: ") + SDL_GetError());
-        // TODO: Raise exception
+        String error = String("SDL_GL_CreateContext fail: ") + SDL_GetError();
+        LogError("GL_RenderWindow", error);
         return false;
     }
 
     GLenum status = glewInit();
     if (status != GLEW_OK) {
-        // TODO: Log error
-        LOG_SHIT(String("GLEW initialization failed."));
-        // TODO: Raise exception
+        LogError("GL_RenderWindow", "GLEW initialization failed.");
         return false;
     }
 

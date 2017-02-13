@@ -1,4 +1,4 @@
-#include <Core/Main.hpp>
+﻿#include <Core/Main.hpp>
 
 #include <Renderer/OpenGL/GL_Renderer.hpp>  // TMP
 
@@ -19,12 +19,14 @@ Main* Main::GetInstancePtr() {
 Main::Main(int argc, char* argv[]) : is_initialized_(false) {
     filesystem::Path resource_dir = filesystem::Absolute(argv[0]).ParentPath();
 
+    m_logger = new LogManager();
     m_input = new InputManager();
     m_resources = new ResourceManager(resource_dir);
 }
 
 Main::~Main() {
     ShutDown();
+    delete m_logger;
     delete m_input;
     delete m_resources;
 }
@@ -32,8 +34,6 @@ Main::~Main() {
 bool Main::Initialize() {
     if (!is_initialized_) {
         SDL_Init(0);
-
-        // SDL_LogSetAllPriority(SDL_LOG_PRIORITY_INFO);  // TMP
 
         m_renderer = new GL_Renderer();
 
