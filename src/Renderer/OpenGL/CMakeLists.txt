@@ -1,3 +1,6 @@
+###############################################################################
+# Third party libraries
+
 # Configurable locations of dependencies of this project.
 set(GLEW_DIRECTORY "${THIRD_PARTY_DIR}/glew")
 
@@ -11,22 +14,29 @@ if(NOT GLEW_FOUND)
     set(GLEW_SOURCES "${GLEW_DIRECTORY}/src/glew.c")
 endif()
 
+###############################################################################
 # OpenGL Renderer
-set(ENGINE_RENDER_OPENGL_LIBRARY OpenGL_Plugin)
 
-engine_add_sources(TARGET ENGINE_RENDER_OPENGL_SRCS
+set(ENGINE_OPENGL_PLUGIN OpenGL_Plugin)
+
+engine_add_sources(TARGET PLUGIN_SOURCES
                    BASE_FOLDER "${ENGINE_SOURCE_DIR}/Renderer/OpenGL"
                    EXTENSIONS "cpp;hpp")
 
-engine_add_library(TARGET ${ENGINE_RENDER_OPENGL_LIBRARY} ${ENGINE_LIBRARY_TYPE}
-                   SOURCES "${ENGINE_RENDER_OPENGL_SRCS};${GLEW_SOURCES}"
-                   DEPENDENCIES ${OPENGL_LIBRARY} ${ENGINE_LIBRARY})
-
-target_include_directories(${ENGINE_RENDER_OPENGL_LIBRARY} SYSTEM PUBLIC ${GLEW_INCLUDE_DIR})
-target_compile_definitions(${ENGINE_RENDER_OPENGL_LIBRARY} PRIVATE GLEW_STATIC=1)
-
-if(GLEW_FOUND)
-    target_link_libraries(${ENGINE_RENDER_OPENGL_LIBRARY} ${GLEW_LIBRARY})
+if(NOT GLEW_FOUND)
+    list(APPEND PLUGIN_SOURCES ${GLEW_SOURCES})
 endif()
 
-set(ENGINE_RENDER_OPENGL_LIBRARY ${ENGINE_RENDER_OPENGL_LIBRARY} PARENT_SCOPE)
+engine_add_library(TARGET ${ENGINE_OPENGL_PLUGIN}
+                   TYPE ${ENGINE_LIBRARY_TYPE}
+                   SOURCES "${PLUGIN_SOURCES}")
+
+target_link_libraries(${ENGINE_OPENGL_PLUGIN} ${OPENGL_LIBRARY} ${ENGINE_LIBRARY})
+target_include_directories(${ENGINE_OPENGL_PLUGIN} SYSTEM PUBLIC ${GLEW_INCLUDE_DIR})
+target_compile_definitions(${ENGINE_OPENGL_PLUGIN} PRIVATE GLEW_STATIC=1)
+
+if(GLEW_FOUND)
+    target_link_libraries(${ENGINE_OPENGL_PLUGIN} ${GLEW_LIBRARY})
+endif()
+
+set(ENGINE_OPENGL_PLUGIN ${ENGINE_OPENGL_PLUGIN} PARENT_SCOPE)

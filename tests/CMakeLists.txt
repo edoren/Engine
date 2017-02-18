@@ -23,11 +23,8 @@ set(TESTS
 
 foreach(TEST ${TESTS})
     target_link_libraries(${TEST}
-        # ${OPENGL_LIBRARY}
-        # ${VULKAN_LIBRARY}
-        # ${SDL2_LIBRARY}
-        # ${GLEW_LIBRARY}
         ${ENGINE_LIBRARY}
+        ${ENGINE_OPENGL_PLUGIN}  # TMP
     )
 endforeach()
 

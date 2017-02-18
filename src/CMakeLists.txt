@@ -1,40 +1,60 @@
+###############################################################################
+# Third party libraries
+
+# Configurable locations of dependencies of this project.
+set(MATHFU_DIR "${THIRD_PARTY_DIR}/mathfu")
+set(STB_DIR "${THIRD_PARTY_DIR}/stb")
+set(UTFCPP_DIR "${THIRD_PARTY_DIR}/utfcpp")
+
+# Mathfu
+set(MATHFU_INCLUDE_DIR "${MATHFU_DIR}/include"
+                       "${MATHFU_DIR}/dependencies/vectorial/include")
+
+# STB
+set(STB_INCLUDE_DIR ${STB_DIR})
+
+# UTFCPP
+set(UTFCPP_INCLUDE_DIR "${UTFCPP_DIR}/source")
+
+###############################################################################
+## Engine library
+
 set(EXTENSIONS c cpp h hpp)
 
-## Math sources
+# Math sources
 engine_add_sources(TARGET ENGINE_MATH_SRCS
                    BASE_FOLDER "${ENGINE_SOURCE_DIR}/Math"
                    MODULES Noise
                    EXTENSIONS "${EXTENSIONS}")
 
-## System sources
+# System sources
 engine_add_sources(TARGET ENGINE_SYSTEM_SRCS
                    BASE_FOLDER "${ENGINE_SOURCE_DIR}/System"
                    MODULES FileSystem IO
                    EXTENSIONS "${EXTENSIONS}")
 
-## Utils sources
+# Utils sources
 engine_add_sources(TARGET ENGINE_UTIL_SRCS
                    BASE_FOLDER "${ENGINE_SOURCE_DIR}/Util"
                    EXTENSIONS "${EXTENSIONS}")
 
-## Render sources
+# Render sources
 engine_add_sources(TARGET ENGINE_RENDER_SRCS
                    BASE_FOLDER "${ENGINE_SOURCE_DIR}/Renderer"
-                   MODULES OpenGL
                    EXTENSIONS "${EXTENSIONS}")
 
-## Graphic sources
+# Graphic sources
 engine_add_sources(TARGET ENGINE_GRAPHICS_SRCS
                    BASE_FOLDER "${ENGINE_SOURCE_DIR}/Graphics"
                    MODULES 3D
                    EXTENSIONS "${EXTENSIONS}")
 
-## Input sources
+# Input sources
 engine_add_sources(TARGET ENGINE_INPUT_SRCS
                    BASE_FOLDER "${ENGINE_SOURCE_DIR}/Input"
                    EXTENSIONS "${EXTENSIONS}")
 
-## Core sources
+# Core sources
 engine_add_sources(TARGET ENGINE_CORE_SRCS
                    BASE_FOLDER "${ENGINE_SOURCE_DIR}/Core"
                    EXTENSIONS "${EXTENSIONS}")
@@ -53,18 +73,19 @@ engine_create_filters("${ENGINE_SRCS}")
 
 set(ENGINE_LIBRARY Engine)
 
-if(ENGINE_BUILD_STATIC)
-    set(ENGINE_LIBRARY_TYPE STATIC)
-else()
-    set(ENGINE_LIBRARY_TYPE SHARED)
+engine_add_library(TARGET ${ENGINE_LIBRARY}
+                   TYPE ${ENGINE_LIBRARY_TYPE}
+                   SOURCES "${ENGINE_SRCS}")
+
+target_link_libraries(${ENGINE_LIBRARY} "${SDL2_${ENGINE_LIBRARY_TYPE}_LIBRARY}")
+
+# Link the filesystem library in GCC and Clang
+if(${COMPILER} STREQUAL "GCC" OR ${COMPILER} STREQUAL "Clang")
+    target_link_libraries(${ENGINE_LIBRARY} "stdc++fs")
 endif()
 
-engine_add_library(TARGET ${ENGINE_LIBRARY} ${ENGINE_LIBRARY_TYPE}
-                   SOURCES "${ENGINE_SRCS}"
-                   DEPENDENCIES ${OPENGL_LIBRARY}
-                                ${VULKAN_LIBRARY}
-                                ${SDL2_MAIN_LIBRARY}
-                                "${SDL2_${ENGINE_LIBRARY_TYPE}_LIBRARY}"
-                                ${GLEW_LIBRARY})
+target_include_directories(${ENGINE_LIBRARY} SYSTEM
+                           PUBLIC ${MATHFU_INCLUDE_DIR}  # TMP
+                           PRIVATE ${STB_INCLUDE_DIR} ${UTFCPP_INCLUDE_DIR})
 
 set(ENGINE_LIBRARY ${ENGINE_LIBRARY} PARENT_SCOPE)

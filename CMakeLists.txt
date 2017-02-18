@@ -48,17 +48,6 @@ if(${COMPILER} STREQUAL "GCC" OR ${COMPILER} STREQUAL "Clang")
 endif()
 
 ###############################################################################
-## Third party libraries configuration
-
-set(DEFAULT_OPTION ON)
-if(${OS} STREQUAL "Windows")
-    set(DEFAULT_OPTION OFF)
-endif()
-
-option(USE_SHARED_SDL2 "Use your installed copy of SDL2" ${DEFAULT_OPTION})
-option(USE_SHARED_GLEW "Use your installed copy of GLEW" ${DEFAULT_OPTION})
-
-###############################################################################
 ## Engine configuration
 
 set(ENGINE_NAME Engine)
@@ -67,6 +56,9 @@ option(ENGINE_BUILD_STATIC "Build the Engine as an static library" OFF)
 
 if(ENGINE_BUILD_STATIC)
     add_definitions(-DENGINE_STATIC)
+    set(ENGINE_LIBRARY_TYPE STATIC)
+else()
+    set(ENGINE_LIBRARY_TYPE SHARED)
 endif()
 
 ###############################################################################
@@ -74,18 +66,18 @@ endif()
 
 # Output directories
 string(TOLOWER ${CMAKE_BUILD_TYPE} BUILD_TYPE)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${BUILD_TYPE}/lib")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${BUILD_TYPE}/lib")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${BUILD_TYPE}/bin")
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/debug/lib")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/debug/lib")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/debug/bin")
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/release/lib")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/release/lib")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/release/bin")
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/relwithdebinfo/lib")
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/relwithdebinfo/lib")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/relwithdebinfo/bin")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${BUILD_TYPE}")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${BUILD_TYPE}")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${BUILD_TYPE}")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/debug")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/debug")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/debug")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/release")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/release")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/release")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/relwithdebinfo")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/relwithdebinfo")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/relwithdebinfo")
 
 set(THIRD_PARTY_DIR "${ENGINE_DIR}/third_party")
 set(ENGINE_SOURCE_DIR "${ENGINE_DIR}/src")
@@ -96,7 +88,7 @@ set(TEMP_DIR "${CMAKE_BINARY_DIR}/obj")
 
 # Set the dependencies folder
 add_subdirectory(${THIRD_PARTY_DIR})
-include_directories(${THIRD_PARTY_INCLUDES})
+include_directories(SYSTEM ${THIRD_PARTY_INCLUDES})
 
 ###############################################################################
 
@@ -105,5 +97,9 @@ include_directories(${ENGINE_SOURCE_DIR})
 # Add the engine folder
 add_subdirectory(${ENGINE_SOURCE_DIR})
 
+# Build the renderers
+add_subdirectory("${ENGINE_SOURCE_DIR}/Renderer/OpenGL")
+
 # Add the test folder
 add_subdirectory(${TESTS_DIR})
+
