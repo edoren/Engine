@@ -77,7 +77,7 @@ engine_add_library(TARGET ${ENGINE_LIBRARY}
                    TYPE ${ENGINE_LIBRARY_TYPE}
                    SOURCES "${ENGINE_SRCS}")
 
-target_link_libraries(${ENGINE_LIBRARY} "${SDL2_${ENGINE_LIBRARY_TYPE}_LIBRARY}")
+target_link_libraries(${ENGINE_LIBRARY} ${SDL2_LIBRARY})
 
 # Link the filesystem library in GCC and Clang
 if(${COMPILER} STREQUAL "GCC" OR ${COMPILER} STREQUAL "Clang")
