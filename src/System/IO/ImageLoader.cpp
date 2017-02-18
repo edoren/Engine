@@ -15,7 +15,7 @@ bool ImageLoader::LoadFromFile(const String& filename,
     int comp;
 
     byte* data =
-        stbi_load(filename.Data(), &width, &height, &comp, STBI_rgb_alpha);
+        stbi_load(filename.GetData(), &width, &height, &comp, STBI_rgb_alpha);
 
     if (data != nullptr && comp == STBI_rgb_alpha) {
         // Fill the vector with the pixels
