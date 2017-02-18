@@ -43,6 +43,6 @@ Time Stopwatch::GetActualTime() const {
     auto now = std::chrono::steady_clock::now().time_since_epoch();
     int64 nanoseconds = std::chrono::nanoseconds(now).count();
     return Time::FromNanoseconds(nanoseconds);
-};
+}
 
 }  // namespace engine

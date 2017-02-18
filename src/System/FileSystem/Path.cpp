@@ -50,7 +50,7 @@ Path operator/(const Path& lhs, const Path& rhs) {
 std::ostream& operator<<(std::ostream& os, const Path& p) {
     os << p.path_;
     return os;
-};
+}
 
 }  // namespace filesystem
 
