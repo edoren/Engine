@@ -60,7 +60,7 @@ function(engine_add_sources)
 endfunction(engine_add_sources)
 
 macro(engine_add_library)
-    set(options SHARED STATIC)
+    set(options SHARED STATIC OBJECT)
     set(one_val_args TARGET NAME FOLDER)
     set(multi_val_args SOURCES DEPENDENCIES)
 
@@ -71,11 +71,14 @@ macro(engine_add_library)
     endif()
 
     if(NOT THIS_NAME)
-        string(TOLOWER "${THIS_TARGET}" THIS_NAME)
+        string(REPLACE "_" "-" NAME_LOWER "${THIS_TARGET}")
+        string(TOLOWER "${NAME_LOWER}" THIS_NAME)
     endif()
 
-    if(THIS_SHARED STREQUAL THIS_STATIC)
-        message(FATAL_ERROR "Library should be STATIC or SHARED but not both.")
+    if (NOT THIS_OBJECT)
+        if(THIS_SHARED STREQUAL THIS_STATIC)
+            message(FATAL_ERROR "Library should be STATIC or SHARED but not both.")
+        endif()
     endif()
 
     # Create the library
@@ -92,6 +95,8 @@ macro(engine_add_library)
         add_library(${THIS_TARGET} STATIC "${THIS_SOURCES}")
         set_target_properties(${THIS_TARGET} PROPERTIES DEBUG_POSTFIX "-s-d")
         set_target_properties(${THIS_TARGET} PROPERTIES RELEASE_POSTFIX "_s")
+    elseif(THIS_OBJECT)
+        add_library(${THIS_TARGET} OBJECT "${THIS_SOURCES}")
     endif()
 
     # Set the library name
