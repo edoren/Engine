@@ -2,66 +2,91 @@
 
 #if PLATFORM_IS(PLATFORM_WINDOWS)
 #include <windows.h>
+#define LIBRARY_PREFIX ""
 #define LIBRARY_EXTENSION ".dll"
-#elif PLATFORM_IS(PLATFORM_LINUX)
+#elif PLATFORM_IS(PLATFORM_LINUX) || PLATFORM_IS(PLATFORM_ANDROID)
 #include <dlfcn.h>
+#define LIBRARY_PREFIX "lib"
 #define LIBRARY_EXTENSION ".so"
 #elif PLATFORM_IS(PLATFORM_MAC)
 #include <dlfcn.h>
+#define LIBRARY_PREFIX "lib"
 #define LIBRARY_EXTENSION ".dylib"
 #endif
 
 namespace engine {
 
-SharedLibrary::SharedLibrary(const filesystem::Path& path)
-      : path_(path), handle_(nullptr) {}
+SharedLibrary::SharedLibrary(const String& name)
+      : m_name(name), m_handle(nullptr) {}
+
+SharedLibrary::SharedLibrary(SharedLibrary&& other) {
+    m_name = other.m_name;
+    m_handle = other.m_handle;
+    other.m_name.Clear();
+    other.m_handle = nullptr;
+}
 
 SharedLibrary::~SharedLibrary() {
     Unload();
 }
 
 bool SharedLibrary::Load() {
-    filesystem::Path library(path_);
     // TODO: Add extension only if it does not exist
-    library.ReplaceExtension(LIBRARY_EXTENSION);
+    if (m_handle != nullptr || m_name.IsEmpty()) return false;
+
+    String lib_name = LIBRARY_PREFIX + m_name + LIBRARY_EXTENSION;
 #if PLATFORM_IS(PLATFORM_WINDOWS)
-    std::u16string utf16string = library.Str().ToUtf16();
-    handle_ = LoadLibraryW(reinterpret_cast<LPCWSTR>(utf16string.c_str()));
-    if (handle_ == nullptr) {
-        // TODO: Handle errors windows
-        // DWORD error_code = GetLastError();
-    }
+    std::u16string utf16string = lib_name.ToUtf16();
+    m_handle = LoadLibraryW(reinterpret_cast<LPCWSTR>(utf16string.c_str()));
 #elif PLATFORM_IS(PLATFORM_LINUX) || PLATFORM_IS(PLATFORM_MAC)
-    std::string utf8string = library.Str().ToUtf8();
-    handle = dlopen(utf8string.c_str(), RTLD_LAZY | RTLD_LOCAL);
-    if (handle == nullptr) {
-        // TODO: Handle errors posix
-        // const char* error = dlerror();
-    }
+    std::string utf8string = lib_name.ToUtf8();
+    m_handle = dlopen(utf8string.c_str(), RTLD_LAZY | RTLD_LOCAL);
 #endif
-    return (handle_ != nullptr);
+    return (m_handle != nullptr);
 }
 
 void SharedLibrary::Unload() {
-    if (handle_ != nullptr) {
+    if (m_handle == nullptr) return;
 #if PLATFORM_IS(PLATFORM_WINDOWS)
-        FreeLibrary(reinterpret_cast<HMODULE>(handle_));
+    FreeLibrary(reinterpret_cast<HMODULE>(m_handle));
 #elif PLATFORM_IS(PLATFORM_LINUX) || PLATFORM_IS(PLATFORM_MAC)
-        dlclose(handle_);
+    dlclose(m_handle);
 #endif
-    }
+    m_handle = nullptr;
+}
+
+String SharedLibrary::GetErrorString() {
+    if (m_name.IsEmpty()) return String("the library name must not be empty");
+#if PLATFORM_IS(PLATFORM_WINDOWS)
+    LPTSTR lpMsgBuf;
+    FormatMessage((FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
+                   FORMAT_MESSAGE_IGNORE_INSERTS),
+                  NULL, GetLastError(),
+                  MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&lpMsgBuf,
+                  0, NULL);
+    String ret(lpMsgBuf);
+    LocalFree(lpMsgBuf);
+    return ret;
+#elif PLATFORM_IS(PLATFORM_LINUX) || PLATFORM_IS(PLATFORM_MAC)
+    return String(dlerror());
+#else
+    return String("");
+#endif
+}
+
+const String& SharedLibrary::GetName() const {
+    return m_name;
 }
 
 void* SharedLibrary::GetSymbol(const String& symbol) {
+    if (m_handle == nullptr) return nullptr;
     void* address = nullptr;
-    if (handle_ != nullptr) {
 #if PLATFORM_IS(PLATFORM_WINDOWS)
-        address = GetProcAddress(reinterpret_cast<HMODULE>(handle_),
-                                 symbol.ToUtf8().c_str());
+    address = GetProcAddress(reinterpret_cast<HMODULE>(m_handle),
+                             symbol.ToUtf8().c_str());
 #elif PLATFORM_IS(PLATFORM_LINUX) || PLATFORM_IS(PLATFORM_MAC)
-        address = dlsym(handle_, symbol.ToUtf8().c_str());
+    address = dlsym(m_handle, symbol.ToUtf8().c_str());
 #endif
-    }
     return address;
 }
 

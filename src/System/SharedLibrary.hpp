@@ -2,24 +2,29 @@
 
 #include <Util/Prerequisites.hpp>
 
-#include <System/FileSystem.hpp>
 #include <System/String.hpp>
 
 namespace engine {
 
 class ENGINE_API SharedLibrary : NonCopyable {
 public:
-    explicit SharedLibrary(const filesystem::Path& path);
+    explicit SharedLibrary(const String& name);
+    SharedLibrary(SharedLibrary&& other);
     ~SharedLibrary();
 
     bool Load();
+
     void Unload();
+
+    String GetErrorString();
+
+    const String& GetName() const;
 
     void* GetSymbol(const String& symbol);
 
 private:
-    filesystem::Path path_;
-    void* handle_;
+    String m_name;
+    void* m_handle;
 };
 
 }  // namespace engine
