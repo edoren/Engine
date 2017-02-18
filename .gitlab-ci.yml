@@ -8,7 +8,8 @@ stages:
 linux_gcc:
   stage: build
   image: gcc:6
-  tags: docker
+  tags:
+    - docker
   before_script:
     - apt-get install -y cmake libsdl2-dev libglew-dev
     - export CC=gcc
