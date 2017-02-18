@@ -8,6 +8,8 @@ if (NOT DEFINED ENGINE_DIR)
 	set (ENGINE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 endif()
 
+message(STATUS "ENGINE_DIR: ${ENGINE_DIR}")
+
 project(Engine)
 
 # Configure the projects to use folders
