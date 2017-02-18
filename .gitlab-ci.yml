@@ -28,3 +28,24 @@ linux_gcc:
     - cd build
     - cmake .. -DCMAKE_BUILD_TYPE=Release -DENGINE_BUILD_STATIC=OFF
     - make
+
+linux_clang:
+  stage: build
+  image: ubuntu:16.04
+  tags:
+    - docker
+  before_script:
+    # System configuration
+    - apt-get update -qq
+    - apt-get install -qq software-properties-common
+    - add-apt-repository -y ppa:ubuntu-toolchain-r/test
+    - apt-get update -qq
+    # Engine dependencies
+    - apt-get install -qq build-essential clang cmake libsdl2-dev libglew-dev
+    - export CC=clang
+    - export CXX=clang++
+  script:
+    - mkdir build
+    - cd build
+    - cmake .. -DCMAKE_BUILD_TYPE=Release -DENGINE_BUILD_STATIC=OFF
+    - make
