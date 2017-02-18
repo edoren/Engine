@@ -14,9 +14,12 @@ linux_gcc:
   tags:
     - docker
   before_script:
+    # System configuration
+    - apt-get update -qq
     - apt-get install -qq software-properties-common
     - add-apt-repository -y ppa:ubuntu-toolchain-r/test
     - apt-get update -qq
+    # Engine dependencies
     - apt-get install -qq build-essential gcc-6 g++-6 cmake libsdl2-dev libglew-dev
     - export CC=gcc-6
     - export CXX=g++-6
