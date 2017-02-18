@@ -1,6 +1,9 @@
 variables:
   GIT_STRATEGY: fetch
   GIT_SUBMODULE_STRATEGY: recursive
+  # Fix for SSL certificate error in GitLab CI see
+  # https://gitlab.com/gitlab-org/gitlab-ci-multi-runner/issues/2148
+  GIT_SSL_NO_VERIFY: "true"
 
 stages:
   - build
