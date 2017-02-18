@@ -16,12 +16,13 @@ public:
 
     bool Initialize();
 
-    void ShutDown();
+    void Shutdown();
 
     Shader* FindShader(const String& basename);
     Texture2D* FindTexture2D(const String& basename);
 
-    Shader* LoadShader(const String& basename);
+    Shader* LoadShader(const String& basename, const String& vertex_file,
+                       const String& fragment_file);
     Texture2D* LoadTexture2D(const String& basename);
 
     // Override standard Singleton retrieval.
@@ -58,8 +59,8 @@ public:
 
 private:
     filesystem::Path basedir_;
-    std::map<String, Shader> shader_map_;
-    std::map<String, Texture2D> texture_2d_map_;
+    std::map<String, Shader*> shader_map_;
+    std::map<String, Texture2D*> texture_2d_map_;
     // std::map<String, Material *> material_map_;
     // std::map<String, Mesh *> mesh_map_;
 };

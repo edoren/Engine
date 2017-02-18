@@ -2,10 +2,13 @@
 
 #include <Util/Prerequisites.hpp>
 
+#include <Core/Plugin.hpp>
+#include <Core/SharedLibManager.hpp>
 #include <Graphics/ResourceManager.hpp>
 #include <Input/InputManager.hpp>
 #include <Renderer/Renderer.hpp>
 #include <System/LogManager.hpp>
+#include <System/String.hpp>
 
 namespace engine {
 
@@ -15,13 +18,29 @@ public:
 
     ~Main();
 
-    bool Initialize();
+    void Initialize();
 
-    void ShutDown();
+    void Shutdown();
 
-    Renderer& GetRenderer();
+    void LoadPlugin(const String& pluginName);
 
-    Renderer* GetRendererPtr();
+    void UnloadPlugin(const String& pluginName);
+
+    void InstallPlugin(Plugin* plugin);
+
+    void UninstallPlugin(Plugin* plugin);
+
+    void AddRenderer(Renderer* new_renderer);
+
+    Renderer& GetActiveRenderer();
+
+    Renderer* GetActiveRendererPtr();
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Unload all the loaded plugins
+    ///
+    ////////////////////////////////////////////////////////////
+    void UnloadPlugins();
 
     // Override standard Singleton retrieval.
     //     @remarks
@@ -56,13 +75,38 @@ public:
     static Main* GetInstancePtr();
 
 private:
-    bool is_initialized_;
+    ////////////////////////////////////////////////////////////
+    /// \brief Initialize all the loaded installed
+    ///
+    ////////////////////////////////////////////////////////////
+    void InitializePlugins();
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Shutdown all the loaded installed
+    ///
+    ////////////////////////////////////////////////////////////
+    void ShutdownPlugins();
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Set the Renderer that the engine will use
+    ///
+    ////////////////////////////////////////////////////////////
+    void SetActiveRenderer();
+
+private:
+    bool m_is_initialized;
+
+    std::vector<SharedLibrary*> m_plugin_libs;
+    std::vector<Plugin*> m_plugins;
+
+    Renderer* m_active_renderer;
+    std::vector<Renderer*> m_renderers;
 
     // Singletons
     LogManager* m_logger;
+    SharedLibManager* m_sharedlibs;
     InputManager* m_input;
     ResourceManager* m_resources;
-    Renderer* m_renderer;
 };
 
 }  // namespace engine
