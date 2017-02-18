@@ -1,5 +1,5 @@
 variables:
-  GIT_STRATEGY: clone
+  GIT_STRATEGY: fetch
   GIT_SUBMODULE_STRATEGY: recursive
   # Temporal fix for SSL certificate error in GitLab CI see
   # https://gitlab.com/gitlab-org/gitlab-ci-multi-runner/issues/2148
@@ -10,14 +10,15 @@ stages:
 
 linux_gcc:
   stage: build
-  image: gcc:6
+  image: ubuntu:16.04
   tags:
     - docker
   before_script:
+    - add-apt-repository -y ppa:ubuntu-toolchain-r/test
     - apt-get update -qq
-    - apt-get install -qq cmake libsdl2-dev libglew-dev
-    - export CC=gcc
-    - export CXX=g++
+    - apt-get install -qq build-essential gcc-6 g++-6 cmake libsdl2-dev libglew-dev
+    - export CC=gcc-6
+    - export CXX=g++-6
   script:
     - mkdir build
     - cd build
