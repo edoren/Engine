@@ -26,6 +26,8 @@
 
 #include <System/String.hpp>
 
+#include <utf8.h>
+
 namespace engine {
 
 const std::size_t String::InvalidPos = std::string::npos;
@@ -36,13 +38,13 @@ String::String(char asciiChar) {
     string_ += asciiChar;
 }
 
-String::String(char16_t utf16Char) {
-    char16_t* iterator = &utf16Char;
+String::String(char16 utf16Char) {
+    char16* iterator = &utf16Char;
     utf8::utf16to8(iterator, iterator + 1, std::back_inserter(string_));
 }
 
-String::String(char32_t utf32Char) {
-    char32_t* iterator = &utf32Char;
+String::String(char32 utf32Char) {
+    char32* iterator = &utf32Char;
     utf8::utf32to8(iterator, iterator + 1, std::back_inserter(string_));
 }
 
@@ -53,7 +55,7 @@ String::String(const char* utf8String) {
             if (utf8::is_valid(utf8String, utf8String + length)) {
                 string_.assign(utf8String);
             } else {
-                throw std::exception("invalid utf8 convertion.");
+                throw std::runtime_error("invalid utf8 convertion.");
             }
         };
     }
@@ -64,7 +66,7 @@ String::String(const std::string& utf8String) {
         if (utf8::is_valid(utf8String.cbegin(), utf8String.cend())) {
             string_.assign(utf8String);
         } else {
-            throw std::exception("invalid utf8 convertion.");
+            throw std::runtime_error("invalid utf8 convertion.");
         }
     };
 }
@@ -82,6 +84,28 @@ String::String(const std::u32string& utf32String) {
 String::String(const String& other) : string_(other.string_) {}
 
 String::String(String&& other) : string_(std::move(other.string_)) {}
+
+String String::FromUtf8(const char8* begin, const char8* end) {
+    String string;
+    if (utf8::is_valid(begin, end)) {
+        string.string_.assign(begin, end);
+    } else {
+        throw std::runtime_error("invalid utf8 convertion.");
+    }
+    return string;
+}
+
+String String::FromUtf16(const char16* begin, const char16* end) {
+    String string;
+    utf8::utf16to8(begin, end, std::back_inserter(string.string_));
+    return string;
+}
+
+String String::FromUtf32(const char32* begin, const char32* end) {
+    String string;
+    utf8::utf32to8(begin, end, std::back_inserter(string.string_));
+    return string;
+}
 
 String::operator std::string() const {
     return ToUtf8();
@@ -215,7 +239,7 @@ String String::SubString(std::size_t position, std::size_t length) const {
         utf8::next(end_it, string_.end());
         if (end_it == string_.end()) break;
     }
-    return String::FromUtf8(start_it, end_it);
+    return String::FromUtf8(&(*start_it), &(*end_it));
 }
 
 const std::string::value_type* String::GetData() const {

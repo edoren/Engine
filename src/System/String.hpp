@@ -29,6 +29,7 @@
 #include <Util/Prerequisites.hpp>
 
 namespace engine {
+
 ////////////////////////////////////////////////////////////
 /// \brief Utility string class that automatically handles
 ///        conversions between types and encodings
@@ -63,7 +64,7 @@ public:
     /// \param asciiChar ASCII character to convert
     ///
     ////////////////////////////////////////////////////////////
-    String(char asciiChar);
+    String(char8 asciiChar);
 
     ////////////////////////////////////////////////////////////
     /// \brief Construct from single UTF-16 character
@@ -71,7 +72,7 @@ public:
     /// \param utf32Char UTF-16 character to convert
     ///
     ////////////////////////////////////////////////////////////
-    String(char16_t utf16Char);
+    String(char16 utf16Char);
 
     ////////////////////////////////////////////////////////////
     /// \brief Construct from single UTF-32 character
@@ -79,20 +80,20 @@ public:
     /// \param utf32Char UTF-32 character to convert
     ///
     ////////////////////////////////////////////////////////////
-    String(char32_t utf32Char);
+    String(char32 utf32Char);
 
     ////////////////////////////////////////////////////////////
     /// \brief Construct from a null-terminated UTF-8 string
     ///
-    /// \param utf8String ASCII string to convert
+    /// \param utf8String UTF-8 string to assign
     ///
     ////////////////////////////////////////////////////////////
-    String(const char* utf8String);
+    String(const char8* utf8String);
 
     ////////////////////////////////////////////////////////////
     /// \brief Construct from an UTF-8 string
     ///
-    /// \param utf8String ASCII string to convert
+    /// \param utf8String UTF-8 string to assign
     ///
     ////////////////////////////////////////////////////////////
     String(const std::string& utf8String);
@@ -100,7 +101,7 @@ public:
     ////////////////////////////////////////////////////////////
     /// \brief Construct from a UTF-16 string
     ///
-    /// \param utf16String Wide string to convert
+    /// \param utf16String UTF-16 string to convert
     ///
     ////////////////////////////////////////////////////////////
     String(const std::u16string& utf16String);
@@ -108,7 +109,7 @@ public:
     ////////////////////////////////////////////////////////////
     /// \brief Construct from an UTF-32 string
     ///
-    /// \param utf32String UTF-32 string to assign
+    /// \param utf32String UTF-32 string to convert
     ///
     ////////////////////////////////////////////////////////////
     String(const std::u32string& utf32String);
@@ -135,60 +136,41 @@ public:
     /// This function is provided for consistency, it is equivalent to
     /// using the constructors that takes a const char* or a std::string.
     ///
-    /// \param begin Forward iterator to the beginning of the UTF-8 sequence
-    /// \param end   Forward iterator to the end of the UTF-8 sequence
+    /// \param begin Pointer to the beginning of the UTF-8 sequence
+    /// \param end   Pointer to the end of the UTF-8 sequence
     ///
     /// \return A String containing the source string
     ///
     /// \see FromUtf16, FromUtf32
     ///
     ////////////////////////////////////////////////////////////
-    template <typename T>
-    static String FromUtf8(T begin, T end) {
-        String string;
-        if (utf8::is_valid(begin, end)) {
-            string.string_.assign(begin, end);
-        } else {
-            throw std::exception("invalid utf8 convertion.");
-        }
-        return string;
-    }
+    static String FromUtf8(const char8* begin, const char8* end);
 
     ////////////////////////////////////////////////////////////
     /// \brief Create a new String from a UTF-16 encoded string
     ///
-    /// \param begin Forward iterator to the beginning of the UTF-16 sequence
-    /// \param end   Forward iterator to the end of the UTF-16 sequence
+    /// \param begin Pointer to the beginning of the UTF-16 sequence
+    /// \param end   Pointer to the end of the UTF-16 sequence
     ///
     /// \return A String containing the source string
     ///
     /// \see FromUtf8, FromUtf32
     ///
     ////////////////////////////////////////////////////////////
-    template <typename T>
-    static String FromUtf16(T begin, T end) {
-        String string;
-        utf8::utf16to8(begin, end, std::back_inserter(string.string_));
-        return string;
-    }
+    static String FromUtf16(const char16* begin, const char16* end);
 
     ////////////////////////////////////////////////////////////
     /// \brief Create a new String from a UTF-32 encoded string
     ///
-    /// \param begin Forward iterator to the beginning of the UTF-32 sequence
-    /// \param end   Forward iterator to the end of the UTF-32 sequence
+    /// \param begin Pointer to the beginning of the UTF-32 sequence
+    /// \param end   Pointer to the end of the UTF-32 sequence
     ///
     /// \return A String containing the source string
     ///
     /// \see FromUtf8, FromUtf16
     ///
     ////////////////////////////////////////////////////////////
-    template <typename T>
-    static String FromUtf32(T begin, T end) {
-        String string;
-        utf8::utf32to8(begin, end, std::back_inserter(string.string_));
-        return string;
-    }
+    static String FromUtf32(const char32* begin, const char32* end);
 
     ////////////////////////////////////////////////////////////
     /// \brief Implicit conversion operator to std::string (UTF-8 string)
@@ -487,10 +469,8 @@ public:
     const_iterator End() const;
 
 private:
-    friend ENGINE_API bool operator==(const String& left,
-                                                 const String& right);
-    friend ENGINE_API bool operator<(const String& left,
-                                                const String& right);
+    friend ENGINE_API bool operator==(const String& left, const String& right);
+    friend ENGINE_API bool operator<(const String& left, const String& right);
 
     ////////////////////////////////////////////////////////////
     // Member data
