@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Util/Prerequisites.hpp>
-
+#include <System/FileSystem/Dependencies.hpp>  // TMP
 #include <System/String.hpp>
 
 namespace engine {

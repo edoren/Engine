@@ -1,11 +1,12 @@
 #pragma once
 
-#include <Util/Prerequisites.hpp>
-
 #include <Input/Button.hpp>
 #include <Input/Mouse.hpp>
 #include <Input/Pointer.hpp>
 #include <Math/Math.hpp>
+#include <Util/Prerequisites.hpp>
+
+union SDL_Event;
 
 namespace engine {
 
@@ -23,13 +24,13 @@ public:
 
     bool Initialize();
 
-    void ShutDown();
+    void Shutdown();
 
     void AdvanceFrame(math::ivec2* window_size);
 
     Button& GetButton(int button);
 
-    Button& GetPointerButton(SDL_FingerID pointer);
+    Button& GetPointerButton(int64 pointer);
 
     Mouse& GetMouse() {
         static std::unique_ptr<Mouse> instance(new Mouse(pointers_[0]));

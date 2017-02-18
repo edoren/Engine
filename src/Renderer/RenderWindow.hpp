@@ -9,8 +9,7 @@ namespace engine {
 
 class ENGINE_API RenderWindow {
 public:
-    RenderWindow();
-    virtual ~RenderWindow();
+    virtual ~RenderWindow() {}
 
     virtual bool Create(const String& name, const math::ivec2& size) = 0;
 
@@ -30,7 +29,7 @@ public:
 
     virtual bool IsVisible() = 0;
 
-    void AdvanceFrame(bool minimized) {}  // RenderTarget?
+    void AdvanceFrame(bool /*minimized*/) {}  // RenderTarget?
 
     const String& GetName() const {
         return name_;

@@ -1,3 +1,4 @@
+#include <System/FileSystem/Dependencies.hpp>
 #include <System/FileSystem/Operations.hpp>
 
 namespace engine {

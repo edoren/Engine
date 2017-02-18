@@ -1,6 +1,6 @@
 #include <System/LogManager.hpp>
 
-#include <ctime>
+#include <SDL.h>
 
 #define MAX_LOG_MESSAGE_LENGTH 512
 
@@ -22,10 +22,10 @@ String DefaultLogCallback(LogPriority priority, const String& tag,
 
     // Format the log message
     char output[4 * MAX_LOG_MESSAGE_LENGTH];
-    sprintf(output, "[%.2d:%.2d:%.2d] [%s/%s] : %s\n", tm->tm_hour, tm->tm_min,
+    sprintf(output, "[%.2d:%.2d:%.2d] [%s/%s] : %s", tm->tm_hour, tm->tm_min,
             tm->tm_sec, tag.GetData(), priority_name, message.GetData());
 
-    return String::FromUtf8(output, output + strlen(output));
+    return String(output);
 }
 
 }  // namespace

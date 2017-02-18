@@ -1,5 +1,7 @@
 #include <Input/Mouse.hpp>
 
+#include <SDL.h>
+
 namespace engine {
 
 Mouse::Mouse(Pointer& pointer) : pointer(pointer) {}

@@ -1,14 +1,12 @@
 #include <Renderer/Renderer.hpp>
 
+#include <SDL.h>
+
 namespace engine {
 
-Renderer::Renderer() : render_window_(nullptr) {
-    int result = SDL_InitSubSystem(SDL_INIT_VIDEO);
-}
+Renderer::Renderer() : render_window_(nullptr) {}
 
-Renderer::~Renderer() {
-    SDL_QuitSubSystem(SDL_INIT_VIDEO);
-}
+Renderer::~Renderer() {}
 
 void Renderer::AdvanceFrame() {
     if (!render_window_) return;

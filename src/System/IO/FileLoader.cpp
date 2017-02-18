@@ -1,6 +1,8 @@
 #include <System/IO/FileLoader.hpp>
 #include <System/LogManager.hpp>
 
+#include <SDL.h>
+
 namespace engine {
 
 namespace io {

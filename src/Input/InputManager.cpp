@@ -1,5 +1,7 @@
 #include <Input/InputManager.hpp>
 
+#include <SDL.h>
+
 namespace engine {
 
 template <>
@@ -21,7 +23,7 @@ InputManager::InputManager()
         mousewheel_delta_(math::ivec2(0, 0)) {}
 
 InputManager::~InputManager() {
-    ShutDown();
+    Shutdown();
 }
 
 bool InputManager::Initialize() {
@@ -30,7 +32,7 @@ bool InputManager::Initialize() {
     return status == 0;
 }
 
-void InputManager::ShutDown() {
+void InputManager::Shutdown() {
     SDL_QuitSubSystem(SDL_INIT_GAMECONTROLLER);
 }
 
