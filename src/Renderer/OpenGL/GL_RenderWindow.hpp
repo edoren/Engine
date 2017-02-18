@@ -1,12 +1,11 @@
 #pragma once
 
-#include <Util/Prerequisites.hpp>
-
 #include <Math/Math.hpp>
 #include <Renderer/RenderWindow.hpp>
 #include <System/String.hpp>
+#include <Util/Prerequisites.hpp>
 
-#include <Renderer/OpenGL/GL_Prerequisites.hpp>
+#include "GL_Dependencies.hpp"
 
 namespace engine {
 

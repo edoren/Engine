@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Util/Prerequisites.hpp>
+#include <Util/Platform.hpp>
 
 // Include the right OpenGL libraries in each platform
 #if PLATFORM_TYPE_IS(PLATFORM_TYPE_DESKTOP)
@@ -12,3 +12,5 @@
 #include <OpenGLES/ES2/gl.h>
 #include <OpenGLES/ES2/glext.h>
 #endif
+
+#include <SDL.h>

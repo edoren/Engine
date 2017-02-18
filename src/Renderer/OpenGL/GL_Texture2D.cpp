@@ -1,29 +1,29 @@
-#include <Renderer/OpenGL/GL_Utilities.hpp>
-#include <Renderer/OpenGL/GL_Texture2D.hpp>
+#include "GL_Texture2D.hpp"
+#include "GL_Utilities.hpp"
 
 namespace engine {
 
-Texture2D::Texture2D() : texture_(0) {
+GL_Texture2D::GL_Texture2D() : texture_(0) {
     glGenTextures(1, &texture_);
 }
 
-Texture2D::Texture2D(Texture2D&& other) : texture_(other.texture_) {
+GL_Texture2D::GL_Texture2D(GL_Texture2D&& other) : texture_(other.texture_) {
     other.texture_ = 0;
 }
 
-Texture2D::~Texture2D() {
+GL_Texture2D::~GL_Texture2D() {
     if (texture_) {
         glDeleteTextures(1, &texture_);
     }
 }
 
-Texture2D& Texture2D::operator=(Texture2D&& other) {
+GL_Texture2D& GL_Texture2D::operator=(GL_Texture2D&& other) {
     texture_ = other.texture_;
     other.texture_ = 0;
     return *this;
 }
 
-bool Texture2D::LoadFromImage(const Image& img) {
+bool GL_Texture2D::LoadFromImage(const Image& img) {
     GL_CALL(glBindTexture(GL_TEXTURE_2D, texture_));
 
     GL_CALL(
@@ -45,7 +45,7 @@ bool Texture2D::LoadFromImage(const Image& img) {
     return true;
 }
 
-void Texture2D::Use() {
+void GL_Texture2D::Use() {
     GL_CALL(glBindTexture(GL_TEXTURE_2D, texture_));
 }
 

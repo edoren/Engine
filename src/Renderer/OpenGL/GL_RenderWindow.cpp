@@ -1,5 +1,5 @@
-#include <Renderer/OpenGL/GL_RenderWindow.hpp>
-#include <Renderer/OpenGL/GL_Utilities.hpp>
+#include "GL_RenderWindow.hpp"
+#include "GL_Utilities.hpp"
 
 #include <System/LogManager.hpp>
 

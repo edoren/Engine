@@ -1,11 +1,10 @@
 #pragma once
 
-#include <string>
-
+#include <Renderer/Renderer.hpp>
 #include <Util/Prerequisites.hpp>
 
-#include <Renderer/Renderer.hpp>
-#include <Renderer/OpenGL/GL_RenderWindow.hpp>
+#include "GL_Dependencies.hpp"
+#include "GL_RenderWindow.hpp"
 
 namespace engine {
 
@@ -17,9 +16,13 @@ public:
 
     virtual bool Initialize();
 
-    virtual void ShutDown();
+    virtual void Shutdown();
 
     virtual void AdvanceFrame();
+
+    virtual Shader* CreateShader(); // TMP?
+
+    virtual Texture2D* CreateTexture2D(); // TMP?
 };
 
 }  // namespace engine

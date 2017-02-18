@@ -1,24 +1,24 @@
 #pragma once
 
+#include <Math/Math.hpp>
+#include <Renderer/Shader.hpp>
+#include <System/String.hpp>
 #include <Util/Prerequisites.hpp>
 
-#include <Math/Math.hpp>
-#include <System/String.hpp>
-
-#include <Renderer/OpenGL/GL_Utilities.hpp>
+#include "GL_Dependencies.hpp"
 
 namespace engine {
 
-class ENGINE_API Shader : NonCopyable {
+class ENGINE_API GL_Shader : public Shader {
 public:
-    Shader();
-    Shader(Shader&& other);
-    ~Shader();
+    GL_Shader();
+    GL_Shader(GL_Shader&& other);
+    ~GL_Shader();
 
-    Shader& operator=(Shader&& other);
+    GL_Shader& operator=(GL_Shader&& other);
 
-    int LoadFromMemory(const String& vertex_source,
-                       const String& fragment_source);
+    bool LoadFromMemory(const String& vertex_source,
+                        const String& fragment_source);
 
     void Use();
 
@@ -33,15 +33,15 @@ public:
     void SetUniform(const String& name, const math::vec2& val);
 
 private:
-    GLuint Compile(GLenum type, const char* source);
+    uint32 Compile(GLenum type, const char* source);
 
-    int CompileAndLink(const char* vertex_source, const char* fragment_source);
+    bool CompileAndLink(const char* vertex_source, const char* fragment_source);
 
-    GLint GetUniformLocation(const String& name);
+    int32 GetUniformLocation(const String& name);
 
 private:
-    GLuint program_;
-    std::map<String, GLint> uniforms_;
+    uint32 program_;
+    std::map<String, int32> uniforms_;
 };
 
 }  // namespace engine

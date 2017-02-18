@@ -1,5 +1,4 @@
-#include <Util/Prerequisites.hpp>
-#include <Renderer/OpenGL/GL_Prerequisites.hpp>
+#include <Util/Config.hpp>
 
 #pragma once
 
@@ -11,7 +10,7 @@ void LogGLError(const char* file, int line, const char* call);
 
 // Define a GL_CALL macro to wrap each (void-returning) OpenGL call.
 // This logs GL error when LOG_GL_ERRORS below is defined.
-#if defined(_DEBUG) || DEBUG == 1
+#ifdef ENGINE_DEBUG
 #define LOG_GL_ERRORS
 #endif
 #ifdef LOG_GL_ERRORS

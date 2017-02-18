@@ -1,4 +1,6 @@
-#include <Renderer/OpenGL/GL_Utilities.hpp>
+#include "GL_Utilities.hpp"
+#include "GL_Dependencies.hpp"
+
 #include <System/LogManager.hpp>
 
 namespace engine {
