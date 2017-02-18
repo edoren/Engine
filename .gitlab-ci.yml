@@ -1,0 +1,20 @@
+variables:
+  GIT_STRATEGY: fetch
+  GIT_SUBMODULE_STRATEGY: recursive
+
+stages:
+  - build
+
+linux_gcc:
+  stage: build
+  image: gcc:6
+  tags: docker
+  before_script:
+    - apt-get install -y cmake libsdl2-dev libglew-dev
+    - export CC=gcc
+    - export CXX=g++
+  script:
+    - mkdir build
+    - cd build
+    - cmake .. -DCMAKE_BUILD_TYPE=Release -DENGINE_BUILD_STATIC=OFF
+    - make
