@@ -10,9 +10,11 @@ class ENGINE_API BaseNoise {
 public:
     BaseNoise(int seed);
 
+    virtual ~BaseNoise();
+
     int GetSeed() const;
 
-    virtual float GetValue(float x, float y, float z) const;
+    virtual float GetValue(float x, float y, float z) const = 0;
 
     void SetSeed(int seed);
 
@@ -31,7 +33,6 @@ private:
 
 private:
     int seed_;
-    // The permutation vector
     std::vector<int> perm_;
 };
 

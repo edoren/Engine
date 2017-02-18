@@ -8,12 +8,10 @@ BaseNoise::BaseNoise(int seed) : seed_(seed) {
     GeneratePermutationVector();
 }
 
+BaseNoise::~BaseNoise() {}
+
 int BaseNoise::GetSeed() const {
     return seed_;
-}
-
-float BaseNoise::GetValue(float x, float y, float z) const {
-    return 0.0f;
 }
 
 void BaseNoise::SetSeed(int seed) {
