@@ -8,10 +8,11 @@
 
 using namespace engine;
 
-int main(int argc, char* argv[]) {
+int main(int /*argc*/, char* argv[]) {
     filesystem::Path basedir = filesystem::Absolute(argv[0]).ParentPath();
 
-    SharedLibrary library(basedir / "Impl1");
+    basedir = basedir / "Impl1";
+    SharedLibrary library(basedir.Str());
     library.Load();
     Operation* op = static_cast<Operation*>(library.GetSymbol("impl"));
 

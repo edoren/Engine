@@ -7,6 +7,10 @@
 #include <Renderer/Texture2D.hpp>
 #include <System/Stopwatch.hpp>
 
+#include <Renderer/OpenGL/GL_Renderer.hpp>
+#include <Renderer/OpenGL/GL_Shader.hpp>
+#include <Renderer/OpenGL/GL_Plugin.hpp>
+
 using namespace engine;
 
 String vertex_shader = R"(
@@ -125,18 +129,31 @@ struct Vertex {
 
 int main(int argc, char* argv[]) {
     Main engine(argc, argv);
+
+    // GL_Plugin opengl;
+    // engine.InstallPlugin(&opengl);
+
+    // GL_Renderer opengl;
+    // engine.AddRenderer(&opengl);
+
+#ifdef ENGINE_DEBUG
+    engine.LoadPlugin("opengl-plugin-d");
+#else
+    engine.LoadPlugin("opengl-plugin");
+#endif
+
     engine.Initialize();
 
     InputManager& input = InputManager::GetInstance();
     ResourceManager& res = ResourceManager::GetInstance();
-    Renderer& render = engine.GetRenderer();
+    Renderer& render = engine.GetActiveRenderer();
 
     {
         math::ivec2 window_size = {800, 600};
         RenderWindow& window = render.GetRenderWindow();
 
         bool ok = window.Create("My Game Test", window_size);
-        glewInit();  // TMP FIX
+
         if (!ok) {
             SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Init failed, exiting!");
             return 1;
@@ -147,22 +164,18 @@ int main(int argc, char* argv[]) {
         math::mat4 View;
         math::mat4 Model;
 
-        // Create the texture
-        Texture2D* texture;
-        Texture2D* specularTexture;
-        // Texture2D* emissionTexture;
-        texture = res.LoadTexture2D("data/textures/container2.png");
-        specularTexture =
+        Texture2D* texture = res.LoadTexture2D("data/textures/container2.png");
+        Texture2D* specularTexture =
             res.LoadTexture2D("data/textures/container2_specular.png");
-        // specularTexture =
-        // res.LoadTexture2D("data/textures/lighting_maps_specular_color.png");
-        // emissionTexture = res.LoadTexture2D("data/textures/matrix.png");
+        // Texture2D* specularTexture =
+        //     res.LoadTexture2D("data/textures/lighting_maps_specular_color.png");
+        // Texture2D* emissionTexture =
+        //     res.LoadTexture2D("data/textures/matrix.png");
 
-        Shader cube_shader;
-        cube_shader.LoadFromMemory(vertex_shader, fragment_shader);
-
-        Shader light_shader;
-        light_shader.LoadFromMemory(light_vertex_shader, light_fragment_shader);
+        GL_Shader* cube_shader = static_cast<GL_Shader*>(
+            res.LoadShader("cube_shader", vertex_shader, fragment_shader));
+        GL_Shader* light_shader = static_cast<GL_Shader*>(res.LoadShader(
+            "light_shader", light_vertex_shader, light_fragment_shader));
 
         std::vector<Vertex> vertex_buffer_data{
             // Red face
@@ -298,7 +311,7 @@ int main(int argc, char* argv[]) {
             delta_time = timer.GetElapsedTime().AsSeconds();
             timer.Restart();
 
-            window.Clear(Color::MAGENTA);
+            window.Clear(Color::BLACK);
 
             // Camera movement
             const math::vec3& camera_front = camera.GetFrontVector();
@@ -343,24 +356,24 @@ int main(int argc, char* argv[]) {
             auto lol = math::Rotate(angle, {0.0f, 1.0f, 0.0f}) *
                        math::vec4(light_position, 1.0f);
 
-            cube_shader.Use();
-            cube_shader.SetUniform("ViewPosition", camera.GetPosition());
+            cube_shader->Use();
+            cube_shader->SetUniform("ViewPosition", camera.GetPosition());
 
-            // cube_shader.SetUniform("light.ambient", light_color * 0.2f);
-            // cube_shader.SetUniform("light.diffuse", light_color * 0.7f);
-            // cube_shader.SetUniform("light.specular", light_color * 1.0f);
-            // cube_shader.SetUniform("light.position", lol.xyz());
+            cube_shader->SetUniform("light.ambient", light_color * 0.2f);
+            cube_shader->SetUniform("light.diffuse", light_color * 0.7f);
+            cube_shader->SetUniform("light.specular", light_color * 1.0f);
+            cube_shader->SetUniform("light.position", lol.xyz());
 
-            // cube_shader.SetUniform("material.diffuse", 0);
-            // cube_shader.SetUniform("material.specular", 1);
-            // cube_shader.SetUniform("material.emission", 2);
-            // cube_shader.SetUniform("material.shininess",
-            //    128.0f * 0.25f / 2 / 2);
+            cube_shader->SetUniform("material.diffuse", 0);
+            cube_shader->SetUniform("material.specular", 1);
+            cube_shader->SetUniform("material.emission", 2);
+            cube_shader->SetUniform("material.shininess",
+                                    128.0f * 0.25f / 2 / 2);
 
-            // glActiveTexture(GL_TEXTURE0);
-            // texture->Use();
-            // glActiveTexture(GL_TEXTURE1);
-            // specularTexture->Use();
+            glActiveTexture(GL_TEXTURE0);
+            texture->Use();
+            glActiveTexture(GL_TEXTURE1);
+            specularTexture->Use();
             // glActiveTexture(GL_TEXTURE2);
             // emissionTexture->Use();
 
@@ -372,16 +385,14 @@ int main(int argc, char* argv[]) {
                 Model *=
                     math::Rotate(math::Radians(10.f * i), {1.0f, 0.3f, 0.5f});
 
-                cube_shader.SetUniform("Model", Model);
-                cube_shader.SetUniform("NormalMatrix",
-                                       Model.Inverse().Transpose());
-                cube_shader.SetUniform("MVP", Projection * View * Model);
+                cube_shader->SetUniform("Model", Model);
+                cube_shader->SetUniform("NormalMatrix",
+                                        Model.Inverse().Transpose());
+                cube_shader->SetUniform("MVP", Projection * View * Model);
 
                 glDrawArrays(GL_TRIANGLES, 0, 36);
             }
             glBindVertexArray(0);
-
-            // glDrawArrays(GL_TRIANGLES, 0, 36);
 
             // Draw the light cube
             Model = math::mat4();
@@ -389,8 +400,8 @@ int main(int argc, char* argv[]) {
             Model *= math::Translate(light_position);
             Model *= math::Scale(math::vec3(0.08f));  // Make it a smaller cube
 
-            light_shader.Use();
-            // light_shader.SetUniform("MVP", Projection * View * Model);
+            light_shader->Use();
+            light_shader->SetUniform("MVP", Projection * View * Model);
 
             glBindVertexArray(light_VAO);
             glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -406,7 +417,7 @@ int main(int argc, char* argv[]) {
         glDeleteVertexArrays(1, &light_VAO);
     }
 
-    engine.ShutDown();
+    engine.Shutdown();
 
     return 0;
 }
