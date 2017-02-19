@@ -1,0 +1,47 @@
+# Specify version format
+version: "{build}-{branch}"
+
+# Build worker image (VM template)
+image: Visual Studio 2015
+
+# build platform, i.e. Win32, x64.
+platform:
+  - Win32
+  - x64
+
+# build configuration, i.e. Debug, Release, etc.
+configuration:
+  - Debug
+  - Release
+
+# scripts that are called at very beginning, before repo cloning
+init:
+  - cmake --version
+  - msbuild /version
+
+# clone directory
+clone_folder: C:\projects\engine
+
+# branches to build
+branches:
+  except:
+    - gh-pages
+
+# scripts that run after cloning repository
+install:
+  - git submodule update --init --recursive
+
+# scripts to run before build
+before_build:
+  - cd C:\projects\engine
+  - mkdir build
+  - cd build
+  - if "%PLATFORM%"=="Win32" set CMAKE_GENERATOR_NAME=Visual Studio 14 2015
+  - if "%PLATFORM%"=="x64"   set CMAKE_GENERATOR_NAME=Visual Studio 14 2015 Win64
+  - cmake .. -G "%CMAKE_GENERATOR_NAME%" -DCMAKE_BUILD_TYPE=%CONFIGURATION% -DENGINE_BUILD_STATIC=OFF
+
+build:
+  project: C:\projects\engine\build\ALL_BUILD.vcxproj
+  verbosity: minimal
+
+test: off
