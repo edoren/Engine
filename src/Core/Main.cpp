@@ -36,10 +36,10 @@ Main::Main(int /*argc*/, char* argv[])
 
 Main::~Main() {
     Shutdown();
-    delete m_logger;
-    delete m_sharedlibs;
-    delete m_input;
     delete m_resources;
+    delete m_input;
+    delete m_sharedlibs;
+    delete m_logger;
 }
 
 void Main::Initialize() {
