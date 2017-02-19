@@ -4,7 +4,7 @@
 
 namespace engine {
 
-class Plugin {
+class ENGINE_API Plugin {
 public:
     virtual ~Plugin() {}
 
