@@ -3,13 +3,13 @@
 #include <Math/Math.hpp>
 #include <Renderer/RenderWindow.hpp>
 #include <System/String.hpp>
-#include <Util/Prerequisites.hpp>
 
+#include "GL_Config.hpp"
 #include "GL_Dependencies.hpp"
 
 namespace engine {
 
-class ENGINE_API GL_RenderWindow : public RenderWindow {
+class OPENGL_PLUGIN_API GL_RenderWindow : public RenderWindow {
 public:
     GL_RenderWindow();
     ~GL_RenderWindow();

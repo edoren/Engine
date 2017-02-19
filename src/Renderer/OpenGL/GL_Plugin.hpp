@@ -3,11 +3,12 @@
 #include <Core/Plugin.hpp>
 #include <System/String.hpp>
 
+#include "GL_Config.hpp"
 #include "GL_Renderer.hpp"
 
 namespace engine {
 
-class GL_Plugin : public Plugin {
+class OPENGL_PLUGIN_API GL_Plugin : public Plugin {
 public:
     GL_Plugin();
 

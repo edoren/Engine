@@ -2,13 +2,13 @@
 
 #include <Graphics/Image.hpp>
 #include <Renderer/Texture2D.hpp>
-#include <Util/Prerequisites.hpp>
 
+#include "GL_Config.hpp"
 #include "GL_Dependencies.hpp"
 
 namespace engine {
 
-class ENGINE_API GL_Texture2D : public Texture2D {
+class OPENGL_PLUGIN_API GL_Texture2D : public Texture2D {
 public:
     GL_Texture2D();
     GL_Texture2D(GL_Texture2D&& other);

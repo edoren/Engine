@@ -3,13 +3,13 @@
 #include <Math/Math.hpp>
 #include <Renderer/Shader.hpp>
 #include <System/String.hpp>
-#include <Util/Prerequisites.hpp>
 
+#include "GL_Config.hpp"
 #include "GL_Dependencies.hpp"
 
 namespace engine {
 
-class ENGINE_API GL_Shader : public Shader {
+class OPENGL_PLUGIN_API GL_Shader : public Shader {
 public:
     GL_Shader();
     GL_Shader(GL_Shader&& other);

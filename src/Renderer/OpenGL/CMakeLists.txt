@@ -33,7 +33,13 @@ engine_add_library(TARGET ${ENGINE_OPENGL_PLUGIN}
 
 target_link_libraries(${ENGINE_OPENGL_PLUGIN} ${OPENGL_LIBRARY} ${ENGINE_LIBRARY})
 target_include_directories(${ENGINE_OPENGL_PLUGIN} SYSTEM PUBLIC ${GLEW_INCLUDE_DIR})
-target_compile_definitions(${ENGINE_OPENGL_PLUGIN} PRIVATE GLEW_STATIC=1)
+
+# TMP: GLEW should not export any symbols when compiled internally
+if(ENGINE_BUILD_STATIC)
+    target_compile_definitions(${ENGINE_OPENGL_PLUGIN} PRIVATE GLEW_STATIC=1)
+else()
+    target_compile_definitions(${ENGINE_OPENGL_PLUGIN} PRIVATE GLEW_BUILD=1)
+endif()
 
 if(GLEW_FOUND)
     target_link_libraries(${ENGINE_OPENGL_PLUGIN} ${GLEW_LIBRARY})
