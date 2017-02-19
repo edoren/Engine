@@ -58,13 +58,14 @@ void SharedLibrary::Unload() {
 String SharedLibrary::GetErrorString() {
     if (m_name.IsEmpty()) return String("the library name must not be empty");
 #if PLATFORM_IS(PLATFORM_WINDOWS)
-    LPTSTR lpMsgBuf;
-    FormatMessage((FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
-                   FORMAT_MESSAGE_IGNORE_INSERTS),
-                  NULL, GetLastError(),
-                  MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&lpMsgBuf,
-                  0, NULL);
-    String ret(lpMsgBuf);
+    LPWSTR lpMsgBuf;
+    FormatMessageW((FORMAT_MESSAGE_ALLOCATE_BUFFER |
+                    FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS),
+                   NULL, GetLastError(),
+                   MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&lpMsgBuf,
+                   0, NULL);
+    char16* buffer = reinterpret_cast<char16*>(lpMsgBuf);
+    String ret = String::FromUtf16(buffer, buffer + std::wcslen(lpMsgBuf));
     LocalFree(lpMsgBuf);
     return ret;
 #elif PLATFORM_IS(PLATFORM_LINUX) || PLATFORM_IS(PLATFORM_MAC)
