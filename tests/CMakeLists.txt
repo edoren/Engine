@@ -25,6 +25,7 @@ foreach(TEST ${TESTS})
     target_link_libraries(${TEST}
         ${ENGINE_LIBRARY}
         ${ENGINE_OPENGL_PLUGIN}  # TMP
+        ${SDL2MAIN_LIBRARY}
     )
 endforeach()
 
