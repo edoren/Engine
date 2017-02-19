@@ -29,19 +29,23 @@ ResourceManager::ResourceManager(const filesystem::Path& resource_dir) {
 }
 
 ResourceManager::~ResourceManager() {
-    for (auto& it : shader_map_) {
-        delete it.second;
-    }
-    for (auto& it : texture_2d_map_) {
-        delete it.second;
-    }
+    Shutdown();
 }
 
 bool ResourceManager::Initialize() {
     return true;
 }
 
-void ResourceManager::Shutdown() {}
+void ResourceManager::Shutdown() {
+    for (auto& it : shader_map_) {
+        delete it.second;
+    }
+    shader_map_.clear();
+    for (auto& it : texture_2d_map_) {
+        delete it.second;
+    }
+    texture_2d_map_.clear();
+}
 
 Shader* ResourceManager::FindShader(const String& basename) {
     return FindInMap(shader_map_, basename);
