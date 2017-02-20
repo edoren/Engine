@@ -30,11 +30,11 @@
 
 namespace engine {
 
-const std::size_t String::InvalidPos = std::string::npos;
+const std::size_t String::InvalidPos = std::basic_string<char8>::npos;
 
 String::String() {}
 
-String::String(char asciiChar) {
+String::String(char8 asciiChar) {
     string_ += asciiChar;
 }
 
@@ -61,7 +61,7 @@ String::String(const char* utf8String) {
     }
 }
 
-String::String(const std::string& utf8String) {
+String::String(const std::basic_string<char8>& utf8String) {
     if (utf8String.size() > 0) {
         if (utf8::is_valid(utf8String.cbegin(), utf8String.cend())) {
             string_.assign(utf8String);
@@ -71,12 +71,12 @@ String::String(const std::string& utf8String) {
     };
 }
 
-String::String(const std::u16string& utf16String) {
+String::String(const std::basic_string<char16>& utf16String) {
     utf8::utf16to8(utf16String.cbegin(), utf16String.cend(),
                    std::back_inserter(string_));
 }
 
-String::String(const std::u32string& utf32String) {
+String::String(const std::basic_string<char32>& utf32String) {
     utf8::utf32to8(utf32String.cbegin(), utf32String.cend(),
                    std::back_inserter(string_));
 }
@@ -107,31 +107,31 @@ String String::FromUtf32(const char32* begin, const char32* end) {
     return string;
 }
 
-String::operator std::string() const {
+String::operator std::basic_string<char8>() const {
     return ToUtf8();
 }
 
-String::operator std::u16string() const {
+String::operator std::basic_string<char16>() const {
     return ToUtf16();
 }
 
-String::operator std::u32string() const {
+String::operator std::basic_string<char32>() const {
     return ToUtf32();
 }
 
-const std::string& String::ToUtf8() const {
+const std::basic_string<char8>& String::ToUtf8() const {
     return string_;
 }
 
-std::u16string String::ToUtf16() const {
-    std::u16string output;
+std::basic_string<char16> String::ToUtf16() const {
+    std::basic_string<char16> output;
     utf8::utf8to16(string_.cbegin(), string_.cend(),
                    std::back_inserter(output));
     return output;
 }
 
-std::u32string String::ToUtf32() const {
-    std::u32string output;
+std::basic_string<char32> String::ToUtf32() const {
+    std::basic_string<char32> output;
     utf8::utf8to32(string_.cbegin(), string_.cend(),
                    std::back_inserter(output));
     return output;
@@ -173,7 +173,7 @@ bool String::IsEmpty() const {
 }
 
 void String::Erase(std::size_t position, std::size_t count) {
-    std::string::iterator start_it(string_.begin());
+    std::basic_string<char8>::iterator start_it(string_.begin());
     for (std::size_t i = 0; i < position; ++i) {
         try {
             utf8::next(start_it, string_.end());
@@ -182,7 +182,7 @@ void String::Erase(std::size_t position, std::size_t count) {
                 "the specified position is out of the string range");
         }
     }
-    std::string::iterator end_it(start_it);
+    std::basic_string<char8>::iterator end_it(start_it);
     for (std::size_t i = 0; i < count; ++i) {
         utf8::next(end_it, string_.end());
         if (end_it == string_.end()) break;
@@ -191,7 +191,7 @@ void String::Erase(std::size_t position, std::size_t count) {
 }
 
 void String::Insert(std::size_t position, const String& str) {
-    std::string::iterator start_it(string_.begin());
+    std::basic_string<char8>::iterator start_it(string_.begin());
     for (std::size_t i = 0; i < position; ++i) {
         try {
             utf8::next(start_it, string_.end());
@@ -225,7 +225,7 @@ void String::Replace(const String& searchFor, const String& replaceWith) {
 }
 
 String String::SubString(std::size_t position, std::size_t length) const {
-    std::string::const_iterator start_it(string_.begin());
+    std::basic_string<char8>::const_iterator start_it(string_.begin());
     for (std::size_t i = 0; i < position; ++i) {
         try {
             utf8::next(start_it, string_.end());
@@ -234,7 +234,7 @@ String String::SubString(std::size_t position, std::size_t length) const {
                 "the specified position is out of the string range");
         }
     }
-    std::string::const_iterator end_it(start_it);
+    std::basic_string<char8>::const_iterator end_it(start_it);
     for (std::size_t i = 0; i < length; ++i) {
         utf8::next(end_it, string_.end());
         if (end_it == string_.end()) break;
@@ -242,7 +242,7 @@ String String::SubString(std::size_t position, std::size_t length) const {
     return String::FromUtf8(&(*start_it), &(*end_it));
 }
 
-const std::string::value_type* String::GetData() const {
+const std::basic_string<char8>::value_type* String::GetData() const {
     return string_.data();
 }
 

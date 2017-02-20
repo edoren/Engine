@@ -36,11 +36,11 @@ bool SharedLibrary::Load() {
 
     String lib_name = LIBRARY_PREFIX + m_name + LIBRARY_EXTENSION;
 #if PLATFORM_IS(PLATFORM_WINDOWS)
-    std::u16string utf16string = lib_name.ToUtf16();
-    m_handle = LoadLibraryW(reinterpret_cast<LPCWSTR>(utf16string.c_str()));
+    auto utf16string = lib_name.ToUtf16();
+    m_handle = LoadLibraryW(reinterpret_cast<LPCWSTR>(utf16string.data()));
 #elif PLATFORM_IS(PLATFORM_LINUX) || PLATFORM_IS(PLATFORM_MAC)
-    std::string utf8string = lib_name.ToUtf8();
-    m_handle = dlopen(utf8string.c_str(), RTLD_LAZY | RTLD_LOCAL);
+    auto utf8string = lib_name.ToUtf8();
+    m_handle = dlopen(utf8string.data(), RTLD_LAZY | RTLD_LOCAL);
 #endif
     return (m_handle != nullptr);
 }
@@ -82,10 +82,10 @@ void* SharedLibrary::GetSymbol(const String& symbol) {
     if (m_handle == nullptr) return nullptr;
     void* address = nullptr;
 #if PLATFORM_IS(PLATFORM_WINDOWS)
-    address = GetProcAddress(reinterpret_cast<HMODULE>(m_handle),
-                             symbol.ToUtf8().c_str());
+    address =
+        GetProcAddress(reinterpret_cast<HMODULE>(m_handle), symbol.GetData());
 #elif PLATFORM_IS(PLATFORM_LINUX) || PLATFORM_IS(PLATFORM_MAC)
-    address = dlsym(m_handle, symbol.ToUtf8().c_str());
+    address = dlsym(m_handle, symbol.GetData());
 #endif
     return address;
 }

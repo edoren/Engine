@@ -40,8 +40,8 @@ public:
     ////////////////////////////////////////////////////////////
     // Types
     ////////////////////////////////////////////////////////////
-    typedef std::string::iterator iterator;  ///< Iterator type
-    typedef std::string::const_iterator
+    typedef std::basic_string<char8>::iterator iterator;  ///< Iterator type
+    typedef std::basic_string<char8>::const_iterator
         const_iterator;  ///< Read-only iterator type
 
     ////////////////////////////////////////////////////////////
@@ -96,7 +96,7 @@ public:
     /// \param utf8String UTF-8 string to assign
     ///
     ////////////////////////////////////////////////////////////
-    String(const std::string& utf8String);
+    String(const std::basic_string<char8>& utf8String);
 
     ////////////////////////////////////////////////////////////
     /// \brief Construct from a UTF-16 string
@@ -104,7 +104,7 @@ public:
     /// \param utf16String UTF-16 string to convert
     ///
     ////////////////////////////////////////////////////////////
-    String(const std::u16string& utf16String);
+    String(const std::basic_string<char16>& utf16String);
 
     ////////////////////////////////////////////////////////////
     /// \brief Construct from an UTF-32 string
@@ -112,7 +112,7 @@ public:
     /// \param utf32String UTF-32 string to convert
     ///
     ////////////////////////////////////////////////////////////
-    String(const std::u32string& utf32String);
+    String(const std::basic_string<char32>& utf32String);
 
     ////////////////////////////////////////////////////////////
     /// \brief Copy constructor
@@ -134,7 +134,8 @@ public:
     /// \brief Create a new String from a UTF-8 encoded string
     ///
     /// This function is provided for consistency, it is equivalent to
-    /// using the constructors that takes a const char* or a std::string.
+    /// using the constructors that takes a const char* or a
+    /// std::basic_string<char8>.
     ///
     /// \param begin Pointer to the beginning of the UTF-8 sequence
     /// \param end   Pointer to the end of the UTF-8 sequence
@@ -173,34 +174,43 @@ public:
     static String FromUtf32(const char32* begin, const char32* end);
 
     ////////////////////////////////////////////////////////////
-    /// \brief Implicit conversion operator to std::string (UTF-8 string)
+    /// \brief Implicit conversion operator to std::basic_string<char8>
+    ///        (UTF-8 string)
     ///
     /// \return Converted UTF-8 string
     ///
-    /// \see ToUtf8, operator std::u16string, operator std::u32string
+    /// \see ToUtf8
+    /// \see operator std::basic_string<char16>
+    /// \see operator std::basic_string<char32>
     ///
     ////////////////////////////////////////////////////////////
-    operator std::string() const;
+    operator std::basic_string<char8>() const;
 
     ////////////////////////////////////////////////////////////
-    /// \brief Implicit conversion operator to std::u16string (UTF-16 string)
+    /// \brief Implicit conversion operator to std::basic_string<char16>
+    ///        (UTF-16 string)
     ///
     /// \return Converted UTF-16 string
     ///
-    /// \see ToUtf16, operator std::string, operator std::u32string
+    /// \see ToUtf16
+    /// \see operator std::basic_string<char8>
+    /// \see operator std::basic_string<char32>
     ///
     ////////////////////////////////////////////////////////////
-    operator std::u16string() const;
+    operator std::basic_string<char16>() const;
 
     ////////////////////////////////////////////////////////////
-    /// \brief Implicit conversion operator to std::u32string (UTF-32 string)
+    /// \brief Implicit conversion operator to std::basic_string<char32>
+    ///        (UTF-32 string)
     ///
     /// \return Converted UTF-32 string
     ///
-    /// \see ToUtf32,, operator std::string, operator std::u16string
+    /// \see ToUtf32
+    /// \see operator std::basic_string<char8>
+    /// \see operator std::basic_string<char16>
     ///
     ////////////////////////////////////////////////////////////
-    operator std::u32string() const;
+    operator std::basic_string<char32>() const;
 
     ////////////////////////////////////////////////////////////
     /// \brief Convert the Unicode string to a UTF-8 string
@@ -213,7 +223,7 @@ public:
     /// \see ToUtf16, ToUtf32
     ///
     ////////////////////////////////////////////////////////////
-    const std::string& ToUtf8() const;
+    const std::basic_string<char8>& ToUtf8() const;
 
     ////////////////////////////////////////////////////////////
     /// \brief Convert the Unicode string to a UTF-16 string
@@ -223,7 +233,7 @@ public:
     /// \see ToUtf8, ToUtf32
     ///
     ////////////////////////////////////////////////////////////
-    std::u16string ToUtf16() const;
+    std::basic_string<char16> ToUtf16() const;
 
     ////////////////////////////////////////////////////////////
     /// \brief Convert the Unicode string to a UTF-32 string
@@ -233,7 +243,7 @@ public:
     /// \see ToUtf8, ToUtf16
     ///
     ////////////////////////////////////////////////////////////
-    std::u32string ToUtf32() const;
+    std::basic_string<char32> ToUtf32() const;
 
     ////////////////////////////////////////////////////////////
     /// \brief Overload of assignment operator
@@ -418,7 +428,7 @@ public:
     /// \return Read-only pointer to the array of characters
     ///
     ////////////////////////////////////////////////////////////
-    const std::string::value_type* GetData() const;
+    const std::basic_string<char8>::value_type* GetData() const;
 
     ////////////////////////////////////////////////////////////
     /// \brief Return an iterator to the beginning of the string
@@ -475,7 +485,7 @@ private:
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-    std::string string_;  ///< Internal string of UTF-8 characters
+    std::basic_string<char8> string_;  ///< Internal string of UTF-8 characters
 };
 
 ////////////////////////////////////////////////////////////
@@ -582,7 +592,7 @@ ENGINE_API String operator+(const String& left, const String& right);
 /// \code
 /// String s;
 ///
-/// std::string s1 = s;  // automatically converted to ASCII string
+/// std::basic_string<char8> s1 = s;  // automatically converted to ASCII string
 /// std::wstring s2 = s; // automatically converted to wide string
 /// s = "hello";         // automatically converted from ASCII string
 /// s = L"hello";        // automatically converted from wide string
@@ -591,7 +601,7 @@ ENGINE_API String operator+(const String& left, const String& right);
 /// \endcode
 ///
 /// String defines the most important functions of the
-/// standard std::string class: removing, random access, iterating,
+/// standard std::basic_string<char8> class: removing, random access, iterating,
 /// appending, comparing, etc.
 ///
 ////////////////////////////////////////////////////////////
