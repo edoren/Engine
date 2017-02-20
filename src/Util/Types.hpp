@@ -2,7 +2,8 @@
 
 #include <Util/Platform.hpp>
 
-#include <cstdint>
+#include <stdint.h>
+#include <wchar.h>
 
 namespace engine {
 
@@ -24,8 +25,8 @@ typedef char char8;
 #if PLATFORM_IS(PLATFORM_WINDOWS)
 typedef wchar_t char16;
 #else
-typedef int16 char16;
+typedef char16_t char16;
 #endif
-typedef int32 char32;
+typedef char32_t char32;
 
 }  // namespace engine
