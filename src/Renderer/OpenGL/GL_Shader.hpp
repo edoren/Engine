@@ -40,8 +40,8 @@ private:
     int32 GetUniformLocation(const String& name);
 
 private:
-    uint32 program_;
-    std::map<String, int32> uniforms_;
+    uint32 m_program;
+    std::map<String, int32> m_uniforms;
 };
 
 }  // namespace engine

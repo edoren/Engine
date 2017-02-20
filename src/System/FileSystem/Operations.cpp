@@ -6,7 +6,7 @@ namespace engine {
 namespace filesystem {
 
 Path Absolute(const Path& path, const Path& base) {
-    return Path(external::fs::absolute(path.path_, base.path_));
+    return Path(external::fs::absolute(path.m_path, base.m_path));
 }
 
 Path CurrentDirectory() {

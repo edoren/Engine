@@ -18,17 +18,17 @@ public:
     typedef Matrix2x2<T> transpose_type;
     typedef T value_type;
 
-    inline Matrix2x2() : data_(data_type::Identity()) {}
+    inline Matrix2x2() : m_data(data_type::Identity()) {}
 
-    explicit inline Matrix2x2(const value_type& s) : data_(s) {}
+    explicit inline Matrix2x2(const value_type& s) : m_data(s) {}
 
-    inline Matrix2x2(const Matrix2x2<T>& m) : data_(m.data_) {}
+    inline Matrix2x2(const Matrix2x2<T>& m) : m_data(m.m_data) {}
 
-    explicit inline Matrix2x2(const data_type& m) : data_(m) {}
+    explicit inline Matrix2x2(const data_type& m) : m_data(m) {}
 
     inline Matrix2x2(const value_type& x0, const value_type& x1,
                      const value_type& y0, const value_type& y1)
-          : data_(x0, x1, y0, y1) {}
+          : m_data(x0, x1, y0, y1) {}
 
     inline Matrix2x2(const col_type& column0, const col_type& column1)
           : Matrix2x2(column0.x, column0.y, column1.x, column1.y) {}
@@ -36,104 +36,104 @@ public:
     // Access operators
 
     inline value_type& operator()(const int row, const int column) {
-        return data_(row, column);
+        return m_data(row, column);
     }
 
     inline const value_type& operator()(const int row, const int column) const {
-        return data_(row, column);
+        return m_data(row, column);
     }
 
     inline value_type& operator()(const int i) {
-        return data_[i];
+        return m_data[i];
     }
 
     inline const value_type& operator()(const int i) const {
-        return data_[i];
+        return m_data[i];
     }
 
     inline value_type& operator[](const int i) {
-        return data_[i];
+        return m_data[i];
     }
 
     inline const value_type& operator[](const int i) const {
-        return data_[i];
+        return m_data[i];
     }
 
     // Matrix arithmetic operators
 
     inline type operator-() const {
-        return type(-data_);
+        return type(-m_data);
     }
 
     inline type operator+(const type& m) const {
-        return type(data_ + m.data_);
+        return type(m_data + m.m_data);
     }
 
     inline type operator-(const type& m) const {
-        return type(data_ - m.data_);
+        return type(m_data - m.m_data);
     }
 
     inline type& operator+=(const type& m) {
-        data_ += m.data_;
+        m_data += m.m_data;
         return *this;
     }
 
     inline type& operator*=(const type& m) {
-        data_ *= m.data_;
+        m_data *= m.m_data;
         return *this;
     }
 
     inline type& operator-=(const type& m) {
-        data_ -= m.data_;
+        m_data -= m.m_data;
         return *this;
     }
 
     inline type& operator*=(const value_type& s) {
-        data_ *= s;
+        m_data *= s;
         return *this;
     }
 
     inline type& operator/=(const value_type& s) {
-        data_ /= s;
+        m_data /= s;
         return *this;
     }
 
     inline type& operator+=(const value_type& s) {
-        data_ += s;
+        m_data += s;
         return *this;
     }
 
     inline type& operator-=(const value_type& s) {
-        data_ -= s;
+        m_data -= s;
         return *this;
     }
 
     // Matrix Functions
 
     inline type Inverse() {
-        return type(data_.Inverse());
+        return type(m_data.Inverse());
     }
 
     inline transpose_type Transpose() {
-        return transpose_type(data_.Transpose());
+        return transpose_type(m_data.Transpose());
     }
 
     // Scalar multiplications
 
     inline type operator*(const value_type& s) const {
-        return type(data_ * s);
+        return type(m_data * s);
     }
 
     inline type operator/(const value_type& s) const {
-        return type(data_ / s);
+        return type(m_data / s);
     }
 
     inline type operator+(const value_type& s) const {
-        return type(data_ + s);
+        return type(m_data + s);
     }
 
     inline type operator-(const value_type& s) const {
-        return type(data_ - s);
+        return type(m_data - s);
     }
 
     friend inline type operator*(const value_type& s, const type& m) {
@@ -149,13 +149,13 @@ public:
     template <typename D>
     friend inline typename Matrix2x2<D>::col_type operator*(
         const typename Matrix2x2<D>::row_type& v, const Matrix2x2<D>& m) {
-        return typename Matrix2x2<D>::col_type(v.data_ * m.data_);
+        return typename Matrix2x2<D>::col_type(v.m_data * m.m_data);
     }
 
     template <typename D>
     friend inline typename Matrix2x2<D>::row_type operator*(
         const Matrix2x2<D>& m, const typename Matrix2x2<D>::col_type& v) {
-        return typename Matrix2x2<D>::row_type(m.data_ * v.data_);
+        return typename Matrix2x2<D>::row_type(m.m_data * v.m_data);
     }
 
     // Matrix multiplications
@@ -163,11 +163,11 @@ public:
     template <typename D>
     friend inline Matrix2x2<D> operator*(const Matrix2x2<D>& m1,
                                          const Matrix2x2<D>& m2) {
-        return Matrix2x2<D>(m1.data_ * m2.data_);
+        return Matrix2x2<D>(m1.m_data * m2.m_data);
     }
 
 private:
-    data_type data_;
+    data_type m_data;
 };
 
 }  // namespace math

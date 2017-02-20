@@ -5,21 +5,21 @@
 
 namespace engine {
 
-GL_Shader::GL_Shader() : program_(0) {}
+GL_Shader::GL_Shader() : m_program(0) {}
 
 GL_Shader::GL_Shader(GL_Shader&& other)
-      : program_(other.program_), uniforms_(std::move(other.uniforms_)) {
-    other.program_ = 0;
+      : m_program(other.m_program), m_uniforms(std::move(other.m_uniforms)) {
+    other.m_program = 0;
 }
 
 GL_Shader::~GL_Shader() {
-    GL_CALL(glDeleteProgram(program_));
+    GL_CALL(glDeleteProgram(m_program));
 }
 
 GL_Shader& GL_Shader::operator=(GL_Shader&& other) {
-    program_ = other.program_;
-    uniforms_ = std::move(other.uniforms_);
-    other.program_ = 0;
+    m_program = other.m_program;
+    m_uniforms = std::move(other.m_uniforms);
+    other.m_program = 0;
     return *this;
 }
 
@@ -29,7 +29,7 @@ bool GL_Shader::LoadFromMemory(const String& vertex_source,
 }
 
 void GL_Shader::Use() {
-    GL_CALL(glUseProgram(program_));
+    GL_CALL(glUseProgram(m_program));
 }
 
 void GL_Shader::SetUniform(const String& name, float val) {
@@ -103,7 +103,7 @@ GLuint GL_Shader::Compile(GLenum shader_type, const char* source) {
 
 bool GL_Shader::CompileAndLink(const char* vertex_source,
                                const char* fragment_source) {
-    if (program_) GL_CALL(glDeleteProgram(program_));
+    if (m_program) GL_CALL(glDeleteProgram(m_program));
 
     GLuint vertex_shader = Compile(GL_VERTEX_SHADER, vertex_source);
     if (!vertex_shader) {
@@ -117,28 +117,28 @@ bool GL_Shader::CompileAndLink(const char* vertex_source,
         return false;
     }
 
-    program_ = glCreateProgram();
-    GL_CALL(glAttachShader(program_, vertex_shader));
-    GL_CALL(glAttachShader(program_, fragment_shader));
-    GL_CALL(glLinkProgram(program_));
+    m_program = glCreateProgram();
+    GL_CALL(glAttachShader(m_program, vertex_shader));
+    GL_CALL(glAttachShader(m_program, fragment_shader));
+    GL_CALL(glLinkProgram(m_program));
 
     GLint success = 0;
-    glGetProgramiv(program_, GL_LINK_STATUS, &success);
+    glGetProgramiv(m_program, GL_LINK_STATUS, &success);
     if (success == GL_FALSE) {
         GLint log_size = 0;
-        GL_CALL(glGetProgramiv(program_, GL_INFO_LOG_LENGTH, &log_size));
+        GL_CALL(glGetProgramiv(m_program, GL_INFO_LOG_LENGTH, &log_size));
         char* error = new char[log_size];
-        GL_CALL(glGetProgramInfoLog(program_, log_size, &log_size, error));
+        GL_CALL(glGetProgramInfoLog(m_program, log_size, &log_size, error));
         LogError("Shader", error);
         delete[] error;
-        GL_CALL(glDeleteProgram(program_));
+        GL_CALL(glDeleteProgram(m_program));
         GL_CALL(glDeleteShader(vertex_shader));
         GL_CALL(glDeleteShader(fragment_shader));
         return false;
     }
 
-    GL_CALL(glDetachShader(program_, vertex_shader));
-    GL_CALL(glDetachShader(program_, fragment_shader));
+    GL_CALL(glDetachShader(m_program, vertex_shader));
+    GL_CALL(glDetachShader(m_program, fragment_shader));
     GL_CALL(glDeleteShader(vertex_shader));
     GL_CALL(glDeleteShader(fragment_shader));
 
@@ -146,13 +146,13 @@ bool GL_Shader::CompileAndLink(const char* vertex_source,
 }
 
 GLint GL_Shader::GetUniformLocation(const String& name) {
-    const auto it = uniforms_.find(name);
+    const auto it = m_uniforms.find(name);
 
-    if (it != uniforms_.end()) {
+    if (it != m_uniforms.end()) {
         return it->second;
     } else {
-        GLint location = glGetUniformLocation(program_, name.ToUtf8().c_str());
-        uniforms_.insert(std::make_pair(name, location));
+        GLint location = glGetUniformLocation(m_program, name.ToUtf8().c_str());
+        m_uniforms.insert(std::make_pair(name, location));
 
         if (location == -1) {
             LogError("Shader",

@@ -18,20 +18,20 @@ public:
 
     inline Vector2() {}
 
-    explicit inline Vector2(const T& s) : data_(s) {}
+    explicit inline Vector2(const T& s) : m_data(s) {}
 
-    inline Vector2(const T& x, const T& y) : data_(x, y) {}
+    inline Vector2(const T& x, const T& y) : m_data(x, y) {}
 
-    inline Vector2(const Vector2<T>& v) : data_(v.data_) {}
+    inline Vector2(const Vector2<T>& v) : m_data(v.m_data) {}
 
-    inline Vector2(const Vector3<T>& v) : data_(v.x, v.y) {}
+    inline Vector2(const Vector3<T>& v) : m_data(v.x, v.y) {}
 
-    inline Vector2(const Vector4<T>& v) : data_(v.x, v.y) {}
+    inline Vector2(const Vector4<T>& v) : m_data(v.x, v.y) {}
 
     template <typename T2>
-    explicit inline Vector2(const Vector2<T2>& v) : data_(v.data_) {}
+    explicit inline Vector2(const Vector2<T2>& v) : m_data(v.m_data) {}
 
-    explicit inline Vector2(const data_type& v) : data_(v) {}
+    explicit inline Vector2(const data_type& v) : m_data(v) {}
 
     inline Vector2<T>& operator=(const Vector2<T>& v) {
         x = v.x;
@@ -52,97 +52,97 @@ public:
     }
 
     inline T& operator[](const int i) {
-        return data_[i];
+        return m_data[i];
     }
 
     inline const T& operator[](const int i) const {
-        return data_[i];
+        return m_data[i];
     }
 
     inline Vector2<T> operator-() const {
-        return Vector2<T>(-data_);
+        return Vector2<T>(-m_data);
     }
 
     inline Vector2<T> operator*(const Vector2<T>& v) const {
-        return Vector2<T>(data_ * v.data_);
+        return Vector2<T>(m_data * v.m_data);
     }
 
     inline Vector2<T> operator/(const Vector2<T>& v) const {
-        return Vector2<T>(data_ / v.data_);
+        return Vector2<T>(m_data / v.m_data);
     }
 
     inline Vector2<T> operator+(const Vector2<T>& v) const {
-        return Vector2<T>(data_ + v.data_);
+        return Vector2<T>(m_data + v.m_data);
     }
 
     inline Vector2<T> operator-(const Vector2<T>& v) const {
-        return Vector2<T>(data_ - v.data_);
+        return Vector2<T>(m_data - v.m_data);
     }
 
     inline Vector2<T> operator*(const T& s) const {
-        return Vector2<T>(data_ * s);
+        return Vector2<T>(m_data * s);
     }
 
     inline Vector2<T> operator/(const T& s) const {
-        return Vector2<T>(data_ / s);
+        return Vector2<T>(m_data / s);
     }
 
     inline Vector2<T> operator+(const T& s) const {
-        return Vector2<T>(data_ + s);
+        return Vector2<T>(m_data + s);
     }
 
     inline Vector2<T> operator-(const T& s) const {
-        return Vector2<T>(data_ - s);
+        return Vector2<T>(m_data - s);
     }
 
     inline Vector2<T>& operator*=(const Vector2<T>& v) {
-        data_ *= v.data_;
+        m_data *= v.m_data;
         return *this;
     }
 
     inline Vector2<T>& operator/=(const Vector2<T>& v) {
-        data_ /= v.data_;
+        m_data /= v.m_data;
         return *this;
     }
 
     inline Vector2<T>& operator+=(const Vector2<T>& v) {
-        data_ += v.data_;
+        m_data += v.m_data;
         return *this;
     }
 
     inline Vector2<T>& operator-=(const Vector2<T>& v) {
-        data_ -= v.data_;
+        m_data -= v.m_data;
         return *this;
     }
 
     inline Vector2<T>& operator*=(const T& s) {
-        data_ *= s;
+        m_data *= s;
         return *this;
     }
 
     inline Vector2<T>& operator/=(const T& s) {
-        data_ /= s;
+        m_data /= s;
         return *this;
     }
 
     inline Vector2<T>& operator+=(const T& s) {
-        data_ += s;
+        m_data += s;
         return *this;
     }
 
     inline Vector2<T>& operator-=(const T& s) {
-        data_ -= s;
+        m_data -= s;
         return *this;
     }
 
     static inline Vector2<T> Lerp(const Vector2<T>& v1, const Vector2<T>& v2,
                                   const T percent) {
-        return Vector2<T>(data_type::Lerp(v1.data_, v2.data_, percent));
+        return Vector2<T>(data_type::Lerp(v1.m_data, v2.m_data, percent));
     }
 
 public:
     union {
-        data_type data_;
+        data_type m_data;
         struct {
             T x, y;
         };

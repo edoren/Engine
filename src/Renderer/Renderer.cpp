@@ -4,26 +4,26 @@
 
 namespace engine {
 
-Renderer::Renderer() : render_window_(nullptr) {}
+Renderer::Renderer() : m_render_window(nullptr) {}
 
 Renderer::~Renderer() {}
 
 void Renderer::AdvanceFrame() {
-    if (!render_window_) return;
-    if (!render_window_->IsVisible()) {
+    if (!m_render_window) return;
+    if (!m_render_window->IsVisible()) {
         SDL_Delay(10);
     } else {
-        render_window_->SwapBuffers();
+        m_render_window->SwapBuffers();
     }
 }
 
 RenderWindow& Renderer::GetRenderWindow() {
-    assert(render_window_);
-    return *render_window_;
+    assert(m_render_window);
+    return *m_render_window;
 }
 
 RenderWindow* Renderer::GetRenderWindowPtr() {
-    return render_window_;
+    return m_render_window;
 }
 
 }  // namespace engine

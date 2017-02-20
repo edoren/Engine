@@ -36,16 +36,16 @@ public:
 
 public:
     // Camera vectors
-    math::vec3 position_;
-    math::vec3 up_;
-    math::vec3 right_;
-    math::vec3 front_;
+    math::vec3 m_position;
+    math::vec3 m_up;
+    math::vec3 m_right;
+    math::vec3 m_front;
 
     // Euler Angles
-    float yaw_;
-    float pitch_;
+    float m_yaw;
+    float m_pitch;
 
     // Camera options
-    float zoom_;
+    float m_zoom;
 };
 }

@@ -35,17 +35,17 @@ const std::size_t String::InvalidPos = std::basic_string<char8>::npos;
 String::String() {}
 
 String::String(char8 asciiChar) {
-    string_ += asciiChar;
+    m_string += asciiChar;
 }
 
 String::String(char16 utf16Char) {
     char16* iterator = &utf16Char;
-    utf8::utf16to8(iterator, iterator + 1, std::back_inserter(string_));
+    utf8::utf16to8(iterator, iterator + 1, std::back_inserter(m_string));
 }
 
 String::String(char32 utf32Char) {
     char32* iterator = &utf32Char;
-    utf8::utf32to8(iterator, iterator + 1, std::back_inserter(string_));
+    utf8::utf32to8(iterator, iterator + 1, std::back_inserter(m_string));
 }
 
 String::String(const char* utf8String) {
@@ -53,7 +53,7 @@ String::String(const char* utf8String) {
         std::size_t length = strlen(utf8String);
         if (length > 0) {
             if (utf8::is_valid(utf8String, utf8String + length)) {
-                string_.assign(utf8String);
+                m_string.assign(utf8String);
             } else {
                 throw std::runtime_error("invalid utf8 convertion.");
             }
@@ -64,7 +64,7 @@ String::String(const char* utf8String) {
 String::String(const std::basic_string<char8>& utf8String) {
     if (utf8String.size() > 0) {
         if (utf8::is_valid(utf8String.cbegin(), utf8String.cend())) {
-            string_.assign(utf8String);
+            m_string.assign(utf8String);
         } else {
             throw std::runtime_error("invalid utf8 convertion.");
         }
@@ -73,22 +73,22 @@ String::String(const std::basic_string<char8>& utf8String) {
 
 String::String(const std::basic_string<char16>& utf16String) {
     utf8::utf16to8(utf16String.cbegin(), utf16String.cend(),
-                   std::back_inserter(string_));
+                   std::back_inserter(m_string));
 }
 
 String::String(const std::basic_string<char32>& utf32String) {
     utf8::utf32to8(utf32String.cbegin(), utf32String.cend(),
-                   std::back_inserter(string_));
+                   std::back_inserter(m_string));
 }
 
-String::String(const String& other) : string_(other.string_) {}
+String::String(const String& other) : m_string(other.m_string) {}
 
-String::String(String&& other) : string_(std::move(other.string_)) {}
+String::String(String&& other) : m_string(std::move(other.m_string)) {}
 
 String String::FromUtf8(const char8* begin, const char8* end) {
     String string;
     if (utf8::is_valid(begin, end)) {
-        string.string_.assign(begin, end);
+        string.m_string.assign(begin, end);
     } else {
         throw std::runtime_error("invalid utf8 convertion.");
     }
@@ -97,13 +97,13 @@ String String::FromUtf8(const char8* begin, const char8* end) {
 
 String String::FromUtf16(const char16* begin, const char16* end) {
     String string;
-    utf8::utf16to8(begin, end, std::back_inserter(string.string_));
+    utf8::utf16to8(begin, end, std::back_inserter(string.m_string));
     return string;
 }
 
 String String::FromUtf32(const char32* begin, const char32* end) {
     String string;
-    utf8::utf32to8(begin, end, std::back_inserter(string.string_));
+    utf8::utf32to8(begin, end, std::back_inserter(string.m_string));
     return string;
 }
 
@@ -120,63 +120,63 @@ String::operator std::basic_string<char32>() const {
 }
 
 const std::basic_string<char8>& String::ToUtf8() const {
-    return string_;
+    return m_string;
 }
 
 std::basic_string<char16> String::ToUtf16() const {
     std::basic_string<char16> output;
-    utf8::utf8to16(string_.cbegin(), string_.cend(),
+    utf8::utf8to16(m_string.cbegin(), m_string.cend(),
                    std::back_inserter(output));
     return output;
 }
 
 std::basic_string<char32> String::ToUtf32() const {
     std::basic_string<char32> output;
-    utf8::utf8to32(string_.cbegin(), string_.cend(),
+    utf8::utf8to32(m_string.cbegin(), m_string.cend(),
                    std::back_inserter(output));
     return output;
 }
 
 String& String::operator=(const String& right) {
-    string_ = right.string_;
+    m_string = right.m_string;
     return *this;
 }
 
 String& String::operator=(String&& right) {
-    string_ = std::move(right.string_);
+    m_string = std::move(right.m_string);
     return *this;
 }
 
 String& String::operator+=(const String& right) {
-    string_ += right.string_;
+    m_string += right.m_string;
     return *this;
 }
 
 char String::operator[](std::size_t index) const {
-    return string_[index];
+    return m_string[index];
 }
 
 char& String::operator[](std::size_t index) {
-    return string_[index];
+    return m_string[index];
 }
 
 void String::Clear() {
-    string_.clear();
+    m_string.clear();
 }
 
 std::size_t String::GetSize() const {
-    return utf8::distance(string_.begin(), string_.end());
+    return utf8::distance(m_string.begin(), m_string.end());
 }
 
 bool String::IsEmpty() const {
-    return string_.empty();
+    return m_string.empty();
 }
 
 void String::Erase(std::size_t position, std::size_t count) {
-    std::basic_string<char8>::iterator start_it(string_.begin());
+    std::basic_string<char8>::iterator start_it(m_string.begin());
     for (std::size_t i = 0; i < position; ++i) {
         try {
-            utf8::next(start_it, string_.end());
+            utf8::next(start_it, m_string.end());
         } catch (utf8::not_enough_room) {
             throw std::out_of_range(
                 "the specified position is out of the string range");
@@ -184,32 +184,32 @@ void String::Erase(std::size_t position, std::size_t count) {
     }
     std::basic_string<char8>::iterator end_it(start_it);
     for (std::size_t i = 0; i < count; ++i) {
-        utf8::next(end_it, string_.end());
-        if (end_it == string_.end()) break;
+        utf8::next(end_it, m_string.end());
+        if (end_it == m_string.end()) break;
     }
-    string_.erase(start_it, end_it);
+    m_string.erase(start_it, end_it);
 }
 
 void String::Insert(std::size_t position, const String& str) {
-    std::basic_string<char8>::iterator start_it(string_.begin());
+    std::basic_string<char8>::iterator start_it(m_string.begin());
     for (std::size_t i = 0; i < position; ++i) {
         try {
-            utf8::next(start_it, string_.end());
+            utf8::next(start_it, m_string.end());
         } catch (utf8::not_enough_room) {
             throw std::out_of_range(
                 "the specified position is out of the string range");
         }
     }
-    string_.insert(start_it, str.string_.cbegin(), str.string_.cend());
+    m_string.insert(start_it, str.m_string.cbegin(), str.m_string.cend());
 }
 // TODO
 std::size_t String::Find(const String& str, std::size_t start) const {
-    return string_.find(str.string_, start);
+    return m_string.find(str.m_string, start);
 }
 // TODO
 void String::Replace(std::size_t position, std::size_t length,
                      const String& replaceWith) {
-    string_.replace(position, length, replaceWith.string_);
+    m_string.replace(position, length, replaceWith.m_string);
 }
 // TODO
 void String::Replace(const String& searchFor, const String& replaceWith) {
@@ -225,10 +225,10 @@ void String::Replace(const String& searchFor, const String& replaceWith) {
 }
 
 String String::SubString(std::size_t position, std::size_t length) const {
-    std::basic_string<char8>::const_iterator start_it(string_.begin());
+    std::basic_string<char8>::const_iterator start_it(m_string.begin());
     for (std::size_t i = 0; i < position; ++i) {
         try {
-            utf8::next(start_it, string_.end());
+            utf8::next(start_it, m_string.end());
         } catch (utf8::not_enough_room) {
             throw std::out_of_range(
                 "the specified position is out of the string range");
@@ -236,38 +236,38 @@ String String::SubString(std::size_t position, std::size_t length) const {
     }
     std::basic_string<char8>::const_iterator end_it(start_it);
     for (std::size_t i = 0; i < length; ++i) {
-        utf8::next(end_it, string_.end());
-        if (end_it == string_.end()) break;
+        utf8::next(end_it, m_string.end());
+        if (end_it == m_string.end()) break;
     }
     return String::FromUtf8(&(*start_it), &(*end_it));
 }
 
 const std::basic_string<char8>::value_type* String::GetData() const {
-    return string_.data();
+    return m_string.data();
 }
 
 /////////////////////////// TODO
 
 String::iterator String::Begin() {
-    return string_.begin();
+    return m_string.begin();
 }
 
 String::const_iterator String::Begin() const {
-    return string_.begin();
+    return m_string.begin();
 }
 
 String::iterator String::End() {
-    return string_.end();
+    return m_string.end();
 }
 
 String::const_iterator String::End() const {
-    return string_.end();
+    return m_string.end();
 }
 
 /////////////////////////// DOTO
 
 bool operator==(const String& left, const String& right) {
-    return left.string_ == right.string_;
+    return left.m_string == right.m_string;
 }
 
 bool operator!=(const String& left, const String& right) {
@@ -275,7 +275,7 @@ bool operator!=(const String& left, const String& right) {
 }
 
 bool operator<(const String& left, const String& right) {
-    return left.string_ < right.string_;
+    return left.m_string < right.m_string;
 }
 
 bool operator>(const String& left, const String& right) {

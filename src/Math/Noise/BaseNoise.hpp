@@ -32,8 +32,8 @@ private:
     float Lerp(float a, float b, float t) const;
 
 private:
-    int seed_;
-    std::vector<int> perm_;
+    int m_seed;
+    std::vector<int> m_perm;
 };
 
 }  // namespace math

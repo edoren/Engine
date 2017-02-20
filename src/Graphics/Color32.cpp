@@ -21,7 +21,7 @@ Color32::Color32(const Color32& color)
 
 Color32::Color32(uint8 r, uint8 g, uint8 b, uint8 a) : r(r), g(g), b(b), a(a) {}
 
-Color32::Color32(const math::Vector4<uint8>& vec) : data_(vec) {}
+Color32::Color32(const math::Vector4<uint8>& vec) : m_data(vec) {}
 
 Color32::Color32(const Color& color)
       : r(static_cast<uint8>(color.r * 255.f)),
@@ -30,12 +30,12 @@ Color32::Color32(const Color& color)
         a(static_cast<uint8>(color.a * 255.f)) {}
 
 Color32& Color32::operator=(const Color32& color) {
-    data_ = color.data_;
+    m_data = color.m_data;
     return *this;
 };
 
 Color32 Color32::Lerp(const Color32& a, const Color32& b, uint8 t) {
-    return Color32(math::Vector4<uint8>::Lerp(a.data_, b.data_, t));
+    return Color32(math::Vector4<uint8>::Lerp(a.m_data, b.m_data, t));
 }
 
 }  // namespace engine

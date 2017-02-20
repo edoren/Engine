@@ -15,59 +15,59 @@ PerlinNoise::PerlinNoise() : PerlinNoise(DEFAULT_SEED) {}
 
 PerlinNoise::PerlinNoise(int seed)
       : BaseNoise(seed),
-        octave_count_(DEFAULT_OCTAVE_COUNT),
-        frequency_(DEFAULT_FREQUENCY),
-        lacunarity_(DEFAULT_LACUNARITY),
-        persistence_(DEFAULT_PERSISTENCE) {}
+        m_octave_count(DEFAULT_OCTAVE_COUNT),
+        m_frequency(DEFAULT_FREQUENCY),
+        m_lacunarity(DEFAULT_LACUNARITY),
+        m_persistence(DEFAULT_PERSISTENCE) {}
 
 int PerlinNoise::GetOctaveCount() const {
-    return octave_count_;
+    return m_octave_count;
 }
 
 float PerlinNoise::GetFrequency() const {
-    return frequency_;
+    return m_frequency;
 }
 
 float PerlinNoise::GetLacunarity() const {
-    return lacunarity_;
+    return m_lacunarity;
 }
 
 float PerlinNoise::GetPersistence() const {
-    return persistence_;
+    return m_persistence;
 }
 
 float PerlinNoise::GetValue(float x, float y, float z) const {
     float value = 0.f;
     float signal = 0.f;
-    float frequency = frequency_;
+    float frequency = m_frequency;
     float amplitude = 1.f;
 
-    for (int current_octave = 0; current_octave < octave_count_;
+    for (int current_octave = 0; current_octave < m_octave_count;
          current_octave++) {
         signal = CoherentNoise3D(x * frequency, y * frequency, z * frequency);
         value += signal * amplitude;
 
-        frequency *= lacunarity_;
-        amplitude *= persistence_;
+        frequency *= m_lacunarity;
+        amplitude *= m_persistence;
     }
 
     return std::min(1.f, std::max(-1.f, value));
 }
 
 void PerlinNoise::SetOctaveCount(int octave_count) {
-    octave_count_ = octave_count;
+    m_octave_count = octave_count;
 }
 
 void PerlinNoise::SetFrequency(float frequency) {
-    frequency_ = frequency;
+    m_frequency = frequency;
 }
 
 void PerlinNoise::SetLacunarity(float lacunarity) {
-    lacunarity_ = lacunarity;
+    m_lacunarity = lacunarity;
 }
 
 void PerlinNoise::SetPersistence(float persistence) {
-    persistence_ = persistence;
+    m_persistence = persistence;
 }
 
 }  // namespace math

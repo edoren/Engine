@@ -26,8 +26,8 @@ public:
     const byte* GetData() const;
 
 private:
-    math::Vector2<uint32> size_;
-    std::vector<byte> pixels_;
+    math::Vector2<uint32> m_size;
+    std::vector<byte> m_pixels;
 };
 
 }  // namespace engine

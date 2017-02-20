@@ -17,10 +17,10 @@ InputManager* InputManager::GetInstancePtr() {
 }
 
 InputManager::InputManager()
-      : minimized_(false),
-        exit_requested_(false),
-        pointers_(kMaxSimultanuousPointers),
-        mousewheel_delta_(math::ivec2(0, 0)) {}
+      : m_minimized(false),
+        m_exit_requested(false),
+        m_pointers(kMaxSimultanuousPointers),
+        m_mousewheel_delta(math::ivec2(0, 0)) {}
 
 InputManager::~InputManager() {
     Shutdown();
@@ -38,17 +38,17 @@ void InputManager::Shutdown() {
 
 int InputManager::HandleAppEvents(void* userdata, SDL_Event* event) {
     auto input_system = reinterpret_cast<InputManager*>(userdata);
-    if (input_system->exit_requested_) return 1;
-    for (auto& callback : input_system->app_event_callbacks_) {
+    if (input_system->m_exit_requested) return 1;
+    for (auto& callback : input_system->m_app_event_callbacks) {
         callback(event);
     }
     return 1;
 }
 
 Button& InputManager::GetButton(int button) {
-    auto it = button_map_.find(button);
-    return it != button_map_.end() ? it->second
-                                   : (button_map_[button] = Button());
+    auto it = m_button_map.find(button);
+    return it != m_button_map.end() ? it->second
+                                   : (m_button_map[button] = Button());
 }
 
 Button& InputManager::GetPointerButton(SDL_FingerID pointer) {
@@ -56,16 +56,16 @@ Button& InputManager::GetPointerButton(SDL_FingerID pointer) {
 }
 
 void InputManager::AddEventCallback(AppEventCallback callback) {
-    app_event_callbacks_.push_back(callback);
+    m_app_event_callbacks.push_back(callback);
 }
 
 void InputManager::AdvanceFrame(math::ivec2* window_size) {
     // Reset our per-frame input state.
-    mousewheel_delta_.x = mousewheel_delta_.y = 0;
-    for (auto& button : button_map_) {
+    m_mousewheel_delta.x = m_mousewheel_delta.y = 0;
+    for (auto& button : m_button_map) {
         button.second.AdvanceFrame();
     }
-    for (auto& pointer : pointers_) {
+    for (auto& pointer : m_pointers) {
         pointer.mousedelta.x = pointer.mousedelta.y = 0;
     }
 
@@ -73,7 +73,7 @@ void InputManager::AdvanceFrame(math::ivec2* window_size) {
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
             case SDL_QUIT: {
-                exit_requested_ = true;
+                m_exit_requested = true;
                 break;
             }
             case SDL_KEYDOWN:
@@ -94,20 +94,20 @@ void InputManager::AdvanceFrame(math::ivec2* window_size) {
             case SDL_MOUSEBUTTONUP: {
                 GetPointerButton(event.button.button - 1)
                     .Update(event.button.state == SDL_PRESSED);
-                pointers_[0].mousepos =
+                m_pointers[0].mousepos =
                     math::ivec2(event.button.x, event.button.y);
-                pointers_[0].used = true;
+                m_pointers[0].used = true;
                 break;
             }
             case SDL_MOUSEMOTION: {
-                pointers_[0].mousedelta +=
+                m_pointers[0].mousedelta +=
                     math::ivec2(event.motion.xrel, event.motion.yrel);
-                pointers_[0].mousepos =
+                m_pointers[0].mousepos =
                     math::ivec2(event.button.x, event.button.y);
                 break;
             }
             case SDL_MOUSEWHEEL: {
-                mousewheel_delta_ += math::ivec2(event.wheel.x, event.wheel.y);
+                m_mousewheel_delta += math::ivec2(event.wheel.x, event.wheel.y);
                 break;
             }
             case SDL_WINDOWEVENT: {
@@ -117,10 +117,10 @@ void InputManager::AdvanceFrame(math::ivec2* window_size) {
                             math::ivec2(event.window.data1, event.window.data2);
                         break;
                     case SDL_WINDOWEVENT_MINIMIZED:
-                        minimized_ = true;
+                        m_minimized = true;
                         break;
                     case SDL_WINDOWEVENT_RESTORED:
-                        minimized_ = false;
+                        m_minimized = false;
                         break;
                 }
                 break;
@@ -133,16 +133,16 @@ void InputManager::AdvanceFrame(math::ivec2* window_size) {
             case SDL_APP_LOWMEMORY:
                 break;
             case SDL_APP_WILLENTERBACKGROUND:
-                minimized_ = true;
-                // input_system->minimized_frame_ = input_system->frames_;
+                m_minimized = true;
+                // input_system->m_minimized_frame = input_system->m_frames;
                 break;
             case SDL_APP_DIDENTERBACKGROUND:
                 break;
             case SDL_APP_WILLENTERFOREGROUND:
                 break;
             case SDL_APP_DIDENTERFOREGROUND:
-                minimized_ = false;
-                // input_system->minimized_frame_ = input_system->frames_;
+                m_minimized = false;
+                // input_system->m_minimized_frame = input_system->m_frames;
                 break;
             default: {
                 SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,

@@ -4,35 +4,35 @@ namespace engine {
 
 namespace math {
 
-BaseNoise::BaseNoise(int seed) : seed_(seed) {
+BaseNoise::BaseNoise(int seed) : m_seed(seed) {
     GeneratePermutationVector();
 }
 
 BaseNoise::~BaseNoise() {}
 
 int BaseNoise::GetSeed() const {
-    return seed_;
+    return m_seed;
 }
 
 void BaseNoise::SetSeed(int seed) {
-    seed_ = seed;
+    m_seed = seed;
     GeneratePermutationVector();
 }
 
 void BaseNoise::GeneratePermutationVector() {
-    perm_.resize(512);
+    m_perm.resize(512);
 
     // Fill p with values from 0 to 255
-    std::iota(perm_.begin(), perm_.begin() + 256, 0);
+    std::iota(m_perm.begin(), m_perm.begin() + 256, 0);
 
     // Initialize a random engine with seed
-    std::default_random_engine engine(seed_);
+    std::default_random_engine engine(m_seed);
 
     // Suffle the values using the above random engine
-    std::shuffle(perm_.begin(), perm_.begin() + 256, engine);
+    std::shuffle(m_perm.begin(), m_perm.begin() + 256, engine);
 
     // Duplicate the permutation vector
-    std::copy(perm_.begin(), perm_.begin() + 256, perm_.begin() + 256);
+    std::copy(m_perm.begin(), m_perm.begin() + 256, m_perm.begin() + 256);
 }
 
 float BaseNoise::CoherentNoise3D(float x, float y, float z) const {
@@ -52,14 +52,14 @@ float BaseNoise::CoherentNoise3D(float x, float y, float z) const {
     float w = Fade(z);
 
     // Hash coordinates of the 8 cube corners
-    int AAA = perm_[perm_[perm_[X] + Y] + Z];
-    int ABA = perm_[perm_[perm_[X] + Y + 1] + Z];
-    int AAB = perm_[perm_[perm_[X] + Y] + Z + 1];
-    int ABB = perm_[perm_[perm_[X] + Y + 1] + Z + 1];
-    int BAA = perm_[perm_[perm_[X + 1] + Y] + Z];
-    int BBA = perm_[perm_[perm_[X + 1] + Y + 1] + Z];
-    int BAB = perm_[perm_[perm_[X + 1] + Y] + Z + 1];
-    int BBB = perm_[perm_[perm_[X + 1] + Y + 1] + Z + 1];
+    int AAA = m_perm[m_perm[m_perm[X] + Y] + Z];
+    int ABA = m_perm[m_perm[m_perm[X] + Y + 1] + Z];
+    int AAB = m_perm[m_perm[m_perm[X] + Y] + Z + 1];
+    int ABB = m_perm[m_perm[m_perm[X] + Y + 1] + Z + 1];
+    int BAA = m_perm[m_perm[m_perm[X + 1] + Y] + Z];
+    int BBA = m_perm[m_perm[m_perm[X + 1] + Y + 1] + Z];
+    int BAB = m_perm[m_perm[m_perm[X + 1] + Y] + Z + 1];
+    int BBB = m_perm[m_perm[m_perm[X + 1] + Y + 1] + Z + 1];
 
     // Calculate noise contributions from each of the eight corners
     float n000 = Grad(AAA, x, y, z);

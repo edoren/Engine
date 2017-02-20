@@ -32,26 +32,26 @@ public:
     void AdvanceFrame(bool /*minimized*/) {}  // RenderTarget?
 
     const String& GetName() const {
-        return name_;
+        return m_name;
     };
 
     const math::ivec2& GetSize() const {
-        return size_;
+        return m_size;
     };
 
     bool IsVSyncEnabled() const {
-        return is_vsync_enable_;
+        return m_is_vsync_enable;
     };
 
     bool IsFullScreen() const {
-        return is_fullscreen_;
+        return m_is_fullscreen;
     }
 
 protected:
-    String name_;
-    math::ivec2 size_;
-    bool is_fullscreen_;
-    bool is_vsync_enable_;
+    String m_name;
+    math::ivec2 m_size;
+    bool m_is_fullscreen;
+    bool m_is_vsync_enable;
 };
 
 }  // namespace engine

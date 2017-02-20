@@ -12,13 +12,13 @@ GL_Renderer::~GL_Renderer() {
 }
 
 bool GL_Renderer::Initialize() {
-    render_window_ = new GL_RenderWindow();
-    return render_window_ != nullptr;
+    m_render_window = new GL_RenderWindow();
+    return m_render_window != nullptr;
 }
 
 void GL_Renderer::Shutdown() {
-    delete render_window_;
-    render_window_ = nullptr;
+    delete m_render_window;
+    m_render_window = nullptr;
 }
 
 void GL_Renderer::AdvanceFrame() {

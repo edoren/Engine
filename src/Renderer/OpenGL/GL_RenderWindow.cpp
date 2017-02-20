@@ -5,7 +5,7 @@
 
 namespace engine {
 
-GL_RenderWindow::GL_RenderWindow() : window_(nullptr), context_(nullptr) {}
+GL_RenderWindow::GL_RenderWindow() : m_window(nullptr), m_context(nullptr) {}
 
 GL_RenderWindow::~GL_RenderWindow() {
     Destroy();
@@ -22,18 +22,18 @@ bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
     math::ivec2 initial_pos(SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
     Uint32 window_flags =
         SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
-    window_ = SDL_CreateWindow(name.GetData(), initial_pos.x, initial_pos.y,
+    m_window = SDL_CreateWindow(name.GetData(), initial_pos.x, initial_pos.y,
                                size.x, size.y, window_flags);
-    if (!window_) {
+    if (!m_window) {
         String error = String("SDL_CreateWindow fail: ") + SDL_GetError();
         LogError("GL_RenderWindow", error);
         return false;
     }
 
-    SDL_GetWindowSize(window_, &size_.x, &size_.y);
+    SDL_GetWindowSize(m_window, &m_size.x, &m_size.y);
 
-    context_ = SDL_GL_CreateContext(window_);
-    if (!context_) {
+    m_context = SDL_GL_CreateContext(m_window);
+    if (!m_context) {
         String error = String("SDL_GL_CreateContext fail: ") + SDL_GetError();
         LogError("GL_RenderWindow", error);
         return false;
@@ -49,8 +49,8 @@ bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
     GL_CALL(glEnable(GL_DEPTH_TEST));
 
     // Update the base class attributes
-    name_ = name;
-    size_ = size;
+    m_name = name;
+    m_size = size;
 
     return true;
 }
@@ -60,70 +60,70 @@ bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
 //        // Save some cpu / battery:
 //        SDL_Delay(10);
 //    } else {
-//        SDL_GL_SwapWindow(window_);
+//        SDL_GL_SwapWindow(m_window);
 //    }
-//    // SDL_GetWindowSize(window_, &window_size_.x, &window_size_.y);
-//    // GL_CALL(glViewport(0, 0, window_size_.x, window_size_.y));
+//    // SDL_GetWindowSize(m_window, &m_window_size.x, &m_window_size.y);
+//    // GL_CALL(glViewport(0, 0, m_window_size.x, m_window_size.y));
 //}
 
 void GL_RenderWindow::Destroy() {
-    if (context_) {
-        SDL_GL_DeleteContext(context_);
-        context_ = nullptr;
+    if (m_context) {
+        SDL_GL_DeleteContext(m_context);
+        m_context = nullptr;
     }
-    if (window_) {
-        SDL_DestroyWindow(window_);
-        window_ = nullptr;
+    if (m_window) {
+        SDL_DestroyWindow(m_window);
+        m_window = nullptr;
     }
 }
 
 void GL_RenderWindow::Reposition(int left, int top) {
-    if (window_) {
+    if (m_window) {
         // TODO check errors
-        SDL_SetWindowPosition(window_, left, top);
+        SDL_SetWindowPosition(m_window, left, top);
     }
 }
 
 void GL_RenderWindow::Resize(int width, int height) {
     // TODO check errors
-    if (window_ && !IsFullScreen()) {
-        SDL_SetWindowSize(window_, width, height);
+    if (m_window && !IsFullScreen()) {
+        SDL_SetWindowSize(m_window, width, height);
 
         // Update the base class attributes
         // TMP Update the ViewPort
-        SDL_GetWindowSize(window_, &size_.x, &size_.y);
-        GL_CALL(glViewport(0, 0, size_.x, size_.y));
+        SDL_GetWindowSize(m_window, &m_size.x, &m_size.y);
+        GL_CALL(glViewport(0, 0, m_size.x, m_size.y));
     }
 }
 
 void GL_RenderWindow::SetFullScreen(bool fullscreen, bool is_fake) {
     // TODO check errors
-    if (window_) {
-        is_fullscreen_ = fullscreen;
+    if (m_window) {
+        m_is_fullscreen = fullscreen;
         Uint32 flag = 0;
         if (fullscreen) {
             flag = (is_fake) ? SDL_WINDOW_FULLSCREEN_DESKTOP
                              : SDL_WINDOW_FULLSCREEN;
         }
-        SDL_SetWindowFullscreen(window_, flag);
+        SDL_SetWindowFullscreen(m_window, flag);
 
         // Update the base class attributes
         // TMP Update the ViewPort
-        SDL_GetWindowSize(window_, &size_.x, &size_.y);
-        GL_CALL(glViewport(0, 0, size_.x, size_.y));
+        SDL_GetWindowSize(m_window, &m_size.x, &m_size.y);
+        GL_CALL(glViewport(0, 0, m_size.x, m_size.y));
     }
 }
 
 void GL_RenderWindow::SetVSyncEnabled(bool vsync) {
     if (SDL_GL_SetSwapInterval(vsync ? 1 : 0) == 0) {
-        is_vsync_enable_ = vsync;
+        m_is_vsync_enable = vsync;
     } else {
-        is_vsync_enable_ = false;
+        m_is_vsync_enable = false;
     }
 }
 
 void GL_RenderWindow::SwapBuffers() {
-    SDL_GL_SwapWindow(window_);
+    SDL_GL_SwapWindow(m_window);
     // RenderWindow::SwapBuffers();
 }
 
@@ -134,7 +134,7 @@ void GL_RenderWindow::Clear(const Color& color) {  // RenderTarget
 
 bool GL_RenderWindow::IsVisible() {
     Uint32 flags = SDL_WINDOW_HIDDEN | SDL_WINDOW_MINIMIZED;
-    Uint32 mask = SDL_GetWindowFlags(window_);
+    Uint32 mask = SDL_GetWindowFlags(m_window);
     return (mask & flags) == 0;
 }
 

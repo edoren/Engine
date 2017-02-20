@@ -36,8 +36,8 @@ public:
     ////////////////////////////////////////////////////////////////
 
 private:
-    SDL_Window* window_;
-    SDL_GLContext context_;
+    SDL_Window* m_window;
+    SDL_GLContext m_context;
 };
 
 }  // namespace engine

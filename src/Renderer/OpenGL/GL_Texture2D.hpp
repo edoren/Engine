@@ -21,7 +21,7 @@ public:
     void Use();
 
 private:
-    uint32 texture_;
+    uint32 m_texture;
 };
 
 }  // namespace engine

@@ -30,7 +30,7 @@ public:
     RenderWindow* GetRenderWindowPtr();
 
 protected:
-    RenderWindow* render_window_;
+    RenderWindow* m_render_window;
 };
 
 }  // namespace engine

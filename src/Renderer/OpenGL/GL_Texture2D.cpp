@@ -3,28 +3,28 @@
 
 namespace engine {
 
-GL_Texture2D::GL_Texture2D() : texture_(0) {
-    glGenTextures(1, &texture_);
+GL_Texture2D::GL_Texture2D() : m_texture(0) {
+    glGenTextures(1, &m_texture);
 }
 
-GL_Texture2D::GL_Texture2D(GL_Texture2D&& other) : texture_(other.texture_) {
-    other.texture_ = 0;
+GL_Texture2D::GL_Texture2D(GL_Texture2D&& other) : m_texture(other.m_texture) {
+    other.m_texture = 0;
 }
 
 GL_Texture2D::~GL_Texture2D() {
-    if (texture_) {
-        glDeleteTextures(1, &texture_);
+    if (m_texture) {
+        glDeleteTextures(1, &m_texture);
     }
 }
 
 GL_Texture2D& GL_Texture2D::operator=(GL_Texture2D&& other) {
-    texture_ = other.texture_;
-    other.texture_ = 0;
+    m_texture = other.m_texture;
+    other.m_texture = 0;
     return *this;
 }
 
 bool GL_Texture2D::LoadFromImage(const Image& img) {
-    GL_CALL(glBindTexture(GL_TEXTURE_2D, texture_));
+    GL_CALL(glBindTexture(GL_TEXTURE_2D, m_texture));
 
     GL_CALL(
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
@@ -46,7 +46,7 @@ bool GL_Texture2D::LoadFromImage(const Image& img) {
 }
 
 void GL_Texture2D::Use() {
-    GL_CALL(glBindTexture(GL_TEXTURE_2D, texture_));
+    GL_CALL(glBindTexture(GL_TEXTURE_2D, m_texture));
 }
 
 }  // namespace engine

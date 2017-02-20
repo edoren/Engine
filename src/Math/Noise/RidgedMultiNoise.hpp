@@ -54,14 +54,14 @@ private:
     void CalcSpectralWeights();
 
 private:
-    int octave_count_;
-    float frequency_;
-    float lacunarity_;
-    float offset_;
-    float gain_;
-    float exponent_;
+    int m_octave_count;
+    float m_frequency;
+    float m_lacunarity;
+    float m_offset;
+    float m_gain;
+    float m_exponent;
 
-    std::vector<float> spectral_weights_;
+    std::vector<float> m_spectral_weights;
 };
 
 }  // namespace math

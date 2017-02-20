@@ -10,31 +10,31 @@ const Path::value_type Path::Separator = '\\';
 const Path::value_type Path::Separator = '/';
 #endif
 
-Path::Path() : path_() {}
+Path::Path() : m_path() {}
 
 Path::Path(const char* p) : Path(String(p)) {}
 
 Path::Path(const String& p)
-      : path_(external::fs::u8path(p.Begin(), p.End())) {}
+      : m_path(external::fs::u8path(p.Begin(), p.End())) {}
 
-Path::Path(external::fs::path&& p) : path_(std::move(p)) {}
+Path::Path(external::fs::path&& p) : m_path(std::move(p)) {}
 
 Path& Path::Append(const Path& p) {
-    path_ /= p.path_;
+    m_path /= p.m_path;
     return *this;
 }
 
 Path Path::ParentPath() const {
-    return Path(path_.parent_path());
+    return Path(m_path.parent_path());
 }
 
 Path& Path::ReplaceExtension(const Path& replacement) {
-    path_.replace_extension(replacement.path_);
+    m_path.replace_extension(replacement.m_path);
     return *this;
 }
 
 String Path::Str() const {
-    return path_.generic_u8string();
+    return m_path.generic_u8string();
 }
 
 Path& Path::operator/=(const Path& p) {
@@ -48,7 +48,7 @@ Path operator/(const Path& lhs, const Path& rhs) {
 }
 
 std::ostream& operator<<(std::ostream& os, const Path& p) {
-    os << p.path_;
+    os << p.m_path;
     return os;
 }
 

@@ -41,10 +41,10 @@ public:
     void SetPersistence(float persistence);
 
 private:
-    int octave_count_;
-    float frequency_;
-    float lacunarity_;
-    float persistence_;
+    int m_octave_count;
+    float m_frequency;
+    float m_lacunarity;
+    float m_persistence;
 };
 
 }  // namespace math

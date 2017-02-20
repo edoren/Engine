@@ -21,7 +21,7 @@ Color::Color(const Color& color)
 
 Color::Color(float r, float g, float b, float a) : r(r), g(g), b(b), a(a) {}
 
-Color::Color(const math::vec4& vec) : data(vec) {}
+Color::Color(const math::vec4& vec) : m_data(vec) {}
 
 Color::Color(const Color32& color32)
       : r(color32.r / 255.f),
@@ -30,12 +30,12 @@ Color::Color(const Color32& color32)
         a(color32.a / 255.f) {}
 
 Color& Color::operator=(const Color& color) {
-    data = color.data;
+    m_data = color.m_data;
     return *this;
 };
 
 Color Color::Lerp(const Color& a, const Color& b, float t) {
-    return Color(math::Vector4<float>::Lerp(a.data, b.data, t));
+    return Color(math::Vector4<float>::Lerp(a.m_data, b.m_data, t));
 }
 
 }  // namespace engine

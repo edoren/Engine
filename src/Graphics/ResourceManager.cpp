@@ -28,7 +28,7 @@ T FindInMap(std::map<String, T>& map, const String& name) {
 ResourceManager::ResourceManager() {
     char* path = SDL_GetBasePath();
     if (path) {
-        basedir_ = path;
+        m_basedir = path;
         SDL_free(path);
     }
 }
@@ -42,22 +42,22 @@ bool ResourceManager::Initialize() {
 }
 
 void ResourceManager::Shutdown() {
-    for (auto& it : shader_map_) {
+    for (auto& it : m_shader_map) {
         delete it.second;
     }
-    shader_map_.clear();
-    for (auto& it : texture_2d_map_) {
+    m_shader_map.clear();
+    for (auto& it : m_texture_2d_map) {
         delete it.second;
     }
-    texture_2d_map_.clear();
+    m_texture_2d_map.clear();
 }
 
 Shader* ResourceManager::FindShader(const String& basename) {
-    return FindInMap(shader_map_, basename);
+    return FindInMap(m_shader_map, basename);
 }
 
 Texture2D* ResourceManager::FindTexture2D(const String& basename) {
-    return FindInMap(texture_2d_map_, basename);
+    return FindInMap(m_texture_2d_map, basename);
 }
 
 Shader* ResourceManager::LoadShader(const String& basename,
@@ -71,7 +71,7 @@ Shader* ResourceManager::LoadShader(const String& basename,
     shader = Main::GetInstance().GetActiveRenderer().CreateShader();
     int status = shader->LoadFromMemory(vertex_file, fragment_file);
     if (status && shader) {
-        shader_map_[basename] = shader;
+        m_shader_map[basename] = shader;
     } else {
         LogError("ResourceManager", "Error loading Shader");
         delete shader;
@@ -88,19 +88,19 @@ Shader* ResourceManager::LoadShader(const String& basename,
     //     }
     // }
     // LogError("ResourceManager", "Can't load shader: " + filename);
-    // renderer_.last_error() = "Couldn't load: " + filename;
+    // m_renderer.last_error() = "Couldn't load: " + filename;
     return nullptr;
 }
 
 Texture2D* ResourceManager::LoadTexture2D(const String& basename) {
     Image img;
-    filesystem::Path filepath = filesystem::Absolute(basename, basedir_);
+    filesystem::Path filepath = filesystem::Absolute(basename, m_basedir);
     if (img.LoadFromFile(filepath.Str())) {
         LogDebug("ResourceManager", "Loading Texture: " + filepath.Str());
         Texture2D* texture =
             Main::GetInstance().GetActiveRenderer().CreateTexture2D();
         texture->LoadFromImage(img);
-        texture_2d_map_[basename] = texture;
+        m_texture_2d_map[basename] = texture;
     } else {
         LogError("ResourceManager",
                  "Could not load Texture: " + filepath.Str());
