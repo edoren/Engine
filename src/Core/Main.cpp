@@ -26,12 +26,10 @@ Main::Main(int /*argc*/, char* argv[])
         m_sharedlibs(nullptr),
         m_input(nullptr),
         m_resources(nullptr) {
-    filesystem::Path resource_dir = filesystem::Absolute(argv[0]).ParentPath();
-
     m_logger = new LogManager();
     m_sharedlibs = new SharedLibManager();
     m_input = new InputManager();
-    m_resources = new ResourceManager(resource_dir);
+    m_resources = new ResourceManager();
 }
 
 Main::~Main() {

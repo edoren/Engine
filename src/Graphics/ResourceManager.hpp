@@ -1,17 +1,16 @@
 #pragma once
 
-#include <Util/Prerequisites.hpp>
-
 #include <Renderer/Renderer.hpp>
 #include <Renderer/Shader.hpp>
 #include <Renderer/Texture2D.hpp>
 #include <System/FileSystem.hpp>
+#include <Util/Prerequisites.hpp>
 
 namespace engine {
 
 class ENGINE_API ResourceManager : public Singleton<ResourceManager> {
 public:
-    ResourceManager(const filesystem::Path& resource_dir);
+    ResourceManager();
     ~ResourceManager();
 
     bool Initialize();

@@ -1,8 +1,9 @@
+#include <Core/Main.hpp>
 #include <Graphics/ResourceManager.hpp>
 #include <System/IO/FileLoader.hpp>
 #include <System/LogManager.hpp>
 
-#include <Core/Main.hpp>
+#include <SDL.h>
 
 namespace engine {
 
@@ -24,8 +25,12 @@ T FindInMap(std::map<String, T>& map, const String& name) {
     return it != map.end() ? it->second : nullptr;
 }
 
-ResourceManager::ResourceManager(const filesystem::Path& resource_dir) {
-    basedir_ = resource_dir;
+ResourceManager::ResourceManager() {
+    char* path = SDL_GetBasePath();
+    if (path) {
+        basedir_ = path;
+        SDL_free(path);
+    }
 }
 
 ResourceManager::~ResourceManager() {
