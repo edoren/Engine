@@ -33,18 +33,18 @@ public:
     Button& GetPointerButton(int64 pointer);
 
     Mouse& GetMouse() {
-        static std::unique_ptr<Mouse> instance(new Mouse(pointers_[0]));
+        static std::unique_ptr<Mouse> instance(new Mouse(m_pointers[0]));
         return *instance;
     }
 
     void AddEventCallback(AppEventCallback callback);
 
     inline bool minimized() {
-        return minimized_;
+        return m_minimized;
     }
 
     inline bool exit_requested() {
-        return exit_requested_;
+        return m_exit_requested;
     }
 
     // Override standard Singleton retrieval.
@@ -83,12 +83,12 @@ private:
     static int HandleAppEvents(void* userdata, SDL_Event* event);
 
 private:
-    bool minimized_;
-    bool exit_requested_;
-    std::vector<AppEventCallback> app_event_callbacks_;
-    std::vector<Pointer> pointers_;
-    std::map<int, Button> button_map_;
-    math::ivec2 mousewheel_delta_;
+    bool m_minimized;
+    bool m_exit_requested;
+    std::vector<AppEventCallback> m_app_event_callbacks;
+    std::vector<Pointer> m_pointers;
+    std::map<int, Button> m_button_map;
+    math::ivec2 m_mousewheel_delta;
 };
 
 }  // namespace engine

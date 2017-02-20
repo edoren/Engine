@@ -122,7 +122,7 @@ public:
 private:
     explicit Time(int64 nanoseconds);
 
-    int64 nanoseconds_;
+    int64 m_nanoseconds;
 };
 
 }  // namespace engine

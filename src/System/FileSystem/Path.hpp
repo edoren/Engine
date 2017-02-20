@@ -42,7 +42,7 @@ public:
                                                const Path& path);
 
 private:
-    external::fs::path path_;
+    external::fs::path m_path;
 };
 
 ENGINE_API Path operator/(const Path& lhs, const Path& rhs);

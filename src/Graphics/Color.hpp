@@ -41,7 +41,7 @@ public:
         struct {
             float r, g, b, a;
         };
-        math::Vector4<float> data;
+        math::Vector4<float> m_data;
     };
 };
 

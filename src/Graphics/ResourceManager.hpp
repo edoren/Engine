@@ -57,9 +57,9 @@ public:
     static ResourceManager* GetInstancePtr();
 
 private:
-    filesystem::Path basedir_;
-    std::map<String, Shader*> shader_map_;
-    std::map<String, Texture2D*> texture_2d_map_;
+    filesystem::Path m_basedir;
+    std::map<String, Shader*> m_shader_map;
+    std::map<String, Texture2D*> m_texture_2d_map;
     // std::map<String, Material *> material_map_;
     // std::map<String, Mesh *> mesh_map_;
 };
