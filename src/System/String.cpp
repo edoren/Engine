@@ -174,7 +174,7 @@ bool String::IsEmpty() const {
 
 void String::Erase(std::size_t position, std::size_t count) {
     iterator start_it(m_string.begin());
-    for (std::size_t i = 0; i < position; ++i) {
+    for (std::size_t i = 0; i < position; i++) {
         try {
             utf8::next(start_it, m_string.end());
         } catch (utf8::not_enough_room) {
@@ -183,7 +183,7 @@ void String::Erase(std::size_t position, std::size_t count) {
         }
     }
     iterator end_it(start_it);
-    for (std::size_t i = 0; i < count; ++i) {
+    for (std::size_t i = 0; i < count; i++) {
         utf8::next(end_it, m_string.end());
         if (end_it == m_string.end()) break;
     }
@@ -192,7 +192,7 @@ void String::Erase(std::size_t position, std::size_t count) {
 
 void String::Insert(std::size_t position, const String& str) {
     iterator start_it(m_string.begin());
-    for (std::size_t i = 0; i < position; ++i) {
+    for (std::size_t i = 0; i < position; i++) {
         try {
             utf8::next(start_it, m_string.end());
         } catch (utf8::not_enough_room) {
@@ -202,9 +202,18 @@ void String::Insert(std::size_t position, const String& str) {
     }
     m_string.insert(start_it, str.m_string.cbegin(), str.m_string.cend());
 }
-// TODO
+
 std::size_t String::Find(const String& str, std::size_t start) const {
-    return m_string.find(str.m_string, start);
+    const_iterator start_it(m_string.cbegin());
+    for (std::size_t i = 0; i < start; i++) {
+        utf8::next(start_it, m_string.cend());
+        if (start_it == m_string.end()) return InvalidPos;
+    }
+    const_iterator find_it(std::search(
+        start_it, m_string.cend(), str.m_string.cbegin(), str.m_string.cend()));
+    return (find_it == m_string.cend())
+               ? InvalidPos
+               : utf8::distance(m_string.cbegin(), find_it);
 }
 // TODO
 void String::Replace(std::size_t position, std::size_t length,
@@ -226,7 +235,7 @@ void String::Replace(const String& searchFor, const String& replaceWith) {
 
 String String::SubString(std::size_t position, std::size_t length) const {
     const_iterator start_it(m_string.begin());
-    for (std::size_t i = 0; i < position; ++i) {
+    for (std::size_t i = 0; i < position; i++) {
         try {
             utf8::next(start_it, m_string.end());
         } catch (utf8::not_enough_room) {
@@ -235,7 +244,7 @@ String String::SubString(std::size_t position, std::size_t length) const {
         }
     }
     const_iterator end_it(start_it);
-    for (std::size_t i = 0; i < length; ++i) {
+    for (std::size_t i = 0; i < length; i++) {
         utf8::next(end_it, m_string.end());
         if (end_it == m_string.end()) break;
     }
