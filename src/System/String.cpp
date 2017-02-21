@@ -173,7 +173,7 @@ bool String::IsEmpty() const {
 }
 
 void String::Erase(std::size_t position, std::size_t count) {
-    std::basic_string<char8>::iterator start_it(m_string.begin());
+    iterator start_it(m_string.begin());
     for (std::size_t i = 0; i < position; ++i) {
         try {
             utf8::next(start_it, m_string.end());
@@ -182,7 +182,7 @@ void String::Erase(std::size_t position, std::size_t count) {
                 "the specified position is out of the string range");
         }
     }
-    std::basic_string<char8>::iterator end_it(start_it);
+    iterator end_it(start_it);
     for (std::size_t i = 0; i < count; ++i) {
         utf8::next(end_it, m_string.end());
         if (end_it == m_string.end()) break;
@@ -191,7 +191,7 @@ void String::Erase(std::size_t position, std::size_t count) {
 }
 
 void String::Insert(std::size_t position, const String& str) {
-    std::basic_string<char8>::iterator start_it(m_string.begin());
+    iterator start_it(m_string.begin());
     for (std::size_t i = 0; i < position; ++i) {
         try {
             utf8::next(start_it, m_string.end());
@@ -225,7 +225,7 @@ void String::Replace(const String& searchFor, const String& replaceWith) {
 }
 
 String String::SubString(std::size_t position, std::size_t length) const {
-    std::basic_string<char8>::const_iterator start_it(m_string.begin());
+    const_iterator start_it(m_string.begin());
     for (std::size_t i = 0; i < position; ++i) {
         try {
             utf8::next(start_it, m_string.end());
@@ -234,7 +234,7 @@ String String::SubString(std::size_t position, std::size_t length) const {
                 "the specified position is out of the string range");
         }
     }
-    std::basic_string<char8>::const_iterator end_it(start_it);
+    const_iterator end_it(start_it);
     for (std::size_t i = 0; i < length; ++i) {
         utf8::next(end_it, m_string.end());
         if (end_it == m_string.end()) break;
@@ -242,7 +242,7 @@ String String::SubString(std::size_t position, std::size_t length) const {
     return String::FromUtf8(&(*start_it), &(*end_it));
 }
 
-const std::basic_string<char8>::value_type* String::GetData() const {
+const char8* String::GetData() const {
     return m_string.data();
 }
 
