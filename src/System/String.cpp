@@ -243,14 +243,26 @@ void String::Replace(std::size_t position, std::size_t length,
 }
 
 void String::Replace(const String& searchFor, const String& replaceWith) {
-    std::size_t step = replaceWith.GetSize();
-    std::size_t len = searchFor.GetSize();
-    std::size_t pos = Find(searchFor);
-
+    std::size_t step = replaceWith.m_string.size();
+    std::size_t len = searchFor.m_string.size();
+    // Start the iterator at the beginning of the sequence
+    size_t find_it_pos = 0;
     // Replace each occurrence of search
-    while (pos != InvalidPos) {
-        Replace(pos, len, replaceWith);
-        pos = Find(searchFor, pos + step);
+    while (true) {
+        // Search the existence of the string searchFor in the range
+        // [m_string.begin() + find_it_pos, m_string.end())
+        auto find_it(std::search(m_string.begin() + find_it_pos, m_string.end(),
+                                 searchFor.m_string.cbegin(),
+                                 searchFor.m_string.cend()));
+        // Check if we reach the end of the string
+        if (find_it == m_string.end()) return;
+        // Retrieve the current iterator position
+        find_it_pos = find_it - m_string.begin();
+        // Replace all the range between [find_it, find_it + len) with the
+        // string in replaceWith
+        m_string.replace(find_it, find_it + len, replaceWith.m_string);
+        // Add an additional step to continue the search
+        find_it_pos += step;
     }
 }
 
