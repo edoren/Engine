@@ -48,7 +48,7 @@ String::String(char32 utf32Char) {
     utf8::utf32to8(ptr, ptr + 1, std::back_inserter(m_string));
 }
 
-String::String(const char* utf8String) {
+String::String(const char8* utf8String) {
     if (utf8String) {
         std::size_t length = strlen(utf8String);
         if (length > 0) {
@@ -152,11 +152,11 @@ String& String::operator+=(const String& right) {
     return *this;
 }
 
-char String::operator[](std::size_t index) const {
+char8 String::operator[](std::size_t index) const {
     return m_string[index];
 }
 
-char& String::operator[](std::size_t index) {
+char8& String::operator[](std::size_t index) {
     return m_string[index];
 }
 
