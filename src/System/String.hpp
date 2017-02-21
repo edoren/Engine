@@ -314,7 +314,7 @@ public:
     ////////////////////////////////////////////////////////////
     /// \brief Get the size of the string
     ///
-    /// \return Number of characters in the string
+    /// \return Number of UTF-8 codepoints in the string
     ///
     /// \see isEmpty
     ///
@@ -356,7 +356,8 @@ public:
     void Insert(std::size_t position, const String& str);
 
     ////////////////////////////////////////////////////////////
-    /// \brief Find a sequence of one or more characters in the string
+    /// \brief Find a sequence of one or more characters in
+    ///        the string
     ///
     /// This function searches for the characters of \a str
     /// in the string, starting from \a start.
@@ -364,8 +365,8 @@ public:
     /// \param str   Characters to find
     /// \param start Where to begin searching
     ///
-    /// \return Position of \a str in the string, or String::InvalidPos if not
-    /// found
+    /// \return Position of \a str in the string, or String::InvalidPos
+    ///         if not found
     ///
     ////////////////////////////////////////////////////////////
     std::size_t Find(const String& str, std::size_t start = 0) const;
@@ -378,8 +379,8 @@ public:
     ///
     /// \param position    Index of the first character to be replaced
     /// \param length      Number of characters to replace. You can pass
-    /// InvalidPos to
-    ///                    replace all characters until the end of the string.
+    ///                    InvalidPos to replace all characters until the
+    ///                    end of the string.
     /// \param replaceWith String that replaces the given SubString.
     ///
     ////////////////////////////////////////////////////////////
