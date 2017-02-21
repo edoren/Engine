@@ -9,10 +9,10 @@
 using namespace engine;
 
 int main(int /*argc*/, char* argv[]) {
-    filesystem::Path basedir = filesystem::Absolute(argv[0]).ParentPath();
+    String basedir = filesystem::ExecutableDirectory();
 
-    basedir = basedir / "Impl1";
-    SharedLibrary library(basedir.Str());
+    basedir = filesystem::Join(basedir, "Impl1");
+    SharedLibrary library(basedir);
     library.Load();
     Operation* op = static_cast<Operation*>(library.GetSymbol("impl"));
 

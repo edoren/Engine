@@ -79,11 +79,6 @@ engine_add_library(TARGET ${ENGINE_LIBRARY}
 
 target_link_libraries(${ENGINE_LIBRARY} ${SDL2_LIBRARY})
 
-# Link the filesystem library in GCC and Clang
-if(${COMPILER} STREQUAL "GCC" OR ${COMPILER} STREQUAL "Clang")
-    target_link_libraries(${ENGINE_LIBRARY} "stdc++fs")
-endif()
-
 target_include_directories(${ENGINE_LIBRARY} SYSTEM
                            PUBLIC ${MATHFU_INCLUDE_DIR}  # TMP
                            PRIVATE ${STB_INCLUDE_DIR} ${UTFCPP_INCLUDE_DIR})
