@@ -39,13 +39,13 @@ String::String(char8 asciiChar) {
 }
 
 String::String(char16 utf16Char) {
-    char16* iterator = &utf16Char;
-    utf8::utf16to8(iterator, iterator + 1, std::back_inserter(m_string));
+    char16* ptr = &utf16Char;
+    utf8::utf16to8(ptr, ptr + 1, std::back_inserter(m_string));
 }
 
 String::String(char32 utf32Char) {
-    char32* iterator = &utf32Char;
-    utf8::utf32to8(iterator, iterator + 1, std::back_inserter(m_string));
+    char32* ptr = &utf32Char;
+    utf8::utf32to8(ptr, ptr + 1, std::back_inserter(m_string));
 }
 
 String::String(const char* utf8String) {
@@ -174,7 +174,7 @@ bool String::IsEmpty() const {
 
 void String::Erase(std::size_t position, std::size_t count) {
     // Iterate to the start codepoint
-    iterator start_it(m_string.begin());
+    auto start_it(m_string.begin());
     for (std::size_t i = 0; i < position; i++) {
         try {
             utf8::next(start_it, m_string.end());
@@ -184,7 +184,7 @@ void String::Erase(std::size_t position, std::size_t count) {
         }
     }
     // Iterate to the end codepoint
-    iterator end_it(start_it);
+    auto end_it(start_it);
     for (std::size_t i = 0; i < count; i++) {
         utf8::next(end_it, m_string.end());
         if (end_it == m_string.end()) break;
@@ -194,7 +194,7 @@ void String::Erase(std::size_t position, std::size_t count) {
 
 void String::Insert(std::size_t position, const String& str) {
     // Iterate to the start codepoint
-    iterator start_it(m_string.begin());
+    auto start_it(m_string.begin());
     for (std::size_t i = 0; i < position; i++) {
         try {
             utf8::next(start_it, m_string.end());
@@ -208,14 +208,14 @@ void String::Insert(std::size_t position, const String& str) {
 
 std::size_t String::Find(const String& str, std::size_t start) const {
     // Iterate to the start codepoint
-    const_iterator start_it(m_string.cbegin());
+    auto start_it(m_string.cbegin());
     for (std::size_t i = 0; i < start; i++) {
         utf8::next(start_it, m_string.cend());
         if (start_it == m_string.end()) return InvalidPos;
     }
     // Find the string
-    const_iterator find_it(std::search(
-        start_it, m_string.cend(), str.m_string.cbegin(), str.m_string.cend()));
+    auto find_it(std::search(start_it, m_string.cend(), str.m_string.cbegin(),
+                             str.m_string.cend()));
     return (find_it == m_string.cend())
                ? InvalidPos
                : utf8::distance(m_string.cbegin(), find_it);
@@ -224,7 +224,7 @@ std::size_t String::Find(const String& str, std::size_t start) const {
 void String::Replace(std::size_t position, std::size_t length,
                      const String& replaceWith) {
     // Iterate to the start codepoint
-    iterator start_it(m_string.begin());
+    auto start_it(m_string.begin());
     for (std::size_t i = 0; i < position; i++) {
         try {
             utf8::next(start_it, m_string.end());
@@ -234,7 +234,7 @@ void String::Replace(std::size_t position, std::size_t length,
         }
     }
     // Iterate to the end codepoint
-    iterator end_it(start_it);
+    auto end_it(start_it);
     for (std::size_t i = 0; i < length; i++) {
         utf8::next(end_it, m_string.end());
         if (end_it == m_string.end()) break;
@@ -256,7 +256,7 @@ void String::Replace(const String& searchFor, const String& replaceWith) {
 
 String String::SubString(std::size_t position, std::size_t length) const {
     // Iterate to the start codepoint
-    const_iterator start_it(m_string.begin());
+    auto start_it(m_string.begin());
     for (std::size_t i = 0; i < position; i++) {
         try {
             utf8::next(start_it, m_string.end());
@@ -265,7 +265,8 @@ String String::SubString(std::size_t position, std::size_t length) const {
                 "the specified position is out of the string range");
         }
     }
-    const_iterator end_it(start_it);
+    // Iterate to the end codepoint
+    auto end_it(start_it);
     for (std::size_t i = 0; i < length; i++) {
         utf8::next(end_it, m_string.end());
         if (end_it == m_string.end()) break;
