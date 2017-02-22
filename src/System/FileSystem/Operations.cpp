@@ -47,7 +47,7 @@ String CurrentWorkingDirectory() {
                 buffer[num_characters++] = L'\\';
                 buffer[num_characters] = L'\0';
             }
-            ret = String::FromUtf16(buffer, buffer + num_characters);
+            ret = String::FromWide(buffer, buffer + num_characters);
             free(buffer);
             break;
         }
@@ -89,7 +89,7 @@ String AbsolutePath(const String& path) {
         DWORD num_characters = GetFullPathNameW(utf16string.data(),
                                                 buffer_length, buffer, nullptr);
         if (num_characters > 0) {
-            ret = String::FromUtf16(buffer, buffer + num_characters);
+            ret = String::FromWide(buffer, buffer + num_characters);
             free(buffer);
             break;
         }

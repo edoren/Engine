@@ -91,6 +91,14 @@ public:
     String(const char8* utf8String);
 
     ////////////////////////////////////////////////////////////
+    /// \brief Construct from a null-terminated Wide string
+    ///
+    /// \param wideString Wide string to assign
+    ///
+    ////////////////////////////////////////////////////////////
+    String(const wchar* wideString);
+
+    ////////////////////////////////////////////////////////////
     /// \brief Construct from an UTF-8 string
     ///
     /// \param utf8String UTF-8 string to assign
@@ -113,6 +121,14 @@ public:
     ///
     ////////////////////////////////////////////////////////////
     String(const std::basic_string<char32>& utf32String);
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Construct from an Wide string
+    ///
+    /// \param wideString Wide string to convert
+    ///
+    ////////////////////////////////////////////////////////////
+    String(const std::basic_string<wchar>& wideString);
 
     ////////////////////////////////////////////////////////////
     /// \brief Copy constructor
@@ -142,7 +158,7 @@ public:
     ///
     /// \return A String containing the source string
     ///
-    /// \see FromUtf16, FromUtf32
+    /// \see FromUtf16, FromUtf32, FromWide
     ///
     ////////////////////////////////////////////////////////////
     static String FromUtf8(const char8* begin, const char8* end);
@@ -155,7 +171,7 @@ public:
     ///
     /// \return A String containing the source string
     ///
-    /// \see FromUtf8, FromUtf32
+    /// \see FromUtf8, FromUtf32, FromWide
     ///
     ////////////////////////////////////////////////////////////
     static String FromUtf16(const char16* begin, const char16* end);
@@ -168,10 +184,23 @@ public:
     ///
     /// \return A String containing the source string
     ///
-    /// \see FromUtf8, FromUtf16
+    /// \see FromUtf8, FromUtf16, FromWide
     ///
     ////////////////////////////////////////////////////////////
     static String FromUtf32(const char32* begin, const char32* end);
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Create a new String from a Wide string
+    ///
+    /// \param begin Pointer to the beginning of the Wide string
+    /// \param end   Pointer to the end of the Wide string
+    ///
+    /// \return A String containing the source string
+    ///
+    /// \see FromUtf8, FromUtf16, FromUtf32
+    ///
+    ////////////////////////////////////////////////////////////
+    static String FromWide(const wchar* begin, const wchar* end);
 
     ////////////////////////////////////////////////////////////
     /// \brief Implicit conversion operator to std::basic_string<char8>
@@ -182,6 +211,7 @@ public:
     /// \see ToUtf8
     /// \see operator std::basic_string<char16>
     /// \see operator std::basic_string<char32>
+    /// \see operator std::basic_string<wchar>
     ///
     ////////////////////////////////////////////////////////////
     operator std::basic_string<char8>() const;
@@ -195,6 +225,7 @@ public:
     /// \see ToUtf16
     /// \see operator std::basic_string<char8>
     /// \see operator std::basic_string<char32>
+    /// \see operator std::basic_string<wchar>
     ///
     ////////////////////////////////////////////////////////////
     operator std::basic_string<char16>() const;
@@ -208,9 +239,24 @@ public:
     /// \see ToUtf32
     /// \see operator std::basic_string<char8>
     /// \see operator std::basic_string<char16>
+    /// \see operator std::basic_string<wchar>
     ///
     ////////////////////////////////////////////////////////////
     operator std::basic_string<char32>() const;
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Implicit conversion operator to std::basic_string<wchar>
+    ///        (Wide string)
+    ///
+    /// \return Converted Wide string
+    ///
+    /// \see ToWide
+    /// \see operator std::basic_string<char8>
+    /// \see operator std::basic_string<char16>
+    /// \see operator std::basic_string<char32>
+    ///
+    ////////////////////////////////////////////////////////////
+    operator std::basic_string<wchar>() const;
 
     ////////////////////////////////////////////////////////////
     /// \brief Convert the Unicode string to a UTF-8 string
@@ -244,6 +290,16 @@ public:
     ///
     ////////////////////////////////////////////////////////////
     std::basic_string<char32> ToUtf32() const;
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Convert the Unicode string to a UTF-32 string
+    ///
+    /// \return Converted UTF-32 string
+    ///
+    /// \see ToUtf8, ToUtf16
+    ///
+    ////////////////////////////////////////////////////////////
+    std::basic_string<wchar> ToWide() const;
 
     ////////////////////////////////////////////////////////////
     /// \brief Overload of assignment operator
@@ -594,7 +650,7 @@ ENGINE_API String operator+(const String& left, const String& right);
 /// String s;
 ///
 /// std::basic_string<char8> s1 = s;  // automatically converted to ASCII string
-/// std::wstring s2 = s; // automatically converted to wide string
+/// std::basic_string<wchar> s2 = s; // automatically converted to wide string
 /// s = "hello";         // automatically converted from ASCII string
 /// s = L"hello";        // automatically converted from wide string
 /// s += 'a';            // automatically converted from ASCII string

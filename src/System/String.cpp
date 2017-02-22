@@ -50,13 +50,28 @@ String::String(char32 utf32Char) {
 
 String::String(const char8* utf8String) {
     if (utf8String) {
-        std::size_t length = strlen(utf8String);
+        std::size_t length = std::strlen(utf8String);
         if (length > 0) {
             if (utf8::is_valid(utf8String, utf8String + length)) {
                 m_string.assign(utf8String);
             } else {
                 throw std::runtime_error("invalid utf8 convertion.");
             }
+        };
+    }
+}
+
+String::String(const wchar* wideString) {
+    if (wideString) {
+        std::size_t length = std::wcslen(wideString);
+        if (length > 0) {
+#if PLATFORM_IS(PLATFORM_WINDOWS)
+            utf8::utf16to8(wideString, wideString + length,
+                           std::back_inserter(m_string));
+#else
+            utf8::utf32to8(wideString, wideString + length,
+                           std::back_inserter(m_string));
+#endif
         };
     }
 }
@@ -78,6 +93,11 @@ String::String(const std::basic_string<char16>& utf16String) {
 
 String::String(const std::basic_string<char32>& utf32String) {
     utf8::utf32to8(utf32String.cbegin(), utf32String.cend(),
+                   std::back_inserter(m_string));
+}
+
+String::String(const std::basic_string<wchar>& wideString) {
+    utf8::utf32to8(wideString.cbegin(), wideString.cend(),
                    std::back_inserter(m_string));
 }
 
@@ -107,6 +127,16 @@ String String::FromUtf32(const char32* begin, const char32* end) {
     return string;
 }
 
+String String::FromWide(const wchar* begin, const wchar* end) {
+#if PLATFORM_IS(PLATFORM_WINDOWS)
+    return FromUtf16(reinterpret_cast<const char16*>(begin),
+                     reinterpret_cast<const char16*>(end));
+#else
+    return FromUtf32(reinterpret_cast<const char32*>(begin),
+                     reinterpret_cast<const char32*>(end));
+#endif
+}
+
 String::operator std::basic_string<char8>() const {
     return ToUtf8();
 }
@@ -117,6 +147,10 @@ String::operator std::basic_string<char16>() const {
 
 String::operator std::basic_string<char32>() const {
     return ToUtf32();
+}
+
+String::operator std::basic_string<wchar>() const {
+    return ToWide();
 }
 
 const std::basic_string<char8>& String::ToUtf8() const {
@@ -134,6 +168,18 @@ std::basic_string<char32> String::ToUtf32() const {
     std::basic_string<char32> output;
     utf8::utf8to32(m_string.cbegin(), m_string.cend(),
                    std::back_inserter(output));
+    return output;
+}
+
+std::basic_string<wchar> String::ToWide() const {
+    std::basic_string<wchar> output;
+#if PLATFORM_IS(PLATFORM_WINDOWS)
+    utf8::utf8to16(m_string.cbegin(), m_string.cend(),
+                   std::back_inserter(output));
+#else
+    utf8::utf8to32(m_string.cbegin(), m_string.cend(),
+                   std::back_inserter(output));
+#endif
     return output;
 }
 

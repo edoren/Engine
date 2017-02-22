@@ -1,7 +1,5 @@
 #pragma once
 
-#include <Util/Platform.hpp>
-
 #include <stdint.h>
 #include <wchar.h>
 
@@ -22,11 +20,11 @@ typedef uint8 byte;
 
 // Char types for UTF-8, UTF-16 and UTF-32 respectively
 typedef char char8;
-#if PLATFORM_IS(PLATFORM_WINDOWS)
-typedef wchar_t char16;
-#else
 typedef char16_t char16;
-#endif
 typedef char32_t char32;
+
+// This type represents a wide char, its size and encoding
+// varies depending on the platform
+typedef wchar_t wchar;
 
 }  // namespace engine
