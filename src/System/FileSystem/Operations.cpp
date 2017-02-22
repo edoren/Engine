@@ -81,12 +81,12 @@ String CurrentWorkingDirectory() {
 String AbsolutePath(const String& path) {
     String ret;
 #if PLATFORM_IS(PLATFORM_WINDOWS)
-    auto utf16string = path.ToUtf16();
+    auto wide_string = path.ToWide();
     DWORD buffer_length = PATH_MAX_LENGTH;
     LPWSTR buffer = nullptr;
     while (true) {
         buffer = (LPWSTR)malloc(sizeof(WCHAR) * buffer_length);
-        DWORD num_characters = GetFullPathNameW(utf16string.data(),
+        DWORD num_characters = GetFullPathNameW(wide_string.data(),
                                                 buffer_length, buffer, nullptr);
         if (num_characters > 0) {
             ret = String::FromWide(buffer, buffer + num_characters);

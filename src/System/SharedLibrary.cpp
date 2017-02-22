@@ -36,8 +36,8 @@ bool SharedLibrary::Load() {
 
     String lib_name = LIBRARY_PREFIX + m_name + LIBRARY_EXTENSION;
 #if PLATFORM_IS(PLATFORM_WINDOWS)
-    auto utf16string = lib_name.ToUtf16();
-    m_handle = LoadLibraryW(reinterpret_cast<LPCWSTR>(utf16string.data()));
+    auto wide_string = lib_name.ToWide();
+    m_handle = LoadLibraryW(wide_string.data());
 #elif PLATFORM_IS(PLATFORM_LINUX) || PLATFORM_IS(PLATFORM_MAC)
     auto utf8string = lib_name.ToUtf8();
     m_handle = dlopen(utf8string.data(), RTLD_LAZY | RTLD_LOCAL);
