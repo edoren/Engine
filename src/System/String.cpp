@@ -49,7 +49,7 @@ String::String(char32 utf32Char) {
 }
 
 String::String(const char8* utf8String) {
-    if (utf8String) {
+    if (utf8String && utf8String[0] != 0) {
         std::size_t length = std::strlen(utf8String);
         if (length > 0) {
             if (utf8::is_valid(utf8String, utf8String + length)) {
@@ -61,18 +61,40 @@ String::String(const char8* utf8String) {
     }
 }
 
+String::String(const char16* utf16String) {
+    if (utf16String && utf16String[0] != 0) {
+        // Find the lenght
+        const char16* it = utf16String;
+        while (*(++it) != 0)
+            ;
+        std::size_t length = it - utf16String;
+        utf8::utf16to8(utf16String, utf16String + length,
+                       std::back_inserter(m_string));
+    }
+}
+
+String::String(const char32* utf32String) {
+    if (utf32String && utf32String[0] != 0) {
+        // Find the lenght
+        const char32* it = utf32String;
+        while (*(++it) != 0)
+            ;
+        std::size_t length = it - utf32String;
+        utf8::utf32to8(utf32String, utf32String + length,
+                       std::back_inserter(m_string));
+    }
+}
+
 String::String(const wchar* wideString) {
-    if (wideString) {
+    if (wideString && wideString[0] != 0) {
         std::size_t length = std::wcslen(wideString);
-        if (length > 0) {
 #if PLATFORM_IS(PLATFORM_WINDOWS)
-            utf8::utf16to8(wideString, wideString + length,
-                           std::back_inserter(m_string));
+        utf8::utf16to8(wideString, wideString + length,
+                       std::back_inserter(m_string));
 #else
-            utf8::utf32to8(wideString, wideString + length,
-                           std::back_inserter(m_string));
+        utf8::utf32to8(wideString, wideString + length,
+                       std::back_inserter(m_string));
 #endif
-        };
     }
 }
 

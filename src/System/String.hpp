@@ -83,7 +83,7 @@ public:
     String(char32 utf32Char);
 
     ////////////////////////////////////////////////////////////
-    /// \brief Construct from a null-terminated UTF-8 string
+    /// \brief Construct from a null-terminated (value 0) UTF-8 string
     ///
     /// \param utf8String UTF-8 string to assign
     ///
@@ -91,7 +91,23 @@ public:
     String(const char8* utf8String);
 
     ////////////////////////////////////////////////////////////
-    /// \brief Construct from a null-terminated Wide string
+    /// \brief Construct from a null-terminated (value 0) UTF-16 string
+    ///
+    /// \param utf8String UTF-8 string to assign
+    ///
+    ////////////////////////////////////////////////////////////
+    String(const char16* utf16String);
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Construct from a null-terminated (value 0) UTF-32 string
+    ///
+    /// \param utf8String UTF-8 string to assign
+    ///
+    ////////////////////////////////////////////////////////////
+    String(const char32* utf32String);
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Construct from a null-terminated (value 0) Wide string
     ///
     /// \param wideString Wide string to assign
     ///
