@@ -1,14 +1,14 @@
 #include "Interface.hpp"
 
-#include <System/SharedLibrary.hpp>
 #include <System/FileSystem.hpp>
+#include <System/SharedLibrary.hpp>
+#include <System/String.hpp>
 
 #include <iostream>
-#include <string>
 
 using namespace engine;
 
-int main(int /*argc*/, char* argv[]) {
+int main(int /*argc*/, char* /*argv*/ []) {
     String basedir = filesystem::ExecutableDirectory();
 
     basedir = filesystem::Join(basedir, "Impl1");
