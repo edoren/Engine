@@ -14,8 +14,6 @@ TEST_CASE("String from other encodings", "[String]") {
         String b = String(std::wstring(hello));
         String c = String::FromWide(hello, hello + wcslen(hello));
         REQUIRE(a == u8"HELLO WORLD");
-        std::cout << a << std::endl;
-        INFO(a);
         REQUIRE(a == b);
         REQUIRE(b == c);
     }
