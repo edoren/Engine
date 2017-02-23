@@ -10,5 +10,4 @@ target_link_libraries(UnitaryTests ${ENGINE_LIBRARY})
 
 set_property(TARGET UnitaryTests PROPERTY FOLDER "Tests")
 
-add_test(NAME RunTests COMMAND UnitaryTests)
-add_dependencies(test UnitaryTests)
+add_test(NAME UnitaryTests COMMAND UnitaryTests)

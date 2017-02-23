@@ -3,10 +3,6 @@ set(TEST_DIR "${CMAKE_SOURCE_DIR}/tests")
 # Configure unit tests via CTest
 enable_testing()
 
-# Create a custom make command to execute all the tests
-set(CMAKE_CTEST_COMMAND  ${CMAKE_CTEST_COMMAND} -V)
-add_custom_target(test COMMAND ${CMAKE_CTEST_COMMAND})
-
 # Create a test executable
 # add_executable(ColorCube "${TEST_DIR}/ColorCube.cpp")
 # add_executable(PerlinMap "${TEST_DIR}/PerlinMap.cpp")

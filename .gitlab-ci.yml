@@ -54,8 +54,8 @@ test:linux_gcc:
   <<: *linux_image
   stage: test
   script:
-    - cd build
-    - make test
+    - cd build/tests/
+    - ctest -V
   dependencies:
     - build:linux_gcc
 
@@ -63,7 +63,7 @@ test:linux_clang:
   <<: *linux_image
   stage: test
   script:
-    - cd build
-    - make test
+    - cd build/tests/
+    - ctest -V
   dependencies:
     - build:linux_clang
