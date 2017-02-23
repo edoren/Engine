@@ -18,29 +18,29 @@ TEST_CASE("String from other encodings", "[String]") {
         REQUIRE(b == c);
     }
     SECTION("from UTF-8 strings") {
-        const char8* smiley = u8"\xF0\x9F\x98\x81";
+        const char8* smiley = u8"\U0001F601";
         String a = String(smiley);
         String b = String(std::string(smiley));
         String c = String::FromUtf8(smiley, smiley + 4);
-        REQUIRE(a == u8"\xF0\x9F\x98\x81");
+        REQUIRE(a == u8"\U0001F601");
         REQUIRE(a == b);
         REQUIRE(b == c);
     }
     SECTION("from UTF-16 strings") {
-        const char16* smiley = u"\xD83D\xDE01";
+        const char16* smiley = u"\U0001F601";
         String a = String(smiley);
         String b = String(std::u16string(smiley));
         String c = String::FromUtf16(smiley, smiley + 2);
-        REQUIRE(a == u8"\xF0\x9F\x98\x81");
+        REQUIRE(a == u8"\U0001F601");
         REQUIRE(a == b);
         REQUIRE(b == c);
     }
     SECTION("from UTF-32 strings") {
-        const char32* smiley = U"\x0001F601";
+        const char32* smiley = U"\U0001F601";
         String a = String(smiley);
         String b = String(std::u32string(smiley));
         String c = String::FromUtf32(smiley, smiley + 1);
-        REQUIRE(a == u8"\xF0\x9F\x98\x81");
+        REQUIRE(a == u8"\U0001F601");
         REQUIRE(a == b);
         REQUIRE(b == c);
     }
@@ -48,7 +48,7 @@ TEST_CASE("String from other encodings", "[String]") {
 
 TEST_CASE("String to other encodings", "[String]") {
     String hello = "HELLO WORLD";
-    String smiley = u8"\xF0\x9F\x98\x8A";
+    String smiley = u8"\U0001F60A";
 
     SECTION("to Wide strings") {
         std::wstring hello_wide = hello.ToWide();
@@ -58,19 +58,19 @@ TEST_CASE("String to other encodings", "[String]") {
         std::string hello_utf8 = hello.ToUtf8();
         std::string smiley_utf8 = smiley.ToUtf8();
         REQUIRE(hello_utf8 == u8"HELLO WORLD");
-        REQUIRE(smiley_utf8 == u8"\xF0\x9F\x98\x8A");
+        REQUIRE(smiley_utf8 == u8"\U0001F60A");
     }
     SECTION("to UTF-16 strings") {
         std::u16string hello_utf16 = hello.ToUtf16();
         std::u16string smiley_utf16 = smiley.ToUtf16();
         REQUIRE(hello_utf16 == u"HELLO WORLD");
-        REQUIRE(smiley_utf16 == u"\xD83D\xDE0A");
+        REQUIRE(smiley_utf16 == u"\U0001F60A");
     }
     SECTION("to UTF-32 strings") {
         std::u32string hello_utf32 = hello.ToUtf32();
         std::u32string smiley_utf32 = smiley.ToUtf32();
         REQUIRE(hello_utf32 == U"HELLO WORLD");
-        REQUIRE(smiley_utf32 == U"\x0001F60A");
+        REQUIRE(smiley_utf32 == U"\U0001F60A");
     }
 }
 
