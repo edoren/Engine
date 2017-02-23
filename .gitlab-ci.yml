@@ -5,47 +5,65 @@ variables:
   # https://gitlab.com/gitlab-org/gitlab-ci-multi-runner/issues/2148
   GIT_SSL_NO_VERIFY: "true"
 
+.linux_config: &linux_image
+  image: ubuntu:16.04
+  tags:
+    - docker
+  before_script:
+    # System configuration
+    - apt-get update -qq
+    - apt-get install -qq software-properties-common  # install add-apt-repository
+    - add-apt-repository -y ppa:ubuntu-toolchain-r/test
+    - apt-get update -qq
+    # Engine dependencies
+    - apt-get install -qq build-essential clang gcc-6 g++-6 cmake libsdl2-dev libglew-dev
+
 stages:
   - build
+  - test
 
-linux_gcc:
+build:linux_gcc:
+  <<: *linux_image
   stage: build
-  image: ubuntu:16.04
-  tags:
-    - docker
-  before_script:
-    # System configuration
-    - apt-get update -qq
-    - apt-get install -qq software-properties-common
-    - add-apt-repository -y ppa:ubuntu-toolchain-r/test
-    - apt-get update -qq
-    # Engine dependencies
-    - apt-get install -qq build-essential gcc-6 g++-6 cmake libsdl2-dev libglew-dev
+  script:
     - export CC=gcc-6
     - export CXX=g++-6
-  script:
     - mkdir build
     - cd build
     - cmake .. -DCMAKE_BUILD_TYPE=Release -DENGINE_BUILD_STATIC=OFF
     - make
+  artifacts:
+    paths:
+      - build/
 
-linux_clang:
+build:linux_clang:
+  <<: *linux_image
   stage: build
-  image: ubuntu:16.04
-  tags:
-    - docker
-  before_script:
-    # System configuration
-    - apt-get update -qq
-    - apt-get install -qq software-properties-common
-    - add-apt-repository -y ppa:ubuntu-toolchain-r/test
-    - apt-get update -qq
-    # Engine dependencies
-    - apt-get install -qq build-essential clang cmake libsdl2-dev libglew-dev
+  script:
     - export CC=clang
     - export CXX=clang++
-  script:
     - mkdir build
     - cd build
     - cmake .. -DCMAKE_BUILD_TYPE=Release -DENGINE_BUILD_STATIC=OFF
     - make
+  artifacts:
+    paths:
+      - build/
+
+test:linux_gcc:
+  <<: *linux_image
+  stage: test
+  script:
+    - cd build
+    - make test
+  dependencies:
+    - build:linux_gcc
+
+test:linux_clang:
+  <<: *linux_image
+  stage: test
+  script:
+    - cd build
+    - make test
+  dependencies:
+    - build:linux_clang
