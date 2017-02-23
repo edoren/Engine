@@ -1,11 +1,11 @@
-#include "Interface.hpp"
+#include "Operation.hpp"
 
 class ENGINE_SYMBOL_EXPORTS OperationMult : public Operation {
 public:
     OperationMult() {}
 
-    virtual void Operate(float a, float b) {
-        last_result = a * b;
+    float Operate(float a, float b) {
+        return a * b;
     }
 
     const char* GetName() {
@@ -13,6 +13,12 @@ public:
     }
 };
 
+static OperationMult s_impl;
+
 extern "C" {
-ENGINE_SYMBOL_EXPORTS OperationMult impl;
+
+ENGINE_SYMBOL_EXPORTS Operation* GetOperation() {
+    return &s_impl;
+}
+
 };
