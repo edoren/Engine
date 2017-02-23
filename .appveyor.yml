@@ -44,4 +44,8 @@ build:
   project: C:\projects\engine\build\ALL_BUILD.vcxproj
   verbosity: minimal
 
-test: off
+test: on
+
+test_script:
+  - cd C:\projects\engine\build\tests
+  - ctest -V -C %CONFIGURATION%
