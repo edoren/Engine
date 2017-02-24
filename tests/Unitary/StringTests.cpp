@@ -1,7 +1,5 @@
-#include <iostream>
-#include <string>
-
 #include "catch.hpp"
+#include "OStreamOverloads.hpp"
 
 #include <System/String.hpp>
 
