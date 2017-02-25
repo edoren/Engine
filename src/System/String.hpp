@@ -166,7 +166,7 @@ public:
     /// \brief Create a new String from a UTF-8 encoded string
     ///
     /// This function is provided for consistency, it is equivalent to
-    /// using the constructors that takes a const char* or a
+    /// using the constructors that takes a const char8* or a
     /// std::basic_string<char8>.
     ///
     /// \param begin Pointer to the beginning of the UTF-8 sequence
@@ -178,6 +178,24 @@ public:
     ///
     ////////////////////////////////////////////////////////////
     static String FromUtf8(const char8* begin, const char8* end);
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Create a new String from a UTF-8 encoded string
+    ///
+    /// The iterators must point to an object of type char8
+    ///
+    /// \param begin Pointer to the beginning of the UTF-8 sequence
+    /// \param end   Pointer to the end of the UTF-8 sequence
+    ///
+    /// \return A String containing the source string
+    ///
+    /// \see FromUtf16, FromUtf32, FromWide
+    ///
+    ////////////////////////////////////////////////////////////
+    template <typename Iterator>
+    static String FromUtf8(Iterator begin, Iterator end) {
+        return FromUtf8(&(*begin), &(*end));
+    }
 
     ////////////////////////////////////////////////////////////
     /// \brief Create a new String from a UTF-16 encoded string
@@ -193,6 +211,24 @@ public:
     static String FromUtf16(const char16* begin, const char16* end);
 
     ////////////////////////////////////////////////////////////
+    /// \brief Create a new String from a UTF-16 encoded string
+    ///
+    /// The iterators must point to an object of type char16
+    ///
+    /// \param begin Pointer to the beginning of the UTF-16 sequence
+    /// \param end   Pointer to the end of the UTF-16 sequence
+    ///
+    /// \return A String containing the source string
+    ///
+    /// \see FromUtf8, FromUtf32, FromWide
+    ///
+    ////////////////////////////////////////////////////////////
+    template <typename Iterator>
+    static String FromUtf16(Iterator begin, Iterator end) {
+        return FromUtf16(&(*begin), &(*end));
+    }
+
+    ////////////////////////////////////////////////////////////
     /// \brief Create a new String from a UTF-32 encoded string
     ///
     /// \param begin Pointer to the beginning of the UTF-32 sequence
@@ -204,6 +240,24 @@ public:
     ///
     ////////////////////////////////////////////////////////////
     static String FromUtf32(const char32* begin, const char32* end);
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Create a new String from a UTF-32 encoded string
+    ///
+    /// The iterators must point to an object of type char32
+    ///
+    /// \param begin Pointer to the beginning of the UTF-32 sequence
+    /// \param end   Pointer to the end of the UTF-32 sequence
+    ///
+    /// \return A String containing the source string
+    ///
+    /// \see FromUtf8, FromUtf16, FromWide
+    ///
+    ////////////////////////////////////////////////////////////
+    template <typename Iterator>
+    static String FromUtf32(Iterator begin, Iterator end) {
+        return FromUtf32(&(*begin), &(*end));
+    }
 
     ////////////////////////////////////////////////////////////
     /// \brief Create a new String from a Wide string
