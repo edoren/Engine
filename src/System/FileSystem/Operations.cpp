@@ -89,8 +89,10 @@ void GetDrive(const String& path, String& drive, String& dir) {
 #if PLATFORM_IS(PLATFORM_WINDOWS)
     const auto& internal = path.ToUtf8();
     if (IsAbsolute(path)) {
-        drive = String(internal.cbegin(), internal.cbegin() + 2);
-        dir = String(internal.cbegin() + 2, internal.cend());
+        const char8* begin = internal.data();
+        const char8* end = internal.data() + internal.size();
+        drive = String::FromUtf8(begin, begin + 2);
+        dir = String::FromUtf8(begin + 2, end);
     } else {
         drive.Clear();
         dir = path;
@@ -125,13 +127,15 @@ String NormalizePath(const String& path) {
                 // If the last element is a .. directory, append another one
                 // if not just pop_back the last component
                 auto& last = path_comps.back();
-                if ((last.second - last.first) == 2 &&
+                if (!is_absolute && (last.second - last.first) == 2 &&
                     std::memcmp(last.first, "..", 2) == 0) {
                     path_comps.emplace_back(begin, end);
                 } else {
                     path_comps.pop_back();
                 }
-            } else if (!is_absolute) {
+            }
+            // Only add .. directories if the path is not absolute
+            else if (!is_absolute) {
                 path_comps.emplace_back(begin, end);
             }
             return;
