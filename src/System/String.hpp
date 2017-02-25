@@ -328,6 +328,16 @@ public:
     String& operator=(const String& right);
 
     ////////////////////////////////////////////////////////////
+    /// \brief Overload of assignment operator
+    ///
+    /// \param right Instance to assign
+    ///
+    /// \return Reference to self
+    ///
+    ////////////////////////////////////////////////////////////
+    String& operator=(const char8* right);
+
+    ////////////////////////////////////////////////////////////
     /// \brief Overload of move assignment operator
     ///
     /// \param right Instance to move
@@ -346,6 +356,17 @@ public:
     ///
     ////////////////////////////////////////////////////////////
     String& operator+=(const String& right);
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Overload of += operator to append an UTF-8 null
+    ///        terminated string
+    ///
+    /// \param right String to append
+    ///
+    /// \return Reference to self
+    ///
+    ////////////////////////////////////////////////////////////
+    String& operator+=(const char8* right);
 
     ////////////////////////////////////////////////////////////
     /// \brief Overload of [] operator to access a character by its position
@@ -553,7 +574,11 @@ public:
 
 private:
     friend ENGINE_API bool operator==(const String& left, const String& right);
+    friend ENGINE_API bool operator==(const String& left, const char8* right);
+    friend ENGINE_API bool operator==(const char8* left, const String& right);
     friend ENGINE_API bool operator<(const String& left, const String& right);
+    friend ENGINE_API bool operator<(const String& left, const char8* right);
+    friend ENGINE_API bool operator<(const char8* left, const String& right);
 
     ////////////////////////////////////////////////////////////
     // Member data
@@ -565,8 +590,8 @@ private:
 /// \relates String
 /// \brief Overload of == operator to compare two UTF-8 strings
 ///
-/// \param left  Left operand (a string)
-/// \param right Right operand (a string)
+/// \param left  Left operand (a String)
+/// \param right Right operand (a String)
 ///
 /// \return True if both strings are equal
 ///
@@ -575,10 +600,36 @@ ENGINE_API bool operator==(const String& left, const String& right);
 
 ////////////////////////////////////////////////////////////
 /// \relates String
+/// \brief Overload of == operator to compare a UTF-8 strings and a null
+///        terminated (value 0) UTF-8 string
+///
+/// \param left  Left operand (a String)
+/// \param right Right operand (a null terminated UTF-8 string)
+///
+/// \return True if both strings are equal
+///
+////////////////////////////////////////////////////////////
+ENGINE_API bool operator==(const String& left, const char8* right);
+
+////////////////////////////////////////////////////////////
+/// \relates String
+/// \brief Overload of == operator to compare a UTF-8 strings and a null
+///        terminated (value 0) UTF-8 string
+///
+/// \param left  Left operand (a null terminated UTF-8 string)
+/// \param right Right operand (a String)
+///
+/// \return True if both strings are equal
+///
+////////////////////////////////////////////////////////////
+ENGINE_API bool operator==(const char8* left, const String& right);
+
+////////////////////////////////////////////////////////////
+/// \relates String
 /// \brief Overload of != operator to compare two UTF-8 strings
 ///
-/// \param left  Left operand (a string)
-/// \param right Right operand (a string)
+/// \param left  Left operand (a String)
+/// \param right Right operand (a String)
 ///
 /// \return True if both strings are different
 ///
@@ -587,10 +638,36 @@ ENGINE_API bool operator!=(const String& left, const String& right);
 
 ////////////////////////////////////////////////////////////
 /// \relates String
+/// \brief Overload of != operator to compare a UTF-8 strings and a null
+///        terminated (value 0) UTF-8 string
+///
+/// \param left  Left operand (a String)
+/// \param right Right operand (a null terminated UTF-8 string)
+///
+/// \return True if both strings are equal
+///
+////////////////////////////////////////////////////////////
+ENGINE_API bool operator!=(const String& left, const char8* right);
+
+////////////////////////////////////////////////////////////
+/// \relates String
+/// \brief Overload of != operator to compare a UTF-8 strings and a null
+///        terminated (value 0) UTF-8 string
+///
+/// \param left  Left operand (a null terminated UTF-8 string)
+/// \param right Right operand (a String)
+///
+/// \return True if both strings are equal
+///
+////////////////////////////////////////////////////////////
+ENGINE_API bool operator!=(const char8* left, const String& right);
+
+////////////////////////////////////////////////////////////
+/// \relates String
 /// \brief Overload of < operator to compare two UTF-8 strings
 ///
-/// \param left  Left operand (a string)
-/// \param right Right operand (a string)
+/// \param left  Left operand (a String)
+/// \param right Right operand (a String)
 ///
 /// \return True if \a left is lexicographically before \a right
 ///
@@ -599,10 +676,36 @@ ENGINE_API bool operator<(const String& left, const String& right);
 
 ////////////////////////////////////////////////////////////
 /// \relates String
+/// \brief Overload of < operator to compare a UTF-8 strings and a null
+///        terminated (value 0) UTF-8 string
+///
+/// \param left  Left operand (a String)
+/// \param right Right operand (a null terminated UTF-8 string)
+///
+/// \return True if \a left is lexicographically before \a right
+///
+////////////////////////////////////////////////////////////
+ENGINE_API bool operator<(const String& left, const char8* right);
+
+////////////////////////////////////////////////////////////
+/// \relates String
+/// \brief Overload of < operator to compare a UTF-8 strings and a null
+///        terminated (value 0) UTF-8 string
+///
+/// \param left  Left operand (a null terminated UTF-8 string)
+/// \param right Right operand (a String)
+///
+/// \return True if \a left is lexicographically before \a right
+///
+////////////////////////////////////////////////////////////
+ENGINE_API bool operator<(const char8* left, const String& right);
+
+////////////////////////////////////////////////////////////
+/// \relates String
 /// \brief Overload of > operator to compare two UTF-8 strings
 ///
-/// \param left  Left operand (a string)
-/// \param right Right operand (a string)
+/// \param left  Left operand (a String)
+/// \param right Right operand (a String)
 ///
 /// \return True if \a left is lexicographically after \a right
 ///
@@ -611,23 +714,77 @@ ENGINE_API bool operator>(const String& left, const String& right);
 
 ////////////////////////////////////////////////////////////
 /// \relates String
+/// \brief Overload of > operator to compare a UTF-8 strings and a null
+///        terminated (value 0) UTF-8 string
+///
+/// \param left  Left operand (a String)
+/// \param right Right operand (a null terminated UTF-8 string)
+///
+/// \return True if \a left is lexicographically after \a right
+///
+////////////////////////////////////////////////////////////
+ENGINE_API bool operator>(const String& left, const char8* right);
+
+////////////////////////////////////////////////////////////
+/// \relates String
+/// \brief Overload of > operator to compare a UTF-8 strings and a null
+///        terminated (value 0) UTF-8 string
+///
+/// \param left  Left operand (a null terminated UTF-8 string)
+/// \param right Right operand (a String)
+///
+/// \return True if \a left is lexicographically after \a right
+///
+////////////////////////////////////////////////////////////
+ENGINE_API bool operator>(const char8* left, const String& right);
+
+////////////////////////////////////////////////////////////
+/// \relates String
 /// \brief Overload of <= operator to compare two UTF-8 strings
 ///
-/// \param left  Left operand (a string)
-/// \param right Right operand (a string)
+/// \param left  Left operand (a String)
+/// \param right Right operand (a String)
 ///
 /// \return True if \a left is lexicographically before or equivalent to \a
-/// right
+///         right
 ///
 ////////////////////////////////////////////////////////////
 ENGINE_API bool operator<=(const String& left, const String& right);
 
 ////////////////////////////////////////////////////////////
 /// \relates String
+/// \brief Overload of <= operator to compare a UTF-8 strings and a null
+///        terminated (value 0) UTF-8 string
+///
+/// \param left  Left operand (a String)
+/// \param right Right operand (a null terminated UTF-8 string)
+///
+/// \return True if \a left is lexicographically before or equivalent to \a
+///         right
+///
+////////////////////////////////////////////////////////////
+ENGINE_API bool operator<=(const String& left, const char8* right);
+
+////////////////////////////////////////////////////////////
+/// \relates String
+/// \brief Overload of <= operator to compare a UTF-8 strings and a null
+///        terminated (value 0) UTF-8 string
+///
+/// \param left  Left operand (a null terminated UTF-8 string)
+/// \param right Right operand (a String)
+///
+/// \return True if \a left is lexicographically before or equivalent to \a
+///         right
+///
+////////////////////////////////////////////////////////////
+ENGINE_API bool operator<=(const char8* left, const String& right);
+
+////////////////////////////////////////////////////////////
+/// \relates String
 /// \brief Overload of >= operator to compare two UTF-8 strings
 ///
-/// \param left  Left operand (a string)
-/// \param right Right operand (a string)
+/// \param left  Left operand (a String)
+/// \param right Right operand (a String)
 ///
 /// \return True if \a left is lexicographically after or equivalent to \a right
 ///
@@ -636,15 +793,69 @@ ENGINE_API bool operator>=(const String& left, const String& right);
 
 ////////////////////////////////////////////////////////////
 /// \relates String
+/// \brief Overload of >= operator to compare a UTF-8 strings and a null
+///        terminated (value 0) UTF-8 string
+///
+/// \param left  Left operand (a String)
+/// \param right Right operand (a null terminated UTF-8 string)
+///
+/// \return True if \a left is lexicographically after or equivalent to \a right
+///
+////////////////////////////////////////////////////////////
+ENGINE_API bool operator>=(const String& left, const char8* right);
+
+////////////////////////////////////////////////////////////
+/// \relates String
+/// \brief Overload of >= operator to compare a UTF-8 strings and a null
+///        terminated (value 0) UTF-8 string
+///
+/// \param left  Left operand (a null terminated UTF-8 string)
+/// \param right Right operand (a String)
+///
+/// \return True if \a left is lexicographically after or equivalent to \a right
+///
+////////////////////////////////////////////////////////////
+ENGINE_API bool operator>=(const char8* left, const String& right);
+
+////////////////////////////////////////////////////////////
+/// \relates String
 /// \brief Overload of binary + operator to concatenate two strings
 ///
-/// \param left  Left operand (a string)
-/// \param right Right operand (a string)
+/// \param left  Left operand (a String)
+/// \param right Right operand (a String)
 ///
 /// \return Concatenated string
 ///
 ////////////////////////////////////////////////////////////
 ENGINE_API String operator+(const String& left, const String& right);
+
+////////////////////////////////////////////////////////////
+/// \relates String
+/// \brief Overload of binary + operator to concatenate a UTF-8 strings and a
+/// null
+///        terminated (value 0) UTF-8 string
+///
+/// \param left  Left operand (a String)
+/// \param right Right operand (a null terminated UTF-8 string)
+///
+/// \return Concatenated string
+///
+////////////////////////////////////////////////////////////
+ENGINE_API String operator+(const String& left, const char8* right);
+
+////////////////////////////////////////////////////////////
+/// \relates String
+/// \brief Overload of binary + operator to concatenate a UTF-8 strings and a
+/// null
+///        terminated (value 0) UTF-8 string
+///
+/// \param left  Left operand (a null terminated UTF-8 string)
+/// \param right Right operand (a String)
+///
+/// \return Concatenated string
+///
+////////////////////////////////////////////////////////////
+ENGINE_API String operator+(const char8* left, const String& right);
 
 }  // namespace engine
 

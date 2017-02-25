@@ -210,6 +210,11 @@ String& String::operator=(const String& right) {
     return *this;
 }
 
+String& String::operator=(const char8* right) {
+    m_string = right;
+    return *this;
+}
+
 String& String::operator=(String&& right) {
     m_string = std::move(right.m_string);
     return *this;
@@ -217,6 +222,11 @@ String& String::operator=(String&& right) {
 
 String& String::operator+=(const String& right) {
     m_string += right.m_string;
+    return *this;
+}
+
+String& String::operator+=(const char8* right) {
+    m_string += right;
     return *this;
 }
 
@@ -382,7 +392,23 @@ bool operator==(const String& left, const String& right) {
     return left.m_string == right.m_string;
 }
 
+bool operator==(const String& left, const char8* right) {
+    return left.m_string == right;
+}
+
+bool operator==(const char8* left, const String& right) {
+    return left == right.m_string;
+}
+
 bool operator!=(const String& left, const String& right) {
+    return !(left == right);
+}
+
+bool operator!=(const String& left, const char8* right) {
+    return !(left == right);
+}
+
+bool operator!=(const char8* left, const String& right) {
     return !(left == right);
 }
 
@@ -390,7 +416,23 @@ bool operator<(const String& left, const String& right) {
     return left.m_string < right.m_string;
 }
 
+bool operator<(const String& left, const char8* right) {
+    return left.m_string < right;
+}
+
+bool operator<(const char8* left, const String& right) {
+    return left < right.m_string;
+}
+
 bool operator>(const String& left, const String& right) {
+    return right < left;
+}
+
+bool operator>(const String& left, const char8* right) {
+    return right < left;
+}
+
+bool operator>(const char8* left, const String& right) {
     return right < left;
 }
 
@@ -398,11 +440,41 @@ bool operator<=(const String& left, const String& right) {
     return !(right < left);
 }
 
+bool operator<=(const String& left, const char8* right) {
+    return !(right < left);
+}
+
+bool operator<=(const char8* left, const String& right) {
+    return !(right < left);
+}
+
 bool operator>=(const String& left, const String& right) {
     return !(left < right);
 }
 
+bool operator>=(const String& left, const char8* right) {
+    return !(left < right);
+}
+
+bool operator>=(const char8* left, const String& right) {
+    return !(left < right);
+}
+
 String operator+(const String& left, const String& right) {
+    String string = left;
+    string += right;
+
+    return string;
+}
+
+String operator+(const String& left, const char8* right) {
+    String string = left;
+    string += right;
+
+    return string;
+}
+
+String operator+(const char8* left, const String& right) {
     String string = left;
     string += right;
 
