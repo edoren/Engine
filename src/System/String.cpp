@@ -230,6 +230,13 @@ String& String::operator+=(const char8* right) {
     return *this;
 }
 
+String& String::operator+=(char8 right) {
+    if (right >= 0) {
+        m_string += right;
+    }
+    return *this;
+}
+
 char8 String::operator[](std::size_t index) const {
     return m_string[index];
 }
@@ -462,23 +469,27 @@ bool operator>=(const char8* left, const String& right) {
 
 String operator+(const String& left, const String& right) {
     String string = left;
-    string += right;
-
-    return string;
+    return string += right;
 }
 
 String operator+(const String& left, const char8* right) {
     String string = left;
-    string += right;
-
-    return string;
+    return string += right;
 }
 
 String operator+(const char8* left, const String& right) {
     String string = left;
-    string += right;
+    return string += right;
+}
 
-    return string;
+String operator+(const String& left, char8 right) {
+    String string = left;
+    return string += right;
+}
+
+String operator+(char8 left, const String& right) {
+    String string = left;
+    return string += right;
 }
 
 }  // namespace engine

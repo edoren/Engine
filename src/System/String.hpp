@@ -423,6 +423,17 @@ public:
     String& operator+=(const char8* right);
 
     ////////////////////////////////////////////////////////////
+    /// \brief Overload of += operator to append a single ASCII
+    ///        character
+    ///
+    /// \param right ASCII character to append
+    ///
+    /// \return Reference to self
+    ///
+    ////////////////////////////////////////////////////////////
+    String& operator+=(char8 right);
+
+    ////////////////////////////////////////////////////////////
     /// \brief Overload of [] operator to access a character by its position
     ///
     /// This function provides read-only access to characters.
@@ -885,9 +896,8 @@ ENGINE_API String operator+(const String& left, const String& right);
 
 ////////////////////////////////////////////////////////////
 /// \relates String
-/// \brief Overload of binary + operator to concatenate a UTF-8 strings and a
-/// null
-///        terminated (value 0) UTF-8 string
+/// \brief Overload of binary + operator to concatenate a UTF-8
+///        strings and a null terminated (value 0) UTF-8 string
 ///
 /// \param left  Left operand (a String)
 /// \param right Right operand (a null terminated UTF-8 string)
@@ -899,9 +909,8 @@ ENGINE_API String operator+(const String& left, const char8* right);
 
 ////////////////////////////////////////////////////////////
 /// \relates String
-/// \brief Overload of binary + operator to concatenate a UTF-8 strings and a
-/// null
-///        terminated (value 0) UTF-8 string
+/// \brief Overload of binary + operator to concatenate a UTF-8
+///        strings and a null terminated (value 0) UTF-8 string
 ///
 /// \param left  Left operand (a null terminated UTF-8 string)
 /// \param right Right operand (a String)
@@ -910,6 +919,32 @@ ENGINE_API String operator+(const String& left, const char8* right);
 ///
 ////////////////////////////////////////////////////////////
 ENGINE_API String operator+(const char8* left, const String& right);
+
+////////////////////////////////////////////////////////////
+/// \relates String
+/// \brief Overload of binary + operator to concatenate a UTF-8
+///        strings and a single ASCII character
+///
+/// \param left  Left operand (a String)
+/// \param right Right operand (an ASCII character)
+///
+/// \return Concatenated string
+///
+////////////////////////////////////////////////////////////
+ENGINE_API String operator+(const String& left, char8 right);
+
+////////////////////////////////////////////////////////////
+/// \relates String
+/// \brief Overload of binary + operator to concatenate a UTF-8
+///        strings and a single ASCII character
+///
+/// \param left  Left operand (a String)
+/// \param right Right operand (an ASCII character)
+///
+/// \return Concatenated string
+///
+////////////////////////////////////////////////////////////
+ENGINE_API String operator+(char8 left, const String& right);
 
 }  // namespace engine
 
