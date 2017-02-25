@@ -77,7 +77,7 @@ TEST_CASE("filesystem::NormalizePath", "[FileSystem]") {
 #endif
     }
     SECTION("if absolute must keep the root component") {
-#if PLATFORM_IS(PLATFORMWINDOWS)
+#if PLATFORM_IS(PLATFORM_WINDOWS)
         String path1 = "C:\\hello";
         String path2 = "C:\\hello\\..\\..";
         String path3 = "C:\\..\\..";
