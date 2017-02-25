@@ -43,12 +43,22 @@ ENGINE_API String CurrentWorkingDirectory();
 ENGINE_API String AbsolutePath(const String& path);
 
 ////////////////////////////////////////////////////////////
-/// \brief Return the absolute path given a base path
+/// \brief Normalize a pathname by collapsing redundant
+///        separators and up-level references so that A//B,
+///        A/B/, A/./B and A/foo/../B all become A/B
 ///
-/// \return String containing the absolute path
+/// \return String containing the normalized path
 ///
 ////////////////////////////////////////////////////////////
-ENGINE_API String AbsolutePath(const String& path, const String& base);
+ENGINE_API String NormalizePath(const String& path);
+
+////////////////////////////////////////////////////////////
+/// \brief Check if a path is absolute
+///
+/// \return true if the path is absolute, false otherwise
+///
+////////////////////////////////////////////////////////////
+ENGINE_API bool IsAbsolute(const String& path);
 
 ////////////////////////////////////////////////////////////
 /// \brief Join two path components. The return value is

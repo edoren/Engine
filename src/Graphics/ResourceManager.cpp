@@ -94,7 +94,7 @@ Shader* ResourceManager::LoadShader(const String& basename,
 
 Texture2D* ResourceManager::LoadTexture2D(const String& basename) {
     Image img;
-    String filepath = filesystem::AbsolutePath(basename, m_basedir);
+    String filepath = filesystem::Join(m_basedir, basename);
     if (img.LoadFromFile(filepath)) {
         LogDebug("ResourceManager", "Loading Texture: " + filepath);
         Texture2D* texture =
