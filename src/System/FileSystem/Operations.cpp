@@ -17,7 +17,7 @@ namespace engine {
 namespace filesystem {
 
 char8 GetSeparator() {
-#if PLATFORM == PLATFORM_WINDOWS
+#if PLATFORM_IS(PLATFORM_WINDOWS)
     return '\\';
 #else
     return '/';
@@ -84,30 +84,7 @@ String AbsolutePath(const String& /*path*/) {
     return ret;
 }
 
-namespace {
-void GetDrive(const String& path, String& drive, String& dir) {
-#if PLATFORM_IS(PLATFORM_WINDOWS)
-    const auto& internal = path.ToUtf8();
-    if (IsAbsolute(path)) {
-        const char8* begin = internal.data();
-        const char8* end = internal.data() + internal.size();
-        drive = String::FromUtf8(begin, begin + 2);
-        dir = String::FromUtf8(begin + 2, end);
-    } else {
-        drive.Clear();
-        dir = path;
-    }
-#else
-    drive.Clear();
-    dir = path;
-#endif
-}
-}
-
 String NormalizePath(const String& path) {
-    String drive, dir;
-    GetDrive(path, drive, dir);
-
     bool is_absolute = IsAbsolute(path);
     std::vector<std::pair<const char8*, const char8*>> path_comps;
 
@@ -145,10 +122,18 @@ String NormalizePath(const String& path) {
         path_comps.emplace_back(begin, end);
     };
 
-    const auto& internal = dir.ToUtf8();
+    const auto& internal = path.ToUtf8();
+
+    // Get the path component without the drive on Windows
+    size_t begin_offset = 0;
+#if PLATFORM_IS(PLATFORM_WINDOWS)
+    if (is_absolute) {
+        begin_offset = 2;
+    }
+#endif
 
     // Split the string by the separator
-    const char8* pathc_start = internal.data();
+    const char8* pathc_start = internal.data() + begin_offset;
     const char8* pathc_end = pathc_start;
     while (*pathc_end != 0) {
         // Get the path component from the start and end iterators
@@ -165,23 +150,23 @@ String NormalizePath(const String& path) {
         AddPathComponent(pathc_start, pathc_end);
     }
 
-    // Create the result fixed path
+    // Create the result normalized path
     String ret;
     if (is_absolute) {
 #if PLATFORM_IS(PLATFORM_WINDOWS)
-        ret += drive;
+        ret += String::FromUtf8(internal.cbegin(), internal.cbegin() + 2);
         ret += "\\";
 #else
         ret += "/";
 #endif
     }
-    if (!path_comps.empty()) {
+    if (!is_absolute & path_comps.empty()) {
+        ret += ".";
+    } else {
         for (size_t i = 0; i < path_comps.size(); i++) {
             if (i) ret += GetSeparator();
             ret += String::FromUtf8(path_comps[i].first, path_comps[i].second);
         }
-    } else if (!is_absolute) {
-        ret += ".";
     }
 
     return ret;

@@ -38,10 +38,17 @@ TEST_CASE("filesystem::NormalizePath", "[FileSystem]") {
         String path2_norm = filesystem::NormalizePath(path2);
         String path3_norm = filesystem::NormalizePath(path3);
         String path4_norm = filesystem::NormalizePath(path4);
+#if PLATFORM_IS(PLATFORM_WINDOWS)
+        REQUIRE(path1_norm == "hello");
+        REQUIRE(path2_norm == ".");
+        REQUIRE(path3_norm == "..");
+        REQUIRE(path4_norm == "..\\..");
+#else
         REQUIRE(path1_norm == "hello");
         REQUIRE(path2_norm == ".");
         REQUIRE(path3_norm == "..");
         REQUIRE(path4_norm == "../..");
+#endif
     }
     SECTION("must resolve all the . directories") {
 #if PLATFORM_IS(PLATFORM_WINDOWS)
