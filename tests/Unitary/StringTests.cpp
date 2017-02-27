@@ -122,4 +122,15 @@ TEST_CASE("String::Replace", "[String]") {
         elements.Replace(0, elements.GetSize(), "Hello World");
         REQUIRE(elements == "Hello World");
     }
+    SECTION("must replace any Unicode code point with another") {
+        // Replace U+3001 (、) with U+1F603 (😃)
+        elements.Replace(0x3001, 0x1F603);
+        REQUIRE(elements == "水😃火😃地😃風😃空");
+        // Replace U+1F603 (😃) with U+2D (-)
+        elements.Replace(0x1F603, '-');
+        REQUIRE(elements == "水-火-地-風-空");
+        // Replace U+2D (-) with U+20 (Space)
+        elements.Replace('-', ' ');
+        REQUIRE(elements == "水 火 地 風 空");
+    }
 }

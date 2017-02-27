@@ -327,6 +327,22 @@ void String::Replace(std::size_t position, std::size_t length,
     m_string.replace(start_it, end_it, replaceWith.m_string);
 }
 
+void String::Replace(uint32 searchFor, uint32 replaceWith) {
+    if (searchFor <= 0x7F && replaceWith <= 0x7F) {
+        for (size_t i = 0; i < m_string.size(); i++) {
+            if (m_string[i] == static_cast<char8>(searchFor)) {
+                m_string[i] = static_cast<char8>(replaceWith);
+            }
+        }
+    } else {
+        String searchForStr;
+        String replaceWithStr;
+        utf8::append(searchFor, std::back_inserter(searchForStr.m_string));
+        utf8::append(replaceWith, std::back_inserter(replaceWithStr.m_string));
+        return Replace(searchForStr, replaceWithStr);
+    }
+}
+
 void String::Replace(const String& searchFor, const String& replaceWith) {
     std::size_t step = replaceWith.m_string.size();
     std::size_t len = searchFor.m_string.size();

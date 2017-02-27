@@ -568,6 +568,20 @@ public:
                  const String& replaceWith);
 
     ////////////////////////////////////////////////////////////
+    /// \brief Replace all occurrences of an Unicode code point with other
+    ///        Unicode code point
+    ///
+    /// This function replaces all occurrences of the code point \a searchFor
+    /// in this string with the \a replaceWith code point.
+    ///
+    /// \param searchFor   The code point being searched for
+    /// \param replaceWith The code point that replaces found \a searchFor
+    ///                    code point
+    ///
+    ////////////////////////////////////////////////////////////
+    void Replace(uint32 searchFor, uint32 replaceWith);
+
+    ////////////////////////////////////////////////////////////
     /// \brief Replace all occurrences of a SubString with a replacement string
     ///
     /// This function replaces all occurrences of \a searchFor in this string
