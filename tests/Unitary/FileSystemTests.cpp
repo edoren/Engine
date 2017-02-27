@@ -99,6 +99,13 @@ TEST_CASE("filesystem::NormalizePath", "[FileSystem]") {
         REQUIRE(path3_norm == "/");
 #endif
     }
+#if PLATFORM_IS(PLATFORM_WINDOWS)
+    SECTION("on Windows this should change any '/' separators to '\\'") {
+        String path = "C:\\hello/world/1234";
+        String path_norm = filesystem::NormalizePath(path);
+        REQUIRE(path_norm == "C:\\hello\\world\\1234");
+    }
+#endif
 }
 
 TEST_CASE("filesystem::Join", "[FileSystem]") {

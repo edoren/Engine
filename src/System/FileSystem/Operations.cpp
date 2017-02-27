@@ -154,20 +154,25 @@ String NormalizePath(const String& path) {
     String ret;
     if (is_absolute) {
 #if PLATFORM_IS(PLATFORM_WINDOWS)
-        ret += String::FromUtf8(internal.cbegin(), internal.cbegin() + 2);
-        ret += "\\";
+        auto it = internal.cbegin();
+        ret += String::FromUtf8(it, it + 2) + '\\';
 #else
-        ret += "/";
+        ret += '/';
 #endif
     }
     if (!is_absolute & path_comps.empty()) {
-        ret += ".";
+        ret += '.';
     } else {
         for (size_t i = 0; i < path_comps.size(); i++) {
             if (i) ret += GetSeparator();
             ret += String::FromUtf8(path_comps[i].first, path_comps[i].second);
         }
     }
+
+#if PLATFORM_IS(PLATFORM_WINDOWS)
+    // Fix separators on Windows
+    ret.Replace('/', '\\');
+#endif
 
     return ret;
 }

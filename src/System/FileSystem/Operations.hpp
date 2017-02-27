@@ -47,6 +47,8 @@ ENGINE_API String AbsolutePath(const String& path);
 ///        separators and up-level references so that A//B,
 ///        A/B/, A/./B and A/foo/../B all become A/B
 ///
+/// On Windows this function also change any '/' character to '\'
+///
 /// \return String containing the normalized path
 ///
 ////////////////////////////////////////////////////////////
