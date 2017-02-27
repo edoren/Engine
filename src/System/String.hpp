@@ -194,7 +194,8 @@ public:
     ////////////////////////////////////////////////////////////
     template <typename Iterator>
     static String FromUtf8(Iterator begin, Iterator end) {
-        return FromUtf8(&(*begin), &(*end));
+        return FromUtf8(const_cast<const char8*>(&(*begin)),
+                        const_cast<const char8*>(&(*end)));
     }
 
     ////////////////////////////////////////////////////////////
@@ -225,7 +226,8 @@ public:
     ////////////////////////////////////////////////////////////
     template <typename Iterator>
     static String FromUtf16(Iterator begin, Iterator end) {
-        return FromUtf16(&(*begin), &(*end));
+        return FromUtf16(const_cast<const char16*>(&(*begin)),
+                         const_cast<const char16*>(&(*end)));
     }
 
     ////////////////////////////////////////////////////////////
@@ -256,7 +258,8 @@ public:
     ////////////////////////////////////////////////////////////
     template <typename Iterator>
     static String FromUtf32(Iterator begin, Iterator end) {
-        return FromUtf32(&(*begin), &(*end));
+        return FromUtf32(const_cast<const char32*>(&(*begin)),
+                         const_cast<const char32*>(&(*end)));
     }
 
     ////////////////////////////////////////////////////////////
@@ -271,6 +274,25 @@ public:
     ///
     ////////////////////////////////////////////////////////////
     static String FromWide(const wchar* begin, const wchar* end);
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Create a new String from a Wide string
+    ///
+    /// The iterators must point to an object of type char32
+    ///
+    /// \param begin Pointer to the beginning of the Wide string
+    /// \param end   Pointer to the end of the Wide string
+    ///
+    /// \return A String containing the source string
+    ///
+    /// \see FromUtf8, FromUtf16, FromWide
+    ///
+    ////////////////////////////////////////////////////////////
+    template <typename Iterator>
+    static String FromWide(Iterator begin, Iterator end) {
+        return FromWide(const_cast<const wchar*>(&(*begin)),
+                        const_cast<const wchar*>(&(*end)));
+    }
 
     ////////////////////////////////////////////////////////////
     /// \brief Implicit conversion operator to std::basic_string<char8>
@@ -938,8 +960,8 @@ ENGINE_API String operator+(const String& left, char8 right);
 /// \brief Overload of binary + operator to concatenate a UTF-8
 ///        strings and a single ASCII character
 ///
-/// \param left  Left operand (a String)
-/// \param right Right operand (an ASCII character)
+/// \param left  Left operand (an ASCII character)
+/// \param right Right operand (a String)
 ///
 /// \return Concatenated string
 ///
