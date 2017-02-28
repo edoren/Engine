@@ -1,3 +1,4 @@
+#include <System/IO/FileLoader.hpp>
 #include <System/IO/ImageLoader.hpp>
 #include <System/LogManager.hpp>
 
@@ -10,27 +11,11 @@ namespace io {
 
 bool ImageLoader::LoadFromFile(const String& filename,
                                std::vector<byte>& pixels, math::uvec2& size) {
-    int width;
-    int height;
-    int comp;
-
-    byte* data =
-        stbi_load(filename.GetData(), &width, &height, &comp, STBI_rgb_alpha);
-
-    if (data != nullptr && comp == STBI_rgb_alpha) {
-        // Fill the vector with the pixels
-        pixels.assign(data, data + (width * height * comp));
-        size.x = static_cast<uint32>(width);
-        size.y = static_cast<uint32>(height);
-    } else {
-        String error = String("STB_Image error: ") + stbi_failure_reason();
-        LogError("ImageLoader", error);
-        return false;
+    std::vector<byte> out;
+    if (FileLoader::LoadFile(filename, &out)) {
+        return LoadFromFileInMemory(out.data(), out.size(), pixels, size);
     }
-
-    stbi_image_free(data);
-
-    return true;
+    return false;
 }
 
 bool ImageLoader::LoadFromFileInMemory(const byte* buffer, uint32 len,
