@@ -11,6 +11,7 @@ namespace io {
 class ENGINE_API FileLoader {
 public:
     static bool LoadFile(const String& filename, String* dest);
+    static bool LoadFile(const String& filename, std::vector<byte>* dest);
 };
 
 }  // namespace io
