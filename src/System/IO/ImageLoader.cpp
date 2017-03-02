@@ -36,9 +36,11 @@ bool ImageLoader::LoadFromFileInMemory(const byte* buffer, uint32 len,
     } else {
         String error = String("STB_Image error: ") + stbi_failure_reason();
         LogError("ImageLoader", error);
+        stbi_image_free(data);
         return false;
     }
 
+    stbi_image_free(data);
     return true;
 }
 
