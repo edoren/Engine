@@ -216,21 +216,33 @@ bool Vk_RenderWindow::CreateVulkanSurface() {
 
 #if defined(VK_USE_PLATFORM_WIN32_KHR)
     if (wminfo.subsystem == SDL_SYSWM_WINDOWS) {
-        vk::Win32SurfaceCreateInfoKHR create_info;
-        create_info.hinstance = GetModuleHandle(nullptr);
-        create_info.hwnd = wminfo.info.win.window;
-
+        vk::Win32SurfaceCreateInfoKHR create_info{
+            vk::Win32SurfaceCreateFlagsKHR(),  // flags
+            GetModuleHandle(nullptr),          // hinstance
+            wminfo.info.win.window             // hwnd
+        };
         result =
             m_instance.createWin32SurfaceKHR(&create_info, nullptr, &m_surface);
     }
 #elif defined(VK_USE_PLATFORM_XCB_KHR)
     if (wminfo.subsystem == SDL_SYSWM_X11) {
-        vk::XcbSurfaceCreateInfoKHR create_info;
-        create_info.connection = XGetXCBConnection(wminfo.info.x11.display);
-        create_info.window = wminfo.info.x11.window;
-
+        vk::XcbSurfaceCreateInfoKHR create_info{
+            vk::XcbSurfaceCreateFlagsKHR(),                    // flags
+            XGetXCBConnection(wminfo.info.x11.display),        // connection
+            static_cast<xcb_window_t>(wminfo.info.x11.window)  // window
+        };
         result =
             m_instance.createXcbSurfaceKHR(&create_info, nullptr, &m_surface);
+    }
+#elif defined(VK_USE_PLATFORM_XLIB_KHR)
+    if (wminfo.subsystem == SDL_SYSWM_X11) {
+        vk::XlibSurfaceCreateInfoKHR create_info{
+            vk::XlibSurfaceCreateFlagsKHR(),  // flags
+            wminfo.info.x11.display,          // dpy
+            wminfo.info.x11.window            // window
+        };
+        result =
+            m_instance.createXlibSurfaceKHR(&create_info, nullptr, &m_surface);
     }
 #endif
     else {
