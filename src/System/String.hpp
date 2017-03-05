@@ -123,6 +123,14 @@ public:
     String(const std::basic_string<char8>& utf8String);
 
     ////////////////////////////////////////////////////////////
+    /// \brief Construct from an UTF-8 string
+    ///
+    /// \param utf8String UTF-8 string to move
+    ///
+    ////////////////////////////////////////////////////////////
+    String(std::basic_string<char8>&& utf8String);
+
+    ////////////////////////////////////////////////////////////
     /// \brief Construct from a UTF-16 string
     ///
     /// \param utf16String UTF-16 string to convert

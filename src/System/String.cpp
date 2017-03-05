@@ -108,6 +108,16 @@ String::String(const std::basic_string<char8>& utf8String) {
     };
 }
 
+String::String(std::basic_string<char8>&& utf8String) {
+    if (utf8String.size() > 0) {
+        if (utf8::is_valid(utf8String.cbegin(), utf8String.cend())) {
+            m_string = std::move(utf8String);
+        } else {
+            throw std::runtime_error("invalid utf8 convertion.");
+        }
+    };
+}
+
 String::String(const std::basic_string<char16>& utf16String) {
     utf8::utf16to8(utf16String.cbegin(), utf16String.cend(),
                    std::back_inserter(m_string));
