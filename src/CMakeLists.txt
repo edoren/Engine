@@ -5,6 +5,7 @@
 set(MATHFU_DIR "${THIRD_PARTY_DIR}/mathfu")
 set(STB_DIR "${THIRD_PARTY_DIR}/stb")
 set(UTFCPP_DIR "${THIRD_PARTY_DIR}/utfcpp")
+set(FMT_DIR "${THIRD_PARTY_DIR}/fmt")
 
 # Mathfu
 set(MATHFU_INCLUDE_DIR "${MATHFU_DIR}/include"
@@ -15,6 +16,9 @@ set(STB_INCLUDE_DIR ${STB_DIR})
 
 # UTFCPP
 set(UTFCPP_INCLUDE_DIR "${UTFCPP_DIR}/source")
+
+# FMT
+set(FMT_INCLUDE_DIR "${FMT_DIR}")
 
 ###############################################################################
 ## Engine library
@@ -80,7 +84,7 @@ engine_add_library(TARGET ${ENGINE_LIBRARY}
 target_link_libraries(${ENGINE_LIBRARY} ${SDL2_LIBRARY})
 
 target_include_directories(${ENGINE_LIBRARY} SYSTEM
-                           PUBLIC ${MATHFU_INCLUDE_DIR}  # TMP
+                           PUBLIC ${MATHFU_INCLUDE_DIR} ${FMT_INCLUDE_DIR} # TMP?
                            PRIVATE ${STB_INCLUDE_DIR} ${UTFCPP_INCLUDE_DIR})
 
 set(ENGINE_LIBRARY ${ENGINE_LIBRARY} PARENT_SCOPE)
