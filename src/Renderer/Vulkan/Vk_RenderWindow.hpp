@@ -46,9 +46,9 @@ private:
 
     bool CheckVulkanInstanceExtensionsSupport() const;
 
-    bool CheckPhysicalDevice(vk::PhysicalDevice& physical_device,
-                             uint32_t& selected_graphics_queue_family_index,
-                             uint32_t& selected_present_queue_family_index);
+    bool CheckPhysicalDevice(const vk::PhysicalDevice& physical_device,
+                             uint32& selected_graphics_queue_family_index,
+                             uint32& selected_present_queue_family_index);
 
 private:
     SDL_Window* m_window;
@@ -57,12 +57,10 @@ private:
     vk::SurfaceKHR m_surface;
     vk::Device m_device;
 
-    uint32_t m_queue_family_index;
-    uint32_t m_graphics_queue_family_index;
-    uint32_t m_present_queue_family_index;
+    uint32 m_graphics_queue_family_index;
+    uint32 m_present_queue_family_index;
 
     bool m_validation_layers_enabled;
-
     std::vector<const char*> m_validation_layers;
 
     std::vector<const char*> m_instance_extensions;

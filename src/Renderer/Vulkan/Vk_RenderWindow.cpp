@@ -54,9 +54,10 @@ bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
     m_name = name;
     m_size = size;
 
-    // Set all the extensions and validation layers
-    // m_validation_layers.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
+    // Add the required validation layers
     m_validation_layers.push_back("VK_LAYER_LUNARG_standard_validation");
+
+    // Add the required Instance extensions
     m_instance_extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
 #if defined(VK_USE_PLATFORM_WIN32_KHR)
     m_instance_extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
@@ -69,12 +70,16 @@ bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
         m_instance_extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
     }
 
+    // Add the required Device extensions
+    m_device_extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+
     CreateVulkanInstance();
     CreateVulkanSurface();
     CreateVulkanDevice();
 
-    vk::Queue q;
-    m_device.getQueue(m_queue_family_index, 0, &q);
+    // vk::Queue q, q2;
+    // m_device.getQueue(m_graphics_queue_family_index, 0, &q);
+    // m_device.getQueue(m_present_queue_family_index, 0, &q2);
 
     return true;
 }
@@ -183,12 +188,11 @@ bool Vk_RenderWindow::CreateVulkanInstance() {
 
     // Define all the information for the instance
     vk::InstanceCreateInfo create_info{
-        vk::InstanceCreateFlags(),  //  flags
-        &appInfo,                   //  pApplicationInfo
-        static_cast<uint32_t>(
-            m_validation_layers.size()),  //  enabledLayerCount
-        m_validation_layers.data(),       //  ppEnabledLayerNames
-        static_cast<uint32_t>(
+        vk::InstanceCreateFlags(),                        //  flags
+        &appInfo,                                         //  pApplicationInfo
+        static_cast<uint32>(m_validation_layers.size()),  //  enabledLayerCount
+        m_validation_layers.data(),  //  ppEnabledLayerNames
+        static_cast<uint32>(
             m_instance_extensions.size()),  //  enabledExtensionCount
         m_instance_extensions.data()        //  ppEnabledExtensionNames
     };
@@ -246,67 +250,70 @@ bool Vk_RenderWindow::CreateVulkanDevice() {
     vk::Result result;
 
     // Query all the avaliable physical devices
-    uint32_t num_devices;
-    std::vector<vk::PhysicalDevice> physical_devices(num_devices);
-    result = m_instance.enumeratePhysicalDevices(&num_devices, nullptr);
-    if (num_devices > 0 && result == vk::Result::eSuccess) {
-        physical_devices.resize(num_devices);
-        result = m_instance.enumeratePhysicalDevices(&num_devices,
+    uint32 physical_devices_count = 0;
+    std::vector<vk::PhysicalDevice> physical_devices;
+    result =
+        m_instance.enumeratePhysicalDevices(&physical_devices_count, nullptr);
+    if (physical_devices_count > 0 && result == vk::Result::eSuccess) {
+        physical_devices.resize(physical_devices_count);
+        result = m_instance.enumeratePhysicalDevices(&physical_devices_count,
                                                      physical_devices.data());
     }
-    if (num_devices == 0 || result != vk::Result::eSuccess) {
+    if (physical_devices_count == 0 || result != vk::Result::eSuccess) {
         LogFatal("Vk_RenderWindow", "Error querying physical devices");
         return false;
     }
 
     // Check all the queried physical devices for one with the required
     // caracteristics and avaliable queues
-    uint32_t selected_queue_family_index = UINT32_MAX;
-    uint32_t selected_present_family_index = UINT32_MAX;
+    uint32 selected_graphics_queue_family_index = UINT32_MAX;
+    uint32 selected_present_queue_family_index = UINT32_MAX;
     vk::PhysicalDevice* selected_physical_device = nullptr;
     for (size_t i = 0; i < physical_devices.size(); i++) {
         if (CheckPhysicalDevice(physical_devices[i],
-                                selected_queue_family_index,
-                                selected_present_family_index)) {
+                                selected_graphics_queue_family_index,
+                                selected_present_queue_family_index)) {
             selected_physical_device = &physical_devices[i];
         }
     }
     if (selected_physical_device == nullptr ||
-        selected_queue_family_index == UINT32_MAX ||
-        selected_present_family_index == UINT32_MAX) {
+        selected_graphics_queue_family_index == UINT32_MAX ||
+        selected_present_queue_family_index == UINT32_MAX) {
         LogFatal(
             "Vk_RenderWindow",
             "No physical device that supports the required caracteristics");
         return false;
     }
 
-    // Create the Queues
+    // Define the queue families information
     std::vector<float> queue_priorities = {1.0f};
-    vk::DeviceQueueCreateInfo queue_create_info{
-        vk::DeviceQueueCreateFlags(),                    // flags
-        selected_queue_family_index,                     // queueFamilyIndex
-        static_cast<uint32_t>(queue_priorities.size()),  // queueCount
-        queue_priorities.data()                          // pQueuePriorities
-    };
-
-    // Get the validation layers
-    uint32_t layer_num = 0;
-    const char* const* layer_names = nullptr;
-    if (m_validation_layers_enabled) {
-        layer_num = static_cast<uint32_t>(m_validation_layers.size());
-        layer_names = m_validation_layers.data();
+    std::vector<vk::DeviceQueueCreateInfo> queue_create_infos;
+    queue_create_infos.push_back(vk::DeviceQueueCreateInfo{
+        vk::DeviceQueueCreateFlags(),                  // flags
+        selected_graphics_queue_family_index,          // queueFamilyIndex
+        static_cast<uint32>(queue_priorities.size()),  // queueCount
+        queue_priorities.data()                        // pQueuePriorities
+    });
+    if (selected_graphics_queue_family_index !=
+        selected_present_queue_family_index) {
+        queue_create_infos.push_back(vk::DeviceQueueCreateInfo{
+            vk::DeviceQueueCreateFlags(),                  // flags
+            selected_present_queue_family_index,           // queueFamilyIndex
+            static_cast<uint32>(queue_priorities.size()),  // queueCount
+            queue_priorities.data()                        // pQueuePriorities
+        });
     }
 
     // Define all the information for the logical device
     vk::DeviceCreateInfo device_create_info{
-        vk::DeviceCreateFlags(),  // flags
-        1,                        // queueCreateInfoCount
-        &queue_create_info,       // pQueueCreateInfos
-        layer_num,                // enabledLayerCount
-        layer_names,              // ppEnabledLayerNames
-        0,                        // enabledExtensionCount
-        nullptr,                  // ppEnabledExtensionNames
-        nullptr                   // pEnabledFeatures
+        vk::DeviceCreateFlags(),                         // flags
+        static_cast<uint32>(queue_create_infos.size()),  // queueCreateInfoCount
+        queue_create_infos.data(),                       // pQueueCreateInfos
+        static_cast<uint32>(m_validation_layers.size()),  // enabledLayerCount
+        m_validation_layers.data(),                       // ppEnabledLayerNames
+        0,        // enabledExtensionCount
+        nullptr,  // ppEnabledExtensionNames
+        nullptr   // pEnabledFeatures
     };
 
     // Create the logical device based on the retrived info
@@ -317,7 +324,8 @@ bool Vk_RenderWindow::CreateVulkanDevice() {
         return false;
     }
 
-    m_queue_family_index = selected_queue_family_index;
+    m_graphics_queue_family_index = selected_graphics_queue_family_index;
+    m_present_queue_family_index = selected_present_queue_family_index;
     return true;
 }
 
@@ -325,7 +333,7 @@ bool Vk_RenderWindow::CheckVulkanValidationLayerSupport() const {
     vk::Result result;
 
     // Get the avaliable layers
-    uint32_t layer_count = 0;
+    uint32 layer_count = 0;
     std::vector<vk::LayerProperties> avaliable_layers;
     result = vk::enumerateInstanceLayerProperties(&layer_count, nullptr);
     if (layer_count > 0 && result == vk::Result::eSuccess) {
@@ -358,7 +366,7 @@ bool Vk_RenderWindow::CheckVulkanInstanceExtensionsSupport() const {
     vk::Result result;
 
     // Get the avaliable extensions
-    uint32_t extensions_count = 0;
+    uint32 extensions_count = 0;
     std::vector<vk::ExtensionProperties> available_extensions;
     result = vk::enumerateInstanceExtensionProperties(
         nullptr, &extensions_count, nullptr);
@@ -375,7 +383,7 @@ bool Vk_RenderWindow::CheckVulkanInstanceExtensionsSupport() const {
         return false;
     }
 
-    // Check that all the extensions exists
+    // Check that all the required instance extensions exists
     for (size_t i = 0; i < m_instance_extensions.size(); i++) {
         if (!CheckExtensionAvailability(m_instance_extensions[i],
                                         available_extensions)) {
@@ -390,21 +398,20 @@ bool Vk_RenderWindow::CheckVulkanInstanceExtensionsSupport() const {
 }
 
 bool Vk_RenderWindow::CheckPhysicalDevice(
-    vk::PhysicalDevice& physical_device,
-    uint32_t& selected_graphics_queue_family_index,
-    uint32_t& selected_present_queue_family_index) {
+    const vk::PhysicalDevice& physical_device,
+    uint32& selected_graphics_queue_family_index,
+    uint32& selected_present_queue_family_index) {
     vk::Result result;
 
     // Check the PhysicalDevice properties and features
     vk::PhysicalDeviceProperties properties;
     vk::PhysicalDeviceFeatures features;
-
     physical_device.getProperties(&properties);
     physical_device.getFeatures(&features);
 
-    uint32_t major_version = VK_VERSION_MAJOR(properties.apiVersion);
-    // uint32_t minor_version = VK_VERSION_MINOR(properties.apiVersion);
-    // uint32_t patch_version = VK_VERSION_PATCH(properties.apiVersion);
+    uint32 major_version = VK_VERSION_MAJOR(properties.apiVersion);
+    // uint32 minor_version = VK_VERSION_MINOR(properties.apiVersion);
+    // uint32 patch_version = VK_VERSION_PATCH(properties.apiVersion);
 
     if (major_version < 1 && properties.limits.maxImageDimension2D < 4096) {
         LogError("Vk_RenderWindow",
@@ -414,7 +421,7 @@ bool Vk_RenderWindow::CheckPhysicalDevice(
     }
 
     // Check if the physical device support the required extensions
-    uint32_t extensions_count = 0;
+    uint32 extensions_count = 0;
     std::vector<vk::ExtensionProperties> available_extensions;
     result = physical_device.enumerateDeviceExtensionProperties(
         nullptr, &extensions_count, nullptr);
@@ -432,23 +439,20 @@ bool Vk_RenderWindow::CheckPhysicalDevice(
         return false;
     }
 
-    std::vector<const char*> device_extensions = {
-        VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-    };
-
-    for (size_t i = 0; i < device_extensions.size(); i++) {
-        if (!CheckExtensionAvailability(device_extensions[i],
+    // Check that all the required device extensions exists
+    for (size_t i = 0; i < m_device_extensions.size(); i++) {
+        if (!CheckExtensionAvailability(m_device_extensions[i],
                                         available_extensions)) {
             LogError("Vk_RenderWindow",
                      "Physical device {} doesn't support extension "
                      "named \"{}\""_format(properties.deviceName,
-                                           device_extensions[i]));
+                                           m_device_extensions[i]));
             return false;
         }
     }
 
     // Retreive all the queue families properties
-    uint32_t queue_families_count = 0;
+    uint32 queue_families_count = 0;
     physical_device.getQueueFamilyProperties(&queue_families_count, nullptr);
     if (queue_families_count == 0) {
         LogError("Vk_RenderWindow",
@@ -465,9 +469,9 @@ bool Vk_RenderWindow::CheckPhysicalDevice(
 
     // Find a queue family that supports graphics queue and other that supports
     // present queue
-    uint32_t graphics_queue_family_index = UINT32_MAX;
-    uint32_t present_queue_family_index = UINT32_MAX;
-    for (uint32_t i = 0; i < queue_families_count; i++) {
+    uint32 graphics_queue_family_index = UINT32_MAX;
+    uint32 present_queue_family_index = UINT32_MAX;
+    for (uint32 i = 0; i < queue_families_count; i++) {
         if (queue_family_properties[i].queueCount > 0 &&
             queue_family_properties[i].queueFlags &
                 vk::QueueFlagBits::eGraphics) {
@@ -492,7 +496,7 @@ bool Vk_RenderWindow::CheckPhysicalDevice(
 
     // We don't have queue that supports both graphics and present so we have
     // to use separate queues
-    for (uint32_t i = 0; i < queue_families_count; i++) {
+    for (uint32 i = 0; i < queue_families_count; i++) {
         if (queue_present_support[i]) {
             present_queue_family_index = i;
             break;
