@@ -1,8 +1,7 @@
 #include <System/LogManager.hpp>
+#include <System/StringFormat.hpp>
 
 #include <SDL.h>
-
-#define MAX_LOG_MESSAGE_LENGTH 512
 
 namespace engine {
 
@@ -21,11 +20,9 @@ String DefaultLogCallback(LogPriority priority, const String& tag,
     std::tm* tm = std::localtime(&t);
 
     // Format the log message
-    char output[4 * MAX_LOG_MESSAGE_LENGTH];
-    sprintf(output, "[%.2d:%.2d:%.2d] [%s/%s] : %s", tm->tm_hour, tm->tm_min,
-            tm->tm_sec, tag.GetData(), priority_name, message.GetData());
-
-    return String(output);
+    return "[{:02d}:{:02d}:{:02d}] [{}/{}] : {}"_format(
+        tm->tm_hour, tm->tm_min, tm->tm_sec, tag.GetData(), priority_name,
+        message.GetData());
 }
 
 }  // namespace
@@ -95,7 +92,8 @@ void LogManager::LogMessage(LogPriority priority, const String& tag,
 
     // Write the log to console
     if (m_console_logging_enable) {
-        fprintf(stdout, "%s\n", log_message.GetData());
+        fputs(log_message.GetData(), stdout);
+        fputs("\n", stdout);
     }
 }
 
