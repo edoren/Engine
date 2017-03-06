@@ -32,8 +32,7 @@ install:
   - git submodule update --init --recursive
   - curl -fsS -o VulkanSDK.exe %VULKAN_DOWNLOAD_URL%
   - start /wait VulkanSDK.exe /S
-  - set
-  - dir C:\ /a
+  - set VULKAN_SDK=C:\VulkanSDK\%VULKAN_SDK_VERSION%
 
 # scripts to run before build
 before_build:
