@@ -64,7 +64,9 @@ String SharedLibrary::GetErrorString() {
                    NULL, GetLastError(),
                    MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&lpMsgBuf,
                    0, NULL);
-    String ret = String::FromWide(lpMsgBuf, lpMsgBuf + std::wcslen(lpMsgBuf));
+    std::size_t msg_len = std::wcslen(lpMsgBuf);
+    if (msg_len >= 2) msg_len -= 2;  // Remove the /r/n characters
+    String ret = String::FromWide(lpMsgBuf, lpMsgBuf + msg_len);
     LocalFree(lpMsgBuf);
     return ret;
 #elif PLATFORM_IS(PLATFORM_LINUX) || PLATFORM_IS(PLATFORM_MAC)
