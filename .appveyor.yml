@@ -31,7 +31,7 @@ branches:
 install:
   - git submodule update --init --recursive
   - curl -fsS -o VulkanSDK.exe %VULKAN_DOWNLOAD_URL%
-  - VulkanSDK.exe /S
+  - start /wait VulkanSDK.exe /S
 
 # scripts to run before build
 before_build:
