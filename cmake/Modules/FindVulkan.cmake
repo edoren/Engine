@@ -17,10 +17,14 @@ if(WIN32)
                              "$ENV{VK_SDK_PATH}/Include")
     if(CMAKE_CL_64)
         set(VULKAN_LIBRARY_PATHS "$ENV{VULKAN_SDK}/Bin"
-                                 "$ENV{VK_SDK_PATH}/Bin")
+                                 "$ENV{VK_SDK_PATH}/Bin"
+                                 "$ENV{VULKAN_SDK}/Lib"
+                                 "$ENV{VK_SDK_PATH}/Lib")
     else()
         set(VULKAN_LIBRARY_PATHS "$ENV{VULKAN_SDK}/Bin32"
-                                 "$ENV{VK_SDK_PATH}/Bin32")
+                                 "$ENV{VK_SDK_PATH}/Bin32"
+                                 "$ENV{VULKAN_SDK}/Lib32"
+                                 "$ENV{VK_SDK_PATH}/Lib32")
     endif()
 else()
     set(VULKAN_SHARED_LIBRARY_NAMES vulkan)
