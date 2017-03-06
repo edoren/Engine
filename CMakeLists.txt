@@ -99,6 +99,7 @@ add_subdirectory(${ENGINE_SOURCE_DIR})
 
 # Build the renderers
 add_subdirectory("${ENGINE_SOURCE_DIR}/Renderer/OpenGL")
+add_subdirectory("${ENGINE_SOURCE_DIR}/Renderer/Vulkan")
 
 # Add the test folder
 add_subdirectory(${TESTS_DIR})
