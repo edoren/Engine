@@ -4,12 +4,9 @@
 #include <System/String.hpp>
 
 #define FMT_HEADER_ONLY
+#define FMT_USE_WINDOWS_H 0
 #define FMT_USE_USER_DEFINED_LITERALS 0
 #include <fmt/format.h>
-
-#if PLATFORM_IS(PLATFORM_WINDOWS)
-#undef ERROR
-#endif
 
 namespace engine {
 

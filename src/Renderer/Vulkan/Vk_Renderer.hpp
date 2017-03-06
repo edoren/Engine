@@ -3,7 +3,6 @@
 #include <Renderer/Renderer.hpp>
 
 #include "Vk_Config.hpp"
-#include "Vk_Dependencies.hpp"
 #include "Vk_RenderWindow.hpp"
 
 namespace engine {

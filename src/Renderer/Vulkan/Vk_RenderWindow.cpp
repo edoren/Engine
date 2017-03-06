@@ -1,7 +1,6 @@
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
 
-#include "Vk_Dependencies.hpp"
 #include "Vk_RenderWindow.hpp"
 
 namespace engine {
