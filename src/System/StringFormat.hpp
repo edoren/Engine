@@ -7,6 +7,10 @@
 #define FMT_USE_USER_DEFINED_LITERALS 0
 #include <fmt/format.h>
 
+#if PLATFORM_IS(PLATFORM_WINDOWS)
+#undef ERROR
+#endif
+
 namespace engine {
 
 template <typename Char>
