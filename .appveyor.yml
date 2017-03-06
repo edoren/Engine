@@ -33,6 +33,7 @@ install:
   - curl -fsS -o VulkanSDK.exe %VULKAN_DOWNLOAD_URL%
   - start /wait VulkanSDK.exe /S
   - set
+  - dir C:\ /a
 
 # scripts to run before build
 before_build:

@@ -12,3 +12,4 @@
 #include <Math/Geometric.hpp>
 #include <Math/MatrixTransform.hpp>
 #include <Math/Trigonometric.hpp>
+#include <Math/Utilities.hpp>
