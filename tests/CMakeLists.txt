@@ -11,6 +11,7 @@ enable_testing()
 # add_executable(Materials "${TEST_DIR}/Materials.cpp")
 # add_executable(LightingMaps "${TEST_DIR}/LightingMaps.cpp")
 add_executable(LightCasters "${TEST_DIR}/LightCasters.cpp")
+add_executable(CreateWindow "${TEST_DIR}/CreateWindow.cpp")
 # add_executable(Vulkan "${TEST_DIR}/Vulkan.cpp")
 
 set(TESTS
@@ -21,6 +22,7 @@ set(TESTS
     # Materials
     # LightingMaps
     LightCasters
+    CreateWindow
     # Vulkan
 )
 
