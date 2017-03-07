@@ -75,20 +75,23 @@ bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
     CreateVulkanInstance();
     CreateVulkanSurface();
     CreateVulkanDevice();
-
-    // vk::Queue q, q2;
-    // m_device.getQueue(m_graphics_queue_family_index, 0, &q);
-    // m_device.getQueue(m_present_queue_family_index, 0, &q2);
+    CreateVulkanSemaphores();
+    CreateVulkanSwapChain();
+    CreateVulkanQueues();
 
     return true;
 }
 
 void Vk_RenderWindow::Destroy() {
     m_device.waitIdle();
+
+    m_device.destroySwapchainKHR(m_swapchain, nullptr);
+    m_device.destroySemaphore(m_image_avaliable_semaphore, nullptr);
+    m_device.destroySemaphore(m_rendering_finished_semaphore, nullptr);
+
     m_device.destroy(nullptr);
 
     m_instance.destroySurfaceKHR(m_surface, nullptr);
-
     m_instance.destroy(nullptr);
 
     if (m_window) {
@@ -322,9 +325,10 @@ bool Vk_RenderWindow::CreateVulkanDevice() {
         queue_create_infos.data(),                       // pQueueCreateInfos
         static_cast<uint32>(m_validation_layers.size()),  // enabledLayerCount
         m_validation_layers.data(),                       // ppEnabledLayerNames
-        0,        // enabledExtensionCount
-        nullptr,  // ppEnabledExtensionNames
-        nullptr   // pEnabledFeatures
+        static_cast<uint32>(
+            m_device_extensions.size()),  // enabledExtensionCount
+        m_device_extensions.data(),       // ppEnabledExtensionNames
+        nullptr                           // pEnabledFeatures
     };
 
     // Create the logical device based on the retrived info
@@ -335,9 +339,235 @@ bool Vk_RenderWindow::CreateVulkanDevice() {
         return false;
     }
 
+    m_physical_device = *selected_physical_device;
     m_graphics_queue_family_index = selected_graphics_queue_family_index;
     m_present_queue_family_index = selected_present_queue_family_index;
     return true;
+}
+
+bool Vk_RenderWindow::CreateVulkanSemaphores() {
+    vk::SemaphoreCreateInfo info{vk::SemaphoreCreateFlags()};
+    vk::Result result1 =
+        m_device.createSemaphore(&info, nullptr, &m_image_avaliable_semaphore);
+    vk::Result result2 = m_device.createSemaphore(
+        &info, nullptr, &m_rendering_finished_semaphore);
+    if (result1 != vk::Result::eSuccess || result2 != vk::Result::eSuccess) {
+        LogError("Vk_RenderWindow", "Could not create semaphores");
+        return false;
+    }
+    return true;
+}
+
+bool Vk_RenderWindow::CreateVulkanSwapChain() {
+    vk::Result result;
+
+    // Get the Surface capabilities
+    vk::SurfaceCapabilitiesKHR surface_capabilities;
+    result = m_physical_device.getSurfaceCapabilitiesKHR(m_surface,
+                                                         &surface_capabilities);
+    if (result != vk::Result::eSuccess) {
+        LogError("Vk_RenderWindow",
+                 "Could not check presentation surface capabilities");
+        return false;
+    }
+
+    // Query all the supported Surface formats
+    uint32 formats_count = 0;
+    std::vector<vk::SurfaceFormatKHR> surface_formats;
+    result = m_physical_device.getSurfaceFormatsKHR(m_surface, &formats_count,
+                                                    nullptr);
+    if (formats_count > 0 && result == vk::Result::eSuccess) {
+        surface_formats.resize(formats_count);
+        result = m_physical_device.getSurfaceFormatsKHR(
+            m_surface, &formats_count, surface_formats.data());
+    }
+
+    // Check that the surface formats where queried successfully
+    if (formats_count == 0 || result != vk::Result::eSuccess) {
+        LogError("Vk_RenderWindow",
+                 "Error occurred during presentation surface formats "
+                 "enumeration");
+        return false;
+    }
+
+    // Query all the supported Surface present modes
+    uint32 present_modes_count = 0;
+    std::vector<vk::PresentModeKHR> present_modes;
+    result = m_physical_device.getSurfacePresentModesKHR(
+        m_surface, &present_modes_count, nullptr);
+    if (present_modes_count > 0 && result == vk::Result::eSuccess) {
+        present_modes.resize(present_modes_count);
+        result = m_physical_device.getSurfacePresentModesKHR(
+            m_surface, &present_modes_count, present_modes.data());
+    }
+
+    // Check that the surface present modes where queried successfully
+    if (present_modes_count == 0 || result != vk::Result::eSuccess) {
+        LogError("Vk_RenderWindow",
+                 "Error occurred during presentation surface formats "
+                 "enumeration");
+        return false;
+    }
+
+    // Retreive all the Swapchain related information
+    uint32 desired_number_of_images =
+        GetVulkanSwapChainNumImages(surface_capabilities);
+    vk::SurfaceFormatKHR desired_format =
+        GetVulkanSwapChainFormat(surface_formats);
+    vk::Extent2D desired_extent =
+        GetVulkanSwapChainExtent(surface_capabilities);
+    vk::ImageUsageFlags desired_usage =
+        GetVulkanSwapChainUsageFlags(surface_capabilities);
+    vk::SurfaceTransformFlagBitsKHR desired_transform =
+        GetVulkanSwapChainTransform(surface_capabilities);
+    vk::PresentModeKHR desired_present_mode =
+        GetVulkanSwapChainPresentMode(present_modes);
+    vk::SwapchainKHR old_swap_chain = m_swapchain;
+
+    if (static_cast<int>(VkImageUsageFlags(desired_usage)) == -1) {
+        return false;
+    }
+
+    vk::SwapchainCreateInfoKHR swap_chain_create_info{
+        vk::SwapchainCreateFlagsKHR(),           // flags
+        m_surface,                               // surface
+        desired_number_of_images,                // minImageCount
+        desired_format.format,                   // imageFormat
+        desired_format.colorSpace,               // imageColorSpace
+        desired_extent,                          // imageExtent
+        1,                                       // imageArrayLayers
+        desired_usage,                           // imageUsage
+        vk::SharingMode::eExclusive,             // imageSharingMode
+        0,                                       // queueFamilyIndexCount
+        nullptr,                                 // pQueueFamilyIndices
+        desired_transform,                       // preTransform
+        vk::CompositeAlphaFlagBitsKHR::eOpaque,  // compositeAlpha
+        desired_present_mode,                    // presentMode
+        true,                                    // clipped
+        old_swap_chain                           // oldSwapchain
+    };
+
+    result = m_device.createSwapchainKHR(&swap_chain_create_info, nullptr,
+                                         &m_swapchain);
+    if (result != vk::Result::eSuccess) {
+        LogFatal("Vk_RenderWindow", "Could not create swap chain");
+        return false;
+    }
+    if (old_swap_chain) {
+        m_device.destroySwapchainKHR(old_swap_chain, nullptr);
+    }
+
+    return true;
+}
+
+bool Vk_RenderWindow::CreateVulkanQueues() {
+    m_device.getQueue(m_graphics_queue_family_index, 0, &m_graphics_queue);
+    m_device.getQueue(m_present_queue_family_index, 0, &m_present_queue);
+    return true;
+}
+
+uint32 Vk_RenderWindow::GetVulkanSwapChainNumImages(
+    const vk::SurfaceCapabilitiesKHR& surface_capabilities) {
+    // Set of images defined in a swap chain may not always be available for
+    // application to render to:
+    // One may be displayed and one may wait in a queue to be presented
+    // If application wants to use more images at the same time it must ask for
+    // more images
+    uint32 image_count = surface_capabilities.minImageCount + 1;
+    if (surface_capabilities.maxImageCount > 0 &&
+        image_count > surface_capabilities.maxImageCount) {
+        image_count = surface_capabilities.maxImageCount;
+    }
+    return image_count;
+}
+
+vk::SurfaceFormatKHR Vk_RenderWindow::GetVulkanSwapChainFormat(
+    const std::vector<vk::SurfaceFormatKHR>& surface_formats) {
+    // If the list contains only one entry with undefined format
+    // it means that there are no preferred surface formats and any can be
+    // chosen
+    if (surface_formats.size() == 1 &&
+        surface_formats[0].format == vk::Format::eUndefined) {
+        return {vk::Format::eR8G8B8A8Unorm, vk::ColorSpaceKHR::eSrgbNonlinear};
+    }
+
+    // Check if list contains most widely used R8 G8 B8 A8 format
+    // with nonlinear color space
+    for (const vk::SurfaceFormatKHR& surface_format : surface_formats) {
+        if (surface_format.format == vk::Format::eR8G8B8A8Unorm) {
+            return surface_format;
+        }
+    }
+
+    // Return the first format from the list
+    return surface_formats[0];
+}
+
+vk::Extent2D Vk_RenderWindow::GetVulkanSwapChainExtent(
+    const vk::SurfaceCapabilitiesKHR& surface_capabilities) {
+    // Special value of surface extent is width == height == 0xFFFFFFFF
+    // If this is so we define the size by ourselves but it must fit within
+    // defined confines
+    if (surface_capabilities.currentExtent.width == 0xFFFFFFFF) {
+        vk::Extent2D swap_chain_extent = {640, 480};
+        swap_chain_extent.width = math::Clamp(
+            swap_chain_extent.width, surface_capabilities.minImageExtent.width,
+            surface_capabilities.maxImageExtent.width);
+        swap_chain_extent.height =
+            math::Clamp(swap_chain_extent.height,
+                        surface_capabilities.minImageExtent.height,
+                        surface_capabilities.maxImageExtent.height);
+        return swap_chain_extent;
+    }
+
+    // Most of the cases we define size of the swap_chain images equal to
+    // current window's size
+    return surface_capabilities.currentExtent;
+}
+
+vk::ImageUsageFlags Vk_RenderWindow::GetVulkanSwapChainUsageFlags(
+    const vk::SurfaceCapabilitiesKHR& surface_capabilities) {
+    // Color attachment flag must always be supported
+    // We can define other usage flags but we always need to check if they are
+    // supported
+    if (surface_capabilities.supportedUsageFlags &
+        vk::ImageUsageFlagBits::eTransferDst) {
+        return vk::ImageUsageFlagBits::eColorAttachment |
+               vk::ImageUsageFlagBits::eTransferDst;
+    }
+    return vk::ImageUsageFlags(static_cast<vk::ImageUsageFlagBits>(-1));
+}
+
+vk::SurfaceTransformFlagBitsKHR Vk_RenderWindow::GetVulkanSwapChainTransform(
+    const vk::SurfaceCapabilitiesKHR& surface_capabilities) {
+    // Sometimes images must be transformed before they are presented (i.e. due
+    // to device's orienation being other than default orientation)
+    // If the specified transform is other than current transform, presentation
+    // engine will transform image during presentation operation; this operation
+    // may hit performance on some platforms
+    // Here we don't want any transformations to occur so if the identity
+    // transform is supported use it otherwise just use the same transform as
+    // current transform
+    if (surface_capabilities.supportedTransforms &
+        vk::SurfaceTransformFlagBitsKHR::eIdentity) {
+        return vk::SurfaceTransformFlagBitsKHR::eIdentity;
+    } else {
+        return surface_capabilities.currentTransform;
+    }
+}
+
+vk::PresentModeKHR Vk_RenderWindow::GetVulkanSwapChainPresentMode(
+    const std::vector<vk::PresentModeKHR>& present_modes) {
+    // MAILBOX is the lowest latency V-Sync enabled mode (something like
+    // triple-buffering) so use it if available
+    for (const vk::PresentModeKHR& present_mode : present_modes) {
+        if (present_mode == vk::PresentModeKHR::eMailbox) {
+            return present_mode;
+        }
+    }
+    // FIFO is the only present mode that is required to be supported
+    // by the VulkanSDK.
+    return vk::PresentModeKHR::eFifo;
 }
 
 bool Vk_RenderWindow::CheckVulkanValidationLayerSupport() const {

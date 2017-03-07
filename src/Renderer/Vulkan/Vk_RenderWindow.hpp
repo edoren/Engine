@@ -39,8 +39,27 @@ public:
 
 private:
     bool CreateVulkanInstance();
-    bool CreateVulkanDevice();
     bool CreateVulkanSurface();
+    bool CreateVulkanDevice();
+    bool CreateVulkanSemaphores();
+    bool CreateVulkanSwapChain();
+    bool CreateVulkanQueues();
+    bool CreateVulkanCommandBuffers();
+
+    bool Draw();
+
+    uint32 GetVulkanSwapChainNumImages(
+        const vk::SurfaceCapabilitiesKHR& surface_capabilities);
+    vk::SurfaceFormatKHR GetVulkanSwapChainFormat(
+        const std::vector<vk::SurfaceFormatKHR>& surface_formats);
+    vk::Extent2D GetVulkanSwapChainExtent(
+        const vk::SurfaceCapabilitiesKHR& surface_capabilities);
+    vk::ImageUsageFlags GetVulkanSwapChainUsageFlags(
+        const vk::SurfaceCapabilitiesKHR& surface_capabilities);
+    vk::SurfaceTransformFlagBitsKHR GetVulkanSwapChainTransform(
+        const vk::SurfaceCapabilitiesKHR& surface_capabilities);
+    vk::PresentModeKHR GetVulkanSwapChainPresentMode(
+        const std::vector<vk::PresentModeKHR>& present_modes);
 
     bool CheckVulkanValidationLayerSupport() const;
 
@@ -55,7 +74,17 @@ private:
 
     vk::Instance m_instance;
     vk::SurfaceKHR m_surface;
+
     vk::Device m_device;
+    vk::PhysicalDevice m_physical_device;
+
+    vk::Semaphore m_image_avaliable_semaphore;
+    vk::Semaphore m_rendering_finished_semaphore;
+
+    vk::SwapchainKHR m_swapchain;
+
+    vk::Queue m_graphics_queue;
+    vk::Queue m_present_queue;
 
     uint32 m_graphics_queue_family_index;
     uint32 m_present_queue_family_index;
