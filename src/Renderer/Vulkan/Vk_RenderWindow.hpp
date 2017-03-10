@@ -46,6 +46,8 @@ private:
     bool CreateVulkanQueues();
     bool CreateVulkanCommandBuffers();
 
+    bool RecordCommandBuffers();
+
     bool Draw();
 
     uint32 GetVulkanSwapChainNumImages(
@@ -69,6 +71,9 @@ private:
                              uint32& selected_graphics_queue_family_index,
                              uint32& selected_present_queue_family_index);
 
+    void CleanCommandBuffers();
+    bool OnWindowSizeChanged();
+
 private:
     SDL_Window* m_window;
 
@@ -88,6 +93,9 @@ private:
 
     uint32 m_graphics_queue_family_index;
     uint32 m_present_queue_family_index;
+
+    vk::CommandPool m_present_queue_cmd_pool;
+    std::vector<vk::CommandBuffer> m_present_queue_cmd_buffers;
 
     bool m_validation_layers_enabled;
     std::vector<const char*> m_validation_layers;

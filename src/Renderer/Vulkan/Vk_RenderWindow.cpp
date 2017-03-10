@@ -29,7 +29,8 @@ bool CheckLayerAvailability(const char* str,
 
 }  // namespace
 
-Vk_RenderWindow::Vk_RenderWindow() : m_window(nullptr) {}
+Vk_RenderWindow::Vk_RenderWindow()
+      : m_window(nullptr), m_validation_layers_enabled(true) {}
 
 Vk_RenderWindow::~Vk_RenderWindow() {
     Destroy();
@@ -38,7 +39,7 @@ Vk_RenderWindow::~Vk_RenderWindow() {
 bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
     // Create the window
     math::ivec2 initial_pos(SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-    Uint32 window_flags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
+    uint32 window_flags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
     m_window = SDL_CreateWindow(name.GetData(), initial_pos.x, initial_pos.y,
                                 size.x, size.y, window_flags);
     if (!m_window) {
@@ -54,7 +55,9 @@ bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
     m_size = size;
 
     // Add the required validation layers
-    m_validation_layers.push_back("VK_LAYER_LUNARG_standard_validation");
+    if (m_validation_layers_enabled) {
+        m_validation_layers.push_back("VK_LAYER_LUNARG_standard_validation");
+    }
 
     // Add the required Instance extensions
     m_instance_extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
@@ -72,32 +75,63 @@ bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
     // Add the required Device extensions
     m_device_extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
 
+    // Check the validation layers support
+    if (m_validation_layers_enabled && !CheckVulkanValidationLayerSupport()) {
+        LogFatal("Vk_RenderWindow",
+                 "Validation layers requested, but not available");
+        return false;
+    }
+
     CreateVulkanInstance();
     CreateVulkanSurface();
     CreateVulkanDevice();
     CreateVulkanSemaphores();
-    CreateVulkanSwapChain();
     CreateVulkanQueues();
+    CreateVulkanSwapChain();
+    CreateVulkanCommandBuffers();
+
+    // Draw();
 
     return true;
 }
 
 void Vk_RenderWindow::Destroy() {
-    m_device.waitIdle();
+    CleanCommandBuffers();
 
-    m_device.destroySwapchainKHR(m_swapchain, nullptr);
-    m_device.destroySemaphore(m_image_avaliable_semaphore, nullptr);
-    m_device.destroySemaphore(m_rendering_finished_semaphore, nullptr);
+    if (m_device) {
+        m_device.waitIdle();
 
-    m_device.destroy(nullptr);
+        if (m_image_avaliable_semaphore) {
+            m_device.destroySemaphore(m_image_avaliable_semaphore, nullptr);
+        }
+        if (m_rendering_finished_semaphore) {
+            m_device.destroySemaphore(m_rendering_finished_semaphore, nullptr);
+        }
+        if (m_swapchain) {
+            m_device.destroySwapchainKHR(m_swapchain, nullptr);
+        }
 
-    m_instance.destroySurfaceKHR(m_surface, nullptr);
-    m_instance.destroy(nullptr);
+        m_device.destroy(nullptr);
+    }
+
+    if (m_instance) {
+        if (m_surface) {
+            m_instance.destroySurfaceKHR(m_surface, nullptr);
+        }
+        m_instance.destroy(nullptr);
+    }
 
     if (m_window) {
         SDL_DestroyWindow(m_window);
         m_window = nullptr;
     }
+
+    m_image_avaliable_semaphore = vk::Semaphore();
+    m_rendering_finished_semaphore = vk::Semaphore();
+    m_swapchain = vk::SwapchainKHR();
+    m_device = vk::Device();
+    m_surface = vk::SurfaceKHR();
+    m_instance = vk::Instance();
 }
 
 void Vk_RenderWindow::Reposition(int left, int top) {
@@ -123,7 +157,7 @@ void Vk_RenderWindow::SetFullScreen(bool fullscreen, bool is_fake) {
     // TODO check errors
     if (m_window) {
         m_is_fullscreen = fullscreen;
-        Uint32 flag = 0;
+        uint32 flag = 0;
         if (fullscreen) {
             flag = (is_fake) ? SDL_WINDOW_FULLSCREEN_DESKTOP
                              : SDL_WINDOW_FULLSCREEN;
@@ -156,18 +190,12 @@ void Vk_RenderWindow::Clear(const Color& color) {  // RenderTarget
 }
 
 bool Vk_RenderWindow::IsVisible() {
-    Uint32 flags = SDL_WINDOW_HIDDEN | SDL_WINDOW_MINIMIZED;
-    Uint32 mask = SDL_GetWindowFlags(m_window);
+    uint32 flags = SDL_WINDOW_HIDDEN | SDL_WINDOW_MINIMIZED;
+    uint32 mask = SDL_GetWindowFlags(m_window);
     return (mask & flags) == 0;
 }
 
 bool Vk_RenderWindow::CreateVulkanInstance() {
-    if (m_validation_layers_enabled && !CheckVulkanValidationLayerSupport()) {
-        LogFatal("Vk_RenderWindow",
-                 "Validation layers requested, but not available");
-        return false;
-    }
-
     // Define the application information
     vk::ApplicationInfo appInfo{
         "Hello Vulkan",            // pApplicationName
@@ -177,12 +205,7 @@ bool Vk_RenderWindow::CreateVulkanInstance() {
         VK_API_VERSION_1_0         // apiVersion
     };
 
-    // Get the validation layers
-    if (!CheckVulkanValidationLayerSupport()) {
-        LogFatal("Vk_RenderWindow", "Error validation layers");
-        return false;
-    };
-
+    // Check that all the instance extensions are supported
     if (!CheckVulkanInstanceExtensionsSupport()) {
         LogFatal("Vk_RenderWindow", "Error instance extensions");
         return false;
@@ -463,6 +486,195 @@ bool Vk_RenderWindow::CreateVulkanSwapChain() {
 bool Vk_RenderWindow::CreateVulkanQueues() {
     m_device.getQueue(m_graphics_queue_family_index, 0, &m_graphics_queue);
     m_device.getQueue(m_present_queue_family_index, 0, &m_present_queue);
+    return true;
+}
+
+bool Vk_RenderWindow::CreateVulkanCommandBuffers() {
+    vk::Result result;
+
+    // Create the pool for the command buffers
+    vk::CommandPoolCreateInfo cmd_pool_create_info = {
+        vk::CommandPoolCreateFlags(),  // flags
+        m_present_queue_family_index   // queueFamilyIndex
+    };
+    result = m_device.createCommandPool(&cmd_pool_create_info, nullptr,
+                                        &m_present_queue_cmd_pool);
+    if (result != vk::Result::eSuccess) {
+        LogError("Vk_RenderWindow", "Could not create a command pool");
+        return false;
+    }
+
+    // Get the number of images in the swapchain
+    uint32 image_count = 0;
+    result = m_device.getSwapchainImagesKHR(m_swapchain, &image_count, nullptr);
+    if (image_count == 0 || result != vk::Result::eSuccess) {
+        LogError("Vk_RenderWindow",
+                 "Could not get the number of swap chain images");
+        return false;
+    }
+
+    // Reserve a command buffer for each image
+    m_present_queue_cmd_buffers.resize(image_count);
+
+    // Allocate space in the pool for each buffer
+    vk::CommandBufferAllocateInfo cmd_buffer_allocate_info{
+        m_present_queue_cmd_pool,          // commandPool
+        vk::CommandBufferLevel::ePrimary,  // level
+        image_count                        // bufferCount
+    };
+    result = m_device.allocateCommandBuffers(
+        &cmd_buffer_allocate_info, m_present_queue_cmd_buffers.data());
+    if (result != vk::Result::eSuccess) {
+        LogError("Vk_RenderWindow", "Could not allocate command buffers");
+        return false;
+    }
+
+    // Define some command buffers
+    if (!RecordCommandBuffers()) {
+        LogError("Vk_RenderWindow", "Could not record command buffers");
+        return false;
+    }
+
+    return true;
+}
+
+bool Vk_RenderWindow::RecordCommandBuffers() {
+    vk::Result result;
+
+    uint32 image_count =
+        static_cast<uint32>(m_present_queue_cmd_buffers.size());
+
+    std::vector<vk::Image> swap_chain_images(image_count);
+    result = m_device.getSwapchainImagesKHR(m_swapchain, &image_count,
+                                            &swap_chain_images[0]);
+    if (result != vk::Result::eSuccess) {
+        LogError("Vk_RenderWindow", "Could not get swap chain images");
+        return false;
+    }
+
+    vk::CommandBufferBeginInfo cmd_buffer_begin_info{
+        vk::CommandBufferUsageFlagBits::eSimultaneousUse,  // flags
+        nullptr                                            // pInheritanceInfo
+    };
+
+    vk::ClearColorValue clear_color(
+        std::array<float, 4>{0.0f, 0.5451f, 0.5451f, 0.0f});
+
+    vk::ImageSubresourceRange image_subresource_range{
+        vk::ImageAspectFlagBits::eColor,  // aspectMask
+        0,                                // baseMipLevel
+        1,                                // levelCount
+        0,                                // baseArrayLayer
+        1                                 // layerCount
+    };
+
+    for (uint32 i = 0; i < image_count; i++) {
+        vk::ImageMemoryBarrier barrier_from_present_to_clear{
+            vk::AccessFlagBits::eMemoryRead,       // srcAccessMask
+            vk::AccessFlagBits::eTransferWrite,    // dstAccessMask
+            vk::ImageLayout::eUndefined,           // oldLayout
+            vk::ImageLayout::eTransferDstOptimal,  // newLayout
+            m_present_queue_family_index,          // srcQueueFamilyIndex
+            m_present_queue_family_index,          // dstQueueFamilyIndex
+            swap_chain_images[i],                  // image
+            image_subresource_range                // subresourceRange
+        };
+
+        vk::ImageMemoryBarrier barrier_from_clear_to_present{
+            vk::AccessFlagBits::eTransferWrite,    // srcAccessMask
+            vk::AccessFlagBits::eMemoryRead,       // dstAccessMask
+            vk::ImageLayout::eTransferDstOptimal,  // oldLayout
+            vk::ImageLayout::ePresentSrcKHR,       // newLayout
+            m_present_queue_family_index,          // srcQueueFamilyIndex
+            m_present_queue_family_index,          // dstQueueFamilyIndex
+            swap_chain_images[i],                  // image
+            image_subresource_range                // subresourceRange
+        };
+
+        m_present_queue_cmd_buffers[i].begin(&cmd_buffer_begin_info);
+
+        m_present_queue_cmd_buffers[i].pipelineBarrier(
+            vk::PipelineStageFlagBits::eTransfer,
+            vk::PipelineStageFlagBits::eTransfer, vk::DependencyFlags(), 0,
+            nullptr, 0, nullptr, 1, &barrier_from_present_to_clear);
+
+        m_present_queue_cmd_buffers[i].clearColorImage(
+            swap_chain_images[i], vk::ImageLayout::eTransferDstOptimal,
+            &clear_color, 1, &image_subresource_range);
+
+        m_present_queue_cmd_buffers[i].pipelineBarrier(
+            vk::PipelineStageFlagBits::eTransfer,
+            vk::PipelineStageFlagBits::eBottomOfPipe, vk::DependencyFlags(), 0,
+            nullptr, 0, nullptr, 1, &barrier_from_clear_to_present);
+
+        result = m_present_queue_cmd_buffers[i].end();
+        if (result != vk::Result::eSuccess) {
+            LogError("Vk_RenderWindow", "Could not record command buffers");
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool Vk_RenderWindow::Draw() {
+    vk::Result result;
+
+    uint32 image_index;
+    result = m_device.acquireNextImageKHR(m_swapchain, UINT64_MAX,
+                                          m_image_avaliable_semaphore,
+                                          vk::Fence(), &image_index);
+    switch (result) {
+        case vk::Result::eSuccess:
+        case vk::Result::eSuboptimalKHR:
+            break;
+        case vk::Result::eErrorOutOfDateKHR:
+            return OnWindowSizeChanged();
+        default:
+            LogError("Vk_RenderWindow",
+                     "Problem occurred during swap chain image acquisition");
+            return false;
+    }
+
+    vk::PipelineStageFlags wait_dst_stage_mask =
+        vk::PipelineStageFlagBits::eTransfer;
+    vk::SubmitInfo submit_info{
+        1,                                          // waitSemaphoreCount
+        &m_image_avaliable_semaphore,               // pWaitSemaphores
+        &wait_dst_stage_mask,                       // pWaitDstStageMask;
+        1,                                          // commandBufferCount
+        &m_present_queue_cmd_buffers[image_index],  // pCommandBuffers
+        1,                                          // signalSemaphoreCount
+        &m_rendering_finished_semaphore             // pSignalSemaphores
+    };
+
+    result = m_present_queue.submit(1, &submit_info, vk::Fence());
+    if (result != vk::Result::eSuccess) {
+        return false;
+    }
+
+    vk::PresentInfoKHR present_info{
+        1,                                // waitSemaphoreCount
+        &m_rendering_finished_semaphore,  // pWaitSemaphores
+        1,                                // swapchainCount
+        &m_swapchain,                     // pSwapchains
+        &image_index,                     // pImageIndices
+        nullptr                           // pResults
+    };
+
+    result = m_present_queue.presentKHR(&present_info);
+    switch (result) {
+        case vk::Result::eSuccess:
+            break;
+        case vk::Result::eErrorOutOfDateKHR:
+        case vk::Result::eSuboptimalKHR:
+            return OnWindowSizeChanged();
+        default:
+            LogError("Vk_RenderWindow",
+                     "Problem occurred during image presentation");
+            return false;
+    }
+
     return true;
 }
 
@@ -756,6 +968,38 @@ bool Vk_RenderWindow::CheckPhysicalDevice(
 
     selected_graphics_queue_family_index = graphics_queue_family_index;
     selected_present_queue_family_index = present_queue_family_index;
+    return true;
+}
+
+void Vk_RenderWindow::CleanCommandBuffers() {
+    if (m_device) {
+        m_device.waitIdle();
+
+        if (m_present_queue_cmd_buffers.size() > 0 &&
+            m_present_queue_cmd_buffers[0]) {
+            m_device.freeCommandBuffers(
+                m_present_queue_cmd_pool,
+                static_cast<uint32>(m_present_queue_cmd_buffers.size()),
+                m_present_queue_cmd_buffers.data());
+            m_present_queue_cmd_buffers.clear();
+        }
+
+        if (m_present_queue_cmd_pool) {
+            m_device.destroyCommandPool(m_present_queue_cmd_pool, nullptr);
+            m_present_queue_cmd_pool = vk::CommandPool();
+        }
+    }
+}
+
+bool Vk_RenderWindow::OnWindowSizeChanged() {
+    CleanCommandBuffers();
+
+    if (!CreateVulkanSwapChain()) {
+        return false;
+    }
+    if (!CreateVulkanCommandBuffers()) {
+        return false;
+    }
     return true;
 }
 
