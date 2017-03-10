@@ -20,7 +20,8 @@ public:
 
     const String& GetName() const;
 
-    void* GetSymbol(const String& symbol);
+    void* GetSymbol(const char* name);
+    void* GetSymbol(const String& name);
 
 private:
     String m_name;

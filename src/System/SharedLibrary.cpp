@@ -80,16 +80,20 @@ const String& SharedLibrary::GetName() const {
     return m_name;
 }
 
-void* SharedLibrary::GetSymbol(const String& symbol) {
+void* SharedLibrary::GetSymbol(const char* name) {
     if (m_handle == nullptr) return nullptr;
     void* address = nullptr;
 #if PLATFORM_IS(PLATFORM_WINDOWS)
     address =
-        GetProcAddress(reinterpret_cast<HMODULE>(m_handle), symbol.GetData());
+        GetProcAddress(reinterpret_cast<HMODULE>(m_handle), name);
 #elif PLATFORM_IS(PLATFORM_LINUX) || PLATFORM_IS(PLATFORM_MAC)
-    address = dlsym(m_handle, symbol.GetData());
+    address = dlsym(m_handle, name);
 #endif
     return address;
+}
+
+void* SharedLibrary::GetSymbol(const String& name) {
+    return GetSymbol(name.GetData());
 }
 
 }  // namespace engine
