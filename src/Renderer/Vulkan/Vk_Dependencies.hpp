@@ -14,7 +14,8 @@
 #define VK_USE_PLATFORM_ANDROID_KHR
 #endif
 
-// #define VULKAN_HPP_DISABLE_ENHANCED_MODE
+#define VULKAN_HPP_NO_SMART_HANDLE
+#define VULKAN_HPP_DISABLE_ENHANCED_MODE
 #include <vulkan/vulkan.hpp>
 
 #include <SDL.h>
