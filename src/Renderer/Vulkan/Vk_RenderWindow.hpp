@@ -14,10 +14,9 @@ namespace engine {
 class VULKAN_PLUGIN_API Vk_RenderWindow : public RenderWindow {
 public:
     Vk_RenderWindow();
+
     ~Vk_RenderWindow();
 
-    ////////////////////////////////////////////////////////////////
-    // Overridden
     virtual bool Create(const String& name, const math::ivec2& size);
 
     virtual void Destroy(void);
@@ -35,7 +34,6 @@ public:
     virtual void Clear(const Color& color);  // Render Target
 
     virtual bool IsVisible();
-    ////////////////////////////////////////////////////////////////
 
 private:
     bool CreateVulkanInstance();
@@ -47,8 +45,6 @@ private:
     bool CreateVulkanCommandBuffers();
 
     bool RecordCommandBuffers();
-
-    bool Draw();
 
     uint32 GetVulkanSwapChainNumImages(
         const vk::SurfaceCapabilitiesKHR& surface_capabilities);

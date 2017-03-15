@@ -43,14 +43,13 @@ bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
     m_window = SDL_CreateWindow(name.GetData(), initial_pos.x, initial_pos.y,
                                 size.x, size.y, window_flags);
     if (!m_window) {
-        String error = String("SDL_CreateWindow fail: ") + SDL_GetError();
-        LogError("Vk_RenderWindow", error);
+        LogError("Vk_RenderWindow",
+                 "SDL_CreateWindow fail: "_format(SDL_GetError()));
         return false;
     }
 
-    SDL_GetWindowSize(m_window, &m_size.x, &m_size.y);
-
     // Update the base class attributes
+    SDL_GetWindowSize(m_window, &m_size.x, &m_size.y);
     m_name = name;
     m_size = size;
 
@@ -89,8 +88,6 @@ bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
     CreateVulkanQueues();
     CreateVulkanSwapChain();
     CreateVulkanCommandBuffers();
-
-    // Draw();
 
     return true;
 }
@@ -145,11 +142,7 @@ void Vk_RenderWindow::Resize(int width, int height) {
     // TODO check errors
     if (m_window && !IsFullScreen()) {
         SDL_SetWindowSize(m_window, width, height);
-
-        // Update the base class attributes
-        // TMP Update the ViewPort
-        SDL_GetWindowSize(m_window, &m_size.x, &m_size.y);
-        // GL_CALL(glViewport(0, 0, m_size.x, m_size.y));
+        OnWindowSizeChanged();
     }
 }
 
@@ -163,15 +156,11 @@ void Vk_RenderWindow::SetFullScreen(bool fullscreen, bool is_fake) {
                              : SDL_WINDOW_FULLSCREEN;
         }
         SDL_SetWindowFullscreen(m_window, flag);
-
-        // Update the base class attributes
-        // TMP Update the ViewPort
-        SDL_GetWindowSize(m_window, &m_size.x, &m_size.y);
-        // GL_CALL(glViewport(0, 0, m_size.x, m_size.y));
+        OnWindowSizeChanged();
     }
 }
 
-void Vk_RenderWindow::SetVSyncEnabled(bool vsync) {
+void Vk_RenderWindow::SetVSyncEnabled(bool /*vsync*/) {
     // if (SDL_GL_SetSwapInterval(vsync ? 1 : 0) == 0) {
     //     m_is_vsync_enable = vsync;
     // } else {
@@ -180,11 +169,68 @@ void Vk_RenderWindow::SetVSyncEnabled(bool vsync) {
 }
 
 void Vk_RenderWindow::SwapBuffers() {
-    // SDL_GL_SwapWindow(m_window);
-    // RenderWindow::SwapBuffers();
+    vk::Result result;
+
+    uint32 image_index = 0;
+    result = m_device.acquireNextImageKHR(m_swapchain, UINT64_MAX,
+                                          m_image_avaliable_semaphore,
+                                          vk::Fence(), &image_index);
+    switch (result) {
+        case vk::Result::eSuccess:
+        case vk::Result::eSuboptimalKHR:
+            break;
+        case vk::Result::eErrorOutOfDateKHR:
+            OnWindowSizeChanged();
+            return;
+        default:
+            LogError("Vk_RenderWindow",
+                     "Problem occurred during swap chain image acquisition");
+            return;
+    }
+
+    vk::PipelineStageFlags wait_dst_stage_mask =
+        vk::PipelineStageFlagBits::eTransfer;
+    vk::SubmitInfo submit_info{
+        1,                                          // waitSemaphoreCount
+        &m_image_avaliable_semaphore,               // pWaitSemaphores
+        &wait_dst_stage_mask,                       // pWaitDstStageMask;
+        1,                                          // commandBufferCount
+        &m_present_queue_cmd_buffers[image_index],  // pCommandBuffers
+        1,                                          // signalSemaphoreCount
+        &m_rendering_finished_semaphore             // pSignalSemaphores
+    };
+
+    result = m_present_queue.submit(1, &submit_info, vk::Fence());
+    if (result != vk::Result::eSuccess) {
+        LogError("Vk_RenderWindow", "Error submitting the command buffers");
+        return;
+    }
+
+    vk::PresentInfoKHR present_info{
+        1,                                // waitSemaphoreCount
+        &m_rendering_finished_semaphore,  // pWaitSemaphores
+        1,                                // swapchainCount
+        &m_swapchain,                     // pSwapchains
+        &image_index,                     // pImageIndices
+        nullptr                           // pResults
+    };
+
+    result = m_present_queue.presentKHR(&present_info);
+    switch (result) {
+        case vk::Result::eSuccess:
+            break;
+        case vk::Result::eErrorOutOfDateKHR:
+        case vk::Result::eSuboptimalKHR:
+            OnWindowSizeChanged();
+            return;
+        default:
+            LogError("Vk_RenderWindow",
+                     "Problem occurred during image presentation");
+            return;
+    }
 }
 
-void Vk_RenderWindow::Clear(const Color& color) {  // RenderTarget
+void Vk_RenderWindow::Clear(const Color& /*color*/) {  // RenderTarget
     // GL_CALL(glClearColor(color.r, color.g, color.b, color.a));
     // GL_CALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }
@@ -198,7 +244,7 @@ bool Vk_RenderWindow::IsVisible() {
 bool Vk_RenderWindow::CreateVulkanInstance() {
     // Define the application information
     vk::ApplicationInfo appInfo{
-        "Hello Vulkan",            // pApplicationName
+        m_name.GetData(),          // pApplicationName
         VK_MAKE_VERSION(1, 0, 0),  // applicationVersion
         "Engine",                  // pEngineName
         VK_MAKE_VERSION(1, 0, 0),  // engineVersion
@@ -546,7 +592,7 @@ bool Vk_RenderWindow::RecordCommandBuffers() {
 
     std::vector<vk::Image> swap_chain_images(image_count);
     result = m_device.getSwapchainImagesKHR(m_swapchain, &image_count,
-                                            &swap_chain_images[0]);
+                                            swap_chain_images.data());
     if (result != vk::Result::eSuccess) {
         LogError("Vk_RenderWindow", "Could not get swap chain images");
         return false;
@@ -568,7 +614,7 @@ bool Vk_RenderWindow::RecordCommandBuffers() {
         1                                 // layerCount
     };
 
-    for (uint32 i = 0; i < image_count; i++) {
+    for (size_t i = 0; i < m_present_queue_cmd_buffers.size(); i++) {
         vk::ImageMemoryBarrier barrier_from_present_to_clear{
             vk::AccessFlagBits::eMemoryRead,       // srcAccessMask
             vk::AccessFlagBits::eTransferWrite,    // dstAccessMask
@@ -617,67 +663,6 @@ bool Vk_RenderWindow::RecordCommandBuffers() {
     return true;
 }
 
-bool Vk_RenderWindow::Draw() {
-    vk::Result result;
-
-    uint32 image_index;
-    result = m_device.acquireNextImageKHR(m_swapchain, UINT64_MAX,
-                                          m_image_avaliable_semaphore,
-                                          vk::Fence(), &image_index);
-    switch (result) {
-        case vk::Result::eSuccess:
-        case vk::Result::eSuboptimalKHR:
-            break;
-        case vk::Result::eErrorOutOfDateKHR:
-            return OnWindowSizeChanged();
-        default:
-            LogError("Vk_RenderWindow",
-                     "Problem occurred during swap chain image acquisition");
-            return false;
-    }
-
-    vk::PipelineStageFlags wait_dst_stage_mask =
-        vk::PipelineStageFlagBits::eTransfer;
-    vk::SubmitInfo submit_info{
-        1,                                          // waitSemaphoreCount
-        &m_image_avaliable_semaphore,               // pWaitSemaphores
-        &wait_dst_stage_mask,                       // pWaitDstStageMask;
-        1,                                          // commandBufferCount
-        &m_present_queue_cmd_buffers[image_index],  // pCommandBuffers
-        1,                                          // signalSemaphoreCount
-        &m_rendering_finished_semaphore             // pSignalSemaphores
-    };
-
-    result = m_present_queue.submit(1, &submit_info, vk::Fence());
-    if (result != vk::Result::eSuccess) {
-        return false;
-    }
-
-    vk::PresentInfoKHR present_info{
-        1,                                // waitSemaphoreCount
-        &m_rendering_finished_semaphore,  // pWaitSemaphores
-        1,                                // swapchainCount
-        &m_swapchain,                     // pSwapchains
-        &image_index,                     // pImageIndices
-        nullptr                           // pResults
-    };
-
-    result = m_present_queue.presentKHR(&present_info);
-    switch (result) {
-        case vk::Result::eSuccess:
-            break;
-        case vk::Result::eErrorOutOfDateKHR:
-        case vk::Result::eSuboptimalKHR:
-            return OnWindowSizeChanged();
-        default:
-            LogError("Vk_RenderWindow",
-                     "Problem occurred during image presentation");
-            return false;
-    }
-
-    return true;
-}
-
 uint32 Vk_RenderWindow::GetVulkanSwapChainNumImages(
     const vk::SurfaceCapabilitiesKHR& surface_capabilities) {
     // Set of images defined in a swap chain may not always be available for
@@ -721,7 +706,8 @@ vk::Extent2D Vk_RenderWindow::GetVulkanSwapChainExtent(
     // If this is so we define the size by ourselves but it must fit within
     // defined confines
     if (surface_capabilities.currentExtent.width == 0xFFFFFFFF) {
-        vk::Extent2D swap_chain_extent = {640, 480};
+        vk::Extent2D swap_chain_extent = {static_cast<uint32>(m_size.x),
+                                          static_cast<uint32>(m_size.y)};
         swap_chain_extent.width = math::Clamp(
             swap_chain_extent.width, surface_capabilities.minImageExtent.width,
             surface_capabilities.maxImageExtent.width);
@@ -992,6 +978,9 @@ void Vk_RenderWindow::CleanCommandBuffers() {
 }
 
 bool Vk_RenderWindow::OnWindowSizeChanged() {
+    // Update the base class attributes
+    SDL_GetWindowSize(m_window, &m_size.x, &m_size.y);
+
     CleanCommandBuffers();
 
     if (!CreateVulkanSwapChain()) {
