@@ -30,6 +30,7 @@ branches:
 # scripts that run after cloning repository
 install:
   - git submodule update --init --recursive
+  - set PATH=C:\Program Files\Git\mingw64\bin;%PATH% # to get curl
   - curl -fsS -o VulkanSDK.exe %VULKAN_DOWNLOAD_URL%
   - start /wait VulkanSDK.exe /S
   - set VULKAN_SDK=C:\VulkanSDK\%VULKAN_SDK_VERSION%
