@@ -18,8 +18,12 @@ GL_Shader::GL_Shader() : m_program(glCreateProgram()), m_linked(false) {
 }
 
 GL_Shader::GL_Shader(GL_Shader&& other)
-      : m_program(other.m_program), m_uniforms(std::move(other.m_uniforms)) {
+      : m_program(other.m_program),
+        m_shaders(std::move(other.m_shaders)),
+        m_linked(other.m_linked),
+        m_uniforms(std::move(other.m_uniforms)) {
     other.m_program = 0;
+    other.m_linked = false;
 }
 
 GL_Shader::~GL_Shader() {
@@ -29,8 +33,11 @@ GL_Shader::~GL_Shader() {
 
 GL_Shader& GL_Shader::operator=(GL_Shader&& other) {
     m_program = other.m_program;
+    m_shaders = std::move(other.m_shaders);
+    m_linked = other.m_linked;
     m_uniforms = std::move(other.m_uniforms);
     other.m_program = 0;
+    other.m_linked = false;
     return *this;
 }
 
