@@ -5,7 +5,17 @@
 
 namespace engine {
 
-GL_Shader::GL_Shader() : m_program(0) {}
+namespace {
+
+GLenum s_gl_shader_types[] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER,
+                              GL_GEOMETRY_SHADER};
+
+}  // namespace
+
+GL_Shader::GL_Shader() : m_program(glCreateProgram()), m_linked(false) {
+    // reserve space minimum for a vetex an a fragment shader
+    m_shaders.reserve(2);
+}
 
 GL_Shader::GL_Shader(GL_Shader&& other)
       : m_program(other.m_program), m_uniforms(std::move(other.m_uniforms)) {
@@ -13,6 +23,7 @@ GL_Shader::GL_Shader(GL_Shader&& other)
 }
 
 GL_Shader::~GL_Shader() {
+    if (!m_linked) CleanUpShaders();
     GL_CALL(glDeleteProgram(m_program));
 }
 
@@ -23,13 +34,47 @@ GL_Shader& GL_Shader::operator=(GL_Shader&& other) {
     return *this;
 }
 
-bool GL_Shader::LoadFromMemory(const String& vertex_source,
-                               const String& fragment_source) {
-    return CompileAndLink(vertex_source.GetData(), fragment_source.GetData());
+bool GL_Shader::LoadFromMemory(const byte* source, std::size_t source_size,
+                               ShaderType type) {
+    if (m_linked) {
+        return false;
+    }
+
+    GLuint shader = Compile(source, source_size, type);
+    if (!shader) {
+        return false;
+    }
+
+    GL_CALL(glAttachShader(m_program, shader));
+    m_shaders.push_back(shader);
+
+    return true;
+}
+
+bool GL_Shader::Link() {
+    GL_CALL(glLinkProgram(m_program));
+
+    GLint success = 0;
+    glGetProgramiv(m_program, GL_LINK_STATUS, &success);
+    if (success == GL_FALSE) {
+        GLint log_size = 0;
+        GL_CALL(glGetProgramiv(m_program, GL_INFO_LOG_LENGTH, &log_size));
+        char* error = new char[log_size];
+        GL_CALL(glGetProgramInfoLog(m_program, log_size, &log_size, error));
+        LogError("Shader", error);
+        delete[] error;
+        return false;
+    }
+
+    // After the program is succesfully linked the shaders can be cleaned
+    CleanUpShaders();
+
+    m_linked = true;
+    return true;
 }
 
 void GL_Shader::Use() {
-    GL_CALL(glUseProgram(m_program));
+    if (m_linked) GL_CALL(glUseProgram(m_program));
 }
 
 void GL_Shader::SetUniform(const String& name, float val) {
@@ -81,11 +126,17 @@ void GL_Shader::SetUniform(const String& name, const math::vec2& val) {
     if (location != -1) GL_CALL(glUniform2f(location, val[0], val[1]));
 }
 
-GLuint GL_Shader::Compile(GLenum shader_type, const char* source) {
-    if (source == nullptr) return 0;
-    GLuint shader = glCreateShader(shader_type);
-    GL_CALL(glShaderSource(shader, 1, &source, nullptr));
+GLuint GL_Shader::Compile(const byte* source, size_t source_size,
+                          ShaderType type) {
+    if (source == nullptr || source_size == 0) return 0;
+
+    GLuint shader = glCreateShader(s_gl_shader_types[static_cast<int>(type)]);
+
+    const char* source_str = reinterpret_cast<const char*>(source);
+    GLint length = static_cast<GLint>(source_size);
+    GL_CALL(glShaderSource(shader, 1, &source_str, &length));
     GL_CALL(glCompileShader(shader));
+
     GLint success = 0;
     GL_CALL(glGetShaderiv(shader, GL_COMPILE_STATUS, &success));
     if (success == GL_FALSE) {
@@ -98,51 +149,18 @@ GLuint GL_Shader::Compile(GLenum shader_type, const char* source) {
         GL_CALL(glDeleteShader(shader));
         return 0;
     }
+
     return shader;
 }
 
-bool GL_Shader::CompileAndLink(const char* vertex_source,
-                               const char* fragment_source) {
-    if (m_program) GL_CALL(glDeleteProgram(m_program));
-
-    GLuint vertex_shader = Compile(GL_VERTEX_SHADER, vertex_source);
-    if (!vertex_shader) {
-        GL_CALL(glDeleteShader(vertex_shader));
-        return false;
+void GL_Shader::CleanUpShaders() {
+    for (size_t i = 0; i < m_shaders.size(); i++) {
+        if (m_shaders[i]) {
+            GL_CALL(glDetachShader(m_program, m_shaders[i]));
+            GL_CALL(glDeleteShader(m_shaders[i]));
+        }
     }
-    GLuint fragment_shader = Compile(GL_FRAGMENT_SHADER, fragment_source);
-    if (!fragment_shader) {
-        GL_CALL(glDeleteShader(fragment_shader));
-        GL_CALL(glDeleteShader(vertex_shader));
-        return false;
-    }
-
-    m_program = glCreateProgram();
-    GL_CALL(glAttachShader(m_program, vertex_shader));
-    GL_CALL(glAttachShader(m_program, fragment_shader));
-    GL_CALL(glLinkProgram(m_program));
-
-    GLint success = 0;
-    glGetProgramiv(m_program, GL_LINK_STATUS, &success);
-    if (success == GL_FALSE) {
-        GLint log_size = 0;
-        GL_CALL(glGetProgramiv(m_program, GL_INFO_LOG_LENGTH, &log_size));
-        char* error = new char[log_size];
-        GL_CALL(glGetProgramInfoLog(m_program, log_size, &log_size, error));
-        LogError("Shader", error);
-        delete[] error;
-        GL_CALL(glDeleteProgram(m_program));
-        GL_CALL(glDeleteShader(vertex_shader));
-        GL_CALL(glDeleteShader(fragment_shader));
-        return false;
-    }
-
-    GL_CALL(glDetachShader(m_program, vertex_shader));
-    GL_CALL(glDetachShader(m_program, fragment_shader));
-    GL_CALL(glDeleteShader(vertex_shader));
-    GL_CALL(glDeleteShader(fragment_shader));
-
-    return true;
+    m_shaders.clear();
 }
 
 GLint GL_Shader::GetUniformLocation(const String& name) {

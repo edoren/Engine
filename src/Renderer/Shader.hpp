@@ -7,6 +7,12 @@
 
 namespace engine {
 
+enum class ShaderType {
+    Vertex,
+    Fragment,
+    Geometry  // TODO: Add support
+};
+
 class ENGINE_API Shader : NonCopyable {
 public:
     Shader() {}
@@ -14,8 +20,10 @@ public:
 
     virtual Shader& operator=(Shader&& other) = default;
 
-    virtual bool LoadFromMemory(const String& vertex_source,
-                                const String& fragment_source) = 0;
+    virtual bool LoadFromMemory(const byte* source, std::size_t source_size,
+                                ShaderType type) = 0;
+
+    virtual bool Link() = 0;
 
     virtual void Use() = 0;
 };

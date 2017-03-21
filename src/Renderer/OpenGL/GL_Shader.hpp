@@ -17,8 +17,10 @@ public:
 
     GL_Shader& operator=(GL_Shader&& other);
 
-    bool LoadFromMemory(const String& vertex_source,
-                        const String& fragment_source);
+    bool LoadFromMemory(const byte* source, std::size_t source_size,
+                        ShaderType type);
+
+    bool Link();
 
     void Use();
 
@@ -33,15 +35,20 @@ public:
     void SetUniform(const String& name, const math::vec2& val);
 
 private:
-    uint32 Compile(GLenum type, const char* source);
+    GLuint Compile(const byte* source, std::size_t source_size,
+                   ShaderType type);
 
-    bool CompileAndLink(const char* vertex_source, const char* fragment_source);
+    void CleanUpShaders();
 
-    int32 GetUniformLocation(const String& name);
+    GLint GetUniformLocation(const String& name);
 
 private:
-    uint32 m_program;
-    std::map<String, int32> m_uniforms;
+    GLuint m_program;
+    std::vector<GLuint> m_shaders;
+
+    bool m_linked;
+
+    std::map<String, GLint> m_uniforms;
 };
 
 }  // namespace engine
