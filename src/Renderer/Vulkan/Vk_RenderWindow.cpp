@@ -104,8 +104,8 @@ void Vk_RenderWindow::Destroy() {
         if (m_rendering_finished_semaphore) {
             m_device.destroySemaphore(m_rendering_finished_semaphore, nullptr);
         }
-        if (m_swapchain) {
-            m_device.destroySwapchainKHR(m_swapchain, nullptr);
+        if (m_swapchain.handle) {
+            m_device.destroySwapchainKHR(m_swapchain.handle, nullptr);
         }
 
         m_device.destroy(nullptr);
@@ -125,7 +125,7 @@ void Vk_RenderWindow::Destroy() {
 
     m_image_avaliable_semaphore = vk::Semaphore();
     m_rendering_finished_semaphore = vk::Semaphore();
-    m_swapchain = vk::SwapchainKHR();
+    m_swapchain.handle = vk::SwapchainKHR();
     m_device = vk::Device();
     m_surface = vk::SurfaceKHR();
     m_instance = vk::Instance();
@@ -172,7 +172,7 @@ void Vk_RenderWindow::SwapBuffers() {
     vk::Result result;
 
     uint32 image_index = 0;
-    result = m_device.acquireNextImageKHR(m_swapchain, UINT64_MAX,
+    result = m_device.acquireNextImageKHR(m_swapchain.handle, UINT64_MAX,
                                           m_image_avaliable_semaphore,
                                           vk::Fence(), &image_index);
     switch (result) {
@@ -200,7 +200,7 @@ void Vk_RenderWindow::SwapBuffers() {
         &m_rendering_finished_semaphore             // pSignalSemaphores
     };
 
-    result = m_present_queue.submit(1, &submit_info, vk::Fence());
+    result = m_present_queue.handle.submit(1, &submit_info, vk::Fence());
     if (result != vk::Result::eSuccess) {
         LogError("Vk_RenderWindow", "Error submitting the command buffers");
         return;
@@ -210,12 +210,12 @@ void Vk_RenderWindow::SwapBuffers() {
         1,                                // waitSemaphoreCount
         &m_rendering_finished_semaphore,  // pWaitSemaphores
         1,                                // swapchainCount
-        &m_swapchain,                     // pSwapchains
+        &m_swapchain.handle,              // pSwapchains
         &image_index,                     // pImageIndices
         nullptr                           // pResults
     };
 
-    result = m_present_queue.presentKHR(&present_info);
+    result = m_present_queue.handle.presentKHR(&present_info);
     switch (result) {
         case vk::Result::eSuccess:
             break;
@@ -409,8 +409,8 @@ bool Vk_RenderWindow::CreateVulkanDevice() {
     }
 
     m_physical_device = *selected_physical_device;
-    m_graphics_queue_family_index = selected_graphics_queue_family_index;
-    m_present_queue_family_index = selected_present_queue_family_index;
+    m_graphics_queue.index = selected_graphics_queue_family_index;
+    m_present_queue.index = selected_present_queue_family_index;
     return true;
 }
 
@@ -491,7 +491,7 @@ bool Vk_RenderWindow::CreateVulkanSwapChain() {
         GetVulkanSwapChainTransform(surface_capabilities);
     vk::PresentModeKHR desired_present_mode =
         GetVulkanSwapChainPresentMode(present_modes);
-    vk::SwapchainKHR old_swap_chain = m_swapchain;
+    vk::SwapchainKHR old_swap_chain = m_swapchain.handle;
 
     if (static_cast<int>(VkImageUsageFlags(desired_usage)) == -1) {
         return false;
@@ -517,7 +517,7 @@ bool Vk_RenderWindow::CreateVulkanSwapChain() {
     };
 
     result = m_device.createSwapchainKHR(&swap_chain_create_info, nullptr,
-                                         &m_swapchain);
+                                         &m_swapchain.handle);
     if (result != vk::Result::eSuccess) {
         LogFatal("Vk_RenderWindow", "Could not create swap chain");
         return false;
@@ -526,12 +526,40 @@ bool Vk_RenderWindow::CreateVulkanSwapChain() {
         m_device.destroySwapchainKHR(old_swap_chain, nullptr);
     }
 
+    // Store all the necesary SwapChain parameters
+
+    // Get the SwapChain format
+    m_swapchain.format = desired_format.format;
+
+    // Get the SwapChain images
+    uint32 image_count = 0;
+    std::vector<vk::Image> swapchain_images;
+    result = m_device.getSwapchainImagesKHR(m_swapchain.handle, &image_count,
+                                            nullptr);
+
+    if (image_count > 0 && result == vk::Result::eSuccess) {
+        swapchain_images.resize(image_count);
+        result = m_device.getSwapchainImagesKHR(
+            m_swapchain.handle, &image_count, swapchain_images.data());
+    }
+    // Check that all the images could be queried
+    if (image_count == 0 || result != vk::Result::eSuccess) {
+        LogError("Vk_RenderWindow",
+                 "Could not get the number of swap chain images");
+        return false;
+    }
+    // Store all the Image handles
+    m_swapchain.images.resize(image_count);
+    for (size_t i = 0; i < swapchain_images.size(); i++) {
+        m_swapchain.images[i].handle = swapchain_images[i];
+    }
+
     return true;
 }
 
 bool Vk_RenderWindow::CreateVulkanQueues() {
-    m_device.getQueue(m_graphics_queue_family_index, 0, &m_graphics_queue);
-    m_device.getQueue(m_present_queue_family_index, 0, &m_present_queue);
+    m_device.getQueue(m_graphics_queue.index, 0, &m_graphics_queue.handle);
+    m_device.getQueue(m_present_queue.index, 0, &m_present_queue.handle);
     return true;
 }
 
@@ -541,7 +569,7 @@ bool Vk_RenderWindow::CreateVulkanCommandBuffers() {
     // Create the pool for the command buffers
     vk::CommandPoolCreateInfo cmd_pool_create_info = {
         vk::CommandPoolCreateFlags(),  // flags
-        m_present_queue_family_index   // queueFamilyIndex
+        m_present_queue.index          // queueFamilyIndex
     };
     result = m_device.createCommandPool(&cmd_pool_create_info, nullptr,
                                         &m_present_queue_cmd_pool);
@@ -550,23 +578,14 @@ bool Vk_RenderWindow::CreateVulkanCommandBuffers() {
         return false;
     }
 
-    // Get the number of images in the swapchain
-    uint32 image_count = 0;
-    result = m_device.getSwapchainImagesKHR(m_swapchain, &image_count, nullptr);
-    if (image_count == 0 || result != vk::Result::eSuccess) {
-        LogError("Vk_RenderWindow",
-                 "Could not get the number of swap chain images");
-        return false;
-    }
-
     // Reserve a command buffer for each image
-    m_present_queue_cmd_buffers.resize(image_count);
+    m_present_queue_cmd_buffers.resize(m_swapchain.images.size());
 
     // Allocate space in the pool for each buffer
     vk::CommandBufferAllocateInfo cmd_buffer_allocate_info{
-        m_present_queue_cmd_pool,          // commandPool
-        vk::CommandBufferLevel::ePrimary,  // level
-        image_count                        // bufferCount
+        m_present_queue_cmd_pool,                       // commandPool
+        vk::CommandBufferLevel::ePrimary,               // level
+        static_cast<uint32>(m_swapchain.images.size())  // bufferCount
     };
     result = m_device.allocateCommandBuffers(
         &cmd_buffer_allocate_info, m_present_queue_cmd_buffers.data());
@@ -584,19 +603,121 @@ bool Vk_RenderWindow::CreateVulkanCommandBuffers() {
     return true;
 }
 
-bool Vk_RenderWindow::RecordCommandBuffers() {
+bool Vk_RenderWindow::CreateVulkanRenderPass() {
     vk::Result result;
 
-    uint32 image_count =
-        static_cast<uint32>(m_present_queue_cmd_buffers.size());
+    // Create the attachment descriptions
+    vk::AttachmentDescription attachment_descriptions[] = {{
+        vk::AttachmentDescriptionFlags(),  // flags
+        m_swapchain.format,                // format
+        vk::SampleCountFlagBits::e1,       // samples
+        vk::AttachmentLoadOp::eClear,      // loadOp
+        vk::AttachmentStoreOp::eStore,     // storeOp
+        vk::AttachmentLoadOp::eDontCare,   // stencilLoadOp
+        vk::AttachmentStoreOp::eDontCare,  // stencilStoreOp
+        vk::ImageLayout::ePresentSrcKHR,   // initialLayout;
+        vk::ImageLayout::ePresentSrcKHR    // finalLayout
+    }};
 
-    std::vector<vk::Image> swap_chain_images(image_count);
-    result = m_device.getSwapchainImagesKHR(m_swapchain, &image_count,
-                                            swap_chain_images.data());
+    vk::AttachmentReference color_attachment_references[] = {{
+        0,                                        // attachment
+        vk::ImageLayout::eColorAttachmentOptimal  // layout
+    }};
+
+    vk::SubpassDescription subpass_descriptions[] = {{
+        vk::SubpassDescriptionFlags(),     // flags
+        vk::PipelineBindPoint::eGraphics,  // pipelineBindPoint
+        0,                                 // inputAttachmentCount
+        nullptr,                           // pInputAttachments
+        1,                                 // colorAttachmentCount
+        color_attachment_references,       // pColorAttachments
+        nullptr,                           // pResolveAttachments
+        nullptr,                           // pDepthStencilAttachment
+        0,                                 // preserveAttachmentCount
+        nullptr                            // pPreserveAttachments
+    }};
+
+    vk::RenderPassCreateInfo render_pass_create_info = {
+        vk::RenderPassCreateFlags(),  // flags
+        1,                            // attachmentCount
+        attachment_descriptions,      // pAttachments
+        1,                            // subpassCount
+        subpass_descriptions,         // pSubpasses
+        0,                            // dependencyCount
+        nullptr                       // pDependencies
+    };
+
+    // NOTES: Dependencies are important for performance
+
+    result = m_device.createRenderPass(&render_pass_create_info, nullptr,
+                                       &m_render_pass);
     if (result != vk::Result::eSuccess) {
-        LogError("Vk_RenderWindow", "Could not get swap chain images");
+        LogError("Vk_RenderWindow", "Could not create render pass.");
         return false;
     }
+
+    return true;
+}
+
+bool Vk_RenderWindow::CreateVulkanFrameBuffer() {
+    vk::Result result;
+
+    m_framebuffers.resize(m_swapchain.images.size());
+
+    for (size_t i = 0; i < m_swapchain.images.size(); i++) {
+        vk::ImageViewCreateInfo image_view_create_info{
+            vk::ImageViewCreateFlags(),    // flags
+            m_swapchain.images[i].handle,  // image
+            vk::ImageViewType::e2D,        // viewType
+            m_swapchain.format,            // format
+            vk::ComponentMapping{
+                // components
+                vk::ComponentSwizzle::eIdentity,  // r
+                vk::ComponentSwizzle::eIdentity,  // g
+                vk::ComponentSwizzle::eIdentity,  // b
+                vk::ComponentSwizzle::eIdentity   // a
+            },
+            vk::ImageSubresourceRange{
+                vk::ImageAspectFlagBits::eColor,  // aspectMask
+                0,                                // baseMipLevel
+                1,                                // levelCount
+                0,                                // baseArrayLayer
+                1                                 // layerCount
+            },
+        };
+
+        result = m_device.createImageView(&image_view_create_info, nullptr,
+                                          &m_swapchain.images[i].view);
+        if (result != vk::Result::eSuccess) {
+            LogError("Vk_RenderWindow",
+                     "Could not create image view for framebuffer.");
+            return false;
+        }
+
+        // Create the FrameBuffer
+        vk::FramebufferCreateInfo framebuffer_create_info{
+            vk::FramebufferCreateFlags(),  // flags
+            m_render_pass,                 // renderPass
+            1,                             // attachmentCount
+            &m_swapchain.images[i].view,   // pAttachments
+            300,                           // width
+            300,                           // height
+            1                              // layers
+        };
+
+        result = m_device.createFramebuffer(&framebuffer_create_info, nullptr,
+                                            &m_framebuffers[i]);
+        if (result != vk::Result::eSuccess) {
+            LogError("Vk_RenderWindow", "Could not create a framebuffer.");
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool Vk_RenderWindow::RecordCommandBuffers() {
+    vk::Result result;
 
     vk::CommandBufferBeginInfo cmd_buffer_begin_info{
         vk::CommandBufferUsageFlagBits::eSimultaneousUse,  // flags
@@ -604,7 +725,7 @@ bool Vk_RenderWindow::RecordCommandBuffers() {
     };
 
     vk::ClearColorValue clear_color(
-        std::array<float, 4>{0.0f, 0.5451f, 0.5451f, 0.0f});
+        std::array<float, 4>{{0.0f, 0.5451f, 0.5451f, 0.0f}});
 
     vk::ImageSubresourceRange image_subresource_range{
         vk::ImageAspectFlagBits::eColor,  // aspectMask
@@ -620,9 +741,9 @@ bool Vk_RenderWindow::RecordCommandBuffers() {
             vk::AccessFlagBits::eTransferWrite,    // dstAccessMask
             vk::ImageLayout::eUndefined,           // oldLayout
             vk::ImageLayout::eTransferDstOptimal,  // newLayout
-            m_present_queue_family_index,          // srcQueueFamilyIndex
-            m_present_queue_family_index,          // dstQueueFamilyIndex
-            swap_chain_images[i],                  // image
+            m_present_queue.index,                 // srcQueueFamilyIndex
+            m_present_queue.index,                 // dstQueueFamilyIndex
+            m_swapchain.images[i].handle,          // image
             image_subresource_range                // subresourceRange
         };
 
@@ -631,9 +752,9 @@ bool Vk_RenderWindow::RecordCommandBuffers() {
             vk::AccessFlagBits::eMemoryRead,       // dstAccessMask
             vk::ImageLayout::eTransferDstOptimal,  // oldLayout
             vk::ImageLayout::ePresentSrcKHR,       // newLayout
-            m_present_queue_family_index,          // srcQueueFamilyIndex
-            m_present_queue_family_index,          // dstQueueFamilyIndex
-            swap_chain_images[i],                  // image
+            m_present_queue.index,                 // srcQueueFamilyIndex
+            m_present_queue.index,                 // dstQueueFamilyIndex
+            m_swapchain.images[i].handle,          // image
             image_subresource_range                // subresourceRange
         };
 
@@ -645,7 +766,7 @@ bool Vk_RenderWindow::RecordCommandBuffers() {
             nullptr, 0, nullptr, 1, &barrier_from_present_to_clear);
 
         m_present_queue_cmd_buffers[i].clearColorImage(
-            swap_chain_images[i], vk::ImageLayout::eTransferDstOptimal,
+            m_swapchain.images[i].handle, vk::ImageLayout::eTransferDstOptimal,
             &clear_color, 1, &image_subresource_range);
 
         m_present_queue_cmd_buffers[i].pipelineBarrier(
@@ -668,8 +789,8 @@ uint32 Vk_RenderWindow::GetVulkanSwapChainNumImages(
     // Set of images defined in a swap chain may not always be available for
     // application to render to:
     // One may be displayed and one may wait in a queue to be presented
-    // If application wants to use more images at the same time it must ask for
-    // more images
+    // If application wants to use more images at the same time it must ask
+    // for more images
     uint32 image_count = surface_capabilities.minImageCount + 1;
     if (surface_capabilities.maxImageCount > 0 &&
         image_count > surface_capabilities.maxImageCount) {
@@ -726,8 +847,8 @@ vk::Extent2D Vk_RenderWindow::GetVulkanSwapChainExtent(
 vk::ImageUsageFlags Vk_RenderWindow::GetVulkanSwapChainUsageFlags(
     const vk::SurfaceCapabilitiesKHR& surface_capabilities) {
     // Color attachment flag must always be supported
-    // We can define other usage flags but we always need to check if they are
-    // supported
+    // We can define other usage flags but we always need to check if they
+    // are supported
     if (surface_capabilities.supportedUsageFlags &
         vk::ImageUsageFlagBits::eTransferDst) {
         return vk::ImageUsageFlagBits::eColorAttachment |
@@ -738,14 +859,15 @@ vk::ImageUsageFlags Vk_RenderWindow::GetVulkanSwapChainUsageFlags(
 
 vk::SurfaceTransformFlagBitsKHR Vk_RenderWindow::GetVulkanSwapChainTransform(
     const vk::SurfaceCapabilitiesKHR& surface_capabilities) {
-    // Sometimes images must be transformed before they are presented (i.e. due
-    // to device's orienation being other than default orientation)
-    // If the specified transform is other than current transform, presentation
-    // engine will transform image during presentation operation; this operation
+    // Sometimes images must be transformed before they are presented (i.e.
+    // due to device's orienation being other than default orientation)
+    // If the specified transform is other than current transform,
+    // presentation engine will transform image during presentation operation;
+    // this operation
     // may hit performance on some platforms
     // Here we don't want any transformations to occur so if the identity
-    // transform is supported use it otherwise just use the same transform as
-    // current transform
+    // transform is supported use it otherwise just use the same transform
+    // as current transform
     if (surface_capabilities.supportedTransforms &
         vk::SurfaceTransformFlagBitsKHR::eIdentity) {
         return vk::SurfaceTransformFlagBitsKHR::eIdentity;
@@ -906,8 +1028,8 @@ bool Vk_RenderWindow::CheckPhysicalDevice(
 
     std::vector<vk::Bool32> queue_present_support(queue_families_count);
 
-    // Find a queue family that supports graphics queue and other that supports
-    // present queue
+    // Find a queue family that supports graphics queue and other that
+    // supports present queue
     uint32 graphics_queue_family_index = UINT32_MAX;
     uint32 present_queue_family_index = UINT32_MAX;
     for (uint32 i = 0; i < queue_families_count; i++) {
@@ -933,8 +1055,8 @@ bool Vk_RenderWindow::CheckPhysicalDevice(
         }
     }
 
-    // We don't have queue that supports both graphics and present so we have
-    // to use separate queues
+    // We don't have queue that supports both graphics and present so we
+    // have to use separate queues
     for (uint32 i = 0; i < queue_families_count; i++) {
         if (queue_present_support[i]) {
             present_queue_family_index = i;

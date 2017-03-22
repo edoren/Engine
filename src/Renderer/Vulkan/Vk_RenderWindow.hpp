@@ -11,6 +11,22 @@
 
 namespace engine {
 
+struct ImageParameters {
+    vk::Image handle;
+    vk::ImageView view;
+};
+
+struct QueueParameters {
+    vk::Queue handle;
+    uint32 index;
+};
+
+struct SwapChainParameters {
+    vk::SwapchainKHR handle;
+    vk::Format format;
+    std::vector<ImageParameters> images;
+};
+
 class VULKAN_PLUGIN_API Vk_RenderWindow : public RenderWindow {
 public:
     Vk_RenderWindow();
@@ -43,6 +59,8 @@ private:
     bool CreateVulkanSwapChain();
     bool CreateVulkanQueues();
     bool CreateVulkanCommandBuffers();
+    bool CreateVulkanRenderPass();
+    bool CreateVulkanFrameBuffer();
 
     bool RecordCommandBuffers();
 
@@ -82,16 +100,16 @@ private:
     vk::Semaphore m_image_avaliable_semaphore;
     vk::Semaphore m_rendering_finished_semaphore;
 
-    vk::SwapchainKHR m_swapchain;
+    SwapChainParameters m_swapchain;
 
-    vk::Queue m_graphics_queue;
-    vk::Queue m_present_queue;
-
-    uint32 m_graphics_queue_family_index;
-    uint32 m_present_queue_family_index;
+    QueueParameters m_graphics_queue;
+    QueueParameters m_present_queue;
 
     vk::CommandPool m_present_queue_cmd_pool;
     std::vector<vk::CommandBuffer> m_present_queue_cmd_buffers;
+
+    vk::RenderPass m_render_pass;
+    std::vector<vk::Framebuffer> m_framebuffers;
 
     bool m_validation_layers_enabled;
     std::vector<const char*> m_validation_layers;
