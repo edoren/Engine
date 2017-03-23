@@ -15,7 +15,6 @@ enum class ShaderType {
 
 class ENGINE_API Shader : NonCopyable {
 public:
-    Shader() {}
     virtual ~Shader() {}
 
     virtual Shader& operator=(Shader&& other) = default;
