@@ -88,3 +88,14 @@ target_include_directories(${ENGINE_LIBRARY} SYSTEM
                            PRIVATE ${STB_INCLUDE_DIR} ${UTFCPP_INCLUDE_DIR})
 
 set(ENGINE_LIBRARY ${ENGINE_LIBRARY} PARENT_SCOPE)
+
+
+find_package(PythonInterp 3 REQUIRED)
+# Copy the engine data
+set(DATA_SOURCE_FOLDER "${CMAKE_SOURCE_DIR}/data")
+set(DATA_OUTPUT_FOLDER "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/data")
+set(SCRIPTS_FOLDER "${CMAKE_SOURCE_DIR}/scripts")
+add_custom_command(
+    TARGET ${ENGINE_LIBRARY} POST_BUILD
+    COMMAND ${PYTHON_EXECUTABLE} "${SCRIPTS_FOLDER}/process_data.py" ${DATA_SOURCE_FOLDER} ${DATA_OUTPUT_FOLDER}
+)

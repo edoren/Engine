@@ -34,12 +34,6 @@ foreach(TEST ${TESTS})
     )
 endforeach()
 
-add_custom_command(
-    TARGET ${TESTS} PRE_BUILD
-    COMMAND ${CMAKE_COMMAND} -E remove_directory "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/data"
-    COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/data" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/data"
-)
-
 set_property(TARGET ${TESTS} PROPERTY FOLDER "Tests")
 
 add_subdirectory("${TEST_DIR}/SharedLibrary")
