@@ -19,6 +19,9 @@ init:
   - cmake --version
   - msbuild /version
 
+environment:
+  PYTHON: "C:\\Python36"
+
 # clone directory
 clone_folder: C:\projects\engine
 
@@ -29,6 +32,7 @@ branches:
 
 # scripts that run after cloning repository
 install:
+  - set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
   - git submodule update --init --recursive
   - set PATH=C:\Program Files\Git\mingw64\bin;%PATH% # to get curl
   - curl -fsS -o VulkanSDK.exe %VULKAN_DOWNLOAD_URL%
