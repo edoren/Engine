@@ -70,6 +70,7 @@ void LogManager::Error(const String& tag, const String& message) {
 
 void LogManager::Fatal(const String& tag, const String& message) {
     LogMessage(LogPriority::FATAL, tag, message);
+    std::exit(1);  // TMP
 }
 
 void LogManager::LogMessage(LogPriority priority, const String& tag,
