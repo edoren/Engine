@@ -16,6 +16,7 @@ configuration:
 
 # scripts that are called at very beginning, before repo cloning
 init:
+  - echo Vulkan Version %VULKAN_SDK_VERSION%
   - cmake --version
   - msbuild /version
 
@@ -35,7 +36,7 @@ install:
   - set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
   - git submodule update --init --recursive
   - set PATH=C:\Program Files\Git\mingw64\bin;%PATH% # to get curl
-  - curl -fsS -o VulkanSDK.exe %VULKAN_DOWNLOAD_URL%
+  - curl -fsS -o VulkanSDK.exe https://vulkan.lunarg.com/sdk/download/%VULKAN_SDK_VERSION%/windows/VulkanSDK-%VULKAN_SDK_VERSION%-Installer.exe?human=true
   - start /wait VulkanSDK.exe /S
   - set VULKAN_SDK=C:\VulkanSDK\%VULKAN_SDK_VERSION%
   - set VK_SDK_PATH=%VULKAN_SDK%
