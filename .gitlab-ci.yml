@@ -10,6 +10,7 @@ variables:
   tags:
     - docker
   before_script:
+    - echo Vulkan Version $VULKAN_SDK_VERSION
     # System configuration
     - apt-get update -qq
     - apt-get install -qq curl software-properties-common  # install add-apt-repository
