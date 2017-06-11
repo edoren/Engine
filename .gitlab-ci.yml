@@ -18,10 +18,10 @@ variables:
     # Engine dependencies
     - apt-get install -qq build-essential clang gcc-6 g++-6 cmake libsdl2-dev libglew-dev
     # Install the VulkanSDK
-    - curl -fsS -o VulkanSDK.run $VULKAN_DOWNLOAD_URL && chmod +x VulkanSDK.run
+    - curl -fsS -o VulkanSDK.run https://vulkan.lunarg.com/sdk/download/$VULKAN_SDK_VERSION/linux/vulkansdk-linux-x86_64-$VULKAN_SDK_VERSION.run?human=true
+    - chmod +x VulkanSDK.run
     - ./VulkanSDK.run --quiet
-    - cd VulkanSDK/*
-    - export VULKAN_SDK=$PWD/x86_64
+    - export VULKAN_SDK=$PWD/VulkanSDK/$VULKAN_SDK_VERSION/x86_64
     - export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$VULKAN_SDK/lib"
     - export VK_LAYER_PATH="$VULKAN_SDK/etc/explicit_layer.d"
     - export PATH="$PATH:$VULKAN_SDK/bin"
