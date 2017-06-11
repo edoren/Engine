@@ -7,29 +7,15 @@
 #include <System/String.hpp>
 
 #include "Vk_Config.hpp"
+#include "Vk_Core.hpp"
+#include "Vk_VulkanParameters.hpp"
 #include "Vk_Dependencies.hpp"
 
 namespace engine {
 
-struct ImageParameters {
-    vk::Image handle;
-    vk::ImageView view;
-};
-
-struct QueueParameters {
-    vk::Queue handle;
-    uint32 index;
-};
-
-struct SwapChainParameters {
-    vk::SwapchainKHR handle;
-    vk::Format format;
-    std::vector<ImageParameters> images;
-};
-
 class VULKAN_PLUGIN_API Vk_RenderWindow : public RenderWindow {
 public:
-    Vk_RenderWindow();
+    Vk_RenderWindow(Vk_Core* core);
 
     ~Vk_RenderWindow();
 
@@ -52,12 +38,10 @@ public:
     virtual bool IsVisible();
 
 private:
-    bool CreateVulkanInstance();
     bool CreateVulkanSurface();
-    bool CreateVulkanDevice();
+    bool CreateVulkanQueues();
     bool CreateVulkanSemaphores();
     bool CreateVulkanSwapChain();
-    bool CreateVulkanQueues();
     bool CreateVulkanCommandBuffers();
     bool CreateVulkanRenderPass();
     bool CreateVulkanFrameBuffer();
@@ -77,45 +61,29 @@ private:
     vk::PresentModeKHR GetVulkanSwapChainPresentMode(
         const std::vector<vk::PresentModeKHR>& present_modes);
 
-    bool CheckVulkanValidationLayerSupport() const;
-
-    bool CheckVulkanInstanceExtensionsSupport() const;
-
-    bool CheckPhysicalDevice(const vk::PhysicalDevice& physical_device,
-                             uint32& selected_graphics_queue_family_index,
-                             uint32& selected_present_queue_family_index);
-
     void CleanCommandBuffers();
     bool OnWindowSizeChanged();
 
 private:
+    Vk_Core* m_core;
+
     SDL_Window* m_window;
 
-    vk::Instance m_instance;
     vk::SurfaceKHR m_surface;
 
-    vk::Device m_device;
-    vk::PhysicalDevice m_physical_device;
+    QueueParameters m_graphics_queue;
+    QueueParameters m_present_queue;
 
     vk::Semaphore m_image_avaliable_semaphore;
     vk::Semaphore m_rendering_finished_semaphore;
 
     SwapChainParameters m_swapchain;
 
-    QueueParameters m_graphics_queue;
-    QueueParameters m_present_queue;
-
     vk::CommandPool m_present_queue_cmd_pool;
     std::vector<vk::CommandBuffer> m_present_queue_cmd_buffers;
 
     vk::RenderPass m_render_pass;
     std::vector<vk::Framebuffer> m_framebuffers;
-
-    bool m_validation_layers_enabled;
-    std::vector<const char*> m_validation_layers;
-
-    std::vector<const char*> m_instance_extensions;
-    std::vector<const char*> m_device_extensions;
 };
 
 }  // namespace engine

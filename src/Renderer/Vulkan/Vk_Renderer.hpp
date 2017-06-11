@@ -3,6 +3,7 @@
 #include <Renderer/Renderer.hpp>
 
 #include "Vk_Config.hpp"
+#include "Vk_Core.hpp"
 #include "Vk_RenderWindow.hpp"
 
 namespace engine {
@@ -11,17 +12,20 @@ class VULKAN_PLUGIN_API Vk_Renderer : public Renderer {
 public:
     Vk_Renderer();
 
-    virtual ~Vk_Renderer();
+    ~Vk_Renderer();
 
-    virtual bool Initialize();
+    bool Initialize();
 
-    virtual void Shutdown();
+    void Shutdown();
 
-    virtual void AdvanceFrame();
+    void AdvanceFrame();
 
-    virtual Shader* CreateShader();  // TMP?
+    Shader* CreateShader();  // TMP?
 
-    virtual Texture2D* CreateTexture2D();  // TMP?
+    Texture2D* CreateTexture2D();  // TMP?
+
+private:
+    Vk_Core m_core;
 };
 
 }  // namespace engine
