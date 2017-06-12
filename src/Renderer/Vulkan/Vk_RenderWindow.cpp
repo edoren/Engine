@@ -283,6 +283,20 @@ bool Vk_RenderWindow::CreateVulkanSwapChain() {
     vk::Device& device = m_core->GetDevice();
     vk::PhysicalDevice physical_device = m_core->GetPhysicalDevice();
 
+    // Wait all the Device Queues to finish
+    if (device) {
+        device.waitIdle();
+    }
+
+    // Destroy the old ImageViews
+    for (size_t i = 0; i < m_swapchain.images.size(); i++) {
+        if (m_swapchain.images[i].view) {
+            device.destroyImageView(m_swapchain.images[i].view, nullptr);
+            m_swapchain.images[i].view = nullptr;
+        }
+    }
+    m_swapchain.images.clear();
+
     // Get the Surface capabilities
     vk::SurfaceCapabilitiesKHR surface_capabilities;
     result = physical_device.getSurfaceCapabilitiesKHR(m_surface,
@@ -406,6 +420,37 @@ bool Vk_RenderWindow::CreateVulkanSwapChain() {
     for (size_t i = 0; i < swapchain_images.size(); i++) {
         m_swapchain.images[i].handle = swapchain_images[i];
     }
+    // Create all the ImageViews
+    for (size_t i = 0; i < m_swapchain.images.size(); i++) {
+        vk::ImageViewCreateInfo image_view_create_info{
+            vk::ImageViewCreateFlags(),    // flags
+            m_swapchain.images[i].handle,  // image
+            vk::ImageViewType::e2D,        // viewType
+            m_swapchain.format,            // format
+            vk::ComponentMapping{
+                // components
+                vk::ComponentSwizzle::eIdentity,  // r
+                vk::ComponentSwizzle::eIdentity,  // g
+                vk::ComponentSwizzle::eIdentity,  // b
+                vk::ComponentSwizzle::eIdentity   // a
+            },
+            vk::ImageSubresourceRange{
+                vk::ImageAspectFlagBits::eColor,  // aspectMask
+                0,                                // baseMipLevel
+                1,                                // levelCount
+                0,                                // baseArrayLayer
+                1                                 // layerCount
+            },
+        };
+
+        result = m_core->GetDevice().createImageView(
+            &image_view_create_info, nullptr, &m_swapchain.images[i].view);
+        if (result != vk::Result::eSuccess) {
+            LogError("Vk_RenderWindow",
+                     "Could not create image view for framebuffer.");
+            return false;
+        }
+    }
 
     return true;
 }
@@ -511,39 +556,9 @@ bool Vk_RenderWindow::CreateVulkanRenderPass() {
 bool Vk_RenderWindow::CreateVulkanFrameBuffer() {
     vk::Result result;
 
+    // Create the FrameBuffers
     m_framebuffers.resize(m_swapchain.images.size());
-
-    for (size_t i = 0; i < m_swapchain.images.size(); i++) {
-        vk::ImageViewCreateInfo image_view_create_info{
-            vk::ImageViewCreateFlags(),    // flags
-            m_swapchain.images[i].handle,  // image
-            vk::ImageViewType::e2D,        // viewType
-            m_swapchain.format,            // format
-            vk::ComponentMapping{
-                // components
-                vk::ComponentSwizzle::eIdentity,  // r
-                vk::ComponentSwizzle::eIdentity,  // g
-                vk::ComponentSwizzle::eIdentity,  // b
-                vk::ComponentSwizzle::eIdentity   // a
-            },
-            vk::ImageSubresourceRange{
-                vk::ImageAspectFlagBits::eColor,  // aspectMask
-                0,                                // baseMipLevel
-                1,                                // levelCount
-                0,                                // baseArrayLayer
-                1                                 // layerCount
-            },
-        };
-
-        result = m_core->GetDevice().createImageView(
-            &image_view_create_info, nullptr, &m_swapchain.images[i].view);
-        if (result != vk::Result::eSuccess) {
-            LogError("Vk_RenderWindow",
-                     "Could not create image view for framebuffer.");
-            return false;
-        }
-
-        // Create the FrameBuffer
+    for (size_t i = 0; i < m_framebuffers.size(); i++) {
         vk::FramebufferCreateInfo framebuffer_create_info{
             vk::FramebufferCreateFlags(),  // flags
             m_render_pass,                 // renderPass
