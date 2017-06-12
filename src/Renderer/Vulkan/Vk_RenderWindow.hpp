@@ -44,7 +44,7 @@ private:
     bool CreateVulkanSwapChain();
     bool CreateVulkanCommandBuffers();
     bool CreateVulkanRenderPass();
-    bool CreateVulkanFrameBuffer();
+    bool CreateVulkanFrameBuffers();
 
     bool RecordCommandBuffers();
 

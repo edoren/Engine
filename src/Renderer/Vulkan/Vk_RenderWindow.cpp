@@ -553,7 +553,7 @@ bool Vk_RenderWindow::CreateVulkanRenderPass() {
     return true;
 }
 
-bool Vk_RenderWindow::CreateVulkanFrameBuffer() {
+bool Vk_RenderWindow::CreateVulkanFrameBuffers() {
     vk::Result result;
 
     // Create the FrameBuffers
@@ -784,6 +784,12 @@ bool Vk_RenderWindow::OnWindowSizeChanged() {
 
     if (!CreateVulkanSwapChain()) {
         return false;
+    }
+    if( !CreateVulkanRenderPass() ) {
+      return false;
+    }
+    if( !CreateVulkanFrameBuffers() ) {
+      return false;
     }
     if (!CreateVulkanCommandBuffers()) {
         return false;
