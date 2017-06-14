@@ -1,11 +1,9 @@
 #pragma once
 
-#include <Util/NonCopyable.hpp>
-
 namespace engine {
 
 template <class T>
-class ENGINE_API Singleton : NonCopyable {
+class Singleton {
 public:
     Singleton() {
         assert(!s_instance);
@@ -28,6 +26,9 @@ public:
 
 protected:
     static T* s_instance;
+
+    Singleton(const Singleton<T>&) = delete;
+    Singleton<T>& operator=(const Singleton<T>&) = delete;
 };
 
 }  // namespace engine
