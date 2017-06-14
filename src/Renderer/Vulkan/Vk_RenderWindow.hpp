@@ -7,7 +7,7 @@
 #include <System/String.hpp>
 
 #include "Vk_Config.hpp"
-#include "Vk_Core.hpp"
+#include "Vk_Context.hpp"
 #include "Vk_VulkanParameters.hpp"
 #include "Vk_Dependencies.hpp"
 
@@ -15,7 +15,7 @@ namespace engine {
 
 class VULKAN_PLUGIN_API Vk_RenderWindow : public RenderWindow {
 public:
-    Vk_RenderWindow(Vk_Core* core);
+    Vk_RenderWindow();
 
     ~Vk_RenderWindow();
 
@@ -65,8 +65,6 @@ private:
     bool OnWindowSizeChanged();
 
 private:
-    Vk_Core* m_core;
-
     SDL_Window* m_window;
 
     vk::SurfaceKHR m_surface;

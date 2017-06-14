@@ -11,15 +11,17 @@ Vk_Renderer::~Vk_Renderer() {
 }
 
 bool Vk_Renderer::Initialize() {
-    m_core.Initialize();
-    m_render_window = new Vk_RenderWindow(&m_core);
+    m_context = new Vk_Context();
+    m_context->Initialize();
+    m_render_window = new Vk_RenderWindow();
     return m_render_window != nullptr;
 }
 
 void Vk_Renderer::Shutdown() {
     delete m_render_window;
     m_render_window = nullptr;
-    m_core.Shutdown();
+    delete m_context;
+    m_context = nullptr;
 }
 
 void Vk_Renderer::AdvanceFrame() {

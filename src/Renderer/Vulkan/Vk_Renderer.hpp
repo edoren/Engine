@@ -3,7 +3,7 @@
 #include <Renderer/Renderer.hpp>
 
 #include "Vk_Config.hpp"
-#include "Vk_Core.hpp"
+#include "Vk_Context.hpp"
 #include "Vk_RenderWindow.hpp"
 
 namespace engine {
@@ -25,7 +25,7 @@ public:
     Texture2D* CreateTexture2D();  // TMP?
 
 private:
-    Vk_Core m_core;
+    Vk_Context* m_context;
 };
 
 }  // namespace engine

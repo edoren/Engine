@@ -5,8 +5,7 @@
 
 namespace engine {
 
-Vk_RenderWindow::Vk_RenderWindow(Vk_Core* core)
-      : m_core(core), m_window(nullptr) {}
+Vk_RenderWindow::Vk_RenderWindow() : m_window(nullptr) {}
 
 Vk_RenderWindow::~Vk_RenderWindow() {
     Destroy();
@@ -33,6 +32,11 @@ bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
     CreateVulkanQueues();
     CreateVulkanSemaphores();
     CreateVulkanSwapChain();
+
+    // CreateVulkanRenderPass();
+    // CreateVulkanFrameBuffers();
+    // CreateVulkanPipeline();
+
     CreateVulkanCommandBuffers();
 
     return true;
@@ -41,8 +45,9 @@ bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
 void Vk_RenderWindow::Destroy() {
     CleanCommandBuffers();
 
-    vk::Instance& instance = m_core->GetInstance();
-    vk::Device& device = m_core->GetDevice();
+    Vk_Context& context = Vk_Context::GetInstance();
+    vk::Instance& instance = context.GetVulkanInstance();
+    vk::Device& device = context.GetVulkanDevice();
 
     if (device) {
         device.waitIdle();
@@ -55,6 +60,13 @@ void Vk_RenderWindow::Destroy() {
         }
         if (m_swapchain.handle) {
             device.destroySwapchainKHR(m_swapchain.handle, nullptr);
+            for (size_t i = 0; i < m_swapchain.images.size(); i++) {
+                if (m_swapchain.images[i].view) {
+                    device.destroyImageView(m_swapchain.images[i].view,
+                                            nullptr);
+                    m_swapchain.images[i].view = nullptr;
+                }
+            }
         }
     }
 
@@ -69,6 +81,7 @@ void Vk_RenderWindow::Destroy() {
     m_window = nullptr;
 
     m_swapchain.handle = nullptr;
+    m_swapchain.images.clear();
 
     m_rendering_finished_semaphore = nullptr;
     m_image_avaliable_semaphore = nullptr;
@@ -120,7 +133,8 @@ void Vk_RenderWindow::SwapBuffers() {
     vk::Result result;
 
     uint32 image_index = 0;
-    result = m_core->GetDevice().acquireNextImageKHR(
+    Vk_Context& context = Vk_Context::GetInstance();
+    result = context.GetVulkanDevice().acquireNextImageKHR(
         m_swapchain.handle, UINT64_MAX, m_image_avaliable_semaphore,
         vk::Fence(), &image_index);
     switch (result) {
@@ -196,7 +210,8 @@ bool Vk_RenderWindow::CreateVulkanSurface() {
 
     vk::Result result;
 
-    vk::Instance& instance = m_core->GetInstance();
+    Vk_Context& context = Vk_Context::GetInstance();
+    vk::Instance& instance = context.GetVulkanInstance();
 
 #if defined(VK_USE_PLATFORM_WIN32_KHR)
     if (wminfo.subsystem == SDL_SYSWM_WINDOWS) {
@@ -243,12 +258,11 @@ bool Vk_RenderWindow::CreateVulkanSurface() {
 }
 
 bool Vk_RenderWindow::CreateVulkanQueues() {
-    vk::Device& device = m_core->GetDevice();
-
     // Check that the device graphics queue family has WSI support
     vk::Bool32 wsi_support;
-    PhysicalDeviceParameters& physical_device = m_core->GetPhysicalDevice();
-    QueueParameters graphics_queue = m_core->GetGraphicsQueue();
+    Vk_Context& context = Vk_Context::GetInstance();
+    PhysicalDeviceParameters& physical_device = context.GetPhysicalDevice();
+    QueueParameters graphics_queue = context.GetGraphicsQueue();
     physical_device.handle.getSurfaceSupportKHR(graphics_queue.index, m_surface,
                                                 &wsi_support);
     if (!wsi_support) {
@@ -264,7 +278,8 @@ bool Vk_RenderWindow::CreateVulkanQueues() {
 }
 
 bool Vk_RenderWindow::CreateVulkanSemaphores() {
-    vk::Device& device = m_core->GetDevice();
+    Vk_Context& context = Vk_Context::GetInstance();
+    vk::Device& device = context.GetVulkanDevice();
     vk::SemaphoreCreateInfo info{vk::SemaphoreCreateFlags()};
     vk::Result result1 =
         device.createSemaphore(&info, nullptr, &m_image_avaliable_semaphore);
@@ -280,8 +295,9 @@ bool Vk_RenderWindow::CreateVulkanSemaphores() {
 bool Vk_RenderWindow::CreateVulkanSwapChain() {
     vk::Result result;
 
-    vk::Device& device = m_core->GetDevice();
-    vk::PhysicalDevice physical_device = m_core->GetPhysicalDevice();
+    Vk_Context& context = Vk_Context::GetInstance();
+    vk::Device& device = context.GetVulkanDevice();
+    vk::PhysicalDevice physical_device = context.GetPhysicalDevice();
 
     // Wait all the Device Queues to finish
     if (device) {
@@ -443,7 +459,8 @@ bool Vk_RenderWindow::CreateVulkanSwapChain() {
             },
         };
 
-        result = m_core->GetDevice().createImageView(
+        Vk_Context& context = Vk_Context::GetInstance();
+        result = context.GetVulkanDevice().createImageView(
             &image_view_create_info, nullptr, &m_swapchain.images[i].view);
         if (result != vk::Result::eSuccess) {
             LogError("Vk_RenderWindow",
@@ -458,7 +475,8 @@ bool Vk_RenderWindow::CreateVulkanSwapChain() {
 bool Vk_RenderWindow::CreateVulkanCommandBuffers() {
     vk::Result result;
 
-    vk::Device& device = m_core->GetDevice();
+    Vk_Context& context = Vk_Context::GetInstance();
+    vk::Device& device = context.GetVulkanDevice();
 
     // Create the pool for the command buffers
     vk::CommandPoolCreateInfo cmd_pool_create_info = {
@@ -543,8 +561,9 @@ bool Vk_RenderWindow::CreateVulkanRenderPass() {
 
     // NOTES: Dependencies are important for performance
 
-    result = m_core->GetDevice().createRenderPass(&render_pass_create_info,
-                                                  nullptr, &m_render_pass);
+    Vk_Context& context = Vk_Context::GetInstance();
+    result = context.GetVulkanDevice().createRenderPass(
+        &render_pass_create_info, nullptr, &m_render_pass);
     if (result != vk::Result::eSuccess) {
         LogError("Vk_RenderWindow", "Could not create render pass.");
         return false;
@@ -569,7 +588,8 @@ bool Vk_RenderWindow::CreateVulkanFrameBuffers() {
             1                              // layers
         };
 
-        result = m_core->GetDevice().createFramebuffer(
+        Vk_Context& context = Vk_Context::GetInstance();
+        result = context.GetVulkanDevice().createFramebuffer(
             &framebuffer_create_info, nullptr, &m_framebuffers[i]);
         if (result != vk::Result::eSuccess) {
             LogError("Vk_RenderWindow", "Could not create a framebuffer.");
@@ -755,7 +775,8 @@ vk::PresentModeKHR Vk_RenderWindow::GetVulkanSwapChainPresentMode(
 }
 
 void Vk_RenderWindow::CleanCommandBuffers() {
-    vk::Device& device = m_core->GetDevice();
+    Vk_Context& context = Vk_Context::GetInstance();
+    vk::Device& device = context.GetVulkanDevice();
 
     if (device) {
         device.waitIdle();
@@ -785,11 +806,11 @@ bool Vk_RenderWindow::OnWindowSizeChanged() {
     if (!CreateVulkanSwapChain()) {
         return false;
     }
-    if( !CreateVulkanRenderPass() ) {
-      return false;
+    if (!CreateVulkanRenderPass()) {
+        return false;
     }
-    if( !CreateVulkanFrameBuffers() ) {
-      return false;
+    if (!CreateVulkanFrameBuffers()) {
+        return false;
     }
     if (!CreateVulkanCommandBuffers()) {
         return false;

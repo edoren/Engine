@@ -1,7 +1,7 @@
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
 
-#include "Vk_Core.hpp"
+#include "Vk_Context.hpp"
 
 namespace engine {
 
@@ -29,13 +29,25 @@ bool CheckLayerAvailability(const char* str,
 
 }  // namespace
 
-Vk_Core::Vk_Core() {}
+template <>
+Vk_Context* Singleton<Vk_Context>::s_instance = nullptr;
 
-Vk_Core::~Vk_Core() {
+Vk_Context& Vk_Context::GetInstance() {
+    assert(s_instance);
+    return (*s_instance);
+}
+
+Vk_Context* Vk_Context::GetInstancePtr() {
+    return s_instance;
+}
+
+Vk_Context::Vk_Context() {}
+
+Vk_Context::~Vk_Context() {
     Shutdown();
 }
 
-bool Vk_Core::Initialize() {
+bool Vk_Context::Initialize() {
     // Add the required validation layers
     if (m_validation_layers_enabled) {
         m_validation_layers.push_back("VK_LAYER_LUNARG_standard_validation");
@@ -69,30 +81,30 @@ bool Vk_Core::Initialize() {
     return true;
 }
 
-void Vk_Core::Shutdown() {
+void Vk_Context::Shutdown() {
     if (m_device) m_device.destroy(nullptr);
     if (m_instance) m_instance.destroy(nullptr);
     m_device = nullptr;
     m_instance = nullptr;
 }
 
-vk::Instance& Vk_Core::GetInstance() {
+vk::Instance& Vk_Context::GetVulkanInstance() {
     return m_instance;
 }
 
-vk::Device& Vk_Core::GetDevice() {
+vk::Device& Vk_Context::GetVulkanDevice() {
     return m_device;
 }
 
-PhysicalDeviceParameters& Vk_Core::GetPhysicalDevice() {
+PhysicalDeviceParameters& Vk_Context::GetPhysicalDevice() {
     return m_physical_device;
 }
 
-QueueParameters& Vk_Core::GetGraphicsQueue() {
+QueueParameters& Vk_Context::GetGraphicsQueue() {
     return m_graphics_queue;
 }
 
-bool Vk_Core::CreateInstance() {
+bool Vk_Context::CreateInstance() {
     // Define the application information
     vk::ApplicationInfo appInfo{
         "Engine",                  // pApplicationName
@@ -129,7 +141,7 @@ bool Vk_Core::CreateInstance() {
     return true;
 }
 
-bool Vk_Core::CreateDevice() {
+bool Vk_Context::CreateDevice() {
     vk::Result result;
 
     // Query all the avaliable physical devices
@@ -196,7 +208,7 @@ bool Vk_Core::CreateDevice() {
     return true;
 }
 
-bool Vk_Core::SelectPhysicalDevice(vk::PhysicalDevice& physical_device) {
+bool Vk_Context::SelectPhysicalDevice(vk::PhysicalDevice& physical_device) {
     vk::Result result;
 
     // Check the PhysicalDevice properties and features
@@ -294,7 +306,7 @@ bool Vk_Core::SelectPhysicalDevice(vk::PhysicalDevice& physical_device) {
     return true;
 }
 
-bool Vk_Core::CheckValidationLayerSupport() const {
+bool Vk_Context::CheckValidationLayerSupport() const {
     vk::Result result;
 
     // Get the avaliable layers
@@ -327,7 +339,7 @@ bool Vk_Core::CheckValidationLayerSupport() const {
     return true;
 }
 
-bool Vk_Core::CheckInstanceExtensionsSupport() const {
+bool Vk_Context::CheckInstanceExtensionsSupport() const {
     vk::Result result;
 
     // Get the avaliable extensions
