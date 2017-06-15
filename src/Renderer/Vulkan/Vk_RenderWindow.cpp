@@ -637,7 +637,6 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         },
         // Fragment shader
         {
-
             vk::PipelineShaderStageCreateFlags(),  // flags
             vk::ShaderStageFlagBits::eFragment,    // stage
             fragment_shader_module.GetModule(),    // module
@@ -646,7 +645,6 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         }};
 
     vk::PipelineVertexInputStateCreateInfo vertex_input_state_create_info = {
-
         vk::PipelineVertexInputStateCreateFlags(),  // flags;
         0,        // vertexBindingDescriptionCount
         nullptr,  // pVertexBindingDescriptions
@@ -656,7 +654,6 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
 
     vk::PipelineInputAssemblyStateCreateInfo input_assembly_state_create_info =
         {
-
             vk::PipelineInputAssemblyStateCreateFlags(),  // flags
             vk::PrimitiveTopology::eTriangleList,         // topology
             VK_FALSE  // primitiveRestartEnable
@@ -683,7 +680,6 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
                           }};
 
     vk::PipelineViewportStateCreateInfo viewport_state_create_info = {
-
         vk::PipelineViewportStateCreateFlags(),  // flags
         1,                                       // viewportCount
         &viewport,                               // pViewports
@@ -692,7 +688,6 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
     };
 
     vk::PipelineRasterizationStateCreateInfo rasterization_state_create_info = {
-
         vk::PipelineRasterizationStateCreateFlags(),  // flags
         VK_FALSE,                                     // depthClampEnable
         VK_FALSE,                                     // rasterizerDiscardEnable
@@ -707,7 +702,6 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
     };
 
     vk::PipelineMultisampleStateCreateInfo multisample_state_create_info = {
-
         vk::PipelineMultisampleStateCreateFlags(),  // flags
         vk::SampleCountFlagBits::e1,                // rasterizationSamples
         VK_FALSE,                                   // sampleShadingEnable
@@ -730,7 +724,6 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
             vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA};
 
     vk::PipelineColorBlendStateCreateInfo color_blend_state_create_info = {
-
         vk::PipelineColorBlendStateCreateFlags(),  // flags
         VK_FALSE,                                  // logicOpEnable
         vk::LogicOp::eCopy,                        // logicOp
@@ -758,7 +751,6 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
     }
 
     vk::GraphicsPipelineCreateInfo pipeline_create_info = {
-
         vk::PipelineCreateFlags(),                                // flags
         static_cast<uint32_t>(shader_stage_create_infos.size()),  // stageCount
         &shader_stage_create_infos[0],                            // pStages
@@ -774,7 +766,7 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         pipeline_layout,                    // layout
         m_render_pass,                      // renderPass
         0,                                  // subpass
-        VK_NULL_HANDLE,                     // basePipelineHandle
+        vk::Pipeline(),                     // basePipelineHandle
         -1                                  // basePipelineIndex
     };
 
