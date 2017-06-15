@@ -721,7 +721,8 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         vk::BlendOp::eAdd,       // alphaBlendOp
         vk::ColorComponentFlagBits::eR |
             vk::ColorComponentFlagBits::eG |  // colorWriteMask
-            vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA};
+            vk::ColorComponentFlagBits::eB |
+            vk::ColorComponentFlagBits::eA};
 
     vk::PipelineColorBlendStateCreateInfo color_blend_state_create_info = {
         vk::PipelineColorBlendStateCreateFlags(),  // flags
@@ -729,7 +730,7 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         vk::LogicOp::eCopy,                        // logicOp
         1,                                         // attachmentCount
         &color_blend_attachment_state,             // pAttachments
-        {0.0f, 0.0f, 0.0f, 0.0f}                   // blendConstants[4]
+        {{0.0f, 0.0f, 0.0f, 0.0f}}                 // blendConstants[4]
     };
 
     // Create the PipelineLayout
