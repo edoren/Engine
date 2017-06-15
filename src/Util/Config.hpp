@@ -10,6 +10,7 @@
 // Disable annoying MSVC++ warning
 #ifdef _MSC_VER
 #pragma warning(disable : 4251)
+#pragma warning(disable : 4661)
 #endif  // _MSC_VER
 #else
 #define ENGINE_SYMBOL_EXPORTS
