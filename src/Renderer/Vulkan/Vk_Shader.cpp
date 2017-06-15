@@ -47,13 +47,21 @@ bool Vk_Shader::LoadFromMemory(const byte* source, std::size_t source_size,
 
     vk::Device& device = Vk_Context::GetInstance().GetVulkanDevice();
     result = device.createShaderModule(&shader_module_create_info, nullptr,
-                                         &m_module);
+                                       &m_module);
     if (result != vk::Result::eSuccess) {
         LogError("Vk_RenderWindow", "Could not create shader module.");
         return false;
     }
 
     return true;
+}
+
+vk::ShaderModule& Vk_Shader::GetModule() {
+    return m_module;
+}
+
+vk::ShaderStageFlagBits Vk_Shader::GetShaderType() {
+    return vk::ShaderStageFlagBits::eVertex;
 }
 
 bool Vk_Shader::Link() {

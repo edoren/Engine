@@ -22,6 +22,10 @@ public:
     bool LoadFromMemory(const byte* source, std::size_t source_size,
                         ShaderType type);
 
+    vk::ShaderModule& GetModule();
+
+    vk::ShaderStageFlagBits GetShaderType();
+
     bool Link();
 
     void Use();

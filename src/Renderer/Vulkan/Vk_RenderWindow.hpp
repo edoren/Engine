@@ -45,6 +45,7 @@ private:
     bool CreateVulkanCommandBuffers();
     bool CreateVulkanRenderPass();
     bool CreateVulkanFrameBuffers();
+    bool CreateVulkanPipeline();
 
     bool RecordCommandBuffers();
 
@@ -61,7 +62,7 @@ private:
     vk::PresentModeKHR GetVulkanSwapChainPresentMode(
         const std::vector<vk::PresentModeKHR>& present_modes);
 
-    void CleanCommandBuffers();
+    void ClearPipeline();
     bool OnWindowSizeChanged();
 
 private:
@@ -76,9 +77,10 @@ private:
     vk::Semaphore m_rendering_finished_semaphore;
 
     SwapChainParameters m_swapchain;
+    vk::Pipeline m_graphics_pipeline;
 
-    vk::CommandPool m_present_queue_cmd_pool;
-    std::vector<vk::CommandBuffer> m_present_queue_cmd_buffers;
+    vk::CommandPool m_graphics_queue_cmd_pool;
+    std::vector<vk::CommandBuffer> m_graphics_queue_cmd_buffers;
 
     vk::RenderPass m_render_pass;
     std::vector<vk::Framebuffer> m_framebuffers;
