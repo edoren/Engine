@@ -132,9 +132,11 @@ void Vk_RenderWindow::SwapBuffers() {
 
     uint32 image_index = 0;
     Vk_Context& context = Vk_Context::GetInstance();
-    result = context.GetVulkanDevice().acquireNextImageKHR(
-        m_swapchain.handle, UINT64_MAX, m_image_avaliable_semaphore,
-        vk::Fence(), &image_index);
+    vk::Device& device = context.GetVulkanDevice();
+
+    result = device.acquireNextImageKHR(m_swapchain.handle, UINT64_MAX,
+                                        m_image_avaliable_semaphore, nullptr,
+                                        &image_index);
     switch (result) {
         case vk::Result::eSuccess:
         case vk::Result::eSuboptimalKHR:
@@ -149,7 +151,7 @@ void Vk_RenderWindow::SwapBuffers() {
     }
 
     vk::PipelineStageFlags wait_dst_stage_mask =
-        vk::PipelineStageFlagBits::eTransfer;
+        vk::PipelineStageFlagBits::eColorAttachmentOutput;
     vk::SubmitInfo submit_info{
         1,                                           // waitSemaphoreCount
         &m_image_avaliable_semaphore,                // pWaitSemaphores
@@ -160,7 +162,7 @@ void Vk_RenderWindow::SwapBuffers() {
         &m_rendering_finished_semaphore              // pSignalSemaphores
     };
 
-    result = m_present_queue.handle.submit(1, &submit_info, vk::Fence());
+    result = m_graphics_queue.handle.submit(1, &submit_info, nullptr);
     if (result != vk::Result::eSuccess) {
         LogError("Vk_RenderWindow", "Error submitting the command buffers");
         return;
@@ -271,7 +273,8 @@ bool Vk_RenderWindow::CreateVulkanQueues() {
     }
 
     m_graphics_queue = graphics_queue;
-    m_present_queue = graphics_queue;
+    m_present_queue = graphics_queue;  // We assume that the graphics
+                                       // queue can also present
     return true;
 }
 
@@ -479,7 +482,7 @@ bool Vk_RenderWindow::CreateVulkanCommandBuffers() {
     // Create the pool for the command buffers
     vk::CommandPoolCreateInfo cmd_pool_create_info = {
         vk::CommandPoolCreateFlags(),  // flags
-        m_present_queue.index          // queueFamilyIndex
+        m_graphics_queue.index         // queueFamilyIndex
     };
     result = device.createCommandPool(&cmd_pool_create_info, nullptr,
                                       &m_graphics_queue_cmd_pool);
@@ -525,7 +528,7 @@ bool Vk_RenderWindow::CreateVulkanRenderPass() {
         vk::AttachmentStoreOp::eStore,     // storeOp
         vk::AttachmentLoadOp::eDontCare,   // stencilLoadOp
         vk::AttachmentStoreOp::eDontCare,  // stencilStoreOp
-        vk::ImageLayout::ePresentSrcKHR,   // initialLayout;
+        vk::ImageLayout::eUndefined,       // initialLayout;
         vk::ImageLayout::ePresentSrcKHR    // finalLayout
     }};
 
@@ -577,13 +580,13 @@ bool Vk_RenderWindow::CreateVulkanFrameBuffers() {
     m_framebuffers.resize(m_swapchain.images.size());
     for (size_t i = 0; i < m_framebuffers.size(); i++) {
         vk::FramebufferCreateInfo framebuffer_create_info{
-            vk::FramebufferCreateFlags(),  // flags
-            m_render_pass,                 // renderPass
-            1,                             // attachmentCount
-            &m_swapchain.images[i].view,   // pAttachments
-            300,                           // width
-            300,                           // height
-            1                              // layers
+            vk::FramebufferCreateFlags(),     // flags
+            m_render_pass,                    // renderPass
+            1,                                // attachmentCount
+            &m_swapchain.images[i].view,      // pAttachments
+            static_cast<uint32_t>(m_size.x),  // width
+            static_cast<uint32_t>(m_size.y),  // height
+            1                                 // layers
         };
 
         Vk_Context& context = Vk_Context::GetInstance();
@@ -660,12 +663,12 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         };
 
     vk::Viewport viewport = {
-        0.0f,    // x
-        0.0f,    // y
-        300.0f,  // width
-        300.0f,  // height
-        0.0f,    // minDepth
-        1.0f     // maxDepth
+        0.0f,                          // x
+        0.0f,                          // y
+        static_cast<float>(m_size.x),  // width
+        static_cast<float>(m_size.y),  // height
+        0.0f,                          // minDepth
+        1.0f                           // maxDepth
     };
 
     vk::Rect2D scissor = {{
@@ -675,8 +678,8 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
                           },
                           {
                               // extent
-                              300,  // width
-                              300   // height
+                              static_cast<uint32_t>(m_size.x),  // width
+                              static_cast<uint32_t>(m_size.y),  // height
                           }};
 
     vk::PipelineViewportStateCreateInfo viewport_state_create_info = {
@@ -792,8 +795,8 @@ bool Vk_RenderWindow::RecordCommandBuffers() {
         nullptr                                            // pInheritanceInfo
     };
 
-    vk::ClearColorValue clear_color(
-        std::array<float, 4>{{0.0f, 0.5451f, 0.5451f, 0.0f}});
+    vk::ClearValue clear_color = {
+        std::array<float, 4>{{0.0f, 0.5451f, 0.5451f, 0.0f}}};
 
     vk::ImageSubresourceRange image_subresource_range{
         vk::ImageAspectFlagBits::eColor,  // aspectMask
@@ -804,43 +807,70 @@ bool Vk_RenderWindow::RecordCommandBuffers() {
     };
 
     for (size_t i = 0; i < m_graphics_queue_cmd_buffers.size(); i++) {
-        vk::ImageMemoryBarrier barrier_from_present_to_clear{
-            vk::AccessFlagBits::eMemoryRead,       // srcAccessMask
-            vk::AccessFlagBits::eTransferWrite,    // dstAccessMask
-            vk::ImageLayout::eUndefined,           // oldLayout
-            vk::ImageLayout::eTransferDstOptimal,  // newLayout
-            m_present_queue.index,                 // srcQueueFamilyIndex
-            m_present_queue.index,                 // dstQueueFamilyIndex
-            m_swapchain.images[i].handle,          // image
-            image_subresource_range                // subresourceRange
-        };
-
-        vk::ImageMemoryBarrier barrier_from_clear_to_present{
-            vk::AccessFlagBits::eTransferWrite,    // srcAccessMask
-            vk::AccessFlagBits::eMemoryRead,       // dstAccessMask
-            vk::ImageLayout::eTransferDstOptimal,  // oldLayout
-            vk::ImageLayout::ePresentSrcKHR,       // newLayout
-            m_present_queue.index,                 // srcQueueFamilyIndex
-            m_present_queue.index,                 // dstQueueFamilyIndex
-            m_swapchain.images[i].handle,          // image
-            image_subresource_range                // subresourceRange
-        };
-
         m_graphics_queue_cmd_buffers[i].begin(&cmd_buffer_begin_info);
 
-        m_graphics_queue_cmd_buffers[i].pipelineBarrier(
-            vk::PipelineStageFlagBits::eTransfer,
-            vk::PipelineStageFlagBits::eTransfer, vk::DependencyFlags(), 0,
-            nullptr, 0, nullptr, 1, &barrier_from_present_to_clear);
+        if (m_present_queue.handle != m_graphics_queue.handle) {
+            vk::ImageMemoryBarrier barrier_from_present_to_draw{
+                vk::AccessFlagBits::eMemoryRead,            // srcAccessMask
+                vk::AccessFlagBits::eColorAttachmentWrite,  // dstAccessMask
+                vk::ImageLayout::eUndefined,                // oldLayout
+                vk::ImageLayout::eTransferDstOptimal,       // newLayout
+                m_present_queue.index,         // srcQueueFamilyIndex
+                m_graphics_queue.index,        // dstQueueFamilyIndex
+                m_swapchain.images[i].handle,  // image
+                image_subresource_range        // subresourceRange
+            };
+            m_graphics_queue_cmd_buffers[i].pipelineBarrier(
+                vk::PipelineStageFlagBits::eColorAttachmentOutput,
+                vk::PipelineStageFlagBits::eColorAttachmentOutput,
+                vk::DependencyFlags(), 0, nullptr, 0, nullptr, 1,
+                &barrier_from_present_to_draw);
+        }
 
-        m_graphics_queue_cmd_buffers[i].clearColorImage(
-            m_swapchain.images[i].handle, vk::ImageLayout::eTransferDstOptimal,
-            &clear_color, 1, &image_subresource_range);
+        vk::RenderPassBeginInfo render_pass_begin_info = {
+            m_render_pass,      // renderPass
+            m_framebuffers[i],  // framebuffer
+            // renderArea
+            {{
+                 // offset
+                 0,  // x
+                 0   // y
+             },
+             {
+                 // extent
+                 static_cast<uint32_t>(m_size.x),  // width
+                 static_cast<uint32_t>(m_size.y)   // height
+             }},
+            1,            // clearValueCount
+            &clear_color  // pClearValues
+        };
 
-        m_graphics_queue_cmd_buffers[i].pipelineBarrier(
-            vk::PipelineStageFlagBits::eTransfer,
-            vk::PipelineStageFlagBits::eBottomOfPipe, vk::DependencyFlags(), 0,
-            nullptr, 0, nullptr, 1, &barrier_from_clear_to_present);
+        m_graphics_queue_cmd_buffers[i].beginRenderPass(
+            &render_pass_begin_info, vk::SubpassContents::eInline);
+
+        m_graphics_queue_cmd_buffers[i].bindPipeline(
+            vk::PipelineBindPoint::eGraphics, m_graphics_pipeline);
+
+        m_graphics_queue_cmd_buffers[i].draw(3, 1, 0, 0);
+
+        m_graphics_queue_cmd_buffers[i].endRenderPass();
+
+        if (m_present_queue.handle != m_graphics_queue.handle) {
+            vk::ImageMemoryBarrier barrier_from_draw_to_present = {
+                vk::AccessFlagBits::eColorAttachmentWrite,  // srcAccessMask
+                vk::AccessFlagBits::eMemoryRead,            // dstAccessMask
+                vk::ImageLayout::ePresentSrcKHR,            // oldLayout
+                vk::ImageLayout::ePresentSrcKHR,            // newLayout
+                m_graphics_queue.index,        // srcQueueFamilyIndex
+                m_present_queue.index,         // dstQueueFamilyIndex
+                m_swapchain.images[i].handle,  // image
+                image_subresource_range        // subresourceRange
+            };
+            m_graphics_queue_cmd_buffers[i].pipelineBarrier(
+                vk::PipelineStageFlagBits::eColorAttachmentOutput,
+                vk::PipelineStageFlagBits::eBottomOfPipe, vk::DependencyFlags(),
+                0, nullptr, 0, nullptr, 1, &barrier_from_draw_to_present);
+        }
 
         result = m_graphics_queue_cmd_buffers[i].end();
         if (result != vk::Result::eSuccess) {
@@ -984,11 +1014,6 @@ void Vk_RenderWindow::ClearPipeline() {
             m_graphics_pipeline = nullptr;
         }
 
-        if (m_render_pass) {
-            device.destroyRenderPass(m_render_pass, nullptr);
-            m_render_pass = nullptr;
-        }
-
         for (size_t i = 0; i < m_framebuffers.size(); ++i) {
             if (m_framebuffers[i]) {
                 device.destroyFramebuffer(m_framebuffers[i], nullptr);
@@ -996,6 +1021,11 @@ void Vk_RenderWindow::ClearPipeline() {
             }
         }
         m_framebuffers.clear();
+
+        if (m_render_pass) {
+            device.destroyRenderPass(m_render_pass, nullptr);
+            m_render_pass = nullptr;
+        }
     }
 }
 
@@ -1014,7 +1044,6 @@ bool Vk_RenderWindow::OnWindowSizeChanged() {
     if (!CreateVulkanFrameBuffers()) {
         return false;
     }
-
     if (!CreateVulkanCommandBuffers()) {
         return false;
     }
