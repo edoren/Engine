@@ -40,6 +40,7 @@ bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
     CreateVulkanPipeline();
 
     CreateVulkanCommandBuffers();
+    RecordCommandBuffers();
 
     return true;
 }
@@ -507,12 +508,6 @@ bool Vk_RenderWindow::CreateVulkanCommandBuffers() {
         return false;
     }
 
-    // Define some command buffers
-    if (!RecordCommandBuffers()) {
-        LogError("Vk_RenderWindow", "Could not record command buffers");
-        return false;
-    }
-
     return true;
 }
 
@@ -722,10 +717,10 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         vk::BlendFactor::eOne,   // srcAlphaBlendFactor
         vk::BlendFactor::eZero,  // dstAlphaBlendFactor
         vk::BlendOp::eAdd,       // alphaBlendOp
-        vk::ColorComponentFlagBits::eR |
-            vk::ColorComponentFlagBits::eG |  // colorWriteMask
-            vk::ColorComponentFlagBits::eB |
-            vk::ColorComponentFlagBits::eA};
+        (vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG |
+         vk::ColorComponentFlagBits::eB |
+         vk::ColorComponentFlagBits::eA)  // colorWriteMask
+    };
 
     vk::PipelineColorBlendStateCreateInfo color_blend_state_create_info = {
         vk::PipelineColorBlendStateCreateFlags(),  // flags
