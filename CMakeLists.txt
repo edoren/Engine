@@ -1,11 +1,11 @@
 ###############################################################################
 ## CMake configuration
 
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.6.0)
 
 # Engine directory
 if (NOT DEFINED ENGINE_DIR)
-	set (ENGINE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+    set (ENGINE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 endif()
 
 project(Engine)
