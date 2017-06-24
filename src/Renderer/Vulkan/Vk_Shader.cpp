@@ -9,8 +9,7 @@ namespace engine {
 namespace {
 
 vk::ShaderStageFlagBits s_vk_shader_types[] = {
-    vk::ShaderStageFlagBits::eVertex, vk::ShaderStageFlagBits::eFragment,
-    vk::ShaderStageFlagBits::eGeometry};
+    vk::ShaderStageFlagBits::eVertex, vk::ShaderStageFlagBits::eFragment};
 
 }  // namespace
 

@@ -7,8 +7,7 @@ namespace engine {
 
 namespace {
 
-GLenum s_gl_shader_types[] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER,
-                              GL_GEOMETRY_SHADER};
+GLenum s_gl_shader_types[] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER};
 
 }  // namespace
 

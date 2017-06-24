@@ -9,8 +9,7 @@ namespace engine {
 
 enum class ShaderType {
     Vertex,
-    Fragment,
-    Geometry  // TODO: Add support
+    Fragment
 };
 
 class ENGINE_API Shader : NonCopyable {
