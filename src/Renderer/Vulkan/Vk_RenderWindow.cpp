@@ -244,11 +244,18 @@ bool Vk_RenderWindow::CreateVulkanSurface() {
         result =
             instance.createXlibSurfaceKHR(&create_info, nullptr, &m_surface);
     }
-#endif
-    else {
-        LogFatal("Vk_RenderWindow", "Unsupported subsystem");
-        return false;
+#elif defined(VK_USE_PLATFORM_ANDROID_KHR)
+    if (wminfo.subsystem == SDL_SYSWM_ANDROID) {
+        vk::AndroidSurfaceCreateInfoKHR create_info{
+            vk::AndroidSurfaceCreateFlagsKHR(),  // flags
+            wminfo.info.android.window,          // window
+        };
+        result =
+            instance.createAndroidSurfaceKHR(&create_info, nullptr, &m_surface);
     }
+#else
+    #error "Unsupported Vulkan subsystem"
+#endif
 
     if (result != vk::Result::eSuccess) {
         LogFatal("Vk_RenderWindow", "Error creating VkSurfaceKHR.");
