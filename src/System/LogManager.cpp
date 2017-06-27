@@ -3,17 +3,28 @@
 
 #include <SDL.h>
 
+#if PLATFORM_IS(PLATFORM_ANDROID)
+#include <android/log.h>
+#endif
+
 namespace engine {
 
 namespace {
 
-const char* g_log_priority_names[] = {NULL,   "VERBOSE", "DEBUG", "INFO",
+#if PLATFORM_IS(PLATFORM_ANDROID)
+android_LogPriority s_android_log_priorities[] = {
+    ANDROID_LOG_UNKNOWN, ANDROID_LOG_VERBOSE, ANDROID_LOG_DEBUG,
+    ANDROID_LOG_INFO,    ANDROID_LOG_WARN,    ANDROID_LOG_ERROR,
+    ANDROID_LOG_FATAL};
+#endif
+
+const char* s_log_priority_names[] = {NULL,   "VERBOSE", "DEBUG", "INFO",
                                       "WARN", "ERROR",   "FATAL"};
 
 String DefaultLogCallback(LogPriority priority, const String& tag,
                           const String& message) {
     const char* priority_name =
-        g_log_priority_names[static_cast<int>(priority)];
+        s_log_priority_names[static_cast<int>(priority)];
 
     // Get the current system hour
     std::time_t t = std::time(nullptr);
@@ -39,12 +50,17 @@ LogManager* LogManager::GetInstancePtr() {
     return s_instance;
 }
 
-LogManager::LogManager() : m_log_file("engine.log") {
-    EnableFileLogging(true);
-    EnableConsoleLogging(true);
-}
+LogManager::LogManager()
+      : m_app_name("Engine"),
+        m_log_file("engine.log"),
+        m_file_logging_enable(true),
+        m_console_logging_enable(true) {}
 
-LogManager::LogManager(const String& log_file) : m_log_file(log_file) {}
+LogManager(const String& app_name, const String& log_file)
+      : m_app_name(app_name),
+        m_log_file(log_file),
+        m_file_logging_enable(true),
+        m_console_logging_enable(true) {}
 
 LogManager::~LogManager() {}
 
@@ -93,8 +109,14 @@ void LogManager::LogMessage(LogPriority priority, const String& tag,
 
     // Write the log to console
     if (m_console_logging_enable) {
+#if PLATFORM_IS(PLATFORM_ANDROID)
+        __android_log_write(
+            s_android_log_priorities[static_cast<int>(priority)],
+            m_app_name.GetData(), log_message.GetData());
+#else
         fputs(log_message.GetData(), stdout);
         fputs("\n", stdout);
+#endif
     }
 }
 
