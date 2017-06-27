@@ -8,6 +8,9 @@ if (NOT DEFINED ENGINE_DIR)
     set (ENGINE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 endif()
 
+# Set the default Android NDK STL to LLVM libc++
+set(ANDROID_STL "c++_static")
+
 project(Engine)
 
 # Configure the projects to use folders
@@ -38,17 +41,14 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Enable Unicode in Windows
-if(${OS} STREQUAL "Windows")
+if(OS STREQUAL "Windows")
     add_definitions(-DUNICODE -D_UNICODE)
 endif()
 
 # If compiler is GNU GCC or Clang enable the warnings
-if(${COMPILER} STREQUAL "GCC" OR ${COMPILER} STREQUAL "Clang")
+if(COMPILER STREQUAL "GCC" OR COMPILER STREQUAL "Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 endif()
-
-# Set the default Android NDK STL to LLVM libc++
-set(ANDROID_STL "c++_static")
 
 ###############################################################################
 ## Engine configuration
