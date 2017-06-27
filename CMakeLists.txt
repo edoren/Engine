@@ -1,7 +1,7 @@
 ###############################################################################
 ## CMake configuration
 
-cmake_minimum_required(VERSION 3.6.0)
+cmake_minimum_required(VERSION 2.8.12)
 
 # Engine directory
 if (NOT DEFINED ENGINE_DIR)
