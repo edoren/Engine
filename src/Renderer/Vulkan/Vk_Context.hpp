@@ -16,8 +16,8 @@ public:
 
     void Shutdown();
 
-    vk::Instance& GetVulkanInstance();
-    vk::Device& GetVulkanDevice();
+    VkInstance& GetVulkanInstance();
+    VkDevice& GetVulkanDevice();
 
     PhysicalDeviceParameters& GetPhysicalDevice();
 
@@ -59,14 +59,14 @@ private:
     bool CreateInstance();
     bool CreateDevice();
 
-    bool SelectPhysicalDevice(vk::PhysicalDevice& physical_device);
+    bool SelectPhysicalDevice(VkPhysicalDevice& physical_device);
 
     bool CheckValidationLayerSupport() const;
     bool CheckInstanceExtensionsSupport() const;
 
 private:
-    vk::Instance m_instance;
-    vk::Device m_device;
+    VkInstance m_instance;
+    VkDevice m_device;
     PhysicalDeviceParameters m_physical_device;
 
     QueueParameters m_graphics_queue;
