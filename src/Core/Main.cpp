@@ -19,13 +19,15 @@ Main* Main::GetInstancePtr() {
     return s_instance;
 }
 
-Main::Main(int /*argc*/, char* argv[])
+Main::Main(int argc, char* argv[])
       : m_is_initialized(false),
         m_active_renderer(nullptr),
         m_logger(nullptr),
         m_sharedlibs(nullptr),
         m_input(nullptr),
         m_resources(nullptr) {
+    ENGINE_UNUSED(argc);
+    ENGINE_UNUSED(argv);
     m_logger = new LogManager();
     m_sharedlibs = new SharedLibManager();
     m_input = new InputManager();
