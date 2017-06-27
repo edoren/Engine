@@ -47,6 +47,9 @@ if(${COMPILER} STREQUAL "GCC" OR ${COMPILER} STREQUAL "Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 endif()
 
+# Set the default Android NDK STL to LLVM libc++
+set(ANDROID_STL "c++_static")
+
 ###############################################################################
 ## Engine configuration
 
