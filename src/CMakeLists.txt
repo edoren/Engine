@@ -1,5 +1,5 @@
 ###############################################################################
-# Third party libraries
+## Third party libraries
 
 # Configurable locations of dependencies of this project.
 set(MATHFU_DIR "${THIRD_PARTY_DIR}/mathfu")
@@ -89,12 +89,20 @@ target_include_directories(${ENGINE_LIBRARY} SYSTEM
 
 set(ENGINE_LIBRARY ${ENGINE_LIBRARY} PARENT_SCOPE)
 
+###############################################################################
+## Data processing
 
 find_package(PythonInterp 3 REQUIRED)
-# Copy the engine data
-set(DATA_SOURCE_FOLDER "${CMAKE_SOURCE_DIR}/data")
-set(DATA_OUTPUT_FOLDER "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/data")
+
 set(SCRIPTS_FOLDER "${CMAKE_SOURCE_DIR}/scripts")
+
+set(DATA_SOURCE_FOLDER "${CMAKE_SOURCE_DIR}/data")
+if(OS STREQUAL "Android")
+    set(DATA_OUTPUT_FOLDER "${CMAKE_SOURCE_DIR}/projects/android/app/src/main/assets")
+else()
+    set(DATA_OUTPUT_FOLDER "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/data")
+endif()
+
 add_custom_command(
     TARGET ${ENGINE_LIBRARY} POST_BUILD
     COMMAND ${PYTHON_EXECUTABLE} "${SCRIPTS_FOLDER}/process_data.py" ${DATA_SOURCE_FOLDER} ${DATA_OUTPUT_FOLDER}

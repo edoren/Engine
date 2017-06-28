@@ -9,42 +9,54 @@
 namespace engine {
 
 struct PhysicalDeviceParameters {
-    vk::PhysicalDevice handle;
-    vk::PhysicalDeviceProperties properties;
-    vk::PhysicalDeviceFeatures features;
+    VkPhysicalDevice handle;
+    VkPhysicalDeviceProperties properties;
+    VkPhysicalDeviceFeatures features;
 
-    operator vk::PhysicalDevice() {
+    PhysicalDeviceParameters()
+          : handle(VK_NULL_HANDLE),
+            properties(),
+            features() {}
+
+    operator VkPhysicalDevice() {
         return handle;
     }
 };
 
 struct ImageParameters {
-    vk::Image handle;
-    vk::ImageView view;
+    VkImage handle;
+    VkImageView view;
 
-    operator vk::Image() {
+    ImageParameters() : handle(VK_NULL_HANDLE), view() {}
+
+    operator VkImage() {
         return handle;
     }
 };
 
 struct QueueParameters {
-    vk::Queue handle;
+    VkQueue handle;
     uint32 index;
-    vk::QueueFamilyProperties properties;
+    VkQueueFamilyProperties properties;
 
-    QueueParameters() : index(UINT32_MAX) {}
+    QueueParameters()
+          : handle(VK_NULL_HANDLE),
+            index(UINT32_MAX),
+            properties() {}
 
-    operator vk::Queue() {
+    operator VkQueue() {
         return handle;
     }
 };
 
 struct SwapChainParameters {
-    vk::SwapchainKHR handle;
-    vk::Format format;
+    VkSwapchainKHR handle;
+    VkFormat format;
     std::vector<ImageParameters> images;
 
-    operator vk::SwapchainKHR() {
+    SwapChainParameters() : handle(VK_NULL_HANDLE), format(), images() {}
+
+    operator VkSwapchainKHR() {
         return handle;
     }
 };

@@ -39,11 +39,13 @@ bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
         return false;
     }
 
+#if PLATFORM_TYPE_IS(PLATFORM_TYPE_DESKTOP)
     GLenum status = glewInit();
     if (status != GLEW_OK) {
         LogError("GL_RenderWindow", "GLEW initialization failed.");
         return false;
     }
+#endif
 
     // TODO: User enable depth test
     GL_CALL(glEnable(GL_DEPTH_TEST));

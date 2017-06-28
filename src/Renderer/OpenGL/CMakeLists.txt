@@ -4,14 +4,28 @@
 # Configurable locations of dependencies of this project.
 set(GLEW_DIRECTORY "${THIRD_PARTY_DIR}/glew")
 
-# OpenGL
-find_package(OpenGL REQUIRED)
+set(DEPENDENCY_SOURCES "")
+set(DEPENDENCY_LIBRARIES ${ENGINE_LIBRARY})
+set(DEPENDENCY_INCLUDE_DIRS ${ENGINE_SOURCE_DIR})
 
-# GLEW
-find_package(GLEW)
-if(NOT GLEW_FOUND)
-    set(GLEW_INCLUDE_DIR "${GLEW_DIRECTORY}/include")
-    set(GLEW_SOURCES "${GLEW_DIRECTORY}/src/glew.c")
+# OpenGL or OpenGL ES
+if(OS STREQUAL "Android")
+    find_package(OpenGLES3 REQUIRED)
+    list(APPEND DEPENDENCY_LIBRARIES ${OPENGLES3_LIBRARIES})
+    list(APPEND DEPENDENCY_INCLUDE_DIRS ${OPENGLES3_INCLUDE_DIR})
+else()
+    find_package(OpenGL REQUIRED)
+    list(APPEND DEPENDENCY_LIBRARIES ${OPENGL_LIBRARY})
+
+    find_package(GLEW)
+    if(NOT GLEW_FOUND)
+        set(GLEW_INCLUDE_DIR "${GLEW_DIRECTORY}/include")
+        set(GLEW_SOURCES "${GLEW_DIRECTORY}/src/glew.c")
+        list(APPEND DEPENDENCY_SOURCES ${GLEW_SOURCES})
+    else()
+        list(APPEND DEPENDENCY_LIBRARIES ${GLEW_LIBRARY})
+    endif()
+    list(APPEND DEPENDENCY_INCLUDE_DIRS ${GLEW_INCLUDE_DIR})
 endif()
 
 ###############################################################################
@@ -23,16 +37,9 @@ engine_add_sources(TARGET PLUGIN_SOURCES
                    BASE_FOLDER "${ENGINE_SOURCE_DIR}/Renderer/OpenGL"
                    EXTENSIONS "cpp;hpp")
 
-if(NOT GLEW_FOUND)
-    list(APPEND PLUGIN_SOURCES ${GLEW_SOURCES})
-endif()
-
 engine_add_library(TARGET ${ENGINE_OPENGL_PLUGIN}
                    TYPE ${ENGINE_LIBRARY_TYPE}
-                   SOURCES "${PLUGIN_SOURCES}")
-
-target_link_libraries(${ENGINE_OPENGL_PLUGIN} ${OPENGL_LIBRARY} ${ENGINE_LIBRARY})
-target_include_directories(${ENGINE_OPENGL_PLUGIN} SYSTEM PUBLIC ${GLEW_INCLUDE_DIR})
+                   SOURCES ${PLUGIN_SOURCES} ${DEPENDENCY_SOURCES})
 
 # TMP: GLEW should not export any symbols when compiled internally
 if(ENGINE_BUILD_STATIC)
@@ -41,8 +48,7 @@ else()
     target_compile_definitions(${ENGINE_OPENGL_PLUGIN} PRIVATE GLEW_BUILD=1)
 endif()
 
-if(GLEW_FOUND)
-    target_link_libraries(${ENGINE_OPENGL_PLUGIN} ${GLEW_LIBRARY})
-endif()
+target_link_libraries(${ENGINE_OPENGL_PLUGIN} ${DEPENDENCY_LIBRARIES})
+target_include_directories(${ENGINE_OPENGL_PLUGIN} SYSTEM PUBLIC ${DEPENDENCY_INCLUDE_DIRS})
 
 set(ENGINE_OPENGL_PLUGIN ${ENGINE_OPENGL_PLUGIN} PARENT_SCOPE)

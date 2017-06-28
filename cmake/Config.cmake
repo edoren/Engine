@@ -6,6 +6,7 @@
 #        OSX     - Mac OSX
 #        Linux   - Linux OS
 #        FreeBSD - FreeBSD OS
+#        Android - Android OS
 #  COMPILER => MSVC  - Microsoft Visual C++
 #              Clang - Clang compiler
 #              GCC   - GNU Compiler Collection
@@ -15,7 +16,7 @@
 #
 # MIT License
 #
-# Copyright (c) 2016 Manuel Sabogal
+# Copyright (c) 2017 Manuel Sabogal
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -45,8 +46,10 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     SET(OS "Linux")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
     SET(OS "FreeBSD")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Android")
+    SET(OS "Android")
 else()
-    message(FATAL_ERROR "Unsupported operating system.")
+    message(FATAL_ERROR "Unsupported operating system ${CMAKE_SYSTEM_NAME}.")
 endif()
 
 if(MSVC)

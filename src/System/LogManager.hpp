@@ -18,7 +18,7 @@ enum class LogPriority : int {
 class ENGINE_API LogManager : public Singleton<LogManager> {
 public:
     LogManager();
-    LogManager(const String& log_file);
+    LogManager(const String& app_name, const String& log_file);
 
     ~LogManager();
 
@@ -68,6 +68,7 @@ public:
     static LogManager* GetInstancePtr();
 
 private:
+    String m_app_name;
     String m_log_file;
     bool m_file_logging_enable;
     bool m_console_logging_enable;

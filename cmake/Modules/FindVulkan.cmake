@@ -29,23 +29,25 @@ if(WIN32)
 else()
     set(VULKAN_SHARED_LIBRARY_NAMES vulkan)
     set(VULKAN_STATIC_LIBRARY_NAMES vkstatic.1 VKstatic.1)
-    set(VULKAN_INCLUDE_PATHS "$ENV{VULKAN_SDK}/include")
-    set(VULKAN_LIBRARY_PATHS "$ENV{VULKAN_SDK}/lib")
+    set(VULKAN_INCLUDE_PATHS "$ENV{VULKAN_SDK}/include"
+                             "/usr/include")
+    set(VULKAN_LIBRARY_PATHS "$ENV{VULKAN_SDK}/lib"
+                             "/usr/lib")
 endif()
 
 find_path(VULKAN_INCLUDE_DIR
     NAMES vulkan/vulkan.h
-    HINTS ${VULKAN_INCLUDE_PATHS}
+    PATHS ${VULKAN_INCLUDE_PATHS}
 )
 
 find_library(VULKAN_SHARED_LIBRARY
     NAMES ${VULKAN_SHARED_LIBRARY_NAMES}
-    HINTS ${VULKAN_LIBRARY_PATHS}
+    PATHS ${VULKAN_LIBRARY_PATHS}
 )
 
 find_library(VULKAN_STATIC_LIBRARY
     NAMES ${VULKAN_STATIC_LIBRARY_NAMES}
-    HINTS ${VULKAN_LIBRARY_PATHS}
+    PATHS ${VULKAN_LIBRARY_PATHS}
 )
 
 if(VULKAN_SHARED_LIBRARY)

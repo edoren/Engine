@@ -50,17 +50,17 @@ private:
     bool RecordCommandBuffers();
 
     uint32 GetVulkanSwapChainNumImages(
-        const vk::SurfaceCapabilitiesKHR& surface_capabilities);
-    vk::SurfaceFormatKHR GetVulkanSwapChainFormat(
-        const std::vector<vk::SurfaceFormatKHR>& surface_formats);
-    vk::Extent2D GetVulkanSwapChainExtent(
-        const vk::SurfaceCapabilitiesKHR& surface_capabilities);
-    vk::ImageUsageFlags GetVulkanSwapChainUsageFlags(
-        const vk::SurfaceCapabilitiesKHR& surface_capabilities);
-    vk::SurfaceTransformFlagBitsKHR GetVulkanSwapChainTransform(
-        const vk::SurfaceCapabilitiesKHR& surface_capabilities);
-    vk::PresentModeKHR GetVulkanSwapChainPresentMode(
-        const std::vector<vk::PresentModeKHR>& present_modes);
+        const VkSurfaceCapabilitiesKHR& surface_capabilities);
+    VkSurfaceFormatKHR GetVulkanSwapChainFormat(
+        const std::vector<VkSurfaceFormatKHR>& surface_formats);
+    VkExtent2D GetVulkanSwapChainExtent(
+        const VkSurfaceCapabilitiesKHR& surface_capabilities);
+    VkImageUsageFlags GetVulkanSwapChainUsageFlags(
+        const VkSurfaceCapabilitiesKHR& surface_capabilities);
+    VkSurfaceTransformFlagBitsKHR GetVulkanSwapChainTransform(
+        const VkSurfaceCapabilitiesKHR& surface_capabilities);
+    VkPresentModeKHR GetVulkanSwapChainPresentMode(
+        const std::vector<VkPresentModeKHR>& present_modes);
 
     void ClearPipeline();
     bool OnWindowSizeChanged();
@@ -68,22 +68,22 @@ private:
 private:
     SDL_Window* m_window;
 
-    vk::SurfaceKHR m_surface;
+    VkSurfaceKHR m_surface;
 
     QueueParameters m_graphics_queue;
     QueueParameters m_present_queue;
 
-    vk::Semaphore m_image_avaliable_semaphore;
-    vk::Semaphore m_rendering_finished_semaphore;
+    VkSemaphore m_image_avaliable_semaphore;
+    VkSemaphore m_rendering_finished_semaphore;
 
     SwapChainParameters m_swapchain;
-    vk::Pipeline m_graphics_pipeline;
+    VkPipeline m_graphics_pipeline;
 
-    vk::CommandPool m_graphics_queue_cmd_pool;
-    std::vector<vk::CommandBuffer> m_graphics_queue_cmd_buffers;
+    VkCommandPool m_graphics_queue_cmd_pool;
+    std::vector<VkCommandBuffer> m_graphics_queue_cmd_buffers;
 
-    vk::RenderPass m_render_pass;
-    std::vector<vk::Framebuffer> m_framebuffers;
+    VkRenderPass m_render_pass;
+    std::vector<VkFramebuffer> m_framebuffers;
 };
 
 }  // namespace engine

@@ -22,18 +22,16 @@ public:
     bool LoadFromMemory(const byte* source, std::size_t source_size,
                         ShaderType type);
 
-    vk::ShaderModule& GetModule();
+    VkShaderModule& GetModule();
 
-    vk::ShaderStageFlagBits GetShaderType();
+    VkShaderStageFlagBits GetShaderType();
 
     bool Link();
 
     void Use();
 
 private:
-    vk::ShaderModule m_module;  // ?
-
-    // std::vector<vk::PipelineShaderStageCreateInfo> m_create_infos;
+    VkShaderModule m_module;
 };
 
 }  // namespace engine

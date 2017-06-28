@@ -8,26 +8,27 @@ namespace engine {
 
 namespace {
 
-vk::ShaderStageFlagBits s_vk_shader_types[] = {
-    vk::ShaderStageFlagBits::eVertex, vk::ShaderStageFlagBits::eFragment,
-    vk::ShaderStageFlagBits::eGeometry};
+VkShaderStageFlagBits s_vk_shader_types[] = {VK_SHADER_STAGE_VERTEX_BIT,
+                                             VK_SHADER_STAGE_FRAGMENT_BIT};
 
 }  // namespace
 
-Vk_Shader::Vk_Shader() {}
+Vk_Shader::Vk_Shader() : m_module(VK_NULL_HANDLE) {}
 
-Vk_Shader::Vk_Shader(Vk_Shader&& other) : m_module(other.m_module) {}
+Vk_Shader::Vk_Shader(Vk_Shader&& other) : m_module(other.m_module) {
+    other.m_module = VK_NULL_HANDLE;
+}
 
 Vk_Shader::~Vk_Shader() {
     if (m_module) {
-        vk::Device& device = Vk_Context::GetInstance().GetVulkanDevice();
-        device.destroyShaderModule(m_module, nullptr);
+        VkDevice& device = Vk_Context::GetInstance().GetVulkanDevice();
+        vkDestroyShaderModule(device, m_module, nullptr);
     }
 }
 
 Vk_Shader& Vk_Shader::operator=(Vk_Shader&& other) {
     m_module = other.m_module;
-    other.m_module = nullptr;
+    other.m_module = VK_NULL_HANDLE;
     return *this;
 }
 
@@ -37,18 +38,21 @@ bool Vk_Shader::LoadFromMemory(const byte* source, std::size_t source_size,
         return false;
     }
 
-    vk::Result result;
+    VkResult result = VK_SUCCESS;
 
-    vk::ShaderModuleCreateInfo shader_module_create_info{
-        vk::ShaderModuleCreateFlags(),             // flags
-        source_size,                               // codeSize
-        reinterpret_cast<const uint32_t*>(source)  // pCode
+    VkShaderModuleCreateInfo shader_module_create_info = {
+        VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,  // sType
+        nullptr,                                      // pNext
+        VkShaderModuleCreateFlags(),                  // flags
+        source_size,                                  // codeSize
+        reinterpret_cast<const uint32_t*>(source)     // pCode
     };
 
-    vk::Device& device = Vk_Context::GetInstance().GetVulkanDevice();
-    result = device.createShaderModule(&shader_module_create_info, nullptr,
-                                       &m_module);
-    if (result != vk::Result::eSuccess) {
+    VkDevice& device = Vk_Context::GetInstance().GetVulkanDevice();
+
+    result = vkCreateShaderModule(device, &shader_module_create_info, nullptr,
+                                  &m_module);
+    if (result != VK_SUCCESS) {
         LogError("Vk_RenderWindow", "Could not create shader module.");
         return false;
     }
@@ -56,12 +60,12 @@ bool Vk_Shader::LoadFromMemory(const byte* source, std::size_t source_size,
     return true;
 }
 
-vk::ShaderModule& Vk_Shader::GetModule() {
+VkShaderModule& Vk_Shader::GetModule() {
     return m_module;
 }
 
-vk::ShaderStageFlagBits Vk_Shader::GetShaderType() {
-    return vk::ShaderStageFlagBits::eVertex;
+VkShaderStageFlagBits Vk_Shader::GetShaderType() {
+    return s_vk_shader_types[0];
 }
 
 bool Vk_Shader::Link() {

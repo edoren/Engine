@@ -38,7 +38,7 @@ bool SharedLibrary::Load() {
 #if PLATFORM_IS(PLATFORM_WINDOWS)
     auto wide_string = lib_name.ToWide();
     m_handle = LoadLibraryW(wide_string.data());
-#elif PLATFORM_IS(PLATFORM_LINUX) || PLATFORM_IS(PLATFORM_MAC)
+#elif PLATFORM_IS(PLATFORM_LINUX) || PLATFORM_IS(PLATFORM_MAC) || PLATFORM_IS(PLATFORM_ANDROID)
     auto utf8string = lib_name.ToUtf8();
     m_handle = dlopen(utf8string.data(), RTLD_LAZY | RTLD_LOCAL);
 #endif
@@ -49,7 +49,7 @@ void SharedLibrary::Unload() {
     if (m_handle == nullptr) return;
 #if PLATFORM_IS(PLATFORM_WINDOWS)
     FreeLibrary(reinterpret_cast<HMODULE>(m_handle));
-#elif PLATFORM_IS(PLATFORM_LINUX) || PLATFORM_IS(PLATFORM_MAC)
+#elif PLATFORM_IS(PLATFORM_LINUX) || PLATFORM_IS(PLATFORM_MAC) || PLATFORM_IS(PLATFORM_ANDROID)
     dlclose(m_handle);
 #endif
     m_handle = nullptr;
@@ -69,7 +69,7 @@ String SharedLibrary::GetErrorString() {
     String ret = String::FromWide(lpMsgBuf, lpMsgBuf + msg_len);
     LocalFree(lpMsgBuf);
     return ret;
-#elif PLATFORM_IS(PLATFORM_LINUX) || PLATFORM_IS(PLATFORM_MAC)
+#elif PLATFORM_IS(PLATFORM_LINUX) || PLATFORM_IS(PLATFORM_MAC) || PLATFORM_IS(PLATFORM_ANDROID)
     return String(dlerror());
 #else
     return String("");
@@ -86,7 +86,7 @@ void* SharedLibrary::GetSymbol(const char* name) {
 #if PLATFORM_IS(PLATFORM_WINDOWS)
     address =
         GetProcAddress(reinterpret_cast<HMODULE>(m_handle), name);
-#elif PLATFORM_IS(PLATFORM_LINUX) || PLATFORM_IS(PLATFORM_MAC)
+#elif PLATFORM_IS(PLATFORM_LINUX) || PLATFORM_IS(PLATFORM_MAC) || PLATFORM_IS(PLATFORM_ANDROID)
     address = dlsym(m_handle, name);
 #endif
     return address;
