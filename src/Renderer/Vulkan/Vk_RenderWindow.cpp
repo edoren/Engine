@@ -23,7 +23,8 @@ Vk_RenderWindow::~Vk_RenderWindow() {
 bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
     // Create the window
     math::ivec2 initial_pos(SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-    uint32 window_flags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
+    uint32 window_flags(SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE |
+                        SDL_WINDOW_VULKAN);
     m_window = SDL_CreateWindow(name.GetData(), initial_pos.x, initial_pos.y,
                                 size.x, size.y, window_flags);
     if (!m_window) {
@@ -35,7 +36,6 @@ bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
     // Update the base class attributes
     SDL_GetWindowSize(m_window, &m_size.x, &m_size.y);
     m_name = name;
-    m_size = size;
 
     CreateVulkanSurface();
     CreateVulkanQueues();
@@ -219,7 +219,10 @@ bool Vk_RenderWindow::IsVisible() {
 bool Vk_RenderWindow::CreateVulkanSurface() {
     SDL_SysWMinfo wminfo;
     SDL_VERSION(&wminfo.version);
-    if (!SDL_GetWindowWMInfo(m_window, &wminfo)) return false;
+    if (!SDL_GetWindowWMInfo(m_window, &wminfo)) {
+        LogFatal("Vk_RenderWindow", "Error on SDL_GetWindowWMInfo.");
+        return false;
+    }
 
     VkResult result = VK_SUCCESS;
 
@@ -416,7 +419,13 @@ bool Vk_RenderWindow::CreateVulkanSwapChain() {
         return false;
     }
 
-    VkSwapchainCreateInfoKHR swap_chain_create_info{
+    VkCompositeAlphaFlagBitsKHR composite_alpha =
+        VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+    if (!(surface_capabilities.supportedCompositeAlpha & composite_alpha)) {
+        composite_alpha = VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR;
+    }
+
+    VkSwapchainCreateInfoKHR swap_chain_create_info = {
         VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,  // sType
         nullptr,                                      // pNext
         VkSwapchainCreateFlagsKHR(),                  // flags
@@ -431,7 +440,7 @@ bool Vk_RenderWindow::CreateVulkanSwapChain() {
         0,                                            // queueFamilyIndexCount
         nullptr,                                      // pQueueFamilyIndices
         desired_transform,                            // preTransform
-        VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR,            // compositeAlpha
+        composite_alpha,                              // compositeAlpha
         desired_present_mode,                         // presentMode
         true,                                         // clipped
         old_swap_chain                                // oldSwapchain
@@ -657,9 +666,9 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         std::vector<byte> vertex_shader_code;
         std::vector<byte> fragment_shader_code;
 
-        io::FileLoader::LoadFile("data/shaders/spirv/triangle.vert",
+        io::FileLoader::LoadFile("shaders/spirv/triangle.vert",
                                  &vertex_shader_code);
-        io::FileLoader::LoadFile("data/shaders/spirv/triangle.frag",
+        io::FileLoader::LoadFile("shaders/spirv/triangle.frag",
                                  &fragment_shader_code);
 
         vertex_shader_module.LoadFromMemory(vertex_shader_code.data(),
