@@ -23,22 +23,19 @@ def remove_directory(dir):
         shutil.rmtree(dir)
 
 
-def get_vulkan_sdk_folder():
-    vulkan_dir = os.environ.get("VULKAN_SDK")
-    if vulkan_dir is None:
-        exit_with_msg("Vulkan SDK not installed", 1)
-    return os.path.abspath(vulkan_dir)
-
-
 def exit_with_msg(message, code=0):
     print(message)
     exit(0)
 
 
 def generate_spirv_shaders(data_folder):
-    vulkan_dir = get_vulkan_sdk_folder()
-
-    glslang_exe = os.path.join(vulkan_dir, "bin", "glslangValidator")
+    glslang_exe = shutil.which("glslangValidator")
+    if glslang_exe is None:
+        vulkan_dir = os.environ.get("VULKAN_SDK")
+        if vulkan_dir is None:
+            exit_with_msg("Vulkan SDK not installed", 1)
+        vulkan_dir = os.path.abspath(vulkan_dir)
+        glslang_exe = os.path.join(vulkan_dir, "bin", "glslangValidator")
 
     glsl_shaders_folder = os.path.join(data_folder, "shaders", "glsl")
     spirv_shaders_folder = os.path.join(data_folder, "shaders", "spirv")
