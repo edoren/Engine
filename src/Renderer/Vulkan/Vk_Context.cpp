@@ -7,6 +7,38 @@ namespace engine {
 
 namespace {
 
+const String sTag("Vk_Context");
+
+VkDebugReportCallbackEXT sDebugReportCallback = VK_NULL_HANDLE;
+
+VKAPI_ATTR VkBool32 VKAPI_CALL DebugReportCallback(
+    VkDebugReportFlagsEXT msgFlags, VkDebugReportObjectTypeEXT objType,
+    uint64_t srcObject, size_t location, int32_t msgCode,
+    const char* pLayerPrefix, const char* pMsg, void* pUserData) {
+    ENGINE_UNUSED(objType);
+    ENGINE_UNUSED(srcObject);
+    ENGINE_UNUSED(location);
+    ENGINE_UNUSED(pLayerPrefix);
+    ENGINE_UNUSED(pUserData);
+
+    String output_msg("{} - Code: {}"_format(pMsg, msgCode));
+
+    if (msgFlags & VK_DEBUG_REPORT_ERROR_BIT_EXT) {
+        LogError(sTag, output_msg);
+    } else if (msgFlags & VK_DEBUG_REPORT_WARNING_BIT_EXT ||
+               msgFlags & VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT) {
+        LogWarning(sTag, output_msg);
+    } else if (msgFlags & VK_DEBUG_REPORT_INFORMATION_BIT_EXT) {
+        LogInfo(sTag, output_msg);
+    } else if (msgFlags & VK_DEBUG_REPORT_DEBUG_BIT_EXT) {
+        LogDebug(sTag, output_msg);
+    }
+
+    // Returning false tells the layer not to stop when the event occurs, so
+    // they see the same behavior with and without validation layers enabled.
+    return VK_FALSE;
+}
+
 bool CheckExtensionAvailability(const char* str,
                                 const std::vector<VkExtensionProperties>& vec) {
     for (size_t i = 0; i < vec.size(); i++) {
@@ -42,7 +74,9 @@ Vk_Context* Vk_Context::GetInstancePtr() {
 }
 
 Vk_Context::Vk_Context()
-      : m_instance(VK_NULL_HANDLE), m_device(VK_NULL_HANDLE) {}
+      : m_instance(VK_NULL_HANDLE),
+        m_device(VK_NULL_HANDLE),
+        m_validation_layers_enabled(true) {}
 
 Vk_Context::~Vk_Context() {
     Shutdown();
@@ -51,7 +85,17 @@ Vk_Context::~Vk_Context() {
 bool Vk_Context::Initialize() {
     // Add the required validation layers
     if (m_validation_layers_enabled) {
+#if PLATFORM_IS(PLATFORM_ANDROID)
+        m_validation_layers.push_back("VK_LAYER_GOOGLE_threading");
+        m_validation_layers.push_back("VK_LAYER_LUNARG_parameter_validation");
+        m_validation_layers.push_back("VK_LAYER_LUNARG_object_tracker");
+        m_validation_layers.push_back("VK_LAYER_LUNARG_core_validation");
+        m_validation_layers.push_back("VK_LAYER_LUNARG_image");
+        m_validation_layers.push_back("VK_LAYER_LUNARG_swapchain");
+        m_validation_layers.push_back("VK_LAYER_GOOGLE_unique_objects");
+#else
         m_validation_layers.push_back("VK_LAYER_LUNARG_standard_validation");
+#endif
     }
 
     // Add the required Instance extensions
@@ -62,6 +106,8 @@ bool Vk_Context::Initialize() {
     m_instance_extensions.push_back(VK_KHR_XCB_SURFACE_EXTENSION_NAME);
 #elif defined(VK_USE_PLATFORM_XLIB_KHR)
     m_instance_extensions.push_back(VK_KHR_XLIB_SURFACE_EXTENSION_NAME);
+#elif defined(VK_USE_PLATFORM_ANDROID_KHR)
+    m_instance_extensions.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
 #endif
     if (m_validation_layers_enabled) {
         m_instance_extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
@@ -72,20 +118,57 @@ bool Vk_Context::Initialize() {
 
     // Check the validation layers support
     if (m_validation_layers_enabled && !CheckValidationLayerSupport()) {
-        LogFatal("Vk_Core", "Validation layers requested, but not available");
+        LogFatal(sTag, "Validation layers requested, but not available");
         return false;
     }
 
     CreateInstance();
     CreateDevice();
 
+    if (m_validation_layers_enabled && !sDebugReportCallback) {
+        PFN_vkCreateDebugReportCallbackEXT vkCreateDebugReportCallbackEXT;
+
+        vkCreateDebugReportCallbackEXT =
+            (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(
+                m_instance, "vkCreateDebugReportCallbackEXT");
+
+        // Create the debug callback with desired settings
+        if (vkCreateDebugReportCallbackEXT) {
+            VkDebugReportCallbackCreateInfoEXT debugReportCallbackCreateInfo = {
+                VK_STRUCTURE_TYPE_DEBUG_REPORT_CREATE_INFO_EXT,  // sType
+                nullptr,                                         // pNext
+                (VK_DEBUG_REPORT_ERROR_BIT_EXT |
+                 VK_DEBUG_REPORT_WARNING_BIT_EXT |
+                 VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT),  // flags
+                DebugReportCallback,                            // pfnCallback
+                nullptr                                         // pUserData
+            };
+
+            vkCreateDebugReportCallbackEXT(m_instance,
+                                           &debugReportCallbackCreateInfo,
+                                           nullptr, &sDebugReportCallback);
+        }
+    }
+
     return true;
 }
 
 void Vk_Context::Shutdown() {
+    if (m_validation_layers_enabled && sDebugReportCallback) {
+        PFN_vkDestroyDebugReportCallbackEXT vkDestroyDebugReportCallbackEXT;
+        vkDestroyDebugReportCallbackEXT =
+            (PFN_vkDestroyDebugReportCallbackEXT)vkGetInstanceProcAddr(
+                m_instance, "vkDestroyDebugReportCallbackEXT");
+
+        if (vkDestroyDebugReportCallbackEXT) {
+            vkDestroyDebugReportCallbackEXT(m_instance, sDebugReportCallback,
+                                            nullptr);
+        }
+    }
+
     if (m_device) vkDestroyDevice(m_device, nullptr);
     if (m_instance) vkDestroyInstance(m_instance, nullptr);
-    ;
+
     m_device = nullptr;
     m_instance = nullptr;
 }
@@ -120,7 +203,7 @@ bool Vk_Context::CreateInstance() {
 
     // Check that all the instance extensions are supported
     if (!CheckInstanceExtensionsSupport()) {
-        LogFatal("Vk_Core", "Error instance extensions");
+        LogFatal(sTag, "Error instance extensions");
         return false;
     };
 
@@ -140,7 +223,7 @@ bool Vk_Context::CreateInstance() {
     // Create the Vulkan instance based on the provided info
     VkResult result = vkCreateInstance(&create_info, nullptr, &m_instance);
     if (result != VK_SUCCESS) {
-        LogFatal("Vk_Core", "Failed to create Vulkan instance");
+        LogFatal(sTag, "Failed to create Vulkan instance");
         return false;
     }
 
@@ -162,7 +245,7 @@ bool Vk_Context::CreateDevice() {
                                             physical_devices.data());
     }
     if (physical_devices_count == 0 || result != VK_SUCCESS) {
-        LogFatal("Vk_Core", "Error querying physical devices");
+        LogFatal(sTag, "Error querying physical devices");
         return false;
     }
 
@@ -209,7 +292,7 @@ bool Vk_Context::CreateDevice() {
     result = vkCreateDevice(m_physical_device.handle, &device_create_info,
                             nullptr, &m_device);
     if (result != VK_SUCCESS) {
-        LogFatal("Vk_Core", "Could not create Vulkan device");
+        LogFatal(sTag, "Could not create Vulkan device");
         return false;
     }
 
@@ -234,7 +317,7 @@ bool Vk_Context::SelectPhysicalDevice(VkPhysicalDevice& physical_device) {
     // uint32 patch_version = VK_VERSION_PATCH(properties.apiVersion);
 
     if (major_version < 1 && properties.limits.maxImageDimension2D < 4096) {
-        LogError("Vk_Core",
+        LogError(sTag,
                  "Physical device {} doesn't support required "
                  "parameters"_format(properties.deviceName));
         return false;
@@ -255,7 +338,7 @@ bool Vk_Context::SelectPhysicalDevice(VkPhysicalDevice& physical_device) {
 
     // Check that the avaliable extensions could be retreived
     if (result != VK_SUCCESS || extensions_count == 0) {
-        LogError("Vk_Core",
+        LogError(sTag,
                  "Error occurred during physical device {} extensions "
                  "enumeration"_format(properties.deviceName));
         return false;
@@ -265,7 +348,7 @@ bool Vk_Context::SelectPhysicalDevice(VkPhysicalDevice& physical_device) {
     for (size_t i = 0; i < m_device_extensions.size(); i++) {
         if (!CheckExtensionAvailability(m_device_extensions[i],
                                         available_extensions)) {
-            LogError("Vk_Core",
+            LogError(sTag,
                      "Physical device {} doesn't support extension "
                      "named \"{}\""_format(properties.deviceName,
                                            m_device_extensions[i]));
@@ -278,7 +361,7 @@ bool Vk_Context::SelectPhysicalDevice(VkPhysicalDevice& physical_device) {
     vkGetPhysicalDeviceQueueFamilyProperties(physical_device,
                                              &queue_families_count, nullptr);
     if (queue_families_count == 0) {
-        LogError("Vk_Core",
+        LogError(sTag,
                  "Physical device {} doesn't have any queue "
                  "families"_format(properties.deviceName));
         return false;
@@ -301,7 +384,7 @@ bool Vk_Context::SelectPhysicalDevice(VkPhysicalDevice& physical_device) {
     // If this device doesn't support queues with graphics and present
     // capabilities don't use it
     if (graphics_queue_family_index == UINT32_MAX) {
-        LogError("Vk_Core",
+        LogError(sTag,
                  "Could not find queue family with required properties "
                  "on physical device: {}"_format(properties.deviceName));
         return false;
@@ -335,15 +418,14 @@ bool Vk_Context::CheckValidationLayerSupport() const {
 
     // Check that the avaliable layers could be retreived
     if (layer_count == 0 || result != VK_SUCCESS) {
-        LogError("Vk_Core",
-                 "Error occurred during validation layers enumeration");
+        LogError(sTag, "Error occurred during validation layers enumeration");
         return false;
     }
 
     // Check that all the validation layers exists
     for (size_t i = 0; i < m_validation_layers.size(); i++) {
         if (!CheckLayerAvailability(m_validation_layers[i], avaliable_layers)) {
-            LogError("Vk_Core",
+            LogError(sTag,
                      "Could not find validation layer "
                      "named: {}"_format(m_validation_layers[i]));
             return false;
@@ -369,8 +451,7 @@ bool Vk_Context::CheckInstanceExtensionsSupport() const {
 
     // Check that the avaliable extensions could be retreived
     if (extensions_count == 0 || result != VK_SUCCESS) {
-        LogError("Vk_Core",
-                 "Error occurred during instance extensions enumeration");
+        LogError(sTag, "Error occurred during instance extensions enumeration");
         return false;
     }
 
@@ -378,7 +459,7 @@ bool Vk_Context::CheckInstanceExtensionsSupport() const {
     for (size_t i = 0; i < m_instance_extensions.size(); i++) {
         if (!CheckExtensionAvailability(m_instance_extensions[i],
                                         available_extensions)) {
-            LogError("Vk_Core",
+            LogError(sTag,
                      "Could not find instance extension "
                      "named: {}"_format(m_instance_extensions[i]));
             return false;
