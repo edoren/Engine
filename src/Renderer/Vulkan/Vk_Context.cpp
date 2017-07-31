@@ -8,6 +8,7 @@ namespace engine {
 namespace {
 
 const String sTag("Vk_Context");
+const String sTagVkDebug("Vk_ValidationLayers");
 
 VkDebugReportCallbackEXT sDebugReportCallback = VK_NULL_HANDLE;
 
@@ -24,14 +25,14 @@ VKAPI_ATTR VkBool32 VKAPI_CALL DebugReportCallback(
     String output_msg("{} - Code: {}"_format(pMsg, msgCode));
 
     if (msgFlags & VK_DEBUG_REPORT_ERROR_BIT_EXT) {
-        LogError(sTag, output_msg);
+        LogError(sTagVkDebug, output_msg);
     } else if (msgFlags & VK_DEBUG_REPORT_WARNING_BIT_EXT ||
                msgFlags & VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT) {
-        LogWarning(sTag, output_msg);
+        LogWarning(sTagVkDebug, output_msg);
     } else if (msgFlags & VK_DEBUG_REPORT_INFORMATION_BIT_EXT) {
-        LogInfo(sTag, output_msg);
+        LogInfo(sTagVkDebug, output_msg);
     } else if (msgFlags & VK_DEBUG_REPORT_DEBUG_BIT_EXT) {
-        LogDebug(sTag, output_msg);
+        LogDebug(sTagVkDebug, output_msg);
     }
 
     // Returning false tells the layer not to stop when the event occurs, so
@@ -86,6 +87,7 @@ bool Vk_Context::Initialize() {
     // Add the required validation layers
     if (m_validation_layers_enabled) {
 #if PLATFORM_IS(PLATFORM_ANDROID)
+        // NDK r15 uses Vulkan API 1.0.13
         m_validation_layers.push_back("VK_LAYER_GOOGLE_threading");
         m_validation_layers.push_back("VK_LAYER_LUNARG_parameter_validation");
         m_validation_layers.push_back("VK_LAYER_LUNARG_object_tracker");
@@ -129,8 +131,9 @@ bool Vk_Context::Initialize() {
         PFN_vkCreateDebugReportCallbackEXT vkCreateDebugReportCallbackEXT;
 
         vkCreateDebugReportCallbackEXT =
-            (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(
-                m_instance, "vkCreateDebugReportCallbackEXT");
+            reinterpret_cast<PFN_vkCreateDebugReportCallbackEXT>(
+                vkGetInstanceProcAddr(m_instance,
+                                      "vkCreateDebugReportCallbackEXT"));
 
         // Create the debug callback with desired settings
         if (vkCreateDebugReportCallbackEXT) {
@@ -157,8 +160,9 @@ void Vk_Context::Shutdown() {
     if (m_validation_layers_enabled && sDebugReportCallback) {
         PFN_vkDestroyDebugReportCallbackEXT vkDestroyDebugReportCallbackEXT;
         vkDestroyDebugReportCallbackEXT =
-            (PFN_vkDestroyDebugReportCallbackEXT)vkGetInstanceProcAddr(
-                m_instance, "vkDestroyDebugReportCallbackEXT");
+            reinterpret_cast<PFN_vkDestroyDebugReportCallbackEXT>(
+                vkGetInstanceProcAddr(m_instance,
+                                      "vkDestroyDebugReportCallbackEXT"));
 
         if (vkDestroyDebugReportCallbackEXT) {
             vkDestroyDebugReportCallbackEXT(m_instance, sDebugReportCallback,
@@ -198,7 +202,7 @@ bool Vk_Context::CreateInstance() {
         VK_MAKE_VERSION(1, 0, 0),            // applicationVersion
         "Engine",                            // pEngineName
         VK_MAKE_VERSION(1, 0, 0),            // engineVersion
-        VK_API_VERSION_1_0                   // apiVersion
+        VK_MAKE_VERSION(1, 0, 0)             // apiVersion
     };
 
     // Check that all the instance extensions are supported
@@ -254,7 +258,7 @@ bool Vk_Context::CreateDevice() {
     for (size_t i = 0; i < physical_devices.size(); i++) {
         if (SelectPhysicalDevice(physical_devices[i])) break;
     }
-    if (!m_physical_device.handle || m_graphics_queue.index == UINT32_MAX) {
+    if (!m_physical_device.handle || m_graphics_queue.family_index == UINT32_MAX) {
         LogFatal(
             "Vk_Core",
             "No physical device that supports the required caracteristics");
@@ -268,7 +272,7 @@ bool Vk_Context::CreateDevice() {
         VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,    // sType
         nullptr,                                       // pNext
         VkDeviceQueueCreateFlags(),                    // flags
-        m_graphics_queue.index,                        // queueFamilyIndex
+        m_graphics_queue.family_index,                 // queueFamilyIndex
         static_cast<uint32>(queue_priorities.size()),  // queueCount
         queue_priorities.data()                        // pQueuePriorities
     });
@@ -297,7 +301,7 @@ bool Vk_Context::CreateDevice() {
     }
 
     // Get the Queue handles
-    vkGetDeviceQueue(m_device, m_graphics_queue.index, 0,
+    vkGetDeviceQueue(m_device, m_graphics_queue.family_index, 0,
                      &m_graphics_queue.handle);
 
     return true;
@@ -396,9 +400,9 @@ bool Vk_Context::SelectPhysicalDevice(VkPhysicalDevice& physical_device) {
     m_physical_device.features = features;
 
     // Set the graphical QueueProperties
-    m_graphics_queue.index = graphics_queue_family_index;
+    m_graphics_queue.family_index = graphics_queue_family_index;
     m_graphics_queue.properties =
-        queue_family_properties[m_graphics_queue.index];
+        queue_family_properties[m_graphics_queue.family_index];
 
     return true;
 }
