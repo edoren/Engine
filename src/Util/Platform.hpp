@@ -5,18 +5,18 @@
     running system, as well as which system APIs are avaliable on it.
 */
 
-#define PLATFORM_WINDOWS 0x1
-#define PLATFORM_LINUX 0x2
-#define PLATFORM_MAC 0x4
-#define PLATFORM_ANDROID 0x8
-#define PLATFORM_IOS 0xF
+#define PLATFORM_WINDOWS 0x00000001
+#define PLATFORM_LINUX   0x00000002
+#define PLATFORM_MAC     0x00000004
+#define PLATFORM_ANDROID 0x00000008
+#define PLATFORM_IOS     0x00000010
 
-#define PLATFORM_TYPE_DESKTOP 1
-#define PLATFORM_TYPE_MOBILE 2
+#define PLATFORM_TYPE_DESKTOP 0x00000001
+#define PLATFORM_TYPE_MOBILE  0x00000002
 
-#define PLATFORM_API_WIN32 0x1
-#define PLATFORM_API_WIN64 0x2
-#define PLATFORM_API_POSIX 0x4
+#define PLATFORM_API_WIN32 0x00000001
+#define PLATFORM_API_WIN64 0x00000002
+#define PLATFORM_API_POSIX 0x00000004
 
 // Find the current platform and platform type
 #if defined(_WIN32)
@@ -59,4 +59,4 @@
 
 #define PLATFORM_IS(x) PLATFORM == x
 #define PLATFORM_TYPE_IS(x) PLATFORM_TYPE == x
-#define PLATFORM_HAS_API(x) PLATFORM_APIS & x
+#define PLATFORM_HAS_API(x) PLATFORM_APIS & (x)
