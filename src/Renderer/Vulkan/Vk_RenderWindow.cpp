@@ -78,26 +78,26 @@ void Vk_RenderWindow::Destroy() {
         vkDeviceWaitIdle(device);
 
         for (size_t i = 0; i < m_render_resources.size(); i++) {
-            if (m_render_resources[i].Framebuffer) {
-                vkDestroyFramebuffer(device, m_render_resources[i].Framebuffer,
+            if (m_render_resources[i].framebuffer) {
+                vkDestroyFramebuffer(device, m_render_resources[i].framebuffer,
                                      nullptr);
             }
-            if (m_render_resources[i].CommandBuffer) {
+            if (m_render_resources[i].command_buffer) {
                 vkFreeCommandBuffers(device, m_graphics_queue_cmd_pool, 1,
-                                     &m_render_resources[i].CommandBuffer);
+                                     &m_render_resources[i].command_buffer);
             }
-            if (m_render_resources[i].ImageAvailableSemaphore) {
+            if (m_render_resources[i].image_available_semaphore) {
                 vkDestroySemaphore(
-                    device, m_render_resources[i].ImageAvailableSemaphore,
+                    device, m_render_resources[i].image_available_semaphore,
                     nullptr);
             }
-            if (m_render_resources[i].FinishedRenderingSemaphore) {
+            if (m_render_resources[i].finished_rendering_semaphore) {
                 vkDestroySemaphore(
-                    device, m_render_resources[i].FinishedRenderingSemaphore,
+                    device, m_render_resources[i].finished_rendering_semaphore,
                     nullptr);
             }
-            if (m_render_resources[i].Fence) {
-                vkDestroyFence(device, m_render_resources[i].Fence, nullptr);
+            if (m_render_resources[i].fence) {
+                vkDestroyFence(device, m_render_resources[i].fence, nullptr);
             }
         }
         m_render_resources.clear();
@@ -189,18 +189,18 @@ void Vk_RenderWindow::SwapBuffers() {
 
     resource_index = (resource_index + 1) % sResourceCount;
 
-    result = vkWaitForFences(device, 1, &current_rendering_resource.Fence,
+    result = vkWaitForFences(device, 1, &current_rendering_resource.fence,
                              VK_FALSE, 1000000000);
     if (result != VK_SUCCESS) {
         LogError("Vk_RenderWindow", "Waiting for fence takes too long");
         return;
     }
 
-    vkResetFences(device, 1, &current_rendering_resource.Fence);
+    vkResetFences(device, 1, &current_rendering_resource.fence);
 
     result = vkAcquireNextImageKHR(
         device, m_swapchain.handle, UINT64_MAX,
-        current_rendering_resource.ImageAvailableSemaphore, VK_NULL_HANDLE,
+        current_rendering_resource.image_available_semaphore, VK_NULL_HANDLE,
         &image_index);
     switch (result) {
         case VK_SUCCESS:
@@ -215,9 +215,9 @@ void Vk_RenderWindow::SwapBuffers() {
             return;
     }
 
-    if (!PrepareFrame(current_rendering_resource.CommandBuffer,
+    if (!PrepareFrame(current_rendering_resource.command_buffer,
                       m_swapchain.images[image_index],
-                      current_rendering_resource.Framebuffer)) {
+                      current_rendering_resource.framebuffer)) {
         return;
     }
 
@@ -227,17 +227,17 @@ void Vk_RenderWindow::SwapBuffers() {
         VK_STRUCTURE_TYPE_SUBMIT_INFO,  // sType
         nullptr,                        // pNext
         1,                              // waitSemaphoreCount
-        &current_rendering_resource.ImageAvailableSemaphore,  // pWaitSemaphores
+        &current_rendering_resource.image_available_semaphore,  // pWaitSemaphores
         &wait_dst_stage_mask,                       // pWaitDstStageMask;
         1,                                          // commandBufferCount
-        &current_rendering_resource.CommandBuffer,  // pCommandBuffers
+        &current_rendering_resource.command_buffer,  // pCommandBuffers
         1,                                          // signalSemaphoreCount
         &current_rendering_resource
-             .FinishedRenderingSemaphore  // pSignalSemaphores
+             .finished_rendering_semaphore  // pSignalSemaphores
     };
 
     result = vkQueueSubmit(m_graphics_queue.handle, 1, &submit_info,
-                           current_rendering_resource.Fence);
+                           current_rendering_resource.fence);
 
     if (result != VK_SUCCESS) {
         LogError("Vk_RenderWindow", "Error submitting the command buffers");
@@ -249,7 +249,7 @@ void Vk_RenderWindow::SwapBuffers() {
         nullptr,                             // pNext
         1,                                   // waitSemaphoreCount
         &current_rendering_resource
-             .FinishedRenderingSemaphore,  // pWaitSemaphores
+             .finished_rendering_semaphore,  // pWaitSemaphores
         1,                                 // swapchainCount
         &m_swapchain.handle,               // pSwapchains
         &image_index,                      // pImageIndices
@@ -390,10 +390,10 @@ bool Vk_RenderWindow::CreateVulkanSemaphores() {
     for (size_t i = 0; i < m_render_resources.size(); i++) {
         VkResult result1 = vkCreateSemaphore(
             device, &semaphore_create_info, nullptr,
-            &m_render_resources[i].ImageAvailableSemaphore);
+            &m_render_resources[i].image_available_semaphore);
         VkResult result2 = vkCreateSemaphore(
             device, &semaphore_create_info, nullptr,
-            &m_render_resources[i].FinishedRenderingSemaphore);
+            &m_render_resources[i].finished_rendering_semaphore);
         if (result1 != VK_SUCCESS || result2 != VK_SUCCESS) {
             LogError("Vk_RenderWindow", "Could not create semaphores");
             return false;
@@ -417,7 +417,7 @@ bool Vk_RenderWindow::CreateVulkanFences() {
 
     for (size_t i = 0; i < m_render_resources.size(); i++) {
         result = vkCreateFence(device, &fence_create_info, nullptr,
-                               &m_render_resources[i].Fence);
+                               &m_render_resources[i].fence);
         if (result != VK_SUCCESS) {
             LogError("Vk_RenderWindow", "Could not create fence");
             return false;
@@ -652,7 +652,7 @@ bool Vk_RenderWindow::CreateVulkanCommandBuffers() {
             1                                                // bufferCount
         };
         result = vkAllocateCommandBuffers(device, &cmd_buffer_allocate_info,
-                                          &m_render_resources[i].CommandBuffer);
+                                          &m_render_resources[i].command_buffer);
         if (result != VK_SUCCESS) {
             LogError("Vk_RenderWindow", "Could not allocate command buffers");
             return false;

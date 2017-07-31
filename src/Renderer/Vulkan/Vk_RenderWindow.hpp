@@ -15,18 +15,18 @@
 namespace engine {
 
 struct RenderingResourcesData {
-    VkFramebuffer Framebuffer;
-    VkCommandBuffer CommandBuffer;
-    VkSemaphore ImageAvailableSemaphore;
-    VkSemaphore FinishedRenderingSemaphore;
-    VkFence Fence;
+    VkFramebuffer framebuffer;
+    VkCommandBuffer command_buffer;
+    VkSemaphore image_available_semaphore;
+    VkSemaphore finished_rendering_semaphore;
+    VkFence fence;
 
     RenderingResourcesData()
-          : Framebuffer(VK_NULL_HANDLE),
-            CommandBuffer(VK_NULL_HANDLE),
-            ImageAvailableSemaphore(VK_NULL_HANDLE),
-            FinishedRenderingSemaphore(VK_NULL_HANDLE),
-            Fence(VK_NULL_HANDLE) {}
+          : framebuffer(VK_NULL_HANDLE),
+            command_buffer(VK_NULL_HANDLE),
+            image_available_semaphore(VK_NULL_HANDLE),
+            finished_rendering_semaphore(VK_NULL_HANDLE),
+            fence(VK_NULL_HANDLE) {}
 };
 
 class VULKAN_PLUGIN_API Vk_RenderWindow : public RenderWindow {
