@@ -3,6 +3,9 @@
 #include <Renderer/Renderer.hpp>
 #include <System/StringFormat.hpp>
 
+// TODO: Remove this later
+#include <SDL.h>
+
 #include <iostream>
 
 #ifdef ENGINE_DEBUG
@@ -18,7 +21,11 @@ using namespace engine;
 int main(int argc, char* argv[]) {
     Main engine(argc, argv);
 
+#if PLATFORM_TYPE_IS(PLATFORM_TYPE_MOBILE)
+    String plugin = "vulkan";
+#else
     String plugin = (argc == 2) ? argv[1] : "";
+#endif
     if (plugin == "vulkan") {
         engine.LoadPlugin(VULKAN_PLUGIN_NAME);
     } else if (plugin == "opengl") {
