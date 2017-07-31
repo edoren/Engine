@@ -7,6 +7,17 @@
 
 namespace engine {
 
+namespace {
+
+const size_t sResourceCount = 3;
+
+}  // namespace
+
+struct VertexData {
+    math::Vector4<float> position;
+    math::Vector4<float> color;
+};
+
 Vk_RenderWindow::Vk_RenderWindow()
       : m_window(nullptr),
         m_surface(VK_NULL_HANDLE),
@@ -14,7 +25,9 @@ Vk_RenderWindow::Vk_RenderWindow()
         m_rendering_finished_semaphore(VK_NULL_HANDLE),
         m_graphics_pipeline(VK_NULL_HANDLE),
         m_graphics_queue_cmd_pool(VK_NULL_HANDLE),
-        m_render_pass(VK_NULL_HANDLE) {}
+        m_render_pass(VK_NULL_HANDLE),
+        m_vertex_buffer(),
+        m_render_resources(sResourceCount) {}
 
 Vk_RenderWindow::~Vk_RenderWindow() {
     Destroy();
@@ -43,11 +56,13 @@ bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
     CreateVulkanSwapChain();
 
     CreateVulkanRenderPass();
-    CreateVulkanFrameBuffers();
     CreateVulkanPipeline();
+    CreateVulkanVertexBuffer();
 
+    // CreateRenderingResources
     CreateVulkanCommandBuffers();
-    RecordCommandBuffers();
+    CreateVulkanSemaphores();
+    CreateVulkanFences();
 
     return true;
 }
@@ -61,6 +76,31 @@ void Vk_RenderWindow::Destroy() {
 
     if (device) {
         vkDeviceWaitIdle(device);
+
+        for (size_t i = 0; i < m_render_resources.size(); i++) {
+            if (m_render_resources[i].Framebuffer) {
+                vkDestroyFramebuffer(device, m_render_resources[i].Framebuffer,
+                                     nullptr);
+            }
+            if (m_render_resources[i].CommandBuffer) {
+                vkFreeCommandBuffers(device, m_graphics_queue_cmd_pool, 1,
+                                     &m_render_resources[i].CommandBuffer);
+            }
+            if (m_render_resources[i].ImageAvailableSemaphore) {
+                vkDestroySemaphore(
+                    device, m_render_resources[i].ImageAvailableSemaphore,
+                    nullptr);
+            }
+            if (m_render_resources[i].FinishedRenderingSemaphore) {
+                vkDestroySemaphore(
+                    device, m_render_resources[i].FinishedRenderingSemaphore,
+                    nullptr);
+            }
+            if (m_render_resources[i].Fence) {
+                vkDestroyFence(device, m_render_resources[i].Fence, nullptr);
+            }
+        }
+        m_render_resources.clear();
 
         if (m_image_avaliable_semaphore) {
             vkDestroySemaphore(device, m_image_avaliable_semaphore, nullptr);
@@ -136,20 +176,37 @@ void Vk_RenderWindow::SetVSyncEnabled(bool /*vsync*/) {
 }
 
 void Vk_RenderWindow::SwapBuffers() {
+    static size_t resource_index = 0;
+
     VkResult result = VK_SUCCESS;
 
-    uint32 image_index = 0;
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.GetVulkanDevice();
 
-    result = vkAcquireNextImageKHR(device, m_swapchain.handle, UINT64_MAX,
-                                   m_image_avaliable_semaphore, VK_NULL_HANDLE,
-                                   &image_index);
+    RenderingResourcesData& current_rendering_resource =
+        m_render_resources[resource_index];
+    uint32_t image_index;
+
+    resource_index = (resource_index + 1) % sResourceCount;
+
+    result = vkWaitForFences(device, 1, &current_rendering_resource.Fence,
+                             VK_FALSE, 1000000000);
+    if (result != VK_SUCCESS) {
+        LogError("Vk_RenderWindow", "Waiting for fence takes too long");
+        return;
+    }
+
+    vkResetFences(device, 1, &current_rendering_resource.Fence);
+
+    result = vkAcquireNextImageKHR(
+        device, m_swapchain.handle, UINT64_MAX,
+        current_rendering_resource.ImageAvailableSemaphore, VK_NULL_HANDLE,
+        &image_index);
     switch (result) {
         case VK_SUCCESS:
-        case VkResult::VK_SUBOPTIMAL_KHR:
+        case VK_SUBOPTIMAL_KHR:
             break;
-        case VkResult::VK_ERROR_OUT_OF_DATE_KHR:
+        case VK_ERROR_OUT_OF_DATE_KHR:
             OnWindowSizeChanged();
             return;
         default:
@@ -158,22 +215,30 @@ void Vk_RenderWindow::SwapBuffers() {
             return;
     }
 
+    if (!PrepareFrame(current_rendering_resource.CommandBuffer,
+                      m_swapchain.images[image_index],
+                      current_rendering_resource.Framebuffer)) {
+        return;
+    }
+
     VkPipelineStageFlags wait_dst_stage_mask =
         VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
     VkSubmitInfo submit_info = {
-        VK_STRUCTURE_TYPE_SUBMIT_INFO,               // sType
-        nullptr,                                     // pNext
-        1,                                           // waitSemaphoreCount
-        &m_image_avaliable_semaphore,                // pWaitSemaphores
-        &wait_dst_stage_mask,                        // pWaitDstStageMask;
-        1,                                           // commandBufferCount
-        &m_graphics_queue_cmd_buffers[image_index],  // pCommandBuffers
-        1,                                           // signalSemaphoreCount
-        &m_rendering_finished_semaphore              // pSignalSemaphores
+        VK_STRUCTURE_TYPE_SUBMIT_INFO,  // sType
+        nullptr,                        // pNext
+        1,                              // waitSemaphoreCount
+        &current_rendering_resource.ImageAvailableSemaphore,  // pWaitSemaphores
+        &wait_dst_stage_mask,                       // pWaitDstStageMask;
+        1,                                          // commandBufferCount
+        &current_rendering_resource.CommandBuffer,  // pCommandBuffers
+        1,                                          // signalSemaphoreCount
+        &current_rendering_resource
+             .FinishedRenderingSemaphore  // pSignalSemaphores
     };
 
-    result =
-        vkQueueSubmit(m_graphics_queue.handle, 1, &submit_info, VK_NULL_HANDLE);
+    result = vkQueueSubmit(m_graphics_queue.handle, 1, &submit_info,
+                           current_rendering_resource.Fence);
+
     if (result != VK_SUCCESS) {
         LogError("Vk_RenderWindow", "Error submitting the command buffers");
         return;
@@ -183,19 +248,21 @@ void Vk_RenderWindow::SwapBuffers() {
         VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,  // sType
         nullptr,                             // pNext
         1,                                   // waitSemaphoreCount
-        &m_rendering_finished_semaphore,     // pWaitSemaphores
-        1,                                   // swapchainCount
-        &m_swapchain.handle,                 // pSwapchains
-        &image_index,                        // pImageIndices
-        nullptr                              // pResults
+        &current_rendering_resource
+             .FinishedRenderingSemaphore,  // pWaitSemaphores
+        1,                                 // swapchainCount
+        &m_swapchain.handle,               // pSwapchains
+        &image_index,                      // pImageIndices
+        nullptr                            // pResults
     };
 
     result = vkQueuePresentKHR(m_present_queue.handle, &present_info);
+
     switch (result) {
         case VK_SUCCESS:
             break;
-        case VkResult::VK_ERROR_OUT_OF_DATE_KHR:
-        case VkResult::VK_SUBOPTIMAL_KHR:
+        case VK_ERROR_OUT_OF_DATE_KHR:
+        case VK_SUBOPTIMAL_KHR:
             OnWindowSizeChanged();
             return;
         default:
@@ -293,10 +360,10 @@ bool Vk_RenderWindow::CreateVulkanQueues() {
     VkBool32 wsi_support;
     Vk_Context& context = Vk_Context::GetInstance();
     PhysicalDeviceParameters& physical_device = context.GetPhysicalDevice();
-    QueueParameters graphics_queue = context.GetGraphicsQueue();
+    QueueParameters& graphics_queue = context.GetGraphicsQueue();
 
     vkGetPhysicalDeviceSurfaceSupportKHR(
-        physical_device.handle, graphics_queue.index, m_surface, &wsi_support);
+        physical_device.handle, graphics_queue.family_index, m_surface, &wsi_support);
     if (!wsi_support) {
         LogFatal("Vk_RenderWindow",
                  "Physical device {} doesn't include WSI "
@@ -313,18 +380,48 @@ bool Vk_RenderWindow::CreateVulkanQueues() {
 bool Vk_RenderWindow::CreateVulkanSemaphores() {
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.GetVulkanDevice();
-    VkSemaphoreCreateInfo info = {
+
+    VkSemaphoreCreateInfo semaphore_create_info = {
         VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,  // sType
         nullptr,                                  // pNext
-        VkSemaphoreCreateFlags()                  // flags
+        0                                         // flags
     };
-    VkResult result1 =
-        vkCreateSemaphore(device, &info, nullptr, &m_image_avaliable_semaphore);
-    VkResult result2 = vkCreateSemaphore(device, &info, nullptr,
-                                         &m_rendering_finished_semaphore);
-    if (result1 != VK_SUCCESS || result2 != VK_SUCCESS) {
-        LogError("Vk_RenderWindow", "Could not create semaphores");
-        return false;
+
+    for (size_t i = 0; i < m_render_resources.size(); i++) {
+        VkResult result1 = vkCreateSemaphore(
+            device, &semaphore_create_info, nullptr,
+            &m_render_resources[i].ImageAvailableSemaphore);
+        VkResult result2 = vkCreateSemaphore(
+            device, &semaphore_create_info, nullptr,
+            &m_render_resources[i].FinishedRenderingSemaphore);
+        if (result1 != VK_SUCCESS || result2 != VK_SUCCESS) {
+            LogError("Vk_RenderWindow", "Could not create semaphores");
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool Vk_RenderWindow::CreateVulkanFences() {
+    VkResult result = VK_SUCCESS;
+
+    Vk_Context& context = Vk_Context::GetInstance();
+    VkDevice& device = context.GetVulkanDevice();
+
+    VkFenceCreateInfo fence_create_info = {
+        VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,  // sType
+        nullptr,                              // pNext
+        VK_FENCE_CREATE_SIGNALED_BIT          // flags
+    };
+
+    for (size_t i = 0; i < m_render_resources.size(); i++) {
+        result = vkCreateFence(device, &fence_create_info, nullptr,
+                               &m_render_resources[i].Fence);
+        if (result != VK_SUCCESS) {
+            LogError("Vk_RenderWindow", "Could not create fence");
+            return false;
+        }
     }
     return true;
 }
@@ -485,7 +582,7 @@ bool Vk_RenderWindow::CreateVulkanSwapChain() {
     }
     // Create all the ImageViews
     for (size_t i = 0; i < m_swapchain.images.size(); i++) {
-        VkImageViewCreateInfo image_view_create_info{
+        VkImageViewCreateInfo image_view_create_info = {
             VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,  // sType
             nullptr,                                   // pNext
             VkImageViewCreateFlags(),                  // flags
@@ -533,8 +630,9 @@ bool Vk_RenderWindow::CreateVulkanCommandBuffers() {
     VkCommandPoolCreateInfo cmd_pool_create_info = {
         VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,  // sType
         nullptr,                                     // pNext
-        VkCommandPoolCreateFlags(),                  // flags
-        m_graphics_queue.index                       // queueFamilyIndex
+        (VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT |
+         VK_COMMAND_POOL_CREATE_TRANSIENT_BIT),  // flags
+        m_graphics_queue.family_index            // queueFamilyIndex
     };
 
     result = vkCreateCommandPool(device, &cmd_pool_create_info, nullptr,
@@ -544,22 +642,21 @@ bool Vk_RenderWindow::CreateVulkanCommandBuffers() {
         return false;
     }
 
-    // Reserve a command buffer for each image
-    m_graphics_queue_cmd_buffers.resize(m_swapchain.images.size());
-
     // Allocate space in the pool for each buffer
-    VkCommandBufferAllocateInfo cmd_buffer_allocate_info = {
-        VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,  // sType
-        nullptr,                                         // pNext
-        m_graphics_queue_cmd_pool,                       // commandPool
-        VK_COMMAND_BUFFER_LEVEL_PRIMARY,                 // level
-        static_cast<uint32>(m_swapchain.images.size())   // bufferCount
-    };
-    result = vkAllocateCommandBuffers(device, &cmd_buffer_allocate_info,
-                                      m_graphics_queue_cmd_buffers.data());
-    if (result != VK_SUCCESS) {
-        LogError("Vk_RenderWindow", "Could not allocate command buffers");
-        return false;
+    for (size_t i = 0; i < m_render_resources.size(); i++) {
+        VkCommandBufferAllocateInfo cmd_buffer_allocate_info = {
+            VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,  // sType
+            nullptr,                                         // pNext
+            m_graphics_queue_cmd_pool,                       // commandPool
+            VK_COMMAND_BUFFER_LEVEL_PRIMARY,                 // level
+            1                                                // bufferCount
+        };
+        result = vkAllocateCommandBuffers(device, &cmd_buffer_allocate_info,
+                                          &m_render_resources[i].CommandBuffer);
+        if (result != VK_SUCCESS) {
+            LogError("Vk_RenderWindow", "Could not allocate command buffers");
+            return false;
+        }
     }
 
     return true;
@@ -577,7 +674,7 @@ bool Vk_RenderWindow::CreateVulkanRenderPass() {
         VK_ATTACHMENT_STORE_OP_STORE,      // storeOp
         VK_ATTACHMENT_LOAD_OP_DONT_CARE,   // stencilLoadOp
         VK_ATTACHMENT_STORE_OP_DONT_CARE,  // stencilStoreOp
-        VK_IMAGE_LAYOUT_UNDEFINED,         // initialLayout;
+        VK_IMAGE_LAYOUT_UNDEFINED,         // initialLayout
         VK_IMAGE_LAYOUT_PRESENT_SRC_KHR    // finalLayout
     }};
 
@@ -599,6 +696,26 @@ bool Vk_RenderWindow::CreateVulkanRenderPass() {
         nullptr                           // pPreserveAttachments
     }};
 
+    std::vector<VkSubpassDependency> dependencies = {
+        {
+            VK_SUBPASS_EXTERNAL,                            // srcSubpass
+            0,                                              // dstSubpass
+            VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,           // srcStageMask
+            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,  // dstStageMask
+            VK_ACCESS_MEMORY_READ_BIT,                      // srcAccessMask
+            VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,           // dstAccessMask
+            VK_DEPENDENCY_BY_REGION_BIT                     // dependencyFlags
+        },
+        {
+            0,                                              // srcSubpass
+            VK_SUBPASS_EXTERNAL,                            // dstSubpass
+            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,  // srcStageMask
+            VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,           // dstStageMask
+            VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,           // srcAccessMask
+            VK_ACCESS_MEMORY_READ_BIT,                      // dstAccessMask
+            VK_DEPENDENCY_BY_REGION_BIT                     // dependencyFlags
+        }};
+
     VkRenderPassCreateInfo render_pass_create_info = {
         VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,  // sType
         nullptr,                                    // pNext
@@ -607,50 +724,19 @@ bool Vk_RenderWindow::CreateVulkanRenderPass() {
         attachment_descriptions,                    // pAttachments
         1,                                          // subpassCount
         subpass_descriptions,                       // pSubpasses
-        0,                                          // dependencyCount
-        nullptr                                     // pDependencies
+        static_cast<uint32_t>(dependencies.size()),   // dependencyCount
+        dependencies.data()                         // pDependencies
     };
 
     // NOTES: Dependencies are important for performance
 
     Vk_Context& context = Vk_Context::GetInstance();
-    result =
-        vkCreateRenderPass(context.GetVulkanDevice(), &render_pass_create_info,
-                           nullptr, &m_render_pass);
+    VkDevice& device = context.GetVulkanDevice();
+    result = vkCreateRenderPass(device, &render_pass_create_info, nullptr,
+                                &m_render_pass);
     if (result != VK_SUCCESS) {
         LogError("Vk_RenderWindow", "Could not create render pass.");
         return false;
-    }
-
-    return true;
-}
-
-bool Vk_RenderWindow::CreateVulkanFrameBuffers() {
-    VkResult result = VK_SUCCESS;
-
-    // Create the FrameBuffers
-    m_framebuffers.resize(m_swapchain.images.size());
-    for (size_t i = 0; i < m_framebuffers.size(); i++) {
-        VkFramebufferCreateInfo framebuffer_create_info = {
-            VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,  // sType
-            nullptr,                                    // pNext
-            VkFramebufferCreateFlags(),                 // flags
-            m_render_pass,                              // renderPass
-            1,                                          // attachmentCount
-            &m_swapchain.images[i].view,                // pAttachments
-            static_cast<uint32_t>(m_size.x),            // width
-            static_cast<uint32_t>(m_size.y),            // height
-            1                                           // layers
-        };
-
-        Vk_Context& context = Vk_Context::GetInstance();
-        result = vkCreateFramebuffer(context.GetVulkanDevice(),
-                                     &framebuffer_create_info, nullptr,
-                                     &m_framebuffers[i]);
-        if (result != VK_SUCCESS) {
-            LogError("Vk_RenderWindow", "Could not create a framebuffer.");
-            return false;
-        }
     }
 
     return true;
@@ -684,6 +770,40 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         return false;
     }
 
+    std::vector<VkVertexInputBindingDescription> vertex_binding_descriptions = {
+        {
+            0,                           // binding
+            sizeof(VertexData),          // stride
+            VK_VERTEX_INPUT_RATE_VERTEX  // inputRate
+        }};
+
+    std::vector<VkVertexInputAttributeDescription>
+        vertex_attribute_descriptions = {
+            {
+                0,                                       // location
+                vertex_binding_descriptions[0].binding,  // binding
+                VK_FORMAT_R32G32B32A32_SFLOAT,           // format
+                offsetof(struct VertexData, position)    // offset
+            },
+            {
+                1,                                       // location
+                vertex_binding_descriptions[0].binding,  // binding
+                VK_FORMAT_R32G32B32A32_SFLOAT,           // format
+                offsetof(struct VertexData, color)       // offset
+            }};
+
+    VkPipelineVertexInputStateCreateInfo vertex_input_state_create_info = {
+        VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,  // sType
+        nullptr,                                                    // pNext
+        0,                                                          // flags;
+        static_cast<uint32_t>(vertex_binding_descriptions
+                                  .size()),  // vertexBindingDescriptionCount
+        vertex_binding_descriptions.data(),     // pVertexBindingDescriptions
+        static_cast<uint32_t>(vertex_attribute_descriptions
+                                  .size()),  // vertexAttributeDescriptionCount
+        vertex_attribute_descriptions.data()    // pVertexAttributeDescriptions
+    };
+
     std::vector<VkPipelineShaderStageCreateInfo> shader_stage_create_infos = {
         // Vertex shader
         {
@@ -706,52 +826,22 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
             nullptr  // pSpecializationInfo
         }};
 
-    VkPipelineVertexInputStateCreateInfo vertex_input_state_create_info = {
-        VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,  // sType
-        nullptr,                                                    // pNext
-        VkPipelineVertexInputStateCreateFlags(),                    // flags;
-        0,        // vertexBindingDescriptionCount
-        nullptr,  // pVertexBindingDescriptions
-        0,        // vertexAttributeDescriptionCount
-        nullptr   // pVertexAttributeDescriptions
-    };
-
     VkPipelineInputAssemblyStateCreateInfo input_assembly_state_create_info = {
         VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,  // sType
         nullptr,                                                      // pNext
         VkPipelineInputAssemblyStateCreateFlags(),                    // flags
-        VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,  // topology
-        VK_FALSE                              // primitiveRestartEnable
+        VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP,  // topology
+        VK_FALSE                               // primitiveRestartEnable
     };
-
-    VkViewport viewport = {
-        0.0f,                          // x
-        0.0f,                          // y
-        static_cast<float>(m_size.x),  // width
-        static_cast<float>(m_size.y),  // height
-        0.0f,                          // minDepth
-        1.0f                           // maxDepth
-    };
-
-    VkRect2D scissor = {{
-                            // offset
-                            0,  // x
-                            0   // y
-                        },
-                        {
-                            // extent
-                            static_cast<uint32_t>(m_size.x),  // width
-                            static_cast<uint32_t>(m_size.y),  // height
-                        }};
 
     VkPipelineViewportStateCreateInfo viewport_state_create_info = {
         VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,  // sType
         nullptr,                                                // pNext
         VkPipelineViewportStateCreateFlags(),                   // flags
         1,                                                      // viewportCount
-        &viewport,                                              // pViewports
+        nullptr,                                                // pViewports
         1,                                                      // scissorCount
-        &scissor                                                // pScissors
+        nullptr                                                 // pScissors
     };
 
     VkPipelineRasterizationStateCreateInfo rasterization_state_create_info = {
@@ -805,6 +895,18 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         {0.0f, 0.0f, 0.0f, 0.0f}        // blendConstants[4]
     };
 
+    // Define the pipeline dynamic states
+    std::vector<VkDynamicState> dynamic_states = {
+        VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR,
+    };
+    VkPipelineDynamicStateCreateInfo dynamic_state_create_info = {
+        VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,  // sType
+        nullptr,                                               // pNext
+        0,                                                     // flags
+        static_cast<uint32_t>(dynamic_states.size()),  // dynamicStateCount
+        dynamic_states.data()                          // pDynamicStates
+    };
+
     // Create the PipelineLayout
     VkPipelineLayoutCreateInfo layout_create_info = {
         VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,  // sType
@@ -832,7 +934,7 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         nullptr,                                                  // pNext
         VkPipelineCreateFlags(),                                  // flags
         static_cast<uint32_t>(shader_stage_create_infos.size()),  // stageCount
-        &shader_stage_create_infos[0],                            // pStages
+        shader_stage_create_infos.data(),                         // pStages
         &vertex_input_state_create_info,    // pVertexInputState;
         &input_assembly_state_create_info,  // pInputAssemblyState
         nullptr,                            // pTessellationState
@@ -841,11 +943,11 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         &multisample_state_create_info,     // pMultisampleState
         nullptr,                            // pDepthStencilState
         &color_blend_state_create_info,     // pColorBlendState
-        nullptr,                            // pDynamicState
+        &dynamic_state_create_info,         // pDynamicState
         pipeline_layout,                    // layout
         m_render_pass,                      // renderPass
         0,                                  // subpass
-        VkPipeline(),                       // basePipelineHandle
+        VK_NULL_HANDLE,                     // basePipelineHandle
         -1                                  // basePipelineIndex
     };
 
@@ -862,19 +964,132 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
     return true;
 }
 
-bool Vk_RenderWindow::RecordCommandBuffers() {
+bool Vk_RenderWindow::CreateVulkanVertexBuffer() {
     VkResult result = VK_SUCCESS;
 
-    VkCommandBufferBeginInfo cmd_buffer_begin_info{
-        VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,   // sType
-        nullptr,                                       // pNext
-        VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT,  // flags
-        nullptr                                        // pInheritanceInfo
+    VertexData vertex_data[] = {
+        {{-0.7f, -0.7f, 0.0f, 1.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
+        {{-0.7f, 0.7f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f}},
+        {{0.7f, -0.7f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f, 1.0f}},
+        {{0.7f, 0.7f, 0.0f, 1.0f}, {1.0f, 1.0f, 0.0f, 1.0f}}};
+
+    m_vertex_buffer.size = sizeof(vertex_data);
+
+    VkBufferCreateInfo buffer_create_info = {
+        VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,  // sType
+        nullptr,                               // pNext
+        0,                                     // flags
+        m_vertex_buffer.size,                      // size
+        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,     // sage
+        VK_SHARING_MODE_EXCLUSIVE,             // sharingMode
+        0,                                     // queueFamilyIndexCount
+        nullptr                                // pQueueFamilyIndices
     };
 
-    VkClearValue clear_color = {{0.0f, 0.5451f, 0.5451f, 0.0f}};
+    Vk_Context& context = Vk_Context::GetInstance();
+    VkDevice& device = context.GetVulkanDevice();
 
-    VkImageSubresourceRange image_subresource_range{
+    result = vkCreateBuffer(device, &buffer_create_info, nullptr,
+                            &m_vertex_buffer.handle);
+    if (result != VK_SUCCESS) {
+        LogError("Vk_RenderWindow", "Could not create a vertex buffer");
+        return false;
+    }
+
+    if (!AllocateVulkanBufferMemory(m_vertex_buffer.handle,
+                                    &m_vertex_buffer.memory)) {
+        LogError("Vk_RenderWindow",
+                 "Could not allocate memory for a vertex buffer");
+        return false;
+    }
+
+    result = vkBindBufferMemory(device, m_vertex_buffer.handle,
+                                m_vertex_buffer.memory, 0);
+    if (result != VK_SUCCESS) {
+        LogError("Vk_RenderWindow",
+                 "Could not bind memory for a vertex buffer");
+        return false;
+    }
+
+    void* vertex_buffer_memory_pointer;
+    result =
+        vkMapMemory(device, m_vertex_buffer.memory, 0, m_vertex_buffer.size, 0,
+                    &vertex_buffer_memory_pointer);
+    if (result != VK_SUCCESS) {
+        LogError("Vk_RenderWindow",
+                 "Could not map memory and upload data to a vertex buffer");
+        return false;
+    }
+
+    std::memcpy(vertex_buffer_memory_pointer, vertex_data,
+                m_vertex_buffer.size);
+
+    VkMappedMemoryRange flush_range = {
+        VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,  // sType
+        nullptr,                                // pNext
+        m_vertex_buffer.memory,                 // memory
+        0,                                      // offset
+        VK_WHOLE_SIZE                           // size
+    };
+    vkFlushMappedMemoryRanges(device, 1, &flush_range);
+
+    vkUnmapMemory(device, m_vertex_buffer.memory);
+
+    return true;
+}
+
+bool Vk_RenderWindow::CreateVulkanFrameBuffer(VkFramebuffer& framebuffer,
+                                              VkImageView& image_view) {
+    VkResult result = VK_SUCCESS;
+
+    Vk_Context& context = Vk_Context::GetInstance();
+    VkDevice& device = context.GetVulkanDevice();
+
+    if (framebuffer) {
+        vkDestroyFramebuffer(device, framebuffer, nullptr);
+    }
+
+    VkFramebufferCreateInfo framebuffer_create_info = {
+        VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,  // sType
+        nullptr,                                    // pNext
+        VkFramebufferCreateFlags(),                 // flags
+        m_render_pass,                              // renderPass
+        1,                                          // attachmentCount
+        &image_view,                                // pAttachments
+        static_cast<uint32_t>(m_size.x),            // width
+        static_cast<uint32_t>(m_size.y),            // height
+        1                                           // layers
+    };
+
+    result = vkCreateFramebuffer(device, &framebuffer_create_info, nullptr,
+                                 &framebuffer);
+    if (result != VK_SUCCESS) {
+        LogError("Vk_RenderWindow", "Could not create a framebuffer.");
+        return false;
+    }
+
+    return true;
+}
+
+bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer,
+                                   ImageParameters& image_parameters,
+                                   VkFramebuffer& framebuffer) {
+    VkResult result = VK_SUCCESS;
+
+    if (!CreateVulkanFrameBuffer(framebuffer, image_parameters.view)) {
+        return false;
+    }
+
+    VkCommandBufferBeginInfo command_buffer_begin_info = {
+        VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,  // sType
+        nullptr,                                      // pNext
+        VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,  // flags
+        nullptr                                       // pInheritanceInfo
+    };
+
+    vkBeginCommandBuffer(command_buffer, &command_buffer_begin_info);
+
+    VkImageSubresourceRange image_subresource_range = {
         VK_IMAGE_ASPECT_COLOR_BIT,  // aspectMask
         0,                          // baseMipLevel
         1,                          // levelCount
@@ -882,87 +1097,111 @@ bool Vk_RenderWindow::RecordCommandBuffers() {
         1                           // layerCount
     };
 
-    for (size_t i = 0; i < m_graphics_queue_cmd_buffers.size(); i++) {
-        vkBeginCommandBuffer(m_graphics_queue_cmd_buffers[i],
-                             &cmd_buffer_begin_info);
-
-        if (m_present_queue.handle != m_graphics_queue.handle) {
-            VkImageMemoryBarrier barrier_from_present_to_draw = {
-                VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,  // sType
-                nullptr,                                 // pNext
-                VK_ACCESS_MEMORY_READ_BIT,               // srcAccessMask
-                VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,    // dstAccessMask
-                VK_IMAGE_LAYOUT_UNDEFINED,               // oldLayout
-                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,    // newLayout
-                m_present_queue.index,                   // srcQueueFamilyIndex
-                m_graphics_queue.index,                  // dstQueueFamilyIndex
-                m_swapchain.images[i].handle,            // image
-                image_subresource_range                  // subresourceRange
-            };
-            vkCmdPipelineBarrier(m_graphics_queue_cmd_buffers[i],
-                                 VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-                                 VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-                                 VkDependencyFlags(), 0, nullptr, 0, nullptr, 1,
-                                 &barrier_from_present_to_draw);
-        }
-
-        VkRenderPassBeginInfo render_pass_begin_info = {
-            VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,  // sType
-            nullptr,                                   // pNext
-            m_render_pass,                             // renderPass
-            m_framebuffers[i],                         // framebuffer
-            // renderArea
-            {{
-                 // offset
-                 0,  // x
-                 0   // y
-             },
-             {
-                 // extent
-                 static_cast<uint32_t>(m_size.x),  // width
-                 static_cast<uint32_t>(m_size.y)   // height
-             }},
-            1,            // clearValueCount
-            &clear_color  // pClearValues
+    if (m_present_queue.handle != m_graphics_queue.handle) {
+        VkImageMemoryBarrier barrier_from_present_to_draw = {
+            VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,  // sType
+            nullptr,                                 // pNext
+            VK_ACCESS_MEMORY_READ_BIT,               // srcAccessMask
+            VK_ACCESS_MEMORY_READ_BIT,               // dstAccessMask
+            VK_IMAGE_LAYOUT_UNDEFINED,               // oldLayout
+            VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,         // newLayout
+            m_present_queue.family_index,            // srcQueueFamilyIndex
+            m_graphics_queue.family_index,           // dstQueueFamilyIndex
+            image_parameters.handle,                 // image
+            image_subresource_range                  // subresourceRange
         };
+        vkCmdPipelineBarrier(
+            command_buffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0, nullptr, 0,
+            nullptr, 1, &barrier_from_present_to_draw);
+    }
 
-        vkCmdBeginRenderPass(m_graphics_queue_cmd_buffers[i],
-                             &render_pass_begin_info,
-                             VK_SUBPASS_CONTENTS_INLINE);
+    VkClearValue clear_value = {
+        {1.0f, 0.8f, 0.4f, 0.0f},  // color
+    };
 
-        vkCmdBindPipeline(m_graphics_queue_cmd_buffers[i],
-                          VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphics_pipeline);
+    VkRenderPassBeginInfo render_pass_begin_info = {
+        VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,  // sType
+        nullptr,                                   // pNext
+        m_render_pass,                             // renderPass
+        framebuffer,                               // framebuffer
+        {
+            // renderArea
+            {
+                // offset
+                0,  // x
+                0   // y
+            },
+            {
+                // extent
+                static_cast<uint32_t>(m_size.x),  // width
+                static_cast<uint32_t>(m_size.y),  // height
+            },
+        },
+        1,            // clearValueCount
+        &clear_value  // pClearValues
+    };
 
-        vkCmdDraw(m_graphics_queue_cmd_buffers[i], 3, 1, 0, 0);
+    vkCmdBeginRenderPass(command_buffer, &render_pass_begin_info,
+                         VK_SUBPASS_CONTENTS_INLINE);
 
-        vkCmdEndRenderPass(m_graphics_queue_cmd_buffers[i]);
+    vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                      m_graphics_pipeline);
 
-        if (m_present_queue.handle != m_graphics_queue.handle) {
-            VkImageMemoryBarrier barrier_from_draw_to_present = {
+    VkViewport viewport = {
+        0.0f,                          // x
+        0.0f,                          // y
+        static_cast<float>(m_size.x),  // width
+        static_cast<float>(m_size.y),  // height
+        0.0f,                          // minDepth
+        1.0f                           // maxDepth
+    };
 
-                VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,  // sType
-                nullptr,                                 // pNext
-                VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,    // srcAccessMask
-                VK_ACCESS_MEMORY_READ_BIT,               // dstAccessMask
-                VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,         // oldLayout
-                VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,         // newLayout
-                m_graphics_queue.index,                  // srcQueueFamilyIndex
-                m_present_queue.index,                   // dstQueueFamilyIndex
-                m_swapchain.images[i].handle,            // image
-                image_subresource_range                  // subresourceRange
-            };
-            vkCmdPipelineBarrier(m_graphics_queue_cmd_buffers[i],
-                                 VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-                                 VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-                                 VkDependencyFlags(), 0, nullptr, 0, nullptr, 1,
-                                 &barrier_from_draw_to_present);
-        }
+    VkRect2D scissor = {{
+                            // offset
+                            0,  // x
+                            0   // y
+                        },
+                        {
+                            // extent
+                            static_cast<uint32_t>(m_size.x),  // width
+                            static_cast<uint32_t>(m_size.y),  // height
+                        }};
 
-        result = vkEndCommandBuffer(m_graphics_queue_cmd_buffers[i]);
-        if (result != VK_SUCCESS) {
-            LogError("Vk_RenderWindow", "Could not record command buffers");
-            return false;
-        }
+    vkCmdSetViewport(command_buffer, 0, 1, &viewport);
+    vkCmdSetScissor(command_buffer, 0, 1, &scissor);
+
+    VkDeviceSize offset = 0;
+    vkCmdBindVertexBuffers(command_buffer, 0, 1, &m_vertex_buffer.handle,
+                           &offset);
+
+    vkCmdDraw(command_buffer, 4, 1, 0, 0);
+
+    vkCmdEndRenderPass(command_buffer);
+
+    if (m_graphics_queue.handle != m_present_queue.handle) {
+        VkImageMemoryBarrier barrier_from_draw_to_present = {
+            VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,  // sType
+            nullptr,                                 // pNext
+            VK_ACCESS_MEMORY_READ_BIT,               // srcAccessMask
+            VK_ACCESS_MEMORY_READ_BIT,               // dstAccessMask
+            VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,         // oldLayout
+            VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,         // newLayout
+            m_graphics_queue.family_index,           // srcQueueFamilyIndex
+            m_present_queue.family_index,            // dstQueueFamilyIndex
+            image_parameters.handle,                 // image
+            image_subresource_range                  // subresourceRange
+        };
+        vkCmdPipelineBarrier(
+            command_buffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+            VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1,
+            &barrier_from_draw_to_present);
+    }
+
+    result = vkEndCommandBuffer(command_buffer);
+    if (result != VK_SUCCESS) {
+        LogError("Vk_RenderWindow", "Could not record command buffer");
+        return false;
     }
 
     return true;
@@ -1074,21 +1313,47 @@ VkPresentModeKHR Vk_RenderWindow::GetVulkanSwapChainPresentMode(
     return VK_PRESENT_MODE_FIFO_KHR;
 }
 
+bool Vk_RenderWindow::AllocateVulkanBufferMemory(VkBuffer buffer,
+                                                 VkDeviceMemory* memory) {
+    VkResult result = VK_SUCCESS;
+
+    Vk_Context& context = Vk_Context::GetInstance();
+    VkDevice& device = context.GetVulkanDevice();
+    VkPhysicalDevice physical_device = context.GetPhysicalDevice();
+
+    VkMemoryRequirements buffer_memory_requirements;
+    vkGetBufferMemoryRequirements(device, buffer, &buffer_memory_requirements);
+
+    VkPhysicalDeviceMemoryProperties memory_properties;
+    vkGetPhysicalDeviceMemoryProperties(physical_device, &memory_properties);
+
+    for (uint32_t i = 0; i < memory_properties.memoryTypeCount; i++) {
+        if ((buffer_memory_requirements.memoryTypeBits & (1 << i)) &&
+            (memory_properties.memoryTypes[i].propertyFlags &
+             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) {
+            VkMemoryAllocateInfo memory_allocate_info = {
+                VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,  // sType
+                nullptr,                                 // pNext
+                buffer_memory_requirements.size,         // allocationSize
+                i                                        // memoryTypeIndex
+            };
+            result = vkAllocateMemory(device, &memory_allocate_info, nullptr,
+                                      memory);
+            if (result == VK_SUCCESS) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 void Vk_RenderWindow::ClearPipeline() {
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.GetVulkanDevice();
 
     if (device) {
         vkDeviceWaitIdle(device);
-
-        if (m_graphics_queue_cmd_buffers.size() > 0 &&
-            m_graphics_queue_cmd_buffers[0]) {
-            vkFreeCommandBuffers(
-                device, m_graphics_queue_cmd_pool,
-                static_cast<uint32>(m_graphics_queue_cmd_buffers.size()),
-                m_graphics_queue_cmd_buffers.data());
-            m_graphics_queue_cmd_buffers.clear();
-        }
 
         if (m_graphics_queue_cmd_pool) {
             vkDestroyCommandPool(device, m_graphics_queue_cmd_pool, nullptr);
@@ -1099,14 +1364,6 @@ void Vk_RenderWindow::ClearPipeline() {
             vkDestroyPipeline(device, m_graphics_pipeline, nullptr);
             m_graphics_pipeline = VK_NULL_HANDLE;
         }
-
-        for (size_t i = 0; i < m_framebuffers.size(); ++i) {
-            if (m_framebuffers[i]) {
-                vkDestroyFramebuffer(device, m_framebuffers[i], nullptr);
-                m_framebuffers[i] = VK_NULL_HANDLE;
-            }
-        }
-        m_framebuffers.clear();
 
         if (m_render_pass) {
             vkDestroyRenderPass(device, m_render_pass, nullptr);
@@ -1124,15 +1381,10 @@ bool Vk_RenderWindow::OnWindowSizeChanged() {
     if (!CreateVulkanSwapChain()) {
         return false;
     }
-    if (!CreateVulkanRenderPass()) {
-        return false;
-    }
-    if (!CreateVulkanFrameBuffers()) {
-        return false;
-    }
-    if (!CreateVulkanCommandBuffers()) {
-        return false;
-    }
+    // if (!CreateVulkanRenderPass()) {
+        // return false;
+    // }
+
     return true;
 }
 

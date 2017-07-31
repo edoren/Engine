@@ -10,8 +10,24 @@
 #include "Vk_Context.hpp"
 #include "Vk_VulkanParameters.hpp"
 #include "Vk_Dependencies.hpp"
+#include "Vk_Buffer.hpp"
 
 namespace engine {
+
+struct RenderingResourcesData {
+    VkFramebuffer Framebuffer;
+    VkCommandBuffer CommandBuffer;
+    VkSemaphore ImageAvailableSemaphore;
+    VkSemaphore FinishedRenderingSemaphore;
+    VkFence Fence;
+
+    RenderingResourcesData()
+          : Framebuffer(VK_NULL_HANDLE),
+            CommandBuffer(VK_NULL_HANDLE),
+            ImageAvailableSemaphore(VK_NULL_HANDLE),
+            FinishedRenderingSemaphore(VK_NULL_HANDLE),
+            Fence(VK_NULL_HANDLE) {}
+};
 
 class VULKAN_PLUGIN_API Vk_RenderWindow : public RenderWindow {
 public:
@@ -41,13 +57,18 @@ private:
     bool CreateVulkanSurface();
     bool CreateVulkanQueues();
     bool CreateVulkanSemaphores();
+    bool CreateVulkanFences();
     bool CreateVulkanSwapChain();
     bool CreateVulkanCommandBuffers();
     bool CreateVulkanRenderPass();
-    bool CreateVulkanFrameBuffers();
     bool CreateVulkanPipeline();
+    bool CreateVulkanVertexBuffer();
 
-    bool RecordCommandBuffers();
+    bool CreateVulkanFrameBuffer(VkFramebuffer& framebuffer,
+                                 VkImageView& image_view);
+    bool PrepareFrame(VkCommandBuffer command_buffer,
+                      ImageParameters& image_parameters,
+                      VkFramebuffer& framebuffer);
 
     uint32 GetVulkanSwapChainNumImages(
         const VkSurfaceCapabilitiesKHR& surface_capabilities);
@@ -61,6 +82,8 @@ private:
         const VkSurfaceCapabilitiesKHR& surface_capabilities);
     VkPresentModeKHR GetVulkanSwapChainPresentMode(
         const std::vector<VkPresentModeKHR>& present_modes);
+
+    bool AllocateVulkanBufferMemory(VkBuffer buffer, VkDeviceMemory* memory);
 
     void ClearPipeline();
     bool OnWindowSizeChanged();
@@ -80,10 +103,11 @@ private:
     VkPipeline m_graphics_pipeline;
 
     VkCommandPool m_graphics_queue_cmd_pool;
-    std::vector<VkCommandBuffer> m_graphics_queue_cmd_buffers;
 
     VkRenderPass m_render_pass;
-    std::vector<VkFramebuffer> m_framebuffers;
+
+    Vk_Buffer m_vertex_buffer;
+    std::vector<RenderingResourcesData> m_render_resources;
 };
 
 }  // namespace engine

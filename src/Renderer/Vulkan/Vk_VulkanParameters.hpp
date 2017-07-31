@@ -36,12 +36,12 @@ struct ImageParameters {
 
 struct QueueParameters {
     VkQueue handle;
-    uint32 index;
+    uint32 family_index;
     VkQueueFamilyProperties properties;
 
     QueueParameters()
           : handle(VK_NULL_HANDLE),
-            index(UINT32_MAX),
+            family_index(UINT32_MAX),
             properties() {}
 
     operator VkQueue() {
