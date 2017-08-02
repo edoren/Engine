@@ -13,6 +13,8 @@ else()
     add_subdirectory(${SDL2_DIR} "${TEMP_DIR}/sdl2" EXCLUDE_FROM_ALL)
     set(SDL2_INCLUDE_DIR "${SDL2_BINARY_DIR}/include"
                          "${SDL2_SOURCE_DIR}/include")
+    # Remove this file to force the compiler to use the generated SDL_config.h
+    file(REMOVE "${SDL2_SOURCE_DIR}/include/SDL_config.h")
     set(SDL2MAIN_LIBRARY SDL2main)
     if(ENGINE_BUILD_STATIC)
         set(SDL2_LIBRARY SDL2-static)
