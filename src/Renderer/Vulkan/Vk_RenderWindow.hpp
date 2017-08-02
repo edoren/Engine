@@ -85,7 +85,6 @@ private:
 
     bool AllocateVulkanBufferMemory(VkBuffer buffer, VkDeviceMemory* memory);
 
-    void ClearPipeline();
     bool OnWindowSizeChanged();
 
 private:
@@ -95,9 +94,6 @@ private:
 
     QueueParameters m_graphics_queue;
     QueueParameters m_present_queue;
-
-    VkSemaphore m_image_avaliable_semaphore;
-    VkSemaphore m_rendering_finished_semaphore;
 
     SwapChainParameters m_swapchain;
     VkPipeline m_graphics_pipeline;

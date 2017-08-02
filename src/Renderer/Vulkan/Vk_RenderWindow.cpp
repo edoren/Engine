@@ -21,8 +21,6 @@ struct VertexData {
 Vk_RenderWindow::Vk_RenderWindow()
       : m_window(nullptr),
         m_surface(VK_NULL_HANDLE),
-        m_image_avaliable_semaphore(VK_NULL_HANDLE),
-        m_rendering_finished_semaphore(VK_NULL_HANDLE),
         m_graphics_pipeline(VK_NULL_HANDLE),
         m_graphics_queue_cmd_pool(VK_NULL_HANDLE),
         m_render_pass(VK_NULL_HANDLE),
@@ -52,7 +50,6 @@ bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
 
     CreateVulkanSurface();
     CreateVulkanQueues();
-    CreateVulkanSemaphores();
     CreateVulkanSwapChain();
 
     CreateVulkanRenderPass();
@@ -68,8 +65,6 @@ bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
 }
 
 void Vk_RenderWindow::Destroy() {
-    ClearPipeline();
-
     Vk_Context& context = Vk_Context::GetInstance();
     VkInstance& instance = context.GetVulkanInstance();
     VkDevice& device = context.GetVulkanDevice();
@@ -102,14 +97,31 @@ void Vk_RenderWindow::Destroy() {
         }
         m_render_resources.clear();
 
-        if (m_image_avaliable_semaphore) {
-            vkDestroySemaphore(device, m_image_avaliable_semaphore, nullptr);
-            m_image_avaliable_semaphore = VK_NULL_HANDLE;
+        if (m_graphics_queue_cmd_pool) {
+            vkDestroyCommandPool(device, m_graphics_queue_cmd_pool, nullptr);
+            m_graphics_queue_cmd_pool = VK_NULL_HANDLE;
         }
-        if (m_rendering_finished_semaphore) {
-            vkDestroySemaphore(device, m_rendering_finished_semaphore, nullptr);
-            m_rendering_finished_semaphore = VK_NULL_HANDLE;
+
+        if (m_vertex_buffer.handle) {
+            vkDestroyBuffer(device, m_vertex_buffer.handle, nullptr);
+            m_vertex_buffer.handle = VK_NULL_HANDLE;
         }
+
+        if (m_vertex_buffer.memory) {
+            vkFreeMemory(device, m_vertex_buffer.memory, nullptr);
+            m_vertex_buffer.memory = VK_NULL_HANDLE;
+        }
+
+        if (m_graphics_pipeline) {
+            vkDestroyPipeline(device, m_graphics_pipeline, nullptr);
+            m_graphics_pipeline = VK_NULL_HANDLE;
+        }
+
+        if (m_render_pass) {
+            vkDestroyRenderPass(device, m_render_pass, nullptr);
+            m_render_pass = VK_NULL_HANDLE;
+        }
+
         if (m_swapchain.handle) {
             vkDestroySwapchainKHR(device, m_swapchain.handle, nullptr);
             m_swapchain.handle = VK_NULL_HANDLE;
@@ -117,7 +129,6 @@ void Vk_RenderWindow::Destroy() {
                 if (m_swapchain.images[i].view) {
                     vkDestroyImageView(device, m_swapchain.images[i].view,
                                        nullptr);
-                    m_swapchain.images[i].view = VK_NULL_HANDLE;
                 }
             }
             m_swapchain.images.clear();
@@ -1348,35 +1359,9 @@ bool Vk_RenderWindow::AllocateVulkanBufferMemory(VkBuffer buffer,
     return false;
 }
 
-void Vk_RenderWindow::ClearPipeline() {
-    Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
-
-    if (device) {
-        vkDeviceWaitIdle(device);
-
-        if (m_graphics_queue_cmd_pool) {
-            vkDestroyCommandPool(device, m_graphics_queue_cmd_pool, nullptr);
-            m_graphics_queue_cmd_pool = VK_NULL_HANDLE;
-        }
-
-        if (m_graphics_pipeline) {
-            vkDestroyPipeline(device, m_graphics_pipeline, nullptr);
-            m_graphics_pipeline = VK_NULL_HANDLE;
-        }
-
-        if (m_render_pass) {
-            vkDestroyRenderPass(device, m_render_pass, nullptr);
-            m_render_pass = VK_NULL_HANDLE;
-        }
-    }
-}
-
 bool Vk_RenderWindow::OnWindowSizeChanged() {
     // Update the base class attributes
     SDL_GetWindowSize(m_window, &m_size.x, &m_size.y);
-
-    ClearPipeline();
 
     if (!CreateVulkanSwapChain()) {
         return false;
