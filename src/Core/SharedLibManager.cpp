@@ -3,16 +3,22 @@
 
 namespace engine {
 
+namespace {
+
+const String sTag("SharedLibManager");
+
+}  // namespace
+
 template <>
-SharedLibManager* Singleton<SharedLibManager>::s_instance = nullptr;
+SharedLibManager* Singleton<SharedLibManager>::sInstance = nullptr;
 
 SharedLibManager& SharedLibManager::GetInstance() {
-    assert(s_instance);
-    return (*s_instance);
+    assert(sInstance);
+    return (*sInstance);
 }
 
 SharedLibManager* SharedLibManager::GetInstancePtr() {
-    return s_instance;
+    return sInstance;
 }
 
 SharedLibManager::SharedLibManager() {}
@@ -36,9 +42,8 @@ SharedLibrary* SharedLibManager::Load(const String& name) {
             auto result = m_libraries.emplace(name, std::move(lib));
             return result.second ? &(result.first->second) : nullptr;
         } else {
-            LogError("SharedLibManager", lib.GetErrorString());
-            LogFatal("SharedLibManager",
-                     "Could not load SharedLibrary: " + name);
+            LogError(sTag, lib.GetErrorString());
+            LogFatal(sTag, "Could not load SharedLibrary: " + name);
         }
     }
 

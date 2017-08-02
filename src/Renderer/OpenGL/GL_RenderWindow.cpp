@@ -5,6 +5,12 @@
 
 namespace engine {
 
+namespace {
+
+const String sTag("GL_RenderWindow");
+
+}  // namespace
+
 GL_RenderWindow::GL_RenderWindow() : m_window(nullptr), m_context(nullptr) {}
 
 GL_RenderWindow::~GL_RenderWindow() {
@@ -23,10 +29,10 @@ bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
     Uint32 window_flags =
         SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
     m_window = SDL_CreateWindow(name.GetData(), initial_pos.x, initial_pos.y,
-                               size.x, size.y, window_flags);
+                                size.x, size.y, window_flags);
     if (!m_window) {
         String error = String("SDL_CreateWindow fail: ") + SDL_GetError();
-        LogError("GL_RenderWindow", error);
+        LogError(sTag, error);
         return false;
     }
 
@@ -35,14 +41,14 @@ bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
     m_context = SDL_GL_CreateContext(m_window);
     if (!m_context) {
         String error = String("SDL_GL_CreateContext fail: ") + SDL_GetError();
-        LogError("GL_RenderWindow", error);
+        LogError(sTag, error);
         return false;
     }
 
 #if PLATFORM_TYPE_IS(PLATFORM_TYPE_DESKTOP)
     GLenum status = glewInit();
     if (status != GLEW_OK) {
-        LogError("GL_RenderWindow", "GLEW initialization failed.");
+        LogError(sTag, "GLEW initialization failed.");
         return false;
     }
 #endif

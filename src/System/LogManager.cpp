@@ -12,19 +12,18 @@ namespace engine {
 namespace {
 
 #if PLATFORM_IS(PLATFORM_ANDROID)
-android_LogPriority s_android_log_priorities[] = {
+android_LogPriority sAndroidLogPriorities[] = {
     ANDROID_LOG_UNKNOWN, ANDROID_LOG_VERBOSE, ANDROID_LOG_DEBUG,
     ANDROID_LOG_INFO,    ANDROID_LOG_WARN,    ANDROID_LOG_ERROR,
     ANDROID_LOG_FATAL};
 #endif
 
-const char* s_log_priority_names[] = {NULL,   "VERBOSE", "DEBUG", "INFO",
-                                      "WARN", "ERROR",   "FATAL"};
+const char* sLogPriorityNames[] = {NULL,   "VERBOSE", "DEBUG", "INFO",
+                                   "WARN", "ERROR",   "FATAL"};
 
 String DefaultLogCallback(LogPriority priority, const String& tag,
                           const String& message) {
-    const char* priority_name =
-        s_log_priority_names[static_cast<int>(priority)];
+    const char* priority_name = sLogPriorityNames[static_cast<int>(priority)];
 
     // Get the current system hour
     std::time_t t = std::time(nullptr);
@@ -39,15 +38,15 @@ String DefaultLogCallback(LogPriority priority, const String& tag,
 }  // namespace
 
 template <>
-LogManager* Singleton<LogManager>::s_instance = nullptr;
+LogManager* Singleton<LogManager>::sInstance = nullptr;
 
 LogManager& LogManager::GetInstance() {
-    assert(s_instance);
-    return (*s_instance);
+    assert(sInstance);
+    return (*sInstance);
 }
 
 LogManager* LogManager::GetInstancePtr() {
-    return s_instance;
+    return sInstance;
 }
 
 LogManager::LogManager()
@@ -110,9 +109,8 @@ void LogManager::LogMessage(LogPriority priority, const String& tag,
     // Write the log to console
     if (m_console_logging_enable) {
 #if PLATFORM_IS(PLATFORM_ANDROID)
-        __android_log_write(
-            s_android_log_priorities[static_cast<int>(priority)],
-            m_app_name.GetData(), log_message.GetData());
+        __android_log_write(sAndroidLogPriorities[static_cast<int>(priority)],
+                            m_app_name.GetData(), log_message.GetData());
 #else
         fputs(log_message.GetData(), stdout);
         fputs("\n", stdout);

@@ -5,6 +5,12 @@
 
 namespace engine {
 
+namespace {
+
+const String sTag("GL_Utilities");
+
+}  // namespace
+
 void LogGLError(const char* file, int line, const char* call) {
     auto err = glGetError();
     if (err == GL_NO_ERROR) return;
@@ -31,7 +37,7 @@ void LogGLError(const char* file, int line, const char* call) {
     sprintf(buffer, "%s(%d): OpenGL Error: %s from %s", file, line, err_str,
             call);
 
-    LogError("GL_Utilities", buffer);
+    LogError(sTag, buffer);
     assert(0);
 };
 

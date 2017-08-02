@@ -7,16 +7,22 @@
 
 namespace engine {
 
+namespace {
+
+const String sTag("ResourceManager");
+
+}  // namespace
+
 template <>
-ResourceManager* Singleton<ResourceManager>::s_instance = nullptr;
+ResourceManager* Singleton<ResourceManager>::sInstance = nullptr;
 
 ResourceManager& ResourceManager::GetInstance() {
-    assert(s_instance);
-    return (*s_instance);
+    assert(sInstance);
+    return (*sInstance);
 }
 
 ResourceManager* ResourceManager::GetInstancePtr() {
-    return s_instance;
+    return sInstance;
 }
 
 template <typename T>
@@ -85,7 +91,7 @@ Shader* ResourceManager::LoadShader(const String& basename,
     if (vertex_status && fragment_status && link_status) {
         m_shader_map[basename] = shader;
     } else {
-        LogError("ResourceManager", "Error loading Shader");
+        LogError(sTag, "Error loading Shader");
         delete shader;
         shader = nullptr;
     }
@@ -97,13 +103,13 @@ Texture2D* ResourceManager::LoadTexture2D(const String& basename) {
     Image img;
     String filepath = filesystem::Join(m_basedir, basename);
     if (img.LoadFromFile(filepath)) {
-        LogDebug("ResourceManager", "Loading Texture: " + filepath);
+        LogDebug(sTag, "Loading Texture: " + filepath);
         Texture2D* texture =
             Main::GetInstance().GetActiveRenderer().CreateTexture2D();
         texture->LoadFromImage(img);
         m_texture_2d_map[basename] = texture;
     } else {
-        LogError("ResourceManager", "Could not load Texture: " + filepath);
+        LogError(sTag, "Could not load Texture: " + filepath);
     }
     return FindTexture2D(basename);
 }

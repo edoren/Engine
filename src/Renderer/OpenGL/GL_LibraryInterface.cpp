@@ -6,17 +6,19 @@
 namespace engine {
 
 namespace {
-GL_Plugin* s_plugin;
+
+GL_Plugin* sPlugin;
+
 }  // namespace
 
 extern "C" void OPENGL_PLUGIN_API StartPlugin(void) {
-    s_plugin = new GL_Plugin();
-    Main::GetInstance().InstallPlugin(s_plugin);
+    sPlugin = new GL_Plugin();
+    Main::GetInstance().InstallPlugin(sPlugin);
 }
 
 extern "C" void OPENGL_PLUGIN_API StopPlugin(void) {
-    Main::GetInstance().UninstallPlugin(s_plugin);
-    delete s_plugin;
+    Main::GetInstance().UninstallPlugin(sPlugin);
+    delete sPlugin;
 }
 
 }  // namespace engine

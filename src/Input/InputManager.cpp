@@ -5,15 +5,15 @@
 namespace engine {
 
 template <>
-InputManager* Singleton<InputManager>::s_instance = nullptr;
+InputManager* Singleton<InputManager>::sInstance = nullptr;
 
 InputManager& InputManager::GetInstance() {
-    assert(s_instance);
-    return (*s_instance);
+    assert(sInstance);
+    return (*sInstance);
 }
 
 InputManager* InputManager::GetInstancePtr() {
-    return s_instance;
+    return sInstance;
 }
 
 InputManager::InputManager()

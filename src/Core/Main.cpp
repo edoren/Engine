@@ -4,19 +4,25 @@
 
 namespace engine {
 
+namespace {
+
+const String sTag("Main");
+
+}  // namespace
+
 typedef void (*PFN_START_PLUGIN)(void);
 typedef void (*PFN_STOP_PLUGIN)(void);
 
 template <>
-Main* Singleton<Main>::s_instance = nullptr;
+Main* Singleton<Main>::sInstance = nullptr;
 
 Main& Main::GetInstance() {
-    assert(s_instance);
-    return (*s_instance);
+    assert(sInstance);
+    return (*sInstance);
 }
 
 Main* Main::GetInstancePtr() {
-    return s_instance;
+    return sInstance;
 }
 
 Main::Main(int argc, char* argv[])
@@ -46,11 +52,11 @@ void Main::Initialize() {
     SetActiveRenderer();  // TODO: Change this to a configurable way
 
     if (!m_active_renderer) {
-        LogFatal("Main", "Could not find an avaliable Renderer");
+        LogFatal(sTag, "Could not find an avaliable Renderer");
     }
 
     if (!m_is_initialized) {
-        LogInfo("Main", "Initializing Engine");
+        LogInfo(sTag, "Initializing Engine");
 
         SDL_Init(0);
         SDL_InitSubSystem(SDL_INIT_VIDEO);
@@ -60,7 +66,7 @@ void Main::Initialize() {
 
         bool status = GetActiveRenderer().Initialize();
         if (!status) {
-            LogFatal("Main", "Could not initialize the Renderer");
+            LogFatal(sTag, "Could not initialize the Renderer");
         }
 
         InitializePlugins();
@@ -71,7 +77,7 @@ void Main::Initialize() {
 
 void Main::Shutdown() {
     if (m_is_initialized) {
-        LogInfo("Main", "Stopping Engine");
+        LogInfo(sTag, "Stopping Engine");
 
         InputManager::GetInstance().Shutdown();
         ResourceManager::GetInstance().Shutdown();
@@ -99,7 +105,7 @@ void Main::LoadPlugin(const String& name) {
             reinterpret_cast<PFN_START_PLUGIN>(lib->GetSymbol("StartPlugin"));
 
         if (!pFunc)
-            LogFatal("Main",
+            LogFatal(sTag,
                      "Cannot find symbol StartPlugin in library: " + name);
 
         // This must call InstallPlugin
@@ -116,7 +122,7 @@ void Main::UnloadPlugin(const String& pluginName) {
 
             if (!pFunc) {
                 const String& name = (*i)->GetName();
-                LogFatal("Main",
+                LogFatal(sTag,
                          "Cannot find symbol StopPlugin in library: " + name);
             }
 
@@ -132,7 +138,7 @@ void Main::UnloadPlugin(const String& pluginName) {
 }
 
 void Main::InstallPlugin(Plugin* plugin) {
-    LogInfo("Main", "Installing plugin: " + plugin->GetName());
+    LogInfo(sTag, "Installing plugin: " + plugin->GetName());
 
     m_plugins.push_back(plugin);
     plugin->Install();
@@ -142,11 +148,11 @@ void Main::InstallPlugin(Plugin* plugin) {
         plugin->Initialize();
     }
 
-    LogInfo("Main", "Plugin successfully installed");
+    LogInfo(sTag, "Plugin successfully installed");
 }
 
 void Main::UninstallPlugin(Plugin* plugin) {
-    LogInfo("Main", "Uninstalling plugin: " + plugin->GetName());
+    LogInfo(sTag, "Uninstalling plugin: " + plugin->GetName());
 
     auto i = std::find(m_plugins.begin(), m_plugins.end(), plugin);
     if (i != m_plugins.end()) {
@@ -155,7 +161,7 @@ void Main::UninstallPlugin(Plugin* plugin) {
         m_plugins.erase(i);
     }
 
-    LogInfo("Main", "Plugin successfully uninstalled");
+    LogInfo(sTag, "Plugin successfully uninstalled");
 }
 
 void Main::AddRenderer(Renderer* new_renderer) {
@@ -186,7 +192,7 @@ void Main::ShutdownPlugins() {
 
         if (!pFunc) {
             const String& name = (*i)->GetName();
-            LogFatal("Main",
+            LogFatal(sTag,
                      "Cannot find symbol StopPlugin in library: " + name);
         }
 

@@ -7,7 +7,9 @@ namespace engine {
 
 namespace {
 
-GLenum s_gl_shader_types[] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER};
+const String sTag("GL_Shader");
+
+GLenum sGlShaderTypes[] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER};
 
 }  // namespace
 
@@ -67,7 +69,7 @@ bool GL_Shader::Link() {
         GL_CALL(glGetProgramiv(m_program, GL_INFO_LOG_LENGTH, &log_size));
         char* error = new char[log_size];
         GL_CALL(glGetProgramInfoLog(m_program, log_size, &log_size, error));
-        LogError("Shader", error);
+        LogError(sTag, error);
         delete[] error;
         return false;
     }
@@ -136,7 +138,7 @@ GLuint GL_Shader::Compile(const byte* source, size_t source_size,
                           ShaderType type) {
     if (source == nullptr || source_size == 0) return 0;
 
-    GLuint shader = glCreateShader(s_gl_shader_types[static_cast<int>(type)]);
+    GLuint shader = glCreateShader(sGlShaderTypes[static_cast<int>(type)]);
 
     const char* source_str = reinterpret_cast<const char*>(source);
     GLint length = static_cast<GLint>(source_size);
@@ -150,7 +152,7 @@ GLuint GL_Shader::Compile(const byte* source, size_t source_size,
         GL_CALL(glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_size));
         char* error = new char[log_size];
         GL_CALL(glGetShaderInfoLog(shader, log_size, &log_size, error));
-        LogError("Shader", error);
+        LogError(sTag, error);
         delete[] error;
         GL_CALL(glDeleteShader(shader));
         return 0;
@@ -179,8 +181,7 @@ GLint GL_Shader::GetUniformLocation(const String& name) {
         m_uniforms.insert(std::make_pair(name, location));
 
         if (location == -1) {
-            LogError("Shader",
-                     "Parameter \"" + name + "\" not found in shader");
+            LogError(sTag, "Parameter \"" + name + "\" not found in shader");
         }
 
         return location;

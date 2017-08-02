@@ -5,13 +5,15 @@
 namespace engine {
 
 namespace {
-const String s_plugin_name("Vulkan");
+
+const String sPluginName("Vulkan");
+
 }  // namespace
 
 Vk_Plugin::Vk_Plugin() : m_renderer(nullptr) {}
 
 const String& Vk_Plugin::GetName() const {
-    return s_plugin_name;
+    return sPluginName;
 }
 
 void Vk_Plugin::Install() {

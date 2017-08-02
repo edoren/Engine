@@ -6,26 +6,26 @@ template <class T>
 class Singleton {
 public:
     Singleton() {
-        assert(!s_instance);
-        s_instance = static_cast<T*>(this);
+        assert(!sInstance);
+        sInstance = static_cast<T*>(this);
     }
 
     ~Singleton() {
-        assert(s_instance);
-        s_instance = nullptr;
+        assert(sInstance);
+        sInstance = nullptr;
     }
 
     static T& GetInstance() {
-        assert(s_instance);
-        return (*s_instance);
+        assert(sInstance);
+        return (*sInstance);
     }
 
     static T* GetInstancePtr() {
-        return s_instance;
+        return sInstance;
     }
 
 protected:
-    static T* s_instance;
+    static T* sInstance;
 
     Singleton(const Singleton<T>&) = delete;
     Singleton<T>& operator=(const Singleton<T>&) = delete;

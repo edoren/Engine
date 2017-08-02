@@ -61,15 +61,15 @@ bool CheckLayerAvailability(const char* str,
 }  // namespace
 
 template <>
-Vk_Context* Singleton<Vk_Context>::s_instance = nullptr;
+Vk_Context* Singleton<Vk_Context>::sInstance = nullptr;
 
 Vk_Context& Vk_Context::GetInstance() {
-    assert(s_instance);
-    return (*s_instance);
+    assert(sInstance);
+    return (*sInstance);
 }
 
 Vk_Context* Vk_Context::GetInstancePtr() {
-    return s_instance;
+    return sInstance;
 }
 
 Vk_Context::Vk_Context()

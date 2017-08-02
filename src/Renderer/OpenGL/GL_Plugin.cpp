@@ -5,13 +5,15 @@
 namespace engine {
 
 namespace {
-const String s_plugin_name("OpenGL");
+
+const String sPluginName("OpenGL");
+
 }  // namespace
 
 GL_Plugin::GL_Plugin() : m_renderer(nullptr) {}
 
 const String& GL_Plugin::GetName() const {
-    return s_plugin_name;
+    return sPluginName;
 }
 
 void GL_Plugin::Install() {

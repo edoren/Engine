@@ -8,8 +8,10 @@ namespace engine {
 
 namespace {
 
-VkShaderStageFlagBits s_vk_shader_types[] = {VK_SHADER_STAGE_VERTEX_BIT,
-                                             VK_SHADER_STAGE_FRAGMENT_BIT};
+const String sTag("Vk_Shader");
+
+VkShaderStageFlagBits sVkShaderTypes[] = {VK_SHADER_STAGE_VERTEX_BIT,
+                                          VK_SHADER_STAGE_FRAGMENT_BIT};
 
 }  // namespace
 
@@ -53,7 +55,7 @@ bool Vk_Shader::LoadFromMemory(const byte* source, std::size_t source_size,
     result = vkCreateShaderModule(device, &shader_module_create_info, nullptr,
                                   &m_module);
     if (result != VK_SUCCESS) {
-        LogError("Vk_RenderWindow", "Could not create shader module.");
+        LogError(sTag, "Could not create shader module.");
         return false;
     }
 
@@ -65,7 +67,7 @@ VkShaderModule& Vk_Shader::GetModule() {
 }
 
 VkShaderStageFlagBits Vk_Shader::GetShaderType() {
-    return s_vk_shader_types[0];
+    return sVkShaderTypes[0];
 }
 
 bool Vk_Shader::Link() {

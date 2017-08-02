@@ -9,7 +9,9 @@ namespace engine {
 
 namespace {
 
-const size_t sResourceCount = 3;
+const String sTag("Vk_RenderWindow");
+
+const size_t sResourceCount(3);
 
 }  // namespace
 
@@ -39,8 +41,7 @@ bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
     m_window = SDL_CreateWindow(name.GetData(), initial_pos.x, initial_pos.y,
                                 size.x, size.y, window_flags);
     if (!m_window) {
-        LogError("Vk_RenderWindow",
-                 "SDL_CreateWindow fail: "_format(SDL_GetError()));
+        LogError(sTag, "SDL_CreateWindow fail: "_format(SDL_GetError()));
         return false;
     }
 
@@ -203,7 +204,7 @@ void Vk_RenderWindow::SwapBuffers() {
     result = vkWaitForFences(device, 1, &current_rendering_resource.fence,
                              VK_FALSE, 1000000000);
     if (result != VK_SUCCESS) {
-        LogError("Vk_RenderWindow", "Waiting for fence takes too long");
+        LogError(sTag, "Waiting for fence takes too long");
         return;
     }
 
@@ -221,7 +222,7 @@ void Vk_RenderWindow::SwapBuffers() {
             OnWindowSizeChanged();
             return;
         default:
-            LogError("Vk_RenderWindow",
+            LogError(sTag,
                      "Problem occurred during swap chain image acquisition");
             return;
     }
@@ -238,11 +239,12 @@ void Vk_RenderWindow::SwapBuffers() {
         VK_STRUCTURE_TYPE_SUBMIT_INFO,  // sType
         nullptr,                        // pNext
         1,                              // waitSemaphoreCount
-        &current_rendering_resource.image_available_semaphore,  // pWaitSemaphores
-        &wait_dst_stage_mask,                       // pWaitDstStageMask;
-        1,                                          // commandBufferCount
+        &current_rendering_resource
+             .image_available_semaphore,             // pWaitSemaphores
+        &wait_dst_stage_mask,                        // pWaitDstStageMask;
+        1,                                           // commandBufferCount
         &current_rendering_resource.command_buffer,  // pCommandBuffers
-        1,                                          // signalSemaphoreCount
+        1,                                           // signalSemaphoreCount
         &current_rendering_resource
              .finished_rendering_semaphore  // pSignalSemaphores
     };
@@ -251,7 +253,7 @@ void Vk_RenderWindow::SwapBuffers() {
                            current_rendering_resource.fence);
 
     if (result != VK_SUCCESS) {
-        LogError("Vk_RenderWindow", "Error submitting the command buffers");
+        LogError(sTag, "Error submitting the command buffers");
         return;
     }
 
@@ -261,10 +263,10 @@ void Vk_RenderWindow::SwapBuffers() {
         1,                                   // waitSemaphoreCount
         &current_rendering_resource
              .finished_rendering_semaphore,  // pWaitSemaphores
-        1,                                 // swapchainCount
-        &m_swapchain.handle,               // pSwapchains
-        &image_index,                      // pImageIndices
-        nullptr                            // pResults
+        1,                                   // swapchainCount
+        &m_swapchain.handle,                 // pSwapchains
+        &image_index,                        // pImageIndices
+        nullptr                              // pResults
     };
 
     result = vkQueuePresentKHR(m_present_queue.handle, &present_info);
@@ -277,8 +279,7 @@ void Vk_RenderWindow::SwapBuffers() {
             OnWindowSizeChanged();
             return;
         default:
-            LogError("Vk_RenderWindow",
-                     "Problem occurred during image presentation");
+            LogError(sTag, "Problem occurred during image presentation");
             return;
     }
 }
@@ -298,7 +299,7 @@ bool Vk_RenderWindow::CreateVulkanSurface() {
     SDL_SysWMinfo wminfo;
     SDL_VERSION(&wminfo.version);
     if (!SDL_GetWindowWMInfo(m_window, &wminfo)) {
-        LogFatal("Vk_RenderWindow", "Error on SDL_GetWindowWMInfo.");
+        LogFatal(sTag, "Error on SDL_GetWindowWMInfo.");
         return false;
     }
 
@@ -359,7 +360,7 @@ bool Vk_RenderWindow::CreateVulkanSurface() {
 #endif
 
     if (result != VK_SUCCESS) {
-        LogFatal("Vk_RenderWindow", "Error creating VkSurfaceKHR.");
+        LogFatal(sTag, "Error creating VkSurfaceKHR.");
         return false;
     }
 
@@ -373,10 +374,11 @@ bool Vk_RenderWindow::CreateVulkanQueues() {
     PhysicalDeviceParameters& physical_device = context.GetPhysicalDevice();
     QueueParameters& graphics_queue = context.GetGraphicsQueue();
 
-    vkGetPhysicalDeviceSurfaceSupportKHR(
-        physical_device.handle, graphics_queue.family_index, m_surface, &wsi_support);
+    vkGetPhysicalDeviceSurfaceSupportKHR(physical_device.handle,
+                                         graphics_queue.family_index, m_surface,
+                                         &wsi_support);
     if (!wsi_support) {
-        LogFatal("Vk_RenderWindow",
+        LogFatal(sTag,
                  "Physical device {} doesn't include WSI "
                  "support"_format(physical_device.properties.deviceName));
         return false;
@@ -399,14 +401,14 @@ bool Vk_RenderWindow::CreateVulkanSemaphores() {
     };
 
     for (size_t i = 0; i < m_render_resources.size(); i++) {
-        VkResult result1 = vkCreateSemaphore(
-            device, &semaphore_create_info, nullptr,
-            &m_render_resources[i].image_available_semaphore);
+        VkResult result1 =
+            vkCreateSemaphore(device, &semaphore_create_info, nullptr,
+                              &m_render_resources[i].image_available_semaphore);
         VkResult result2 = vkCreateSemaphore(
             device, &semaphore_create_info, nullptr,
             &m_render_resources[i].finished_rendering_semaphore);
         if (result1 != VK_SUCCESS || result2 != VK_SUCCESS) {
-            LogError("Vk_RenderWindow", "Could not create semaphores");
+            LogError(sTag, "Could not create semaphores");
             return false;
         }
     }
@@ -430,7 +432,7 @@ bool Vk_RenderWindow::CreateVulkanFences() {
         result = vkCreateFence(device, &fence_create_info, nullptr,
                                &m_render_resources[i].fence);
         if (result != VK_SUCCESS) {
-            LogError("Vk_RenderWindow", "Could not create fence");
+            LogError(sTag, "Could not create fence");
             return false;
         }
     }
@@ -464,8 +466,7 @@ bool Vk_RenderWindow::CreateVulkanSwapChain() {
     result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
         physical_device, m_surface, &surface_capabilities);
     if (result != VK_SUCCESS) {
-        LogError("Vk_RenderWindow",
-                 "Could not check presentation surface capabilities");
+        LogError(sTag, "Could not check presentation surface capabilities");
         return false;
     }
 
@@ -482,7 +483,7 @@ bool Vk_RenderWindow::CreateVulkanSwapChain() {
 
     // Check that the surface formats where queried successfully
     if (formats_count == 0 || result != VK_SUCCESS) {
-        LogError("Vk_RenderWindow",
+        LogError(sTag,
                  "Error occurred during presentation surface formats "
                  "enumeration");
         return false;
@@ -503,7 +504,7 @@ bool Vk_RenderWindow::CreateVulkanSwapChain() {
 
     // Check that the surface present modes where queried successfully
     if (present_modes_count == 0 || result != VK_SUCCESS) {
-        LogError("Vk_RenderWindow",
+        LogError(sTag,
                  "Error occurred during presentation surface formats "
                  "enumeration");
         return false;
@@ -557,7 +558,7 @@ bool Vk_RenderWindow::CreateVulkanSwapChain() {
     result = vkCreateSwapchainKHR(device, &swap_chain_create_info, nullptr,
                                   &m_swapchain.handle);
     if (result != VK_SUCCESS) {
-        LogFatal("Vk_RenderWindow", "Could not create swap chain");
+        LogFatal(sTag, "Could not create swap chain");
         return false;
     }
     if (old_swap_chain) {
@@ -582,8 +583,7 @@ bool Vk_RenderWindow::CreateVulkanSwapChain() {
     }
     // Check that all the images could be queried
     if (image_count == 0 || result != VK_SUCCESS) {
-        LogError("Vk_RenderWindow",
-                 "Could not get the number of swap chain images");
+        LogError(sTag, "Could not get the number of swap chain images");
         return false;
     }
     // Store all the Image handles
@@ -622,8 +622,7 @@ bool Vk_RenderWindow::CreateVulkanSwapChain() {
                                    &image_view_create_info, nullptr,
                                    &m_swapchain.images[i].view);
         if (result != VK_SUCCESS) {
-            LogError("Vk_RenderWindow",
-                     "Could not create image view for framebuffer.");
+            LogError(sTag, "Could not create image view for framebuffer.");
             return false;
         }
     }
@@ -649,7 +648,7 @@ bool Vk_RenderWindow::CreateVulkanCommandBuffers() {
     result = vkCreateCommandPool(device, &cmd_pool_create_info, nullptr,
                                  &m_graphics_queue_cmd_pool);
     if (result != VK_SUCCESS) {
-        LogError("Vk_RenderWindow", "Could not create a command pool");
+        LogError(sTag, "Could not create a command pool");
         return false;
     }
 
@@ -662,10 +661,11 @@ bool Vk_RenderWindow::CreateVulkanCommandBuffers() {
             VK_COMMAND_BUFFER_LEVEL_PRIMARY,                 // level
             1                                                // bufferCount
         };
-        result = vkAllocateCommandBuffers(device, &cmd_buffer_allocate_info,
-                                          &m_render_resources[i].command_buffer);
+        result =
+            vkAllocateCommandBuffers(device, &cmd_buffer_allocate_info,
+                                     &m_render_resources[i].command_buffer);
         if (result != VK_SUCCESS) {
-            LogError("Vk_RenderWindow", "Could not allocate command buffers");
+            LogError(sTag, "Could not allocate command buffers");
             return false;
         }
     }
@@ -728,15 +728,15 @@ bool Vk_RenderWindow::CreateVulkanRenderPass() {
         }};
 
     VkRenderPassCreateInfo render_pass_create_info = {
-        VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,  // sType
-        nullptr,                                    // pNext
-        VkRenderPassCreateFlags(),                  // flags
-        1,                                          // attachmentCount
-        attachment_descriptions,                    // pAttachments
-        1,                                          // subpassCount
-        subpass_descriptions,                       // pSubpasses
-        static_cast<uint32_t>(dependencies.size()),   // dependencyCount
-        dependencies.data()                         // pDependencies
+        VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,   // sType
+        nullptr,                                     // pNext
+        VkRenderPassCreateFlags(),                   // flags
+        1,                                           // attachmentCount
+        attachment_descriptions,                     // pAttachments
+        1,                                           // subpassCount
+        subpass_descriptions,                        // pSubpasses
+        static_cast<uint32_t>(dependencies.size()),  // dependencyCount
+        dependencies.data()                          // pDependencies
     };
 
     // NOTES: Dependencies are important for performance
@@ -746,7 +746,7 @@ bool Vk_RenderWindow::CreateVulkanRenderPass() {
     result = vkCreateRenderPass(device, &render_pass_create_info, nullptr,
                                 &m_render_pass);
     if (result != VK_SUCCESS) {
-        LogError("Vk_RenderWindow", "Could not create render pass.");
+        LogError(sTag, "Could not create render pass.");
         return false;
     }
 
@@ -809,10 +809,10 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         0,                                                          // flags;
         static_cast<uint32_t>(vertex_binding_descriptions
                                   .size()),  // vertexBindingDescriptionCount
-        vertex_binding_descriptions.data(),     // pVertexBindingDescriptions
+        vertex_binding_descriptions.data(),  // pVertexBindingDescriptions
         static_cast<uint32_t>(vertex_attribute_descriptions
-                                  .size()),  // vertexAttributeDescriptionCount
-        vertex_attribute_descriptions.data()    // pVertexAttributeDescriptions
+                                  .size()),   // vertexAttributeDescriptionCount
+        vertex_attribute_descriptions.data()  // pVertexAttributeDescriptions
     };
 
     std::vector<VkPipelineShaderStageCreateInfo> shader_stage_create_infos = {
@@ -936,7 +936,7 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
     result = vkCreatePipelineLayout(device, &layout_create_info, nullptr,
                                     &pipeline_layout);
     if (result != VK_SUCCESS) {
-        LogError("Vk_RenderWindow", "Could not create pipeline layout");
+        LogError(sTag, "Could not create pipeline layout");
         return false;
     }
 
@@ -966,7 +966,7 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
                                        &pipeline_create_info, nullptr,
                                        &m_graphics_pipeline);
     if (result != VK_SUCCESS) {
-        LogError("Vk_RenderWindow", "Could not create graphics pipeline");
+        LogError(sTag, "Could not create graphics pipeline");
         vkDestroyPipelineLayout(device, pipeline_layout, nullptr);
         return false;
     }
@@ -990,7 +990,7 @@ bool Vk_RenderWindow::CreateVulkanVertexBuffer() {
         VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,  // sType
         nullptr,                               // pNext
         0,                                     // flags
-        m_vertex_buffer.size,                      // size
+        m_vertex_buffer.size,                  // size
         VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,     // sage
         VK_SHARING_MODE_EXCLUSIVE,             // sharingMode
         0,                                     // queueFamilyIndexCount
@@ -1003,22 +1003,20 @@ bool Vk_RenderWindow::CreateVulkanVertexBuffer() {
     result = vkCreateBuffer(device, &buffer_create_info, nullptr,
                             &m_vertex_buffer.handle);
     if (result != VK_SUCCESS) {
-        LogError("Vk_RenderWindow", "Could not create a vertex buffer");
+        LogError(sTag, "Could not create a vertex buffer");
         return false;
     }
 
     if (!AllocateVulkanBufferMemory(m_vertex_buffer.handle,
                                     &m_vertex_buffer.memory)) {
-        LogError("Vk_RenderWindow",
-                 "Could not allocate memory for a vertex buffer");
+        LogError(sTag, "Could not allocate memory for a vertex buffer");
         return false;
     }
 
     result = vkBindBufferMemory(device, m_vertex_buffer.handle,
                                 m_vertex_buffer.memory, 0);
     if (result != VK_SUCCESS) {
-        LogError("Vk_RenderWindow",
-                 "Could not bind memory for a vertex buffer");
+        LogError(sTag, "Could not bind memory for a vertex buffer");
         return false;
     }
 
@@ -1027,7 +1025,7 @@ bool Vk_RenderWindow::CreateVulkanVertexBuffer() {
         vkMapMemory(device, m_vertex_buffer.memory, 0, m_vertex_buffer.size, 0,
                     &vertex_buffer_memory_pointer);
     if (result != VK_SUCCESS) {
-        LogError("Vk_RenderWindow",
+        LogError(sTag,
                  "Could not map memory and upload data to a vertex buffer");
         return false;
     }
@@ -1075,7 +1073,7 @@ bool Vk_RenderWindow::CreateVulkanFrameBuffer(VkFramebuffer& framebuffer,
     result = vkCreateFramebuffer(device, &framebuffer_create_info, nullptr,
                                  &framebuffer);
     if (result != VK_SUCCESS) {
-        LogError("Vk_RenderWindow", "Could not create a framebuffer.");
+        LogError(sTag, "Could not create a framebuffer.");
         return false;
     }
 
@@ -1211,7 +1209,7 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer,
 
     result = vkEndCommandBuffer(command_buffer);
     if (result != VK_SUCCESS) {
-        LogError("Vk_RenderWindow", "Could not record command buffer");
+        LogError(sTag, "Could not record command buffer");
         return false;
     }
 
@@ -1367,7 +1365,7 @@ bool Vk_RenderWindow::OnWindowSizeChanged() {
         return false;
     }
     // if (!CreateVulkanRenderPass()) {
-        // return false;
+    // return false;
     // }
 
     return true;

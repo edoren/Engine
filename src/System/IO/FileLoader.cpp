@@ -5,15 +5,19 @@
 
 namespace engine {
 
-namespace io {
-
 namespace {
+
+const String sTag("FileLoader");
+
 #if PLATFORM_IS(PLATFORM_ANDROID)
     std::vector<String> sLookupPaths = {""};
 #else
     std::vector<String> sLookupPaths = {"data/"};
 #endif
-}
+
+}  // namespace
+
+namespace io {
 
 bool FileLoader::LoadFile(const String& filename, String* dest) {
     std::vector<byte> out;
@@ -33,7 +37,7 @@ bool FileLoader::LoadFile(const String& filename, std::vector<byte>* dest) {
         if (handle) break;
     }
     if (!handle) {
-        LogError("FileLoader", "LoadFile fail on " + filename);
+        LogError(sTag, "LoadFile fail on " + filename);
         return false;
     }
 

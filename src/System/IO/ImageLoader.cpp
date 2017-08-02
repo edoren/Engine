@@ -7,6 +7,12 @@
 
 namespace engine {
 
+namespace {
+
+const String sTag("ImageLoader");
+
+}  // namespace
+
 namespace io {
 
 bool ImageLoader::LoadFromFile(const String& filename,
@@ -35,7 +41,7 @@ bool ImageLoader::LoadFromFileInMemory(const byte* buffer, uint32 len,
         size.y = static_cast<uint32>(height);
     } else {
         String error = String("STB_Image error: ") + stbi_failure_reason();
-        LogError("ImageLoader", error);
+        LogError(sTag, error);
         stbi_image_free(data);
         return false;
     }

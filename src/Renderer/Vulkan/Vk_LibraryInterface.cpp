@@ -5,17 +5,19 @@
 namespace engine {
 
 namespace {
-Vk_Plugin* s_plugin;
+
+Vk_Plugin* sPlugin;
+
 }  // namespace
 
 extern "C" void VULKAN_PLUGIN_API StartPlugin(void) {
-    s_plugin = new Vk_Plugin();
-    Main::GetInstance().InstallPlugin(s_plugin);
+    sPlugin = new Vk_Plugin();
+    Main::GetInstance().InstallPlugin(sPlugin);
 }
 
 extern "C" void VULKAN_PLUGIN_API StopPlugin(void) {
-    Main::GetInstance().UninstallPlugin(s_plugin);
-    delete s_plugin;
+    Main::GetInstance().UninstallPlugin(sPlugin);
+    delete sPlugin;
 }
 
 }  // namespace engine
