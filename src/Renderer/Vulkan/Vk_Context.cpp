@@ -157,6 +157,11 @@ bool Vk_Context::Initialize() {
 }
 
 void Vk_Context::Shutdown() {
+    if (m_device) {
+        vkDestroyDevice(m_device, nullptr);
+        m_device = nullptr;
+    }
+
     if (m_validation_layers_enabled && sDebugReportCallback) {
         PFN_vkDestroyDebugReportCallbackEXT vkDestroyDebugReportCallbackEXT;
         vkDestroyDebugReportCallbackEXT =
@@ -170,11 +175,10 @@ void Vk_Context::Shutdown() {
         }
     }
 
-    if (m_device) vkDestroyDevice(m_device, nullptr);
-    if (m_instance) vkDestroyInstance(m_instance, nullptr);
-
-    m_device = nullptr;
-    m_instance = nullptr;
+    if (m_instance) {
+        vkDestroyInstance(m_instance, nullptr);
+        m_instance = nullptr;
+    }
 }
 
 VkInstance& Vk_Context::GetVulkanInstance() {
