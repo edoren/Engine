@@ -5,7 +5,7 @@
 set(SDL2_DIR "${THIRD_PARTY_DIR}/sdl2")
 
 # SDL2
-# find_package(SDL2)
+find_package(SDL2 2.0.6)
 if (SDL2_FOUND)
     set(SDL2_LIBRARY ${SDL2_LIBRARY})
 else()
