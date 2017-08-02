@@ -10,8 +10,6 @@ namespace {
 const String sTag("Vk_Context");
 const String sTagVkDebug("Vk_ValidationLayers");
 
-VkDebugReportCallbackEXT sDebugReportCallback = VK_NULL_HANDLE;
-
 VKAPI_ATTR VkBool32 VKAPI_CALL DebugReportCallback(
     VkDebugReportFlagsEXT msgFlags, VkDebugReportObjectTypeEXT objType,
     uint64_t srcObject, size_t location, int32_t msgCode,
@@ -77,6 +75,7 @@ Vk_Context* Vk_Context::GetInstancePtr() {
 Vk_Context::Vk_Context()
       : m_instance(VK_NULL_HANDLE),
         m_device(VK_NULL_HANDLE),
+        m_debug_report_callback(VK_NULL_HANDLE),
         m_validation_layers_enabled(true) {}
 
 Vk_Context::~Vk_Context() {
@@ -127,7 +126,7 @@ bool Vk_Context::Initialize() {
     CreateInstance();
     CreateDevice();
 
-    if (m_validation_layers_enabled && !sDebugReportCallback) {
+    if (m_validation_layers_enabled && !m_debug_report_callback) {
         PFN_vkCreateDebugReportCallbackEXT vkCreateDebugReportCallbackEXT;
 
         vkCreateDebugReportCallbackEXT =
@@ -137,7 +136,7 @@ bool Vk_Context::Initialize() {
 
         // Create the debug callback with desired settings
         if (vkCreateDebugReportCallbackEXT) {
-            VkDebugReportCallbackCreateInfoEXT debugReportCallbackCreateInfo = {
+            VkDebugReportCallbackCreateInfoEXT create_info = {
                 VK_STRUCTURE_TYPE_DEBUG_REPORT_CREATE_INFO_EXT,  // sType
                 nullptr,                                         // pNext
                 (VK_DEBUG_REPORT_ERROR_BIT_EXT |
@@ -147,9 +146,8 @@ bool Vk_Context::Initialize() {
                 nullptr                                         // pUserData
             };
 
-            vkCreateDebugReportCallbackEXT(m_instance,
-                                           &debugReportCallbackCreateInfo,
-                                           nullptr, &sDebugReportCallback);
+            vkCreateDebugReportCallbackEXT(m_instance, &create_info, nullptr,
+                                           &m_debug_report_callback);
         }
     }
 
@@ -162,7 +160,7 @@ void Vk_Context::Shutdown() {
         m_device = nullptr;
     }
 
-    if (m_validation_layers_enabled && sDebugReportCallback) {
+    if (m_validation_layers_enabled && m_debug_report_callback) {
         PFN_vkDestroyDebugReportCallbackEXT vkDestroyDebugReportCallbackEXT;
         vkDestroyDebugReportCallbackEXT =
             reinterpret_cast<PFN_vkDestroyDebugReportCallbackEXT>(
@@ -170,7 +168,7 @@ void Vk_Context::Shutdown() {
                                       "vkDestroyDebugReportCallbackEXT"));
 
         if (vkDestroyDebugReportCallbackEXT) {
-            vkDestroyDebugReportCallbackEXT(m_instance, sDebugReportCallback,
+            vkDestroyDebugReportCallbackEXT(m_instance, m_debug_report_callback,
                                             nullptr);
         }
     }
@@ -262,7 +260,8 @@ bool Vk_Context::CreateDevice() {
     for (size_t i = 0; i < physical_devices.size(); i++) {
         if (SelectPhysicalDevice(physical_devices[i])) break;
     }
-    if (!m_physical_device.handle || m_graphics_queue.family_index == UINT32_MAX) {
+    if (!m_physical_device.handle ||
+        m_graphics_queue.family_index == UINT32_MAX) {
         LogFatal(
             "Vk_Core",
             "No physical device that supports the required caracteristics");

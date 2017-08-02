@@ -71,6 +71,8 @@ private:
 
     QueueParameters m_graphics_queue;
 
+    VkDebugReportCallbackEXT m_debug_report_callback;
+
     bool m_validation_layers_enabled;
     std::vector<const char*> m_validation_layers;
 
