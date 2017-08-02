@@ -58,19 +58,31 @@ endif()
 
 set(VULKAN_LIBRARIES ${VULKAN_LIBRARY})
 
+if(VULKAN_INCLUDE_DIR)
+    set(VULKAN_HEADER_INPUT "${VULKAN_INCLUDE_DIR}/vulkan/vulkan.h")
+    file(READ "${VULKAN_HEADER_INPUT}" VULKAN_HEADER_CONTENTS)
+    string(REGEX REPLACE ".*#define[ \t]+VK_HEADER_VERSION[ \t]+([0-9]+).*"
+           "\\1" VULKAN_HEADER_VERSION "${VULKAN_HEADER_CONTENTS}")
+    set(VULKAN_VERSION "1.0.${VULKAN_HEADER_VERSION}")
+endif()
+
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(Vulkan DEFAULT_MSG VULKAN_LIBRARY
-                                                     VULKAN_INCLUDE_DIR)
+find_package_handle_standard_args(Vulkan
+    REQUIRED_VARS
+        VULKAN_LIBRARY
+        VULKAN_INCLUDE_DIR
+    VERSION_VAR
+        VULKAN_VERSION
+)
 
 mark_as_advanced(
     VULKAN_SHARED_LIBRARY_NAMES
     VULKAN_STATIC_LIBRARY_NAMES
     VULKAN_INCLUDE_PATHS
     VULKAN_LIBRARY_PATHS
-    VULKAN_INCLUDE_DIR
-    VULKAN_LIBRARY
     VULKAN_LIBRARIES
     VULKAN_SHARED_LIBRARY
     VULKAN_STATIC_LIBRARY
+    VULKAN_HEADER_INPUT
+    VULKAN_HEADER_CONTENTS
 )
-
