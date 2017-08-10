@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
     while (!input.exit_requested()) {
         window.Clear(Color::BLACK);
 
-        input.AdvanceFrame(&window_size);
+        input.AdvanceFrame();
         render.AdvanceFrame();
     }
 

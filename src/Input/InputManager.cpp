@@ -17,8 +17,7 @@ InputManager* InputManager::GetInstancePtr() {
 }
 
 InputManager::InputManager()
-      : m_minimized(false),
-        m_exit_requested(false),
+      : m_exit_requested(false),
         m_pointers(kMaxSimultanuousPointers),
         m_mousewheel_delta(math::ivec2(0, 0)) {}
 
@@ -59,7 +58,7 @@ void InputManager::AddEventCallback(AppEventCallback callback) {
     m_app_event_callbacks.push_back(callback);
 }
 
-void InputManager::AdvanceFrame(math::ivec2* window_size) {
+void InputManager::AdvanceFrame() {
     // Reset our per-frame input state.
     m_mousewheel_delta.x = m_mousewheel_delta.y = 0;
     for (auto& button : m_button_map) {
@@ -112,16 +111,20 @@ void InputManager::AdvanceFrame(math::ivec2* window_size) {
             }
             case SDL_WINDOWEVENT: {
                 switch (event.window.event) {
-                    case SDL_WINDOWEVENT_RESIZED:
-                        *window_size =
-                            math::ivec2(event.window.data1, event.window.data2);
+                    case SDL_WINDOWEVENT_RESIZED: {
+                        math::ivec2 window_size(event.window.data1,
+                                                event.window.data2);
+                        OnWindowResized.Emit(window_size);
                         break;
-                    case SDL_WINDOWEVENT_MINIMIZED:
-                        m_minimized = true;
+                    }
+                    case SDL_WINDOWEVENT_MINIMIZED: {
+                        OnWindowMinimized.Emit();
                         break;
-                    case SDL_WINDOWEVENT_RESTORED:
-                        m_minimized = false;
+                    }
+                    case SDL_WINDOWEVENT_RESTORED: {
+                        OnWindowRestored.Emit();
                         break;
+                    }
                 }
                 break;
             }
@@ -132,18 +135,24 @@ void InputManager::AdvanceFrame(math::ivec2* window_size) {
                 break;
             case SDL_APP_LOWMEMORY:
                 break;
-            case SDL_APP_WILLENTERBACKGROUND:
-                m_minimized = true;
+            case SDL_APP_WILLENTERBACKGROUND: {
+                OnAppWillEnterBackground.Emit();
                 // input_system->m_minimized_frame = input_system->m_frames;
                 break;
-            case SDL_APP_DIDENTERBACKGROUND:
+            }
+            case SDL_APP_DIDENTERBACKGROUND: {
+                OnAppDidEnterBackground.Emit();
                 break;
-            case SDL_APP_WILLENTERFOREGROUND:
+            }
+            case SDL_APP_WILLENTERFOREGROUND: {
+                OnAppWillEnterForeground.Emit();
                 break;
-            case SDL_APP_DIDENTERFOREGROUND:
-                m_minimized = false;
+            }
+            case SDL_APP_DIDENTERFOREGROUND: {
+                OnAppDidEnterForeground.Emit();
                 // input_system->m_minimized_frame = input_system->m_frames;
                 break;
+            }
             default: {
                 SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
                             "----Unknown SDL event!\n");

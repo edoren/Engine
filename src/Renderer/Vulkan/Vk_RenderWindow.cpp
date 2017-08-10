@@ -161,7 +161,7 @@ void Vk_RenderWindow::Resize(int width, int height) {
     // TODO check errors
     if (m_window && !IsFullScreen()) {
         SDL_SetWindowSize(m_window, width, height);
-        OnWindowSizeChanged();
+        OnWindowResized(m_size);
     }
 }
 
@@ -175,7 +175,7 @@ void Vk_RenderWindow::SetFullScreen(bool fullscreen, bool is_fake) {
                              : SDL_WINDOW_FULLSCREEN;
         }
         SDL_SetWindowFullscreen(m_window, flag);
-        OnWindowSizeChanged();
+        OnWindowResized(m_size);
     }
 }
 
@@ -219,7 +219,7 @@ void Vk_RenderWindow::SwapBuffers() {
         case VK_SUBOPTIMAL_KHR:
             break;
         case VK_ERROR_OUT_OF_DATE_KHR:
-            OnWindowSizeChanged();
+            OnWindowResized(m_size);
             return;
         default:
             LogError(sTag,
@@ -276,7 +276,7 @@ void Vk_RenderWindow::SwapBuffers() {
             break;
         case VK_ERROR_OUT_OF_DATE_KHR:
         case VK_SUBOPTIMAL_KHR:
-            OnWindowSizeChanged();
+            OnWindowResized(m_size);
             return;
         default:
             LogError(sTag, "Problem occurred during image presentation");
@@ -1357,18 +1357,28 @@ bool Vk_RenderWindow::AllocateVulkanBufferMemory(VkBuffer buffer,
     return false;
 }
 
-bool Vk_RenderWindow::OnWindowSizeChanged() {
+void Vk_RenderWindow::OnWindowResized(const math::ivec2& size) {
     // Update the base class attributes
-    SDL_GetWindowSize(m_window, &m_size.x, &m_size.y);
+    m_size = size;
 
-    if (!CreateVulkanSwapChain()) {
-        return false;
-    }
-    // if (!CreateVulkanRenderPass()) {
-    // return false;
-    // }
+    // Recreate the Vulkan Swapchain
+    CreateVulkanSwapChain();
+}
 
-    return true;
+void Vk_RenderWindow::OnAppWillEnterBackground() {
+
+}
+
+void Vk_RenderWindow::OnAppDidEnterBackground() {
+
+}
+
+void Vk_RenderWindow::OnAppWillEnterForeground() {
+
+}
+
+void Vk_RenderWindow::OnAppDidEnterForeground() {
+
 }
 
 }  // namespace engine

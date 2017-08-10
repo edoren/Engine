@@ -35,23 +35,23 @@ public:
 
     ~Vk_RenderWindow();
 
-    virtual bool Create(const String& name, const math::ivec2& size);
+    virtual bool Create(const String& name, const math::ivec2& size) override;
 
-    virtual void Destroy(void);
+    virtual void Destroy(void) override;
 
-    virtual void Reposition(int left, int top);
+    virtual void Reposition(int left, int top) override;
 
-    virtual void Resize(int width, int height);
+    virtual void Resize(int width, int height) override;
 
-    virtual void SetFullScreen(bool fullscreen, bool is_fake);
+    virtual void SetFullScreen(bool fullscreen, bool is_fake) override;
 
-    virtual void SetVSyncEnabled(bool vsync);
+    virtual void SetVSyncEnabled(bool vsync) override;
 
-    virtual void SwapBuffers();  // RenderTarget
+    virtual void SwapBuffers() override;  // RenderTarget
 
-    virtual void Clear(const Color& color);  // Render Target
+    virtual void Clear(const Color& color) override;  // Render Target
 
-    virtual bool IsVisible();
+    virtual bool IsVisible() override;
 
 private:
     bool CreateVulkanSurface();
@@ -85,7 +85,12 @@ private:
 
     bool AllocateVulkanBufferMemory(VkBuffer buffer, VkDeviceMemory* memory);
 
-    bool OnWindowSizeChanged();
+    virtual void OnWindowResized(const math::ivec2& size) override;
+
+    virtual void OnAppWillEnterBackground() override;
+    virtual void OnAppDidEnterBackground() override;
+    virtual void OnAppWillEnterForeground() override;
+    virtual void OnAppDidEnterForeground() override;
 
 private:
     SDL_Window* m_window;

@@ -54,6 +54,13 @@ protected:
     math::ivec2 m_size;
     bool m_is_fullscreen;
     bool m_is_vsync_enable;
+
+private:
+    uint32 on_window_resize_connection;
+    uint32 on_app_will_enter_background_connection;
+    uint32 on_app_did_enter_background_connection;
+    uint32 on_app_will_enter_foreground_connection;
+    uint32 on_app_did_enter_foreground_connection;
 };
 
 }  // namespace engine

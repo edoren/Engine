@@ -407,7 +407,7 @@ int main(int argc, char* argv[]) {
             glDrawArrays(GL_TRIANGLES, 0, 36);
             glBindVertexArray(0);
 
-            input.AdvanceFrame(&window_size);
+            input.AdvanceFrame();
             render.AdvanceFrame();
             // render.DepthTest(false);
         }

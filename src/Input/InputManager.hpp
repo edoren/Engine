@@ -6,6 +6,8 @@
 #include <Math/Math.hpp>
 #include <Util/Prerequisites.hpp>
 
+#include <System/Signal.hpp>
+
 union SDL_Event;
 
 namespace engine {
@@ -26,7 +28,7 @@ public:
 
     void Shutdown();
 
-    void AdvanceFrame(math::ivec2* window_size);
+    void AdvanceFrame();
 
     Button& GetButton(int button);
 
@@ -38,10 +40,6 @@ public:
     }
 
     void AddEventCallback(AppEventCallback callback);
-
-    inline bool minimized() {
-        return m_minimized;
-    }
 
     inline bool exit_requested() {
         return m_exit_requested;
@@ -79,11 +77,19 @@ public:
     //         preventing link errors.
     static InputManager* GetInstancePtr();
 
+    Signal<const math::ivec2&> OnWindowResized;
+    Signal<> OnWindowMinimized;
+    Signal<> OnWindowRestored;
+
+    Signal<> OnAppWillEnterBackground;
+    Signal<> OnAppDidEnterBackground;
+    Signal<> OnAppWillEnterForeground;
+    Signal<> OnAppDidEnterForeground;
+
 private:
     static int HandleAppEvents(void* userdata, SDL_Event* event);
 
 private:
-    bool m_minimized;
     bool m_exit_requested;
     std::vector<AppEventCallback> m_app_event_callbacks;
     std::vector<Pointer> m_pointers;
