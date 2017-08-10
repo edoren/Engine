@@ -9,7 +9,9 @@ namespace engine {
 
 class ENGINE_API RenderWindow {
 public:
-    virtual ~RenderWindow() {}
+    RenderWindow();
+
+    virtual ~RenderWindow();
 
     virtual bool Create(const String& name, const math::ivec2& size) = 0;
 
@@ -29,23 +31,23 @@ public:
 
     virtual bool IsVisible() = 0;
 
-    void AdvanceFrame(bool /*minimized*/) {}  // RenderTarget?
+    void AdvanceFrame(bool minimized); // RenderTarget?
 
-    const String& GetName() const {
-        return m_name;
-    };
+    const String& GetName() const;
 
-    const math::ivec2& GetSize() const {
-        return m_size;
-    };
+    const math::ivec2& GetSize() const;
 
-    bool IsVSyncEnabled() const {
-        return m_is_vsync_enable;
-    };
+    bool IsVSyncEnabled() const;
 
-    bool IsFullScreen() const {
-        return m_is_fullscreen;
-    }
+    bool IsFullScreen() const;
+
+private:
+    virtual void OnWindowResized(const math::ivec2& size);
+
+    virtual void OnAppWillEnterBackground();
+    virtual void OnAppDidEnterBackground();
+    virtual void OnAppWillEnterForeground();
+    virtual void OnAppDidEnterForeground();
 
 protected:
     String m_name;
