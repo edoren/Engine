@@ -11,7 +11,7 @@
 namespace engine {
 
 template <typename... Args>
-class ENGINE_API Signal {
+class Signal {
 public:
     template <typename... Args2>
     using Slot = std::function<void(Args2...)>;
