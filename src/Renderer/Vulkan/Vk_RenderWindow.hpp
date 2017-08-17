@@ -55,7 +55,7 @@ public:
 
 private:
     bool CreateVulkanSurface();
-    bool CreateVulkanQueues();
+    bool CreateVulkanQueues();  // CheckWSISupport
     bool CreateVulkanSemaphores();
     bool CreateVulkanFences();
     bool CreateVulkanSwapChain();

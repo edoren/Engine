@@ -1366,19 +1366,57 @@ void Vk_RenderWindow::OnWindowResized(const math::ivec2& size) {
 }
 
 void Vk_RenderWindow::OnAppWillEnterBackground() {
+    Vk_Context& context = Vk_Context::GetInstance();
+    VkInstance& instance = context.GetVulkanInstance();
+    VkDevice& device = context.GetVulkanDevice();
 
+    if (device) {
+        vkDeviceWaitIdle(device);
+        if (m_swapchain.handle) {
+            vkDestroySwapchainKHR(device, m_swapchain.handle, nullptr);
+            m_swapchain.handle = VK_NULL_HANDLE;
+            for (size_t i = 0; i < m_swapchain.images.size(); i++) {
+                if (m_swapchain.images[i].view) {
+                    vkDestroyImageView(device, m_swapchain.images[i].view,
+                                       nullptr);
+                }
+            }
+            m_swapchain.images.clear();
+        }
+    }
+
+    if (instance && m_surface) {
+        vkDestroySurfaceKHR(instance, m_surface, nullptr);
+        m_surface = VK_NULL_HANDLE;
+    }
 }
 
-void Vk_RenderWindow::OnAppDidEnterBackground() {
+void Vk_RenderWindow::OnAppDidEnterBackground() {}
 
-}
-
-void Vk_RenderWindow::OnAppWillEnterForeground() {
-
-}
+void Vk_RenderWindow::OnAppWillEnterForeground() {}
 
 void Vk_RenderWindow::OnAppDidEnterForeground() {
+    Vk_Context& context = Vk_Context::GetInstance();
+    VkDevice& device = context.GetVulkanDevice();
 
+    if (device) {
+        vkDeviceWaitIdle(device);
+    }
+
+    if (!CreateVulkanSurface()) {
+        LogError(sTag, "Could not create the Vulkan Surface");
+        return;
+    }
+
+    if (!CreateVulkanQueues()) {
+        LogError(sTag, "Could not create the Vulkan Queues");
+        return;
+    }
+
+    if (!CreateVulkanSwapChain()) {
+        LogError(sTag, "Could not create the Vulkan SwapChain");
+        return;
+    }
 }
 
 }  // namespace engine
