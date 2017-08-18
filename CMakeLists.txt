@@ -109,3 +109,33 @@ add_subdirectory("${ENGINE_SOURCE_DIR}/Renderer/Vulkan")
 # Add the test folder
 add_subdirectory(${TESTS_DIR})
 
+###############################################################################
+## Data processing
+
+find_package(PythonInterp 3 REQUIRED)
+
+set(SCRIPTS_FOLDER "${CMAKE_SOURCE_DIR}/scripts")
+
+set(DATA_SOURCE_FOLDER "${CMAKE_SOURCE_DIR}/data")
+if(OS STREQUAL "Android")
+    set(DATA_OUTPUT_FOLDER "${CMAKE_SOURCE_DIR}/projects/android/app/src/main/assets")
+else()
+    set(DATA_OUTPUT_FOLDER "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/data")
+endif()
+
+file(GLOB_RECURSE DATA_FILES "${DATA_SOURCE_FOLDER}/*.?*")
+
+foreach(FILE ${DATA_FILES})
+    message(STATUS ${FILE})
+endforeach()
+
+add_custom_command(
+    OUTPUT ${DATA_OUTPUT_FOLDER}
+    COMMAND ${PYTHON_EXECUTABLE} "${SCRIPTS_FOLDER}/process_data.py" ${DATA_SOURCE_FOLDER} ${DATA_OUTPUT_FOLDER}
+    DEPENDS "${DATA_FILES}"
+)
+
+add_custom_target(
+    BuildAssets ALL
+    DEPENDS ${DATA_OUTPUT_FOLDER}
+)
