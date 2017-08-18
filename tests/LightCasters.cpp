@@ -164,13 +164,13 @@ int main(int argc, char* argv[]) {
         math::mat4 View;
         math::mat4 Model;
 
-        Texture2D* texture = res.LoadTexture2D("data/textures/container2.png");
+        Texture2D* texture = res.LoadTexture2D("textures/container2.png");
         Texture2D* specularTexture =
-            res.LoadTexture2D("data/textures/container2_specular.png");
+            res.LoadTexture2D("textures/container2_specular.png");
         // Texture2D* specularTexture =
-        //     res.LoadTexture2D("data/textures/lighting_maps_specular_color.png");
+        //     res.LoadTexture2D("textures/lighting_maps_specular_color.png");
         // Texture2D* emissionTexture =
-        //     res.LoadTexture2D("data/textures/matrix.png");
+        //     res.LoadTexture2D("textures/matrix.png");
 
         GL_Shader* cube_shader = static_cast<GL_Shader*>(
             res.LoadShader("cube_shader", vertex_shader, fragment_shader));

@@ -4,17 +4,19 @@
 # Configurable locations of dependencies of this project.
 set(GLEW_DIRECTORY "${THIRD_PARTY_DIR}/glew")
 
+###############################################################################
+# OpenGL / OpenGL ES Renderer
+
 set(DEPENDENCY_SOURCES "")
 set(DEPENDENCY_LIBRARIES ${ENGINE_LIBRARY})
 set(DEPENDENCY_INCLUDE_DIRS ${ENGINE_SOURCE_DIR})
 
-# OpenGL or OpenGL ES
 if(OS STREQUAL "Android")
-    find_package(OpenGLES3 REQUIRED)
+    find_package(OpenGLES3)
     list(APPEND DEPENDENCY_LIBRARIES ${OPENGLES3_LIBRARIES})
     list(APPEND DEPENDENCY_INCLUDE_DIRS ${OPENGLES3_INCLUDE_DIR})
 else()
-    find_package(OpenGL REQUIRED)
+    find_package(OpenGL)
     list(APPEND DEPENDENCY_LIBRARIES ${OPENGL_LIBRARY})
 
     find_package(GLEW)
@@ -27,9 +29,6 @@ else()
     endif()
     list(APPEND DEPENDENCY_INCLUDE_DIRS ${GLEW_INCLUDE_DIR})
 endif()
-
-###############################################################################
-# OpenGL Renderer
 
 set(ENGINE_OPENGL_PLUGIN OpenGL_Plugin)
 

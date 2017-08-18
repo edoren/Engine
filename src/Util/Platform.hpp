@@ -30,7 +30,8 @@
         #define PLATFORM PLATFORM_LINUX
         #define PLATFORM_TYPE PLATFORM_TYPE_DESKTOP
     #endif
-#elif defined(__APPLE__) && defined(__MACH__)
+#elif defined(__APPLE__)
+    #include "TargetConditionals.h"
     #if TARGET_IPHONE_SIMULATOR == 1 || TARGET_OS_IPHONE == 1
         #define PLATFORM PLATFORM_IOS
         #define PLATFORM_TYPE PLATFORM_TYPE_MOBILE
@@ -50,7 +51,7 @@
     #else
         #define PLATFORM_APIS PLATFORM_API_WIN32
     #endif
-#elif defined(__unix__) || (defined(__APPLE__) && defined(__MACH__)) /* UNIX-style OS. */
+#elif defined(__unix__) || defined(__APPLE__) /* UNIX-style OS. */
     #if defined(_POSIX_VERSION) /* POSIX compliant */
         #undef PLATFORM_APIS
         #define PLATFORM_APIS PLATFORM_API_POSIX

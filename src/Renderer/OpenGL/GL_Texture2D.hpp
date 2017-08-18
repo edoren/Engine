@@ -12,13 +12,13 @@ class OPENGL_PLUGIN_API GL_Texture2D : public Texture2D {
 public:
     GL_Texture2D();
     GL_Texture2D(GL_Texture2D&& other);
-    ~GL_Texture2D();
+    virtual ~GL_Texture2D();
 
-    GL_Texture2D& operator=(GL_Texture2D&& other);
+    virtual GL_Texture2D& operator=(GL_Texture2D&& other);
 
-    bool LoadFromImage(const Image& img);
+    virtual bool LoadFromImage(const Image& img);
 
-    void Use();
+    virtual void Use();
 
 private:
     uint32 m_texture;

@@ -10,7 +10,10 @@ public:
 
     virtual ~Texture2D() {}
 
-    virtual Texture2D& operator=(Texture2D&& other) = default;
+    virtual Texture2D& operator=(Texture2D&& other) {
+        ENGINE_UNUSED(other);
+        return *this;
+    }
 
     virtual bool LoadFromImage(const Image& img) = 0;
 

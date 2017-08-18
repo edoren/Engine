@@ -25,14 +25,20 @@ bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
 
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+#if PLATFORM_IS(PLATFORM_MAC)
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
+                        SDL_GL_CONTEXT_PROFILE_CORE);
+#endif
+
     math::ivec2 initial_pos(SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
     Uint32 window_flags =
         SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
     m_window = SDL_CreateWindow(name.GetData(), initial_pos.x, initial_pos.y,
                                 size.x, size.y, window_flags);
     if (!m_window) {
-        String error = String("SDL_CreateWindow fail: ") + SDL_GetError();
-        LogError(sTag, error);
+        LogError(sTag, SDL_GetError());
         return false;
     }
 
@@ -40,10 +46,23 @@ bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
 
     m_context = SDL_GL_CreateContext(m_window);
     if (!m_context) {
-        String error = String("SDL_GL_CreateContext fail: ") + SDL_GetError();
-        LogError(sTag, error);
+        LogError(sTag, SDL_GetError());
         return false;
     }
+
+    String opengl_vendor =
+        reinterpret_cast<const char8*>(glGetString(GL_VENDOR));
+    String opengl_renderer =
+        reinterpret_cast<const char8*>(glGetString(GL_RENDERER));
+    String opengl_version =
+        reinterpret_cast<const char8*>(glGetString(GL_VERSION));
+    String glsl_version = reinterpret_cast<const char8*>(
+        glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+    LogInfo(sTag, "OpenGL Vendor: " + opengl_vendor);
+    LogInfo(sTag, "OpenGL Renderer: " + opengl_renderer);
+    LogInfo(sTag, "OpenGL Version: " + opengl_version);
+    LogInfo(sTag, "GLSL Version: " + glsl_version);
 
 #if PLATFORM_TYPE_IS(PLATFORM_TYPE_DESKTOP)
     GLenum status = glewInit();
