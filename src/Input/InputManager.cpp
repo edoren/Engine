@@ -1,8 +1,28 @@
 #include <Input/InputManager.hpp>
+#include <System/LogManager.hpp>
+#include <System/StringFormat.hpp>
 
 #include <SDL.h>
 
 namespace engine {
+
+namespace {
+
+const String sTag("InputManager");
+
+int EngineEventFilter(void* userdata, SDL_Event* event) {
+    InputManager* input_system = reinterpret_cast<InputManager*>(userdata);
+    if (input_system->exit_requested()) {
+        return 1;
+    }
+    switch (event->type) {
+        default:
+            break;
+    }
+    return 1;
+}
+
+}  // namespace
 
 template <>
 InputManager* Singleton<InputManager>::sInstance = nullptr;
@@ -27,7 +47,7 @@ InputManager::~InputManager() {
 
 bool InputManager::Initialize() {
     int status = SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER);
-    SDL_SetEventFilter(HandleAppEvents, this);
+    SDL_SetEventFilter(EngineEventFilter, this);
     return status == 0;
 }
 
@@ -35,27 +55,14 @@ void InputManager::Shutdown() {
     SDL_QuitSubSystem(SDL_INIT_GAMECONTROLLER);
 }
 
-int InputManager::HandleAppEvents(void* userdata, SDL_Event* event) {
-    auto input_system = reinterpret_cast<InputManager*>(userdata);
-    if (input_system->m_exit_requested) return 1;
-    for (auto& callback : input_system->m_app_event_callbacks) {
-        callback(event);
-    }
-    return 1;
-}
-
 Button& InputManager::GetButton(int button) {
     auto it = m_button_map.find(button);
     return it != m_button_map.end() ? it->second
-                                   : (m_button_map[button] = Button());
+                                    : (m_button_map[button] = Button());
 }
 
 Button& InputManager::GetPointerButton(SDL_FingerID pointer) {
     return GetButton(static_cast<int>(pointer + SDLK_POINTER1));
-}
-
-void InputManager::AddEventCallback(AppEventCallback callback) {
-    m_app_event_callbacks.push_back(callback);
 }
 
 void InputManager::AdvanceFrame() {
@@ -75,38 +82,23 @@ void InputManager::AdvanceFrame() {
                 m_exit_requested = true;
                 break;
             }
-            case SDL_KEYDOWN:
-            case SDL_KEYUP: {
-                GetButton(event.key.keysym.sym)
-                    .Update(event.key.state == SDL_PRESSED);
+            case SDL_APP_TERMINATING:
+            case SDL_APP_LOWMEMORY:
+                break;
+            case SDL_APP_WILLENTERBACKGROUND: {
+                OnAppWillEnterBackground.Emit();
                 break;
             }
-            // These fire from e.g. OS X touchpads. Ignore them because we just
-            // want the mouse events.
-            case SDL_FINGERDOWN:
-                break;
-            case SDL_FINGERUP:
-                break;
-            case SDL_FINGERMOTION:
-                break;
-            case SDL_MOUSEBUTTONDOWN:
-            case SDL_MOUSEBUTTONUP: {
-                GetPointerButton(event.button.button - 1)
-                    .Update(event.button.state == SDL_PRESSED);
-                m_pointers[0].mousepos =
-                    math::ivec2(event.button.x, event.button.y);
-                m_pointers[0].used = true;
+            case SDL_APP_DIDENTERBACKGROUND: {
+                OnAppDidEnterBackground.Emit();
                 break;
             }
-            case SDL_MOUSEMOTION: {
-                m_pointers[0].mousedelta +=
-                    math::ivec2(event.motion.xrel, event.motion.yrel);
-                m_pointers[0].mousepos =
-                    math::ivec2(event.button.x, event.button.y);
+            case SDL_APP_WILLENTERFOREGROUND: {
+                OnAppWillEnterForeground.Emit();
                 break;
             }
-            case SDL_MOUSEWHEEL: {
-                m_mousewheel_delta += math::ivec2(event.wheel.x, event.wheel.y);
+            case SDL_APP_DIDENTERFOREGROUND: {
+                OnAppDidEnterForeground.Emit();
                 break;
             }
             case SDL_WINDOWEVENT: {
@@ -128,36 +120,70 @@ void InputManager::AdvanceFrame() {
                 }
                 break;
             }
+            case SDL_SYSWMEVENT:
+                break;
+            case SDL_KEYDOWN:
+            case SDL_KEYUP: {
+                GetButton(event.key.keysym.sym)
+                    .Update(event.key.state == SDL_PRESSED);
+                break;
+            }
             case SDL_TEXTEDITING:
             case SDL_TEXTINPUT:
+            case SDL_KEYMAPCHANGED:
                 break;
-            case SDL_APP_TERMINATING:
-                break;
-            case SDL_APP_LOWMEMORY:
-                break;
-            case SDL_APP_WILLENTERBACKGROUND: {
-                OnAppWillEnterBackground.Emit();
-                // input_system->m_minimized_frame = input_system->m_frames;
-                break;
-            }
-            case SDL_APP_DIDENTERBACKGROUND: {
-                OnAppDidEnterBackground.Emit();
+            case SDL_MOUSEMOTION: {
+                m_pointers[0].mousedelta +=
+                    math::ivec2(event.motion.xrel, event.motion.yrel);
+                m_pointers[0].mousepos =
+                    math::ivec2(event.button.x, event.button.y);
                 break;
             }
-            case SDL_APP_WILLENTERFOREGROUND: {
-                OnAppWillEnterForeground.Emit();
+            case SDL_MOUSEBUTTONDOWN:
+            case SDL_MOUSEBUTTONUP: {
+                GetPointerButton(event.button.button - 1)
+                    .Update(event.button.state == SDL_PRESSED);
+                m_pointers[0].mousepos =
+                    math::ivec2(event.button.x, event.button.y);
+                m_pointers[0].used = true;
                 break;
             }
-            case SDL_APP_DIDENTERFOREGROUND: {
-                OnAppDidEnterForeground.Emit();
-                // input_system->m_minimized_frame = input_system->m_frames;
+            case SDL_MOUSEWHEEL: {
+                m_mousewheel_delta += math::ivec2(event.wheel.x, event.wheel.y);
                 break;
             }
+            case SDL_JOYAXISMOTION:
+            case SDL_JOYBALLMOTION:
+            case SDL_JOYHATMOTION:
+            case SDL_JOYBUTTONDOWN:
+            case SDL_JOYBUTTONUP:
+            case SDL_JOYDEVICEADDED:
+            case SDL_JOYDEVICEREMOVED:
+            case SDL_CONTROLLERAXISMOTION:
+            case SDL_CONTROLLERBUTTONDOWN:
+            case SDL_CONTROLLERBUTTONUP:
+            case SDL_CONTROLLERDEVICEADDED:
+            case SDL_CONTROLLERDEVICEREMOVED:
+            case SDL_CONTROLLERDEVICEREMAPPED:
+            case SDL_FINGERDOWN:
+            case SDL_FINGERUP:
+            case SDL_FINGERMOTION:
+            case SDL_DOLLARGESTURE:
+            case SDL_DOLLARRECORD:
+            case SDL_MULTIGESTURE:
+            case SDL_CLIPBOARDUPDATE:
+            case SDL_DROPFILE:
+            case SDL_DROPTEXT:
+            case SDL_DROPBEGIN:
+            case SDL_DROPCOMPLETE:
+            case SDL_AUDIODEVICEADDED:
+            case SDL_AUDIODEVICEREMOVED:
+            case SDL_RENDER_TARGETS_RESET:
+            case SDL_RENDER_DEVICE_RESET:
+            case SDL_USEREVENT:
+                break;
             default: {
-                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
-                            "----Unknown SDL event!\n");
-                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "----Event ID: %d!\n",
-                            event.type);
+                LogDebug(sTag, "Unknown SDL Event ID: {}"_format(event.type));
             }
         }
     }

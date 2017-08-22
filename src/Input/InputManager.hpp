@@ -14,9 +14,6 @@ namespace engine {
 
 class ENGINE_API InputManager : public Singleton<InputManager> {
 public:
-    // Type definitions
-    typedef std::function<void(SDL_Event*)> AppEventCallback;
-
     // All current touch screens.
     static const int kMaxSimultanuousPointers = 10;
 
@@ -38,8 +35,6 @@ public:
         static std::unique_ptr<Mouse> instance(new Mouse(m_pointers[0]));
         return *instance;
     }
-
-    void AddEventCallback(AppEventCallback callback);
 
     inline bool exit_requested() {
         return m_exit_requested;
@@ -87,11 +82,7 @@ public:
     Signal<> OnAppDidEnterForeground;
 
 private:
-    static int HandleAppEvents(void* userdata, SDL_Event* event);
-
-private:
     bool m_exit_requested;
-    std::vector<AppEventCallback> m_app_event_callbacks;
     std::vector<Pointer> m_pointers;
     std::map<int, Button> m_button_map;
     math::ivec2 m_mousewheel_delta;
