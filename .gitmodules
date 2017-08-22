@@ -1,11 +1,11 @@
 [submodule "third_party/sdl2"]
 	path = third_party/sdl2
 	url = https://github.com/spurious/SDL-mirror.git
-    ignore = dirty
+	ignore = dirty
 [submodule "third_party/glew"]
 	path = third_party/glew
 	url = https://github.com/edoren/glew.git
-    ignore = dirty
+	ignore = dirty
 [submodule "third_party/mathfu"]
 	path = third_party/mathfu
 	url = https://github.com/google/mathfu.git
@@ -18,3 +18,6 @@
 [submodule "third_party/fmt"]
 	path = third_party/fmt
 	url = https://github.com/fmtlib/fmt.git
+[submodule "third_party/assimp"]
+	path = third_party/assimp
+	url = https://github.com/assimp/assimp.git
