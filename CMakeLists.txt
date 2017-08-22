@@ -123,16 +123,12 @@ else()
     set(DATA_OUTPUT_FOLDER "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/data")
 endif()
 
-file(GLOB_RECURSE DATA_FILES "${DATA_SOURCE_FOLDER}/*.?*")
-
-foreach(FILE ${DATA_FILES})
-    message(STATUS ${FILE})
-endforeach()
+file(GLOB_RECURSE DATA_FILES "${DATA_SOURCE_FOLDER}/*.*")
 
 add_custom_command(
     OUTPUT ${DATA_OUTPUT_FOLDER}
     COMMAND ${PYTHON_EXECUTABLE} "${SCRIPTS_FOLDER}/process_data.py" ${DATA_SOURCE_FOLDER} ${DATA_OUTPUT_FOLDER}
-    DEPENDS "${DATA_FILES}"
+    DEPENDS ${DATA_FILES}
 )
 
 add_custom_target(
