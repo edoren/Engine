@@ -9,5 +9,5 @@ AccessModifierOffset: -4
 ConstructorInitializerIndentWidth: 6
 Cpp11BracedListStyle: true
 DerivePointerAlignment: false
-SortIncludes: false
+SortIncludes: true
 ---
