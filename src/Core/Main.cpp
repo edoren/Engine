@@ -61,7 +61,6 @@ void Main::Initialize() {
         LogInfo(sTag, "Initializing Engine");
 
         SDL_Init(0);
-        SDL_InitSubSystem(SDL_INIT_VIDEO);
 
         InputManager::GetInstance().Initialize();
         ResourceManager::GetInstance().Initialize();
@@ -86,7 +85,6 @@ void Main::Shutdown() {
 
         ShutdownPlugins();
 
-        SDL_QuitSubSystem(SDL_INIT_VIDEO);
         SDL_Quit();
 
         m_is_initialized = false;

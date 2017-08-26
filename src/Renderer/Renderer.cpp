@@ -1,5 +1,9 @@
 #include <Renderer/Renderer.hpp>
 
+#include <Renderer/RenderWindow.hpp>
+#include <Renderer/Shader.hpp>
+#include <Renderer/Texture2D.hpp>
+
 #include <SDL.h>
 
 namespace engine {
@@ -7,6 +11,15 @@ namespace engine {
 Renderer::Renderer() : m_render_window(nullptr) {}
 
 Renderer::~Renderer() {}
+
+bool Renderer::Initialize() {
+    int code = SDL_InitSubSystem(SDL_INIT_VIDEO);
+    return code == 0;
+}
+
+void Renderer::Shutdown() {
+    SDL_QuitSubSystem(SDL_INIT_VIDEO);
+}
 
 void Renderer::AdvanceFrame() {
     if (!m_render_window) return;

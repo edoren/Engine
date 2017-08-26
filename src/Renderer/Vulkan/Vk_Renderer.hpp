@@ -14,15 +14,16 @@ public:
 
     ~Vk_Renderer();
 
-    bool Initialize();
+    bool Initialize() override;
 
-    void Shutdown();
+    void Shutdown() override;
 
-    void AdvanceFrame();
+    void AdvanceFrame() override;
 
-    Shader* CreateShader();  // TMP?
-
-    Texture2D* CreateTexture2D();  // TMP?
+    // TODO: Change this for a factory
+    Shader* CreateShader() override;
+    Texture2D* CreateTexture2D() override;
+    // Mesh* CreateMesh() override;
 
 private:
     Vk_Context* m_context;

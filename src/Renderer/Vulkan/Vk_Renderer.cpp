@@ -11,10 +11,13 @@ Vk_Renderer::~Vk_Renderer() {
 }
 
 bool Vk_Renderer::Initialize() {
-    m_context = new Vk_Context();
-    m_context->Initialize();
-    m_render_window = new Vk_RenderWindow();
-    return m_render_window != nullptr;
+    bool ok = Renderer::Initialize();
+    if (ok) {
+        m_context = new Vk_Context();
+        ok = ok && m_context->Initialize();
+        m_render_window = new Vk_RenderWindow();
+    }
+    return ok;
 }
 
 void Vk_Renderer::Shutdown() {
@@ -22,6 +25,7 @@ void Vk_Renderer::Shutdown() {
     m_render_window = nullptr;
     delete m_context;
     m_context = nullptr;
+    Renderer::Shutdown();
 }
 
 void Vk_Renderer::AdvanceFrame() {
@@ -37,5 +41,9 @@ Shader* Vk_Renderer::CreateShader() {
 Texture2D* Vk_Renderer::CreateTexture2D() {
     return nullptr;
 }
+
+// Mesh* Vk_Renderer::CreateMesh() {
+//     return nullptr;
+// }
 
 }  // namespace engine

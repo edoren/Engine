@@ -12,17 +12,18 @@ class OPENGL_PLUGIN_API GL_Renderer : public Renderer {
 public:
     GL_Renderer();
 
-    virtual ~GL_Renderer();
+    ~GL_Renderer();
 
-    virtual bool Initialize();
+    bool Initialize() override;
 
-    virtual void Shutdown();
+    void Shutdown() override;
 
-    virtual void AdvanceFrame();
+    void AdvanceFrame() override;
 
-    virtual Shader* CreateShader();  // TMP?
-
-    virtual Texture2D* CreateTexture2D();  // TMP?
+    // TODO: Change this for a factory
+    Shader* CreateShader() override;
+    Texture2D* CreateTexture2D() override;
+    // Mesh* CreateMesh() override;
 };
 
 }  // namespace engine
