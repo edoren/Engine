@@ -81,7 +81,7 @@ engine_add_library(TARGET ${ENGINE_LIBRARY}
                    TYPE ${ENGINE_LIBRARY_TYPE}
                    SOURCES "${ENGINE_SRCS}")
 
-target_link_libraries(${ENGINE_LIBRARY} ${SDL2_LIBRARY})
+target_link_libraries(${ENGINE_LIBRARY} ${SDL2_LIBRARY} ${ASSIMP_LIBRARY})
 
 target_include_directories(${ENGINE_LIBRARY} SYSTEM
                            PUBLIC ${MATHFU_INCLUDE_DIR} ${FMT_INCLUDE_DIR} # TMP?
