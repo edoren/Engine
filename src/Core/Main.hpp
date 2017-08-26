@@ -7,6 +7,7 @@
 #include <Graphics/ResourceManager.hpp>
 #include <Input/InputManager.hpp>
 #include <Renderer/Renderer.hpp>
+#include <System/FileSystem.hpp>
 #include <System/LogManager.hpp>
 #include <System/String.hpp>
 
@@ -104,6 +105,7 @@ private:
 
     // Singletons
     LogManager* m_logger;
+    FileSystem* m_file_system;
     SharedLibManager* m_sharedlibs;
     InputManager* m_input;
     ResourceManager* m_resources;

@@ -35,6 +35,7 @@ Main::Main(int argc, char* argv[])
     ENGINE_UNUSED(argc);
     ENGINE_UNUSED(argv);
     m_logger = new LogManager();
+    m_file_system = new FileSystem();
     m_sharedlibs = new SharedLibManager();
     m_input = new InputManager();
     m_resources = new ResourceManager();
@@ -45,6 +46,7 @@ Main::~Main() {
     delete m_resources;
     delete m_input;
     delete m_sharedlibs;
+    delete m_file_system;
     delete m_logger;
 }
 

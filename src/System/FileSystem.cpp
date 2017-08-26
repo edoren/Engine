@@ -1,12 +1,14 @@
-// #include <System/FileSystem/Dependencies.hpp>
-#include <System/FileSystem/Operations.hpp>
+#include <System/FileSystem.hpp>
+#include <System/IOStream.hpp>
+#include <System/LogManager.hpp>
 #include <Util/Prerequisites.hpp>
 
 #include <SDL.h>
 
 #if PLATFORM_IS(PLATFORM_WINDOWS)
 #include <windows.h>
-#elif PLATFORM_IS(PLATFORM_LINUX) || PLATFORM_IS(PLATFORM_MAC) || PLATFORM_IS(PLATFORM_ANDROID)
+#elif (PLATFORM_IS(PLATFORM_LINUX) || PLATFORM_IS(PLATFORM_MAC) || \
+       PLATFORM_IS(PLATFORM_ANDROID))
 #include <unistd.h>
 #endif
 
@@ -14,9 +16,81 @@
 
 namespace engine {
 
-namespace filesystem {
+namespace {
 
-char8 GetSeparator() {
+String sTag("FileSystem");
+
+}  // namespace
+
+template <>
+FileSystem* Singleton<FileSystem>::sInstance = nullptr;
+
+FileSystem& FileSystem::GetInstance() {
+    assert(sInstance);
+    return (*sInstance);
+}
+
+FileSystem* FileSystem::GetInstancePtr() {
+    return sInstance;
+}
+
+FileSystem::FileSystem() {
+    m_search_paths = {
+#if PLATFORM_IS(PLATFORM_ANDROID)
+        ""
+#else
+        "data/"
+#endif
+    };
+}
+
+FileSystem::~FileSystem() {}
+
+bool FileSystem::FileExists(const String& filename) const {
+    IOStream file;
+    for (const String& path : m_search_paths) {
+        String file_path = Join(path, filename);
+        if (file.Open(file_path, "r")) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool FileSystem::LoadFileData(const String& filename, String* dest) const {
+    std::vector<byte> out;
+    bool success = LoadFileData(filename, &out);
+    if (success) {
+        char8* begin = reinterpret_cast<char8*>(out.data());
+        *dest = String::FromUtf8(begin, begin + out.size());
+    }
+    return success;
+}
+
+bool FileSystem::LoadFileData(const String& filename,
+                              std::vector<byte>* dest) const {
+    IOStream file;
+
+    auto filename_cpy = filename;
+    filename_cpy.Replace('\\', GetOsSeparator());
+    filename_cpy.Replace('/', GetOsSeparator());
+
+    for (const String& path : m_search_paths) {
+        String file_path = Join(path, filename_cpy);
+        if (file.Open(file_path.GetData(), "rb")) break;
+    }
+    if (!file.IsOpen()) {
+        LogError(sTag, "Error loading file: " + filename);
+        return false;
+    }
+
+    std::size_t len = file.GetSize();
+    dest->resize(len);
+    std::size_t rlen = file.Read(dest->data(), 1, len);
+    return len == rlen && len > 0;
+}
+
+char8 FileSystem::GetOsSeparator() const {
 #if PLATFORM_IS(PLATFORM_WINDOWS)
     return '\\';
 #else
@@ -24,7 +98,7 @@ char8 GetSeparator() {
 #endif
 }
 
-String ExecutableDirectory() {
+String FileSystem::ExecutableDirectory() const {
     String ret;
     char* path = SDL_GetBasePath();
     if (path) {
@@ -34,7 +108,7 @@ String ExecutableDirectory() {
     return ret;
 }
 
-String CurrentWorkingDirectory() {
+String FileSystem::CurrentWorkingDirectory() const {
     String ret;
 #if PLATFORM_IS(PLATFORM_WINDOWS)
     DWORD buffer_length = PATH_MAX_LENGTH;
@@ -54,7 +128,8 @@ String CurrentWorkingDirectory() {
         free(buffer);
         buffer_length *= 2;
     }
-#elif PLATFORM_IS(PLATFORM_LINUX) || PLATFORM_IS(PLATFORM_MAC) || PLATFORM_IS(PLATFORM_ANDROID)
+#elif (PLATFORM_IS(PLATFORM_LINUX) || PLATFORM_IS(PLATFORM_MAC) || \
+       PLATFORM_IS(PLATFORM_ANDROID))
     size_t buffer_length = PATH_MAX_LENGTH;
     char8* buffer = nullptr;
     while (true) {
@@ -78,14 +153,14 @@ String CurrentWorkingDirectory() {
     return ret;
 }
 
-String AbsolutePath(const String& /*path*/) {
+String FileSystem::AbsolutePath(const String& /*path*/) const {
     String ret;
 
     return ret;
 }
 
-String NormalizePath(const String& path) {
-    bool is_absolute = IsAbsolute(path);
+String FileSystem::NormalizePath(const String& path) const {
+    bool is_absolute = IsAbsolutePath(path);
     std::vector<std::pair<const char8*, const char8*>> path_comps;
 
     auto AddPathComponent = [&path_comps, is_absolute](const char8* begin,
@@ -137,11 +212,11 @@ String NormalizePath(const String& path) {
     const char8* pathc_end = pathc_start;
     while (*pathc_end != 0) {
         // Get the path component from the start and end iterators
-        if (*pathc_end == GetSeparator() && pathc_end > pathc_start) {
+        if (*pathc_end == GetOsSeparator() && pathc_end > pathc_start) {
             AddPathComponent(pathc_start, pathc_end);
             pathc_start = pathc_end;
         }
-        if (*pathc_start == GetSeparator()) pathc_start++;
+        if (*pathc_start == GetOsSeparator()) pathc_start++;
         pathc_end++;
     }
     // Get the last path component
@@ -164,7 +239,7 @@ String NormalizePath(const String& path) {
         ret += '.';
     } else {
         for (size_t i = 0; i < path_comps.size(); i++) {
-            if (i) ret += GetSeparator();
+            if (i) ret += GetOsSeparator();
             ret += String::FromUtf8(path_comps[i].first, path_comps[i].second);
         }
     }
@@ -177,14 +252,15 @@ String NormalizePath(const String& path) {
     return ret;
 }
 
-bool IsAbsolute(const String& path) {
+bool FileSystem::IsAbsolutePath(const String& path) const {
     const auto& internal = path.ToUtf8();
     if (path.IsEmpty()) return false;
 #if PLATFORM_IS(PLATFORM_WINDOWS)
     if (internal.size() > 2 && internal[1] == ':' && internal[2] == '\\') {
         return true;
     }
-#elif PLATFORM_IS(PLATFORM_LINUX) || PLATFORM_IS(PLATFORM_MAC) || PLATFORM_IS(PLATFORM_ANDROID)
+#elif PLATFORM_IS(PLATFORM_LINUX) || PLATFORM_IS(PLATFORM_MAC) || \
+    PLATFORM_IS(PLATFORM_ANDROID)
     if (internal[0] == '/') {
         return true;
     }
@@ -192,23 +268,33 @@ bool IsAbsolute(const String& path) {
     return false;
 }
 
-String Join(const String& left, const String& right) {
+String FileSystem::Join(const String& left, const String& right) const {
     if (right.IsEmpty()) return left;
     if (left.IsEmpty()) return right;
 
-    if (IsAbsolute(right)) return right;
+    if (IsAbsolutePath(right)) return right;
 
     String ret;
     const auto& internal = left.ToUtf8();
     char8 last_character = internal[internal.size() - 1];
-    if (last_character == GetSeparator()) {
+    if (last_character == GetOsSeparator()) {
         ret = left + right;
     } else {
-        ret = left + GetSeparator() + right;
+        ret = left + GetOsSeparator() + right;
     }
     return ret;
 }
 
-}  // namespace filesystem
+void FileSystem::SetSearchPaths(std::vector<String> search_paths) {
+    m_search_paths = search_paths;
+}
+
+const std::vector<String>& FileSystem::GetSearchPaths() const {
+    return m_search_paths;
+}
+
+void FileSystem::AddSearchPath(const String& path) {
+    m_search_paths.push_back(path);
+}
 
 }  // namespace engine

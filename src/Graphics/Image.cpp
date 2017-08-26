@@ -1,5 +1,5 @@
 #include <Graphics/Image.hpp>
-#include <System/IO/ImageLoader.hpp>
+#include <Graphics/ImageLoader.hpp>
 
 namespace engine {
 

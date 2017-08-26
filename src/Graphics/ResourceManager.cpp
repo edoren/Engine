@@ -1,6 +1,5 @@
 #include <Core/Main.hpp>
 #include <Graphics/ResourceManager.hpp>
-#include <System/IO/FileLoader.hpp>
 #include <System/LogManager.hpp>
 
 #include <SDL.h>
@@ -31,13 +30,7 @@ T FindInMap(std::map<String, T>& map, const String& name) {
     return it != map.end() ? it->second : nullptr;
 }
 
-ResourceManager::ResourceManager() {
-    char* path = SDL_GetBasePath();
-    if (path) {
-        m_basedir = path;
-        SDL_free(path);
-    }
-}
+ResourceManager::ResourceManager() {}
 
 ResourceManager::~ResourceManager() {
     Shutdown();
@@ -100,17 +93,22 @@ Shader* ResourceManager::LoadShader(const String& basename,
 }
 
 Texture2D* ResourceManager::LoadTexture2D(const String& basename) {
+    Texture2D* texture = nullptr;
+
+    texture = FindTexture2D(basename);
+    if (texture) return texture;
+
     Image img;
     if (img.LoadFromFile(basename)) {
         LogDebug(sTag, "Loading Texture: " + basename);
-        Texture2D* texture =
-            Main::GetInstance().GetActiveRenderer().CreateTexture2D();
+        texture = Main::GetInstance().GetActiveRenderer().CreateTexture2D();
         texture->LoadFromImage(img);
         m_texture_2d_map[basename] = texture;
     } else {
         LogError(sTag, "Could not load Texture: " + basename);
     }
-    return FindTexture2D(basename);
+
+    return texture;
 }
 
 }  // namespace engine

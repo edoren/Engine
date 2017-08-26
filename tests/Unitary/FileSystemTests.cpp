@@ -1,13 +1,13 @@
 #include "catch.hpp"
 
-#include "OStreamOverloads.hpp"
-
 #include <System/FileSystem.hpp>
 #include <System/String.hpp>
 
 using namespace engine;
 
-TEST_CASE("filesystem::IsAbsolute", "[FileSystem]") {
+static FileSystem file_system;
+
+TEST_CASE("FileSystem::IsAbsolutePath", "[FileSystem]") {
     SECTION("true if the path is absolute, false otherwise") {
 #if PLATFORM_IS(PLATFORM_WINDOWS)
         String absolute = "C:\\hello";
@@ -16,12 +16,12 @@ TEST_CASE("filesystem::IsAbsolute", "[FileSystem]") {
         String absolute = "/hello";
         String relative = "hello/world";
 #endif
-        REQUIRE(filesystem::IsAbsolute(absolute) == true);
-        REQUIRE(filesystem::IsAbsolute(relative) == false);
+        REQUIRE(file_system.IsAbsolutePath(absolute) == true);
+        REQUIRE(file_system.IsAbsolutePath(relative) == false);
     }
 }
 
-TEST_CASE("filesystem::NormalizePath", "[FileSystem]") {
+TEST_CASE("FileSystem::NormalizePath", "[FileSystem]") {
     SECTION("must resolve all the .. directories") {
 #if PLATFORM_IS(PLATFORM_WINDOWS)
         String path1 = "hello\\world\\..";
@@ -34,10 +34,10 @@ TEST_CASE("filesystem::NormalizePath", "[FileSystem]") {
         String path3 = "hello/../world/../..";
         String path4 = "hello/../world/../../..";
 #endif
-        String path1_norm = filesystem::NormalizePath(path1);
-        String path2_norm = filesystem::NormalizePath(path2);
-        String path3_norm = filesystem::NormalizePath(path3);
-        String path4_norm = filesystem::NormalizePath(path4);
+        String path1_norm = file_system.NormalizePath(path1);
+        String path2_norm = file_system.NormalizePath(path2);
+        String path3_norm = file_system.NormalizePath(path3);
+        String path4_norm = file_system.NormalizePath(path4);
 #if PLATFORM_IS(PLATFORM_WINDOWS)
         REQUIRE(path1_norm == "hello");
         REQUIRE(path2_norm == ".");
@@ -56,7 +56,7 @@ TEST_CASE("filesystem::NormalizePath", "[FileSystem]") {
 #else
         String path = "hello/./world/././.";
 #endif
-        String path_norm = filesystem::NormalizePath(path);
+        String path_norm = file_system.NormalizePath(path);
 #if PLATFORM_IS(PLATFORM_WINDOWS)
         REQUIRE(path_norm == "hello\\world");
 #else
@@ -69,7 +69,7 @@ TEST_CASE("filesystem::NormalizePath", "[FileSystem]") {
 #else
         String path1 = "hello//1234//world//.///";
 #endif
-        String path1_norm = filesystem::NormalizePath(path1);
+        String path1_norm = file_system.NormalizePath(path1);
 #if PLATFORM_IS(PLATFORM_WINDOWS)
         REQUIRE(path1_norm == "hello\\1234\\world");
 #else
@@ -86,9 +86,9 @@ TEST_CASE("filesystem::NormalizePath", "[FileSystem]") {
         String path2 = "/hello/../..";
         String path3 = "/../..";
 #endif
-        String path1_norm = filesystem::NormalizePath(path1);
-        String path2_norm = filesystem::NormalizePath(path2);
-        String path3_norm = filesystem::NormalizePath(path3);
+        String path1_norm = file_system.NormalizePath(path1);
+        String path2_norm = file_system.NormalizePath(path2);
+        String path3_norm = file_system.NormalizePath(path3);
 #if PLATFORM_IS(PLATFORM_WINDOWS)
         REQUIRE(path1_norm == "C:\\hello");
         REQUIRE(path2_norm == "C:\\");
@@ -102,15 +102,15 @@ TEST_CASE("filesystem::NormalizePath", "[FileSystem]") {
 #if PLATFORM_IS(PLATFORM_WINDOWS)
     SECTION("on Windows this should change any '/' separators to '\\'") {
         String path = "C:\\hello/world/1234";
-        String path_norm = filesystem::NormalizePath(path);
+        String path_norm = file_system.NormalizePath(path);
         REQUIRE(path_norm == "C:\\hello\\world\\1234");
     }
 #endif
 }
 
-TEST_CASE("filesystem::Join", "[FileSystem]") {
+TEST_CASE("FileSystem::Join", "[FileSystem]") {
     SECTION("must be able to join any number of paths") {
-        String joined = filesystem::Join("hello", "world", "1234");
+        String joined = file_system.Join("hello", "world", "1234");
 #if PLATFORM_IS(PLATFORM_WINDOWS)
         REQUIRE(joined == "hello\\world\\1234");
 #else
@@ -118,7 +118,7 @@ TEST_CASE("filesystem::Join", "[FileSystem]") {
 #endif
     }
     SECTION("if any of the provided paths is empty it must ignore it") {
-        String joined = filesystem::Join("hello", "", "1234");
+        String joined = file_system.Join("hello", "", "1234");
 #if PLATFORM_IS(PLATFORM_WINDOWS)
         REQUIRE(joined == "hello\\1234");
 #else
@@ -132,7 +132,7 @@ TEST_CASE("filesystem::Join", "[FileSystem]") {
 #else
         String right = "/world/1234";
 #endif
-        String joined = filesystem::Join(left, right);
+        String joined = file_system.Join(left, right);
 #if PLATFORM_IS(PLATFORM_WINDOWS)
         REQUIRE(joined == "C:\\world\\1234");
 #else
@@ -148,8 +148,8 @@ TEST_CASE("filesystem::Join", "[FileSystem]") {
         String left2 = "hello/";
 #endif
         String right = "world";
-        String joined1 = filesystem::Join(left1, right);
-        String joined2 = filesystem::Join(left2, right);
+        String joined1 = file_system.Join(left1, right);
+        String joined2 = file_system.Join(left2, right);
         REQUIRE(joined1 == joined2);
     }
 }

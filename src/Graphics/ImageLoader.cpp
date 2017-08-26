@@ -1,5 +1,5 @@
-#include <System/IO/FileLoader.hpp>
-#include <System/IO/ImageLoader.hpp>
+#include <Graphics/ImageLoader.hpp>
+#include <System/FileSystem.hpp>
 #include <System/LogManager.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -18,7 +18,8 @@ namespace io {
 bool ImageLoader::LoadFromFile(const String& filename,
                                std::vector<byte>& pixels, math::uvec2& size) {
     std::vector<byte> out;
-    if (FileLoader::LoadFile(filename, &out)) {
+    FileSystem& fs = FileSystem::GetInstance();
+    if (fs.LoadFileData(filename, &out)) {
         return LoadFromFileInMemory(out.data(), out.size(), pixels, size);
     }
     return false;

@@ -1,6 +1,5 @@
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
-#include <System/IO.hpp>
 
 #include "Vk_Shader.hpp"
 

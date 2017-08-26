@@ -1,6 +1,6 @@
+#include <System/FileSystem.hpp>
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
-#include <System/IO.hpp>
 
 #include "Vk_RenderWindow.hpp"
 #include "Vk_Shader.hpp"
@@ -763,10 +763,10 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         std::vector<byte> vertex_shader_code;
         std::vector<byte> fragment_shader_code;
 
-        io::FileLoader::LoadFile("shaders/spirv/triangle.vert",
-                                 &vertex_shader_code);
-        io::FileLoader::LoadFile("shaders/spirv/triangle.frag",
-                                 &fragment_shader_code);
+        FileSystem& fs = FileSystem::GetInstance();
+
+        fs.LoadFileData("shaders/spirv/triangle.vert", &vertex_shader_code);
+        fs.LoadFileData("shaders/spirv/triangle.frag", &fragment_shader_code);
 
         vertex_shader_module.LoadFromMemory(vertex_shader_code.data(),
                                             vertex_shader_code.size(),
