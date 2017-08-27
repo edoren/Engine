@@ -177,6 +177,14 @@ Renderer* Main::GetActiveRendererPtr() {
     return m_active_renderer;
 }
 
+RendererFactory& Main::GetActiveRendererFactory() {
+    return GetActiveRenderer().GetRendererFactory();
+}
+
+RendererFactory* Main::GetActiveRendererFactoryPtr() {
+    return GetActiveRenderer().GetRendererFactoryPtr();
+}
+
 void Main::InitializePlugins() {
     for (auto i = m_plugins.begin(); i != m_plugins.end(); i++) {
         (*i)->Initialize();

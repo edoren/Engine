@@ -2,14 +2,16 @@
 #include <Graphics/3D/Camera.hpp>
 #include <Graphics/ResourceManager.hpp>
 #include <Input/InputManager.hpp>
+#include <Renderer/Model.hpp>
+#include <Renderer/RenderWindow.hpp>
 #include <Renderer/Renderer.hpp>
 #include <Renderer/Shader.hpp>
 #include <Renderer/Texture2D.hpp>
 #include <System/Stopwatch.hpp>
 
+#include <Renderer/OpenGL/GL_Plugin.hpp>
 #include <Renderer/OpenGL/GL_Renderer.hpp>
 #include <Renderer/OpenGL/GL_Shader.hpp>
-#include <Renderer/OpenGL/GL_Plugin.hpp>
 
 using namespace engine;
 
@@ -118,23 +120,14 @@ void main() {
 }
 )";
 
-struct Vertex {
-    Vertex(const math::vec3& position, const math::vec3& normal,
-           const math::vec2& tex_coords)
-          : position(position), normal(normal), tex_coords(tex_coords) {}
-    math::vec3 position;
-    math::vec3 normal;
-    math::vec2 tex_coords;
-};
-
 int main(int argc, char* argv[]) {
     Main engine(argc, argv);
 
-    // GL_Plugin opengl;
-    // engine.InstallPlugin(&opengl);
+// GL_Plugin opengl;
+// engine.InstallPlugin(&opengl);
 
-    // GL_Renderer opengl;
-    // engine.AddRenderer(&opengl);
+// GL_Renderer opengl;
+// engine.AddRenderer(&opengl);
 
 #ifdef ENGINE_DEBUG
     engine.LoadPlugin("opengl-plugin-d");
@@ -245,7 +238,7 @@ int main(int argc, char* argv[]) {
                               GL_FALSE,        // normalized?
                               sizeof(Vertex),  // stride
                               reinterpret_cast<void*>(offsetof(
-                                  Vertex, position))  // array buffer offset
+                                  Vertex, m_position))  // array buffer offset
                               );
         glEnableVertexAttribArray(0);
 
@@ -255,7 +248,7 @@ int main(int argc, char* argv[]) {
                               GL_TRUE,         // normalized?
                               sizeof(Vertex),  // stride
                               reinterpret_cast<void*>(offsetof(
-                                  Vertex, normal))  // array buffer offset
+                                  Vertex, m_normal))  // array buffer offset
                               );
         glEnableVertexAttribArray(1);
 
@@ -265,7 +258,7 @@ int main(int argc, char* argv[]) {
                               GL_FALSE,        // normalized?
                               sizeof(Vertex),  // stride
                               reinterpret_cast<void*>(offsetof(
-                                  Vertex, tex_coords))  // array buffer offset
+                                  Vertex, m_tex_coords))  // array buffer offset
                               );
         glEnableVertexAttribArray(2);
 
@@ -282,7 +275,7 @@ int main(int argc, char* argv[]) {
                               GL_FALSE,        // normalized?
                               sizeof(Vertex),  // stride
                               reinterpret_cast<void*>(offsetof(
-                                  Vertex, position))  // array buffer offset
+                                  Vertex, m_position))  // array buffer offset
                               );
         glEnableVertexAttribArray(0);
 

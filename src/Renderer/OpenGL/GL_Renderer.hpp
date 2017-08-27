@@ -3,8 +3,6 @@
 #include <Renderer/Renderer.hpp>
 
 #include "GL_Config.hpp"
-#include "GL_Dependencies.hpp"
-#include "GL_RenderWindow.hpp"
 
 namespace engine {
 
@@ -19,11 +17,6 @@ public:
     void Shutdown() override;
 
     void AdvanceFrame() override;
-
-    // TODO: Change this for a factory
-    Shader* CreateShader() override;
-    Texture2D* CreateTexture2D() override;
-    // Mesh* CreateMesh() override;
 };
 
 }  // namespace engine

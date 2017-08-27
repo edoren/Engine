@@ -1,6 +1,7 @@
 #include <Core/Main.hpp>
 #include <Input/InputManager.hpp>
 #include <Renderer/Renderer.hpp>
+#include <Renderer/RenderWindow.hpp>
 #include <System/StringFormat.hpp>
 
 // TODO: Remove this later

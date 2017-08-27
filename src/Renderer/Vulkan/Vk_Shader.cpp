@@ -1,6 +1,7 @@
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
 
+#include "Vk_Context.hpp"
 #include "Vk_Shader.hpp"
 
 namespace engine {

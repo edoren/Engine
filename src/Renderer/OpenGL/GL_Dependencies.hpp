@@ -14,3 +14,5 @@
 #endif
 
 #include <SDL.h>
+
+#include "GL_Utilities.hpp"

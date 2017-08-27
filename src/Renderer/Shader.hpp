@@ -2,15 +2,9 @@
 
 #include <Util/Prerequisites.hpp>
 
-#include <Math/Math.hpp>
-#include <System/String.hpp>
-
 namespace engine {
 
-enum class ShaderType {
-    Vertex,
-    Fragment
-};
+enum class ShaderType { Vertex, Fragment };
 
 class ENGINE_API Shader : NonCopyable {
 public:

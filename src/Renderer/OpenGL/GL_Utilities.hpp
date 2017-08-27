@@ -1,5 +1,3 @@
-#include <Util/Config.hpp>
-
 #pragma once
 
 namespace engine {

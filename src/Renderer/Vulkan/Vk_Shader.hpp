@@ -6,12 +6,10 @@
 
 #include "Vk_Config.hpp"
 #include "Vk_Dependencies.hpp"
-#include "Vk_Context.hpp"
 
 namespace engine {
 
-// class VULKAN_PLUGIN_API Vk_Shader : public Shader {
-class VULKAN_PLUGIN_API Vk_Shader {
+class VULKAN_PLUGIN_API Vk_Shader : public Shader {
 public:
     Vk_Shader();
     Vk_Shader(Vk_Shader&& other);
@@ -20,15 +18,15 @@ public:
     Vk_Shader& operator=(Vk_Shader&& other);
 
     bool LoadFromMemory(const byte* source, std::size_t source_size,
-                        ShaderType type);
+                        ShaderType type) override;
+
+    bool Link() override;
+
+    void Use() override;
 
     VkShaderModule& GetModule();
 
     VkShaderStageFlagBits GetShaderType();
-
-    bool Link();
-
-    void Use();
 
 private:
     VkShaderModule m_module;

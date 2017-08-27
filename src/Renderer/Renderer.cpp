@@ -1,14 +1,12 @@
-#include <Renderer/Renderer.hpp>
-
 #include <Renderer/RenderWindow.hpp>
-#include <Renderer/Shader.hpp>
-#include <Renderer/Texture2D.hpp>
+#include <Renderer/Renderer.hpp>
+#include <Renderer/RendererFactory.hpp>
 
 #include <SDL.h>
 
 namespace engine {
 
-Renderer::Renderer() : m_render_window(nullptr) {}
+Renderer::Renderer() : m_render_window(nullptr), m_renderer_factory(nullptr) {}
 
 Renderer::~Renderer() {}
 
@@ -37,6 +35,15 @@ RenderWindow& Renderer::GetRenderWindow() {
 
 RenderWindow* Renderer::GetRenderWindowPtr() {
     return m_render_window;
+}
+
+RendererFactory& Renderer::GetRendererFactory() {
+    assert(m_renderer_factory);
+    return *m_renderer_factory;
+}
+
+RendererFactory* Renderer::GetRendererFactoryPtr() {
+    return m_renderer_factory;
 }
 
 }  // namespace engine

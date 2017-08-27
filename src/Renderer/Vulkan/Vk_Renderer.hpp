@@ -20,11 +20,6 @@ public:
 
     void AdvanceFrame() override;
 
-    // TODO: Change this for a factory
-    Shader* CreateShader() override;
-    Texture2D* CreateTexture2D() override;
-    // Mesh* CreateMesh() override;
-
 private:
     Vk_Context* m_context;
 };

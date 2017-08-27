@@ -37,6 +37,10 @@ public:
 
     Renderer* GetActiveRendererPtr();
 
+    RendererFactory& GetActiveRendererFactory();
+
+    RendererFactory* GetActiveRendererFactoryPtr();
+
     ////////////////////////////////////////////////////////////
     /// \brief Unload all the loaded plugins
     ///

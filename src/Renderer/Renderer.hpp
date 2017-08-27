@@ -2,13 +2,10 @@
 
 #include <Util/Prerequisites.hpp>
 
-#include <Renderer/RenderWindow.hpp>
-
 namespace engine {
 
-class Shader;
-class Texture2D;
-class Mesh;
+class RenderWindow;
+class RendererFactory;
 
 class ENGINE_API Renderer {
 public:
@@ -22,17 +19,15 @@ public:
 
     virtual void AdvanceFrame();
 
-    // TODO: Change this for a factory
-    virtual Shader* CreateShader() = 0;
-    virtual Texture2D* CreateTexture2D() = 0;
-    // virtual Mesh* CreateMesh() = 0;
-
     RenderWindow& GetRenderWindow();
-
     RenderWindow* GetRenderWindowPtr();
+
+    RendererFactory& GetRendererFactory();
+    RendererFactory* GetRendererFactoryPtr();
 
 protected:
     RenderWindow* m_render_window;
+    RendererFactory* m_renderer_factory;
 };
 
 }  // namespace engine

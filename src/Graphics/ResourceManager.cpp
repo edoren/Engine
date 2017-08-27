@@ -1,5 +1,6 @@
 #include <Core/Main.hpp>
 #include <Graphics/ResourceManager.hpp>
+#include <Renderer/RendererFactory.hpp>
 #include <System/LogManager.hpp>
 
 #include <SDL.h>
@@ -67,7 +68,9 @@ Shader* ResourceManager::LoadShader(const String& basename,
     shader = FindShader(basename);
     if (shader) return shader;
 
-    shader = Main::GetInstance().GetActiveRenderer().CreateShader();
+    RendererFactory& factory = Main::GetInstance().GetActiveRendererFactory();
+
+    shader = factory.CreateShader();
 
     const std::string& vertex_src = vertex_file.ToUtf8();
     const std::string& fragment_src = fragment_file.ToUtf8();
@@ -98,10 +101,12 @@ Texture2D* ResourceManager::LoadTexture2D(const String& basename) {
     texture = FindTexture2D(basename);
     if (texture) return texture;
 
+    RendererFactory& factory = Main::GetInstance().GetActiveRendererFactory();
+
     Image img;
     if (img.LoadFromFile(basename)) {
         LogDebug(sTag, "Loading Texture: " + basename);
-        texture = Main::GetInstance().GetActiveRenderer().CreateTexture2D();
+        texture = factory.CreateTexture2D();
         texture->LoadFromImage(img);
         m_texture_2d_map[basename] = texture;
     } else {
