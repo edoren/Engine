@@ -11,7 +11,10 @@ endif()
 # Set the default Android NDK STL to LLVM libc++
 set(ANDROID_STL "c++_static")
 
-project(Engine)
+set(PROJECT_NAME "Engine")
+set(PROJECT_DESCRIPTION "")
+
+project(${PROJECT_NAME})
 
 # Configure the projects to use folders
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -56,6 +59,8 @@ endif()
 set(ENGINE_NAME Engine)
 
 option(ENGINE_BUILD_STATIC "Build the Engine as an static library" OFF)
+option(ENGINE_BUILD_TESTS "Build the Engine test projects" ON)
+option(ENGINE_BUILD_DOCS "Build the Engine documentation (Requires Doxygen)" OFF)
 
 if(ENGINE_BUILD_STATIC)
     add_definitions(-DENGINE_STATIC)
@@ -87,6 +92,7 @@ endif()
 set(THIRD_PARTY_DIR "${ENGINE_DIR}/third_party")
 set(ENGINE_SOURCE_DIR "${ENGINE_DIR}/src")
 set(TESTS_DIR "${ENGINE_DIR}/tests")
+set(DOCS_DIR "${ENGINE_DIR}/docs")
 set(TEMP_DIR "${CMAKE_BINARY_DIR}/obj")
 
 ###############################################################################
@@ -107,7 +113,13 @@ add_subdirectory("${ENGINE_SOURCE_DIR}/Renderer/OpenGL")
 add_subdirectory("${ENGINE_SOURCE_DIR}/Renderer/Vulkan")
 
 # Add the test folder
-add_subdirectory(${TESTS_DIR})
+if(ENGINE_BUILD_TESTS)
+    add_subdirectory(${TESTS_DIR})
+endif()
+
+if(ENGINE_BUILD_DOCS)
+    add_subdirectory(${DOCS_DIR})
+endif()
 
 ###############################################################################
 ## Data processing
