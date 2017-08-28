@@ -200,20 +200,20 @@ Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
             String name = fs.Join(m_relative_directory, str.C_Str());
 
             Texture2D* texture = res.LoadTexture2D(name);
-            TextureType texture_type = TextureType::None;
+            TextureType texture_type = TextureType::eNone;
 
             switch (type) {
                 case aiTextureType_DIFFUSE:
-                    texture_type = TextureType::Diffuse;
+                    texture_type = TextureType::eDiffuse;
                     break;
                 case aiTextureType_SPECULAR:
-                    texture_type = TextureType::Specular;
+                    texture_type = TextureType::eSpecular;
                     break;
                 case aiTextureType_NORMALS:
-                    texture_type = TextureType::Normals;
+                    texture_type = TextureType::eNormals;
                     break;
                 default:
-                    texture_type = TextureType::Unknown;
+                    texture_type = TextureType::eUnknown;
                     break;
             }
 

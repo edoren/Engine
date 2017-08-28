@@ -77,10 +77,10 @@ Shader* ResourceManager::LoadShader(const String& basename,
 
     bool vertex_status =
         shader->LoadFromMemory(reinterpret_cast<const byte*>(vertex_src.data()),
-                               vertex_src.size(), ShaderType::Vertex);
+                               vertex_src.size(), ShaderType::eVertex);
     bool fragment_status = shader->LoadFromMemory(
         reinterpret_cast<const byte*>(fragment_src.data()), fragment_src.size(),
-        ShaderType::Fragment);
+        ShaderType::eFragment);
 
     bool link_status = shader->Link();
 

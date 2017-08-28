@@ -4,7 +4,7 @@
 
 namespace engine {
 
-enum class ShaderType { Vertex, Fragment };
+enum class ShaderType { eVertex, eFragment };
 
 class ENGINE_API Shader : NonCopyable {
 public:

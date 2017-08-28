@@ -4,13 +4,13 @@
 
 #include <System/String.hpp>
 
-class SDL_RWops;
+struct SDL_RWops;
 
 namespace engine {
 
 class ENGINE_API IOStream : NonCopyable {
 public:
-    enum Origin : int { SET = 0, CUR = 1, END = 2 };
+    enum Origin : int { eSet = 0, eCur = 1, eEnd = 2 };
 
     IOStream();
     IOStream(IOStream&& other);
@@ -30,7 +30,7 @@ public:
 
     int64 Seek(size_t offset, Origin origin);
 
-    size_t Tell() const;
+    int64 Tell() const;
 
     size_t GetSize() const;
 

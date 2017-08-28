@@ -3,11 +3,11 @@
 namespace engine {
 
 enum class TextureType {
-    None,
-    Diffuse,
-    Specular,
-    Normals,
-    Unknown
+    eNone,
+    eDiffuse,
+    eSpecular,
+    eNormals,
+    eUnknown
 };
 
 }  // namespace engine

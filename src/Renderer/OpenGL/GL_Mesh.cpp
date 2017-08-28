@@ -80,10 +80,10 @@ void GL_Mesh::Draw() {
 
         String uniform_name = "material.";
         switch (m_textures[i].second) {
-            case TextureType::Diffuse:
+            case TextureType::eDiffuse:
                 uniform_name += "tex_diffuse" + std::to_string(diffuse_num++);
                 break;
-            case TextureType::Specular:
+            case TextureType::eSpecular:
                 uniform_name += "tex_specular" + std::to_string(specular_num++);
                 break;
             default:

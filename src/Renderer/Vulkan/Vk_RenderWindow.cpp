@@ -770,10 +770,10 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
 
         vertex_shader_module.LoadFromMemory(vertex_shader_code.data(),
                                             vertex_shader_code.size(),
-                                            ShaderType::Vertex);
+                                            ShaderType::eVertex);
         fragment_shader_module.LoadFromMemory(fragment_shader_code.data(),
                                               fragment_shader_code.size(),
-                                              ShaderType::Fragment);
+                                              ShaderType::eFragment);
     }
 
     if (!vertex_shader_module.GetModule() ||

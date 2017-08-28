@@ -61,17 +61,17 @@ int64 IOStream::Seek(size_t offset, Origin origin) {
     return m_file ? SDL_RWseek(m_file, offset, static_cast<int>(origin)) : 0;
 }
 
-size_t IOStream::Tell() const {
+int64 IOStream::Tell() const {
     return m_file ? SDL_RWtell(m_file) : 0;
 }
 
 size_t IOStream::GetSize() const {
     if (!m_file) return 0;
-    size_t current_pos = SDL_RWtell(m_file);
+    int64 current_pos = SDL_RWtell(m_file);
     SDL_RWseek(m_file, 0, RW_SEEK_END);
-    size_t file_size = SDL_RWtell(m_file);
+    int64 file_size = SDL_RWtell(m_file);
     SDL_RWseek(m_file, current_pos, RW_SEEK_SET);
-    return file_size;
+    return static_cast<size_t>(file_size);
 }
 
 bool IOStream::IsOpen() const {
