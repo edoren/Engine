@@ -6,11 +6,12 @@
 #include <Renderer/RenderWindow.hpp>
 #include <System/String.hpp>
 
+#include "Vk_Buffer.hpp"
 #include "Vk_Config.hpp"
 #include "Vk_Context.hpp"
-#include "Vk_VulkanParameters.hpp"
 #include "Vk_Dependencies.hpp"
-#include "Vk_Buffer.hpp"
+#include "Vk_Queue.hpp"
+#include "Vk_VulkanParameters.hpp"
 
 namespace engine {
 
@@ -55,14 +56,20 @@ public:
 
 private:
     bool CreateVulkanSurface();
-    bool CreateVulkanQueues();  // CheckWSISupport
-    bool CreateVulkanSemaphores();
-    bool CreateVulkanFences();
+    bool CheckWSISupport();
+
     bool CreateVulkanSwapChain();
-    bool CreateVulkanCommandBuffers();
     bool CreateVulkanRenderPass();
     bool CreateVulkanPipeline();
     bool CreateVulkanVertexBuffer();
+
+    bool CreateVulkanCommandPool(QueueParameters& queue,
+                                 VkCommandPool* cmd_pool);
+    bool AllocateVulkanCommandBuffers(VkCommandPool& cmd_pool, uint32_t count,
+                                     VkCommandBuffer* command_buffer);
+    bool CreateVulkanSemaphore(VkSemaphore* semaphore);
+    bool CreateVulkanFence(VkFenceCreateFlags flags, VkFence* fence);
+    bool CreateRenderingResources();
 
     bool CreateVulkanFrameBuffer(VkFramebuffer& framebuffer,
                                  VkImageView& image_view);
@@ -97,8 +104,8 @@ private:
 
     VkSurfaceKHR m_surface;
 
-    QueueParameters m_graphics_queue;
-    QueueParameters m_present_queue;
+    QueueParameters* m_graphics_queue;
+    QueueParameters* m_present_queue;
 
     SwapChainParameters m_swapchain;
     VkPipeline m_graphics_pipeline;

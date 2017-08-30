@@ -23,6 +23,9 @@ struct VertexData {
 Vk_RenderWindow::Vk_RenderWindow()
       : m_window(nullptr),
         m_surface(VK_NULL_HANDLE),
+        m_graphics_queue(nullptr),
+        m_present_queue(nullptr),
+        m_swapchain(),
         m_graphics_pipeline(VK_NULL_HANDLE),
         m_graphics_queue_cmd_pool(VK_NULL_HANDLE),
         m_render_pass(VK_NULL_HANDLE),
@@ -45,22 +48,48 @@ bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
         return false;
     }
 
+    // We assume that the graphics queue can also present
+    Vk_Context& context = Vk_Context::GetInstance();
+    m_graphics_queue = &context.GetGraphicsQueue();
+    m_present_queue = m_graphics_queue;
+
     // Update the base class attributes
     SDL_GetWindowSize(m_window, &m_size.x, &m_size.y);
     m_name = name;
 
-    CreateVulkanSurface();
-    CreateVulkanQueues();
-    CreateVulkanSwapChain();
+    if (!CreateVulkanSurface()) {
+        LogFatal(sTag, "Could not create the Surface");
+        return false;
+    }
+    if (!CheckWSISupport()) {
+        PhysicalDeviceParameters& physical_device = context.GetPhysicalDevice();
+        LogFatal(sTag,
+                 "Physical device {} doesn't include WSI "
+                 "support"_format(physical_device.properties.deviceName));
+        return false;
+    }
 
-    CreateVulkanRenderPass();
-    CreateVulkanPipeline();
-    CreateVulkanVertexBuffer();
+    if (!CreateVulkanSwapChain()) {
+        LogFatal(sTag, "Could not create the SwapChain");
+        return false;
+    }
+    if (!CreateVulkanRenderPass()) {
+        LogFatal(sTag, "Could not create the RenderPass");
+        return false;
+    }
+    if (!CreateVulkanPipeline()) {
+        LogFatal(sTag, "Could not create the SwapChain");
+        return false;
+    }
+    if (!CreateVulkanVertexBuffer()) {
+        LogFatal(sTag, "Could not create the VertexBuffer");
+        return false;
+    }
 
-    // CreateRenderingResources
-    CreateVulkanCommandBuffers();
-    CreateVulkanSemaphores();
-    CreateVulkanFences();
+    if (!CreateRenderingResources()) {
+        LogFatal(sTag, "Could not create the RenderingResources");
+        return false;
+    }
 
     return true;
 }
@@ -136,8 +165,8 @@ void Vk_RenderWindow::Destroy() {
         }
     }
 
-    m_present_queue.handle = VK_NULL_HANDLE;
-    m_graphics_queue.handle = VK_NULL_HANDLE;
+    m_present_queue = nullptr;
+    m_graphics_queue = nullptr;
 
     if (instance && m_surface) {
         vkDestroySurfaceKHR(instance, m_surface, nullptr);
@@ -249,7 +278,7 @@ void Vk_RenderWindow::SwapBuffers() {
              .finished_rendering_semaphore  // pSignalSemaphores
     };
 
-    result = vkQueueSubmit(m_graphics_queue.handle, 1, &submit_info,
+    result = vkQueueSubmit(m_graphics_queue->handle, 1, &submit_info,
                            current_rendering_resource.fence);
 
     if (result != VK_SUCCESS) {
@@ -269,7 +298,7 @@ void Vk_RenderWindow::SwapBuffers() {
         nullptr                              // pResults
     };
 
-    result = vkQueuePresentKHR(m_present_queue.handle, &present_info);
+    result = vkQueuePresentKHR(m_present_queue->handle, &present_info);
 
     switch (result) {
         case VK_SUCCESS:
@@ -367,7 +396,7 @@ bool Vk_RenderWindow::CreateVulkanSurface() {
     return true;
 }
 
-bool Vk_RenderWindow::CreateVulkanQueues() {
+bool Vk_RenderWindow::CheckWSISupport() {
     // Check that the device graphics queue family has WSI support
     VkBool32 wsi_support;
     Vk_Context& context = Vk_Context::GetInstance();
@@ -377,46 +406,31 @@ bool Vk_RenderWindow::CreateVulkanQueues() {
     vkGetPhysicalDeviceSurfaceSupportKHR(physical_device.handle,
                                          graphics_queue.family_index, m_surface,
                                          &wsi_support);
-    if (!wsi_support) {
-        LogFatal(sTag,
-                 "Physical device {} doesn't include WSI "
-                 "support"_format(physical_device.properties.deviceName));
-        return false;
-    }
-
-    m_graphics_queue = graphics_queue;
-    m_present_queue = graphics_queue;  // We assume that the graphics
-                                       // queue can also present
-    return true;
+    return static_cast<bool>(wsi_support);
 }
 
-bool Vk_RenderWindow::CreateVulkanSemaphores() {
+bool Vk_RenderWindow::CreateVulkanSemaphore(VkSemaphore* semaphore) {
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.GetVulkanDevice();
 
     VkSemaphoreCreateInfo semaphore_create_info = {
         VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,  // sType
         nullptr,                                  // pNext
-        0                                         // flags
+        VkSemaphoreCreateFlags()                  // flags
     };
 
-    for (size_t i = 0; i < m_render_resources.size(); i++) {
-        VkResult result1 =
-            vkCreateSemaphore(device, &semaphore_create_info, nullptr,
-                              &m_render_resources[i].image_available_semaphore);
-        VkResult result2 = vkCreateSemaphore(
-            device, &semaphore_create_info, nullptr,
-            &m_render_resources[i].finished_rendering_semaphore);
-        if (result1 != VK_SUCCESS || result2 != VK_SUCCESS) {
-            LogError(sTag, "Could not create semaphores");
-            return false;
-        }
+    VkResult result =
+        vkCreateSemaphore(device, &semaphore_create_info, nullptr, semaphore);
+    if (result != VK_SUCCESS) {
+        LogError(sTag, "Could not create semaphore");
+        return false;
     }
 
     return true;
 }
 
-bool Vk_RenderWindow::CreateVulkanFences() {
+bool Vk_RenderWindow::CreateVulkanFence(VkFenceCreateFlags flags,
+                                        VkFence* fence) {
     VkResult result = VK_SUCCESS;
 
     Vk_Context& context = Vk_Context::GetInstance();
@@ -425,17 +439,15 @@ bool Vk_RenderWindow::CreateVulkanFences() {
     VkFenceCreateInfo fence_create_info = {
         VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,  // sType
         nullptr,                              // pNext
-        VK_FENCE_CREATE_SIGNALED_BIT          // flags
+        flags                                 // flags
     };
 
-    for (size_t i = 0; i < m_render_resources.size(); i++) {
-        result = vkCreateFence(device, &fence_create_info, nullptr,
-                               &m_render_resources[i].fence);
-        if (result != VK_SUCCESS) {
-            LogError(sTag, "Could not create fence");
-            return false;
-        }
+    result = vkCreateFence(device, &fence_create_info, nullptr, fence);
+    if (result != VK_SUCCESS) {
+        LogError(sTag, "Could not create fence");
+        return false;
     }
+
     return true;
 }
 
@@ -630,7 +642,8 @@ bool Vk_RenderWindow::CreateVulkanSwapChain() {
     return true;
 }
 
-bool Vk_RenderWindow::CreateVulkanCommandBuffers() {
+bool Vk_RenderWindow::CreateVulkanCommandPool(QueueParameters& queue,
+                                              VkCommandPool* cmd_pool) {
     VkResult result = VK_SUCCESS;
 
     Vk_Context& context = Vk_Context::GetInstance();
@@ -642,32 +655,39 @@ bool Vk_RenderWindow::CreateVulkanCommandBuffers() {
         nullptr,                                     // pNext
         (VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT |
          VK_COMMAND_POOL_CREATE_TRANSIENT_BIT),  // flags
-        m_graphics_queue.family_index            // queueFamilyIndex
+        queue.family_index                       // queueFamilyIndex
     };
 
-    result = vkCreateCommandPool(device, &cmd_pool_create_info, nullptr,
-                                 &m_graphics_queue_cmd_pool);
+    result =
+        vkCreateCommandPool(device, &cmd_pool_create_info, nullptr, cmd_pool);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Could not create a command pool");
         return false;
     }
 
-    // Allocate space in the pool for each buffer
-    for (size_t i = 0; i < m_render_resources.size(); i++) {
-        VkCommandBufferAllocateInfo cmd_buffer_allocate_info = {
-            VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,  // sType
-            nullptr,                                         // pNext
-            m_graphics_queue_cmd_pool,                       // commandPool
-            VK_COMMAND_BUFFER_LEVEL_PRIMARY,                 // level
-            1                                                // bufferCount
-        };
-        result =
-            vkAllocateCommandBuffers(device, &cmd_buffer_allocate_info,
-                                     &m_render_resources[i].command_buffer);
-        if (result != VK_SUCCESS) {
-            LogError(sTag, "Could not allocate command buffers");
-            return false;
-        }
+    return true;
+}
+
+bool Vk_RenderWindow::AllocateVulkanCommandBuffers(
+    VkCommandPool& cmd_pool, uint32_t count, VkCommandBuffer* command_buffer) {
+    VkResult result = VK_SUCCESS;
+
+    Vk_Context& context = Vk_Context::GetInstance();
+    VkDevice& device = context.GetVulkanDevice();
+
+    // Allocate space in the pool for the buffer
+    VkCommandBufferAllocateInfo cmd_buffer_allocate_info = {
+        VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,  // sType
+        nullptr,                                         // pNext
+        cmd_pool,                                        // commandPool
+        VK_COMMAND_BUFFER_LEVEL_PRIMARY,                 // level
+        count                                            // bufferCount
+    };
+    result = vkAllocateCommandBuffers(device, &cmd_buffer_allocate_info,
+                                      command_buffer);
+    if (result != VK_SUCCESS) {
+        LogError(sTag, "Could not allocate command buffer");
+        return false;
     }
 
     return true;
@@ -1047,6 +1067,29 @@ bool Vk_RenderWindow::CreateVulkanVertexBuffer() {
     return true;
 }
 
+bool Vk_RenderWindow::CreateRenderingResources() {
+    if (!CreateVulkanCommandPool(*m_graphics_queue,
+                                 &m_graphics_queue_cmd_pool)) {
+        return false;
+    }
+
+    for (size_t i = 0; i < m_render_resources.size(); ++i) {
+        if (!AllocateVulkanCommandBuffers(
+                m_graphics_queue_cmd_pool, 1,
+                &m_render_resources[i].command_buffer) ||
+            !CreateVulkanSemaphore(
+                &m_render_resources[i].image_available_semaphore) ||
+            !CreateVulkanSemaphore(
+                &m_render_resources[i].finished_rendering_semaphore) ||
+            !CreateVulkanFence(VK_FENCE_CREATE_SIGNALED_BIT,
+                               &m_render_resources[i].fence)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 bool Vk_RenderWindow::CreateVulkanFrameBuffer(VkFramebuffer& framebuffer,
                                               VkImageView& image_view) {
     VkResult result = VK_SUCCESS;
@@ -1106,7 +1149,7 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer,
         1                           // layerCount
     };
 
-    if (m_present_queue.handle != m_graphics_queue.handle) {
+    if (m_present_queue->handle != m_graphics_queue->handle) {
         VkImageMemoryBarrier barrier_from_present_to_draw = {
             VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,  // sType
             nullptr,                                 // pNext
@@ -1114,8 +1157,8 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer,
             VK_ACCESS_MEMORY_READ_BIT,               // dstAccessMask
             VK_IMAGE_LAYOUT_UNDEFINED,               // oldLayout
             VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,         // newLayout
-            m_present_queue.family_index,            // srcQueueFamilyIndex
-            m_graphics_queue.family_index,           // dstQueueFamilyIndex
+            m_present_queue->family_index,           // srcQueueFamilyIndex
+            m_graphics_queue->family_index,          // dstQueueFamilyIndex
             image_parameters.handle,                 // image
             image_subresource_range                  // subresourceRange
         };
@@ -1188,7 +1231,7 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer,
 
     vkCmdEndRenderPass(command_buffer);
 
-    if (m_graphics_queue.handle != m_present_queue.handle) {
+    if (m_graphics_queue->handle != m_present_queue->handle) {
         VkImageMemoryBarrier barrier_from_draw_to_present = {
             VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,  // sType
             nullptr,                                 // pNext
@@ -1196,8 +1239,8 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer,
             VK_ACCESS_MEMORY_READ_BIT,               // dstAccessMask
             VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,         // oldLayout
             VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,         // newLayout
-            m_graphics_queue.family_index,           // srcQueueFamilyIndex
-            m_present_queue.family_index,            // dstQueueFamilyIndex
+            m_graphics_queue->family_index,          // srcQueueFamilyIndex
+            m_present_queue->family_index,           // dstQueueFamilyIndex
             image_parameters.handle,                 // image
             image_subresource_range                  // subresourceRange
         };
@@ -1404,17 +1447,12 @@ void Vk_RenderWindow::OnAppDidEnterForeground() {
     }
 
     if (!CreateVulkanSurface()) {
-        LogError(sTag, "Could not create the Vulkan Surface");
-        return;
-    }
-
-    if (!CreateVulkanQueues()) {
-        LogError(sTag, "Could not create the Vulkan Queues");
+        LogError(sTag, "Could not create the Surface");
         return;
     }
 
     if (!CreateVulkanSwapChain()) {
-        LogError(sTag, "Could not create the Vulkan SwapChain");
+        LogError(sTag, "Could not create the SwapChain");
         return;
     }
 }
