@@ -16,7 +16,7 @@
 using namespace engine;
 
 String vertex_shader = R"(
-#version 330
+#version 330 core
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
@@ -39,7 +39,7 @@ void main() {
 )";
 
 String fragment_shader = R"(
-#version 330
+#version 330 core
 
 struct Material {
     sampler2D diffuse;
@@ -99,7 +99,7 @@ void main() {
 )";
 
 String light_vertex_shader = R"(
-#version 330
+#version 330 core
 
 layout (location = 0) in vec3 position;
 
@@ -111,12 +111,78 @@ void main() {
 )";
 
 String light_fragment_shader = R"(
-#version 330
+#version 330 core
 
 out vec4 color;
 
 void main() {
     color = vec4(1.0f);
+}
+)";
+
+String character_vertex_shader = R"(#version 330 core
+
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec3 normal;
+layout (location = 2) in vec2 texCoords;
+
+out vec2 TexCoords;
+out vec3 FragPosition;
+out vec3 Normal;
+
+uniform mat4 NormalMatrix;
+uniform mat4 Model;
+uniform mat4 MVP;
+
+void main() {
+    FragPosition = (Model * vec4(position, 1.0f)).xyz;
+    Normal = mat3(NormalMatrix) * normal;
+    TexCoords = texCoords;
+    gl_Position = MVP * vec4(position, 1.0f);
+}
+)";
+
+String character_fragment_shader = R"(
+#version 330 core
+
+in vec2 TexCoords;
+in vec3 FragPosition;
+in vec3 Normal;
+
+out vec4 FragColor;
+
+struct Material {
+    sampler2D tex_diffuse1;
+    sampler2D tex_specular1;
+    sampler2D tex_normal1;
+    float shininess;
+};
+
+struct Light {
+    vec3 position;
+
+    vec4 ambient;
+    vec4 diffuse;
+    vec4 specular;
+};
+
+uniform Material material;
+uniform Light light;
+
+void main()
+{
+    // Ambient lighting
+    vec4 ambient = vec4(texture(material.tex_diffuse1, TexCoords)) * light.ambient;
+
+    // Diffuse lighting
+    vec3 normal = normalize(Normal);
+    // vec3 light_direction = normalize(-light.direction);
+    vec3 light_direction = normalize(light.position - FragPosition);
+    float diff = max(dot(normal, light_direction), 0.0f);
+    vec4 diffuse = texture(material.tex_diffuse1, TexCoords) * diff * light.diffuse;
+
+    FragColor = ambient + diffuse;
+    FragColor = texture(material.tex_diffuse1, TexCoords);
 }
 )";
 
@@ -152,10 +218,10 @@ int main(int argc, char* argv[]) {
             return 1;
         }
 
-        math::mat4 Projection =
+        math::mat4 ProjectionMatrix =
             math::Perspective(45.0f, 16.0f / 9.0f, 0.1f, 100.0f);
-        math::mat4 View;
-        math::mat4 Model;
+        math::mat4 ViewMatrix;
+        math::mat4 ModelMatrix;
 
         Texture2D* texture = res.LoadTexture2D("textures/container2.png");
         Texture2D* specularTexture =
@@ -169,6 +235,12 @@ int main(int argc, char* argv[]) {
             res.LoadShader("cube_shader", vertex_shader, fragment_shader));
         GL_Shader* light_shader = static_cast<GL_Shader*>(res.LoadShader(
             "light_shader", light_vertex_shader, light_fragment_shader));
+
+        GL_Shader* character_shader = static_cast<GL_Shader*>(res.LoadShader(
+            "model", character_vertex_shader, character_fragment_shader));
+
+        // Model character("models/CookKirby/DolCook.obj");
+        Model character("models/LinkOcarina/YoungLinkEquipped.obj");
 
         std::vector<Vertex> vertex_buffer_data{
             // Red face
@@ -232,6 +304,7 @@ int main(int argc, char* argv[]) {
         glGenVertexArrays(1, &cube_VAO);
         glBindVertexArray(cube_VAO);
 
+        glEnableVertexAttribArray(0);
         glVertexAttribPointer(0,
                               3,               // size
                               GL_FLOAT,        // type
@@ -240,8 +313,8 @@ int main(int argc, char* argv[]) {
                               reinterpret_cast<void*>(offsetof(
                                   Vertex, m_position))  // array buffer offset
                               );
-        glEnableVertexAttribArray(0);
 
+        glEnableVertexAttribArray(1);
         glVertexAttribPointer(1,
                               3,               // size
                               GL_FLOAT,        // type
@@ -250,8 +323,8 @@ int main(int argc, char* argv[]) {
                               reinterpret_cast<void*>(offsetof(
                                   Vertex, m_normal))  // array buffer offset
                               );
-        glEnableVertexAttribArray(1);
 
+        glEnableVertexAttribArray(2);
         glVertexAttribPointer(2,
                               2,               // size
                               GL_FLOAT,        // type
@@ -260,7 +333,6 @@ int main(int argc, char* argv[]) {
                               reinterpret_cast<void*>(offsetof(
                                   Vertex, m_tex_coords))  // array buffer offset
                               );
-        glEnableVertexAttribArray(2);
 
         glBindVertexArray(0);
 
@@ -269,6 +341,7 @@ int main(int argc, char* argv[]) {
         glBindVertexArray(light_VAO);
 
         // position attribute buffer : vertice
+        glEnableVertexAttribArray(0);
         glVertexAttribPointer(0,
                               3,               // size
                               GL_FLOAT,        // type
@@ -277,7 +350,6 @@ int main(int argc, char* argv[]) {
                               reinterpret_cast<void*>(offsetof(
                                   Vertex, m_position))  // array buffer offset
                               );
-        glEnableVertexAttribArray(0);
 
         glBindVertexArray(0);
 
@@ -331,7 +403,7 @@ int main(int argc, char* argv[]) {
             if (input.GetButton(SDLK_LSHIFT).IsDown())
                 camera.Move(speed * -Camera::WORLD_UP);
 
-            View = camera.GetViewMatrix();
+            ViewMatrix = camera.GetViewMatrix();
 
             auto window_size = window.GetSize();
 
@@ -339,12 +411,12 @@ int main(int argc, char* argv[]) {
                 window_size.x / static_cast<float>(window_size.y);
             angle += math::Radians(delta_time * 90.f);
 
-            View = camera.GetViewMatrix();
-            Projection = math::Perspective(math::Radians(45.f), aspect_ratio,
-                                           0.1f, 100.0f);
+            ViewMatrix = camera.GetViewMatrix();
+            ProjectionMatrix = math::Perspective(math::Radians(45.f),
+                                                 aspect_ratio, 0.1f, 100.0f);
 
             // Draw cube
-            Model = math::mat4();
+            ModelMatrix = math::mat4();
 
             auto lol = math::Rotate(angle, {0.0f, 1.0f, 0.0f}) *
                        math::vec4(light_position, 1.0f);
@@ -371,30 +443,56 @@ int main(int argc, char* argv[]) {
             // emissionTexture->Use();
 
             glBindVertexArray(cube_VAO);
-            for (std::size_t i = 0; i < cube_positions.size(); i++) {
-                // Calculate the model matrix for each object and pass it to
+            for (std::size_t i = 1; i < cube_positions.size(); i++) {
+                // Calculate the ModelMatrix matrix for each object and pass it
+                // to
                 // shader before drawing
-                Model = math::Translate(cube_positions[i] * 2);
-                Model *=
+                ModelMatrix = math::Translate(cube_positions[i] * 2);
+                ModelMatrix *=
                     math::Rotate(math::Radians(10.f * i), {1.0f, 0.3f, 0.5f});
 
-                cube_shader->SetUniform("Model", Model);
+                cube_shader->SetUniform("Model", ModelMatrix);
                 cube_shader->SetUniform("NormalMatrix",
-                                        Model.Inverse().Transpose());
-                cube_shader->SetUniform("MVP", Projection * View * Model);
+                                        ModelMatrix.Inverse().Transpose());
+                cube_shader->SetUniform(
+                    "MVP", ProjectionMatrix * ViewMatrix * ModelMatrix);
 
                 glDrawArrays(GL_TRIANGLES, 0, 36);
             }
             glBindVertexArray(0);
 
+            character_shader->Use();
+
+            character_shader->SetUniform("light.ambient", light_color * 0.2f);
+            character_shader->SetUniform("light.diffuse", light_color * 0.7f);
+            // character_shader->SetUniform("light.specular", light_color *
+            // 1.0f);
+            character_shader->SetUniform("light.position", lol.xyz());
+
+            ModelMatrix = math::mat4();
+            ModelMatrix *= math::Translate(math::vec3(
+                0.0f, -1.75f,
+                0.0f));  // translate it down so it's at the center of the scene
+            ModelMatrix *= math::Scale(math::vec3(
+                0.08f));  // it's a bit too big for our scene, so scale it down
+
+            character_shader->SetUniform("Model", math::mat4());
+            character_shader->SetUniform("NormalMatrix",
+                                         ModelMatrix.Inverse().Transpose());
+            character_shader->SetUniform(
+                "MVP", ProjectionMatrix * ViewMatrix * ModelMatrix);
+            character.Draw();
+
             // Draw the light cube
-            Model = math::mat4();
-            Model *= math::Rotate(angle, {0.0f, 1.0f, 0.0f});
-            Model *= math::Translate(light_position);
-            Model *= math::Scale(math::vec3(0.08f));  // Make it a smaller cube
+            ModelMatrix = math::mat4();
+            ModelMatrix *= math::Rotate(angle, {0.0f, 1.0f, 0.0f});
+            ModelMatrix *= math::Translate(light_position);
+            ModelMatrix *=
+                math::Scale(math::vec3(0.08f));  // Make it a smaller cube
 
             light_shader->Use();
-            light_shader->SetUniform("MVP", Projection * View * Model);
+            light_shader->SetUniform(
+                "MVP", ProjectionMatrix * ViewMatrix * ModelMatrix);
 
             glBindVertexArray(light_VAO);
             glDrawArrays(GL_TRIANGLES, 0, 36);
