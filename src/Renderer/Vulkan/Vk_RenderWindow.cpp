@@ -22,7 +22,7 @@ struct VertexData {
 
 Vk_RenderWindow::Vk_RenderWindow()
       : m_window(nullptr),
-        m_surface(VK_NULL_HANDLE),
+        m_surface(),
         m_graphics_queue(nullptr),
         m_present_queue(nullptr),
         m_swapchain(),
@@ -57,7 +57,7 @@ bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
     SDL_GetWindowSize(m_window, &m_size.x, &m_size.y);
     m_name = name;
 
-    if (!CreateVulkanSurface()) {
+    if (!m_surface.Create(m_window)) {
         LogFatal(sTag, "Could not create the Surface");
         return false;
     }
@@ -158,10 +158,7 @@ void Vk_RenderWindow::Destroy() {
     m_present_queue = nullptr;
     m_graphics_queue = nullptr;
 
-    if (instance && m_surface) {
-        vkDestroySurfaceKHR(instance, m_surface, nullptr);
-        m_surface = VK_NULL_HANDLE;
-    }
+    m_surface.Destroy();
 
     if (m_window) {
         SDL_DestroyWindow(m_window);
@@ -314,73 +311,6 @@ bool Vk_RenderWindow::IsVisible() {
     return (mask & flags) == 0;
 }
 
-bool Vk_RenderWindow::CreateVulkanSurface() {
-    SDL_SysWMinfo wminfo;
-    SDL_VERSION(&wminfo.version);
-    if (!SDL_GetWindowWMInfo(m_window, &wminfo)) {
-        LogError(sTag, "Error on SDL_GetWindowWMInfo.");
-        return false;
-    }
-
-    VkResult result = VK_SUCCESS;
-
-    Vk_Context& context = Vk_Context::GetInstance();
-    VkInstance& instance = context.GetVulkanInstance();
-
-#if defined(VK_USE_PLATFORM_WIN32_KHR)
-    if (wminfo.subsystem == SDL_SYSWM_WINDOWS) {
-        VkWin32SurfaceCreateInfoKHR create_info = {
-            VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,  // sType
-            nullptr,                                          // pNext
-            VkWin32SurfaceCreateFlagsKHR(),                   // flags
-            GetModuleHandle(nullptr),                         // hinstance
-            wminfo.info.win.window                            // hwnd
-        };
-        result = vkCreateWin32SurfaceKHR(instance, &create_info, nullptr,
-                                         &m_surface);
-    }
-#elif defined(VK_USE_PLATFORM_XCB_KHR)
-    if (wminfo.subsystem == SDL_SYSWM_X11) {
-        VkXcbSurfaceCreateInfoKHR create_info = {
-            VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR,     // sType
-            nullptr,                                           // pNext
-            VkXcbSurfaceCreateFlagsKHR(),                      // flags
-            XGetXCBConnection(wminfo.info.x11.display),        // connection
-            static_cast<xcb_window_t>(wminfo.info.x11.window)  // window
-        };
-        result =
-            vkCreateXcbSurfaceKHR(instance, &create_info, nullptr, &m_surface);
-    }
-#elif defined(VK_USE_PLATFORM_XLIB_KHR)
-    if (wminfo.subsystem == SDL_SYSWM_X11) {
-        VkXlibSurfaceCreateInfoKHR create_info = {
-            VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR,  // sType
-            nullptr,                                         // pNext
-            VkXlibSurfaceCreateFlagsKHR(),                   // flags
-            wminfo.info.x11.display,                         // dpy
-            wminfo.info.x11.window                           // window
-        };
-        result =
-            vkCreateXlibSurfaceKHR(instance, &create_info, nullptr, &m_surface);
-    }
-#elif defined(VK_USE_PLATFORM_ANDROID_KHR)
-    if (wminfo.subsystem == SDL_SYSWM_ANDROID) {
-        VkAndroidSurfaceCreateInfoKHR create_info = {
-            VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR,  // sType
-            nullptr,                                            // pNext
-            VkAndroidSurfaceCreateFlagsKHR(),                   // flags
-            wminfo.info.android.window,                         // window
-        };
-        result = vkCreateAndroidSurfaceKHR(instance, &create_info, nullptr,
-                                           &m_surface);
-    }
-#else
-#error "Unsupported Vulkan subsystem"
-#endif
-
-    return result == VK_SUCCESS;
-}
-
 bool Vk_RenderWindow::CheckWSISupport() {
     // Check that the device graphics queue family has WSI support
     VkBool32 wsi_support;
@@ -389,8 +319,8 @@ bool Vk_RenderWindow::CheckWSISupport() {
     QueueParameters& graphics_queue = context.GetGraphicsQueue();
 
     vkGetPhysicalDeviceSurfaceSupportKHR(physical_device.handle,
-                                         graphics_queue.family_index, m_surface,
-                                         &wsi_support);
+                                         graphics_queue.family_index,
+                                         m_surface.GetHandle(), &wsi_support);
     return static_cast<bool>(wsi_support);
 }
 
@@ -1101,11 +1031,7 @@ void Vk_RenderWindow::OnAppWillEnterBackground() {
     VkInstance& instance = context.GetVulkanInstance();
 
     m_swapchain.Destroy();
-
-    if (instance && m_surface) {
-        vkDestroySurfaceKHR(instance, m_surface, nullptr);
-        m_surface = VK_NULL_HANDLE;
-    }
+    m_surface.Destroy();
 }
 
 void Vk_RenderWindow::OnAppDidEnterBackground() {}
@@ -1120,7 +1046,7 @@ void Vk_RenderWindow::OnAppDidEnterForeground() {
         vkDeviceWaitIdle(device);
     }
 
-    if (!CreateVulkanSurface()) {
+    if (!m_surface.Create(m_window)) {
         LogFatal(sTag, "Could not create the Surface");
         return;
     }

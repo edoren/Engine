@@ -10,6 +10,7 @@
 #include "Vk_Config.hpp"
 #include "Vk_Context.hpp"
 #include "Vk_Dependencies.hpp"
+#include "Vk_Surface.hpp"
 #include "Vk_SwapChain.hpp"
 #include "Vk_VulkanParameters.hpp"
 
@@ -55,7 +56,6 @@ public:
     virtual bool IsVisible() override;
 
 private:
-    bool CreateVulkanSurface();
     bool CheckWSISupport();
 
     bool CreateVulkanRenderPass();
@@ -88,7 +88,7 @@ private:
 private:
     SDL_Window* m_window;
 
-    VkSurfaceKHR m_surface;
+    Vk_Surface m_surface;
 
     QueueParameters* m_graphics_queue;
     QueueParameters* m_present_queue;

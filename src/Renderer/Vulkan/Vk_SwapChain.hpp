@@ -2,7 +2,7 @@
 
 #include "Vk_Config.hpp"
 #include "Vk_Dependencies.hpp"
-
+#include "Vk_Surface.hpp"
 #include "Vk_VulkanParameters.hpp"
 
 namespace engine {
@@ -12,7 +12,7 @@ public:
     Vk_SwapChain();
     ~Vk_SwapChain();
 
-    bool Create(VkSurfaceKHR& surface, uint32 width, uint32 height);
+    bool Create(Vk_Surface& surface, uint32 width, uint32 height);
     void Destroy();
 
     VkSwapchainKHR& GetHandle();

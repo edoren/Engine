@@ -21,7 +21,7 @@ Vk_SwapChain::~Vk_SwapChain() {
     }
 }
 
-bool Vk_SwapChain::Create(VkSurfaceKHR& surface, uint32 width, uint32 height) {
+bool Vk_SwapChain::Create(Vk_Surface& surface, uint32 width, uint32 height) {
     VkResult result = VK_SUCCESS;
 
     Vk_Context& context = Vk_Context::GetInstance();
@@ -45,8 +45,8 @@ bool Vk_SwapChain::Create(VkSurfaceKHR& surface, uint32 width, uint32 height) {
     // Get the Surface capabilities
     VkSurfaceCapabilitiesKHR surface_capabilities;
 
-    result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device, surface,
-                                                       &surface_capabilities);
+    result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
+        physical_device, surface.GetHandle(), &surface_capabilities);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Could not check presentation surface capabilities");
         return false;
@@ -55,12 +55,13 @@ bool Vk_SwapChain::Create(VkSurfaceKHR& surface, uint32 width, uint32 height) {
     // Query all the supported Surface formats
     uint32 formats_count = 0;
     std::vector<VkSurfaceFormatKHR> surface_formats;
-    result = vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, surface,
-                                                  &formats_count, nullptr);
+    result = vkGetPhysicalDeviceSurfaceFormatsKHR(
+        physical_device, surface.GetHandle(), &formats_count, nullptr);
     if (formats_count > 0 && result == VK_SUCCESS) {
         surface_formats.resize(formats_count);
         result = vkGetPhysicalDeviceSurfaceFormatsKHR(
-            physical_device, surface, &formats_count, surface_formats.data());
+            physical_device, surface.GetHandle(), &formats_count,
+            surface_formats.data());
     }
 
     // Check that the surface formats where queried successfully
@@ -76,11 +77,11 @@ bool Vk_SwapChain::Create(VkSurfaceKHR& surface, uint32 width, uint32 height) {
     std::vector<VkPresentModeKHR> present_modes;
 
     result = vkGetPhysicalDeviceSurfacePresentModesKHR(
-        physical_device, surface, &present_modes_count, nullptr);
+        physical_device, surface.GetHandle(), &present_modes_count, nullptr);
     if (present_modes_count > 0 && result == VK_SUCCESS) {
         present_modes.resize(present_modes_count);
         result = vkGetPhysicalDeviceSurfacePresentModesKHR(
-            physical_device, surface, &present_modes_count,
+            physical_device, surface.GetHandle(), &present_modes_count,
             present_modes.data());
     }
 
@@ -116,7 +117,7 @@ bool Vk_SwapChain::Create(VkSurfaceKHR& surface, uint32 width, uint32 height) {
         VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,  // sType
         nullptr,                                      // pNext
         VkSwapchainCreateFlagsKHR(),                  // flags
-        surface,                                      // surface
+        surface.GetHandle(),                          // surface
         desired_number_of_images,                     // minImageCount
         desired_format.format,                        // imageFormat
         desired_format.colorSpace,                    // imageColorSpace
