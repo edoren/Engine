@@ -10,7 +10,7 @@
 #include "Vk_Config.hpp"
 #include "Vk_Context.hpp"
 #include "Vk_Dependencies.hpp"
-#include "Vk_Queue.hpp"
+#include "Vk_SwapChain.hpp"
 #include "Vk_VulkanParameters.hpp"
 
 namespace engine {
@@ -58,7 +58,6 @@ private:
     bool CreateVulkanSurface();
     bool CheckWSISupport();
 
-    bool CreateVulkanSwapChain();
     bool CreateVulkanRenderPass();
     bool CreateVulkanPipeline();
     bool CreateVulkanVertexBuffer();
@@ -66,7 +65,7 @@ private:
     bool CreateVulkanCommandPool(QueueParameters& queue,
                                  VkCommandPool* cmd_pool);
     bool AllocateVulkanCommandBuffers(VkCommandPool& cmd_pool, uint32_t count,
-                                     VkCommandBuffer* command_buffer);
+                                      VkCommandBuffer* command_buffer);
     bool CreateVulkanSemaphore(VkSemaphore* semaphore);
     bool CreateVulkanFence(VkFenceCreateFlags flags, VkFence* fence);
     bool CreateRenderingResources();
@@ -76,19 +75,6 @@ private:
     bool PrepareFrame(VkCommandBuffer command_buffer,
                       ImageParameters& image_parameters,
                       VkFramebuffer& framebuffer);
-
-    uint32 GetVulkanSwapChainNumImages(
-        const VkSurfaceCapabilitiesKHR& surface_capabilities);
-    VkSurfaceFormatKHR GetVulkanSwapChainFormat(
-        const std::vector<VkSurfaceFormatKHR>& surface_formats);
-    VkExtent2D GetVulkanSwapChainExtent(
-        const VkSurfaceCapabilitiesKHR& surface_capabilities);
-    VkImageUsageFlags GetVulkanSwapChainUsageFlags(
-        const VkSurfaceCapabilitiesKHR& surface_capabilities);
-    VkSurfaceTransformFlagBitsKHR GetVulkanSwapChainTransform(
-        const VkSurfaceCapabilitiesKHR& surface_capabilities);
-    VkPresentModeKHR GetVulkanSwapChainPresentMode(
-        const std::vector<VkPresentModeKHR>& present_modes);
 
     bool AllocateVulkanBufferMemory(VkBuffer buffer, VkDeviceMemory* memory);
 
@@ -107,7 +93,7 @@ private:
     QueueParameters* m_graphics_queue;
     QueueParameters* m_present_queue;
 
-    SwapChainParameters m_swapchain;
+    Vk_SwapChain m_swapchain;
     VkPipeline m_graphics_pipeline;
 
     VkCommandPool m_graphics_queue_cmd_pool;
