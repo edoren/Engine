@@ -1,5 +1,4 @@
 #include "catch.hpp"
-#include "OStreamOverloads.hpp"
 
 #include <System/String.hpp>
 
@@ -77,7 +76,7 @@ TEST_CASE("String::Find", "[String]") {
     String elements = "水、火、地、風、空";
 
     SECTION("must be able to find any UTF-8 string") {
-        size_t location = elements.Find("風");
+        size_t location = elements.Find("風", 0);
         REQUIRE(location == 6);
     }
     SECTION("if no start is specified it start from the beginning") {
@@ -91,10 +90,66 @@ TEST_CASE("String::Find", "[String]") {
         REQUIRE(location1 == location2);
     }
     SECTION("if the string is not found it returns String::InvalidPos") {
-        size_t location1 = elements.Find("A");
+        size_t location1 = elements.Find("A", 0);
         size_t location2 = elements.Find("火", 5);
         REQUIRE(location1 == String::InvalidPos);
         REQUIRE(location1 == location2);
+    }
+}
+
+TEST_CASE("String::FindFirstOf", "[String]") {
+    // "Water, Fire, Earth, Wind, Void"
+    String elements = "水、火、地、風、空";
+
+    SECTION("must be able to find any of the specified UTF-8 codepoints") {
+        size_t location = elements.FindFirstOf("火ñ地", 0);
+        REQUIRE(location == 2);
+    }
+    SECTION("if no start is specified it start from the beginning") {
+        size_t location = elements.FindFirstOf("地火、");
+        REQUIRE(location == 1);
+    }
+    SECTION("it can start to search from any position") {
+        size_t location1 = elements.FindFirstOf("、地火", 2);
+        size_t location2 = elements.FindFirstOf("空、地火", 4);
+        REQUIRE(location1 == 2);
+        REQUIRE(location2 == 4);
+    }
+    SECTION(
+        "if the any of the UTF-8 characters are not found "
+        "it returns String::InvalidPos") {
+        size_t location1 = elements.FindFirstOf("A", 0);
+        size_t location2 = elements.FindFirstOf("#空ñ、風");
+        REQUIRE(location1 == String::InvalidPos);
+        REQUIRE(location2 == 1);
+    }
+}
+
+TEST_CASE("String::FindLastOf", "[String]") {
+    // "Water, Fire, Earth, Wind, Void"
+    String elements = "水、火、地、風、空";
+
+    SECTION("must be able to find any of the specified UTF-8 codepoints") {
+        size_t location = elements.FindLastOf("火、地", elements.GetSize() - 1);
+        REQUIRE(location == 7);
+    }
+    SECTION("if no start is specified it start from the end") {
+        size_t location = elements.FindLastOf("風地火");
+        REQUIRE(location == 6);
+    }
+    SECTION("it can start to search from any position") {
+        size_t location1 = elements.FindLastOf("、地火", 2);
+        size_t location2 = elements.FindLastOf("空、火", 4);
+        REQUIRE(location1 == 2);
+        REQUIRE(location2 == 3);
+    }
+    SECTION(
+        "if the any of the UTF-8 characters are not found "
+        "it returns String::InvalidPos") {
+        size_t location1 = elements.FindLastOf("A");
+        size_t location2 = elements.FindLastOf("#空ñ、風");
+        REQUIRE(location1 == String::InvalidPos);
+        REQUIRE(location2 == 8);
     }
 }
 
