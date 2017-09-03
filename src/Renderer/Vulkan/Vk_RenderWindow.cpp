@@ -132,15 +132,7 @@ void Vk_RenderWindow::Destroy() {
             m_graphics_queue_cmd_pool = VK_NULL_HANDLE;
         }
 
-        if (m_vertex_buffer.handle) {
-            vkDestroyBuffer(device, m_vertex_buffer.handle, nullptr);
-            m_vertex_buffer.handle = VK_NULL_HANDLE;
-        }
-
-        if (m_vertex_buffer.memory) {
-            vkFreeMemory(device, m_vertex_buffer.memory, nullptr);
-            m_vertex_buffer.memory = VK_NULL_HANDLE;
-        }
+        m_vertex_buffer.Destroy();
 
         if (m_graphics_pipeline) {
             vkDestroyPipeline(device, m_graphics_pipeline, nullptr);
@@ -321,7 +313,7 @@ bool Vk_RenderWindow::CheckWSISupport() {
     vkGetPhysicalDeviceSurfaceSupportKHR(physical_device.handle,
                                          graphics_queue.family_index,
                                          m_surface.GetHandle(), &wsi_support);
-    return static_cast<bool>(wsi_support);
+    return wsi_support == VK_TRUE;
 }
 
 bool Vk_RenderWindow::CreateVulkanSemaphore(VkSemaphore* semaphore) {
@@ -728,46 +720,17 @@ bool Vk_RenderWindow::CreateVulkanVertexBuffer() {
         {{0.7f, -0.7f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f, 1.0f}},
         {{0.7f, 0.7f, 0.0f, 1.0f}, {1.0f, 1.0f, 0.0f, 1.0f}}};
 
-    m_vertex_buffer.size = sizeof(vertex_data);
-
-    VkBufferCreateInfo buffer_create_info = {
-        VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,  // sType
-        nullptr,                               // pNext
-        0,                                     // flags
-        m_vertex_buffer.size,                  // size
-        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,     // sage
-        VK_SHARING_MODE_EXCLUSIVE,             // sharingMode
-        0,                                     // queueFamilyIndexCount
-        nullptr                                // pQueueFamilyIndices
-    };
+    m_vertex_buffer.Create(sizeof(vertex_data),
+                           VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+                           VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
 
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.GetVulkanDevice();
 
-    result = vkCreateBuffer(device, &buffer_create_info, nullptr,
-                            &m_vertex_buffer.handle);
-    if (result != VK_SUCCESS) {
-        LogError(sTag, "Could not create a vertex buffer");
-        return false;
-    }
-
-    if (!AllocateVulkanBufferMemory(m_vertex_buffer.handle,
-                                    &m_vertex_buffer.memory)) {
-        LogError(sTag, "Could not allocate memory for a vertex buffer");
-        return false;
-    }
-
-    result = vkBindBufferMemory(device, m_vertex_buffer.handle,
-                                m_vertex_buffer.memory, 0);
-    if (result != VK_SUCCESS) {
-        LogError(sTag, "Could not bind memory for a vertex buffer");
-        return false;
-    }
-
     void* vertex_buffer_memory_pointer;
-    result =
-        vkMapMemory(device, m_vertex_buffer.memory, 0, m_vertex_buffer.size, 0,
-                    &vertex_buffer_memory_pointer);
+    result = vkMapMemory(device, m_vertex_buffer.GetMemory(), 0,
+                         m_vertex_buffer.GetSize(), 0,
+                         &vertex_buffer_memory_pointer);
     if (result != VK_SUCCESS) {
         LogError(sTag,
                  "Could not map memory and upload data to a vertex buffer");
@@ -775,18 +738,18 @@ bool Vk_RenderWindow::CreateVulkanVertexBuffer() {
     }
 
     std::memcpy(vertex_buffer_memory_pointer, vertex_data,
-                m_vertex_buffer.size);
+                static_cast<size_t>(m_vertex_buffer.GetSize()));
 
     VkMappedMemoryRange flush_range = {
         VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,  // sType
         nullptr,                                // pNext
-        m_vertex_buffer.memory,                 // memory
+        m_vertex_buffer.GetMemory(),            // memory
         0,                                      // offset
         VK_WHOLE_SIZE                           // size
     };
     vkFlushMappedMemoryRanges(device, 1, &flush_range);
 
-    vkUnmapMemory(device, m_vertex_buffer.memory);
+    vkUnmapMemory(device, m_vertex_buffer.GetMemory());
 
     return true;
 }
@@ -948,7 +911,7 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer,
     vkCmdSetScissor(command_buffer, 0, 1, &scissor);
 
     VkDeviceSize offset = 0;
-    vkCmdBindVertexBuffers(command_buffer, 0, 1, &m_vertex_buffer.handle,
+    vkCmdBindVertexBuffers(command_buffer, 0, 1, &m_vertex_buffer.GetHandle(),
                            &offset);
 
     vkCmdDraw(command_buffer, 4, 1, 0, 0);
