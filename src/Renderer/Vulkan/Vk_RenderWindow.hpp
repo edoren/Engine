@@ -101,6 +101,7 @@ private:
     VkRenderPass m_render_pass;
 
     Vk_Buffer m_vertex_buffer;
+    Vk_Buffer m_staging_buffer;
     std::vector<RenderingResourcesData> m_render_resources;
 };
 

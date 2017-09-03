@@ -13,6 +13,8 @@ const String sTag("Vk_RenderWindow");
 
 const size_t sResourceCount(3);
 
+const size_t sStagingBufferSize(4000);
+
 }  // namespace
 
 struct VertexData {
@@ -30,6 +32,7 @@ Vk_RenderWindow::Vk_RenderWindow()
         m_graphics_queue_cmd_pool(VK_NULL_HANDLE),
         m_render_pass(VK_NULL_HANDLE),
         m_vertex_buffer(),
+        m_staging_buffer(),
         m_render_resources(sResourceCount) {}
 
 Vk_RenderWindow::~Vk_RenderWindow() {
@@ -81,13 +84,14 @@ bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
         LogFatal(sTag, "Could not create the Pipeline");
         return false;
     }
-    if (!CreateVulkanVertexBuffer()) {
-        LogFatal(sTag, "Could not create the VertexBuffer");
-        return false;
-    }
 
     if (!CreateRenderingResources()) {
         LogFatal(sTag, "Could not create the RenderingResources");
+        return false;
+    }
+
+    if (!CreateVulkanVertexBuffer()) {
+        LogFatal(sTag, "Could not create the VertexBuffer");
         return false;
     }
 
@@ -133,6 +137,8 @@ void Vk_RenderWindow::Destroy() {
         }
 
         m_vertex_buffer.Destroy();
+
+        m_staging_buffer.Destroy();
 
         if (m_graphics_pipeline) {
             vkDestroyPipeline(device, m_graphics_pipeline, nullptr);
@@ -720,16 +726,25 @@ bool Vk_RenderWindow::CreateVulkanVertexBuffer() {
         {{0.7f, -0.7f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f, 1.0f}},
         {{0.7f, 0.7f, 0.0f, 1.0f}, {1.0f, 1.0f, 0.0f, 1.0f}}};
 
-    m_vertex_buffer.Create(sizeof(vertex_data),
-                           VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-                           VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+    if (!m_vertex_buffer.Create(sizeof(vertex_data),
+                                (VK_BUFFER_USAGE_VERTEX_BUFFER_BIT |
+                                 VK_BUFFER_USAGE_TRANSFER_DST_BIT),
+                                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)) {
+        LogFatal(sTag, "Could not create Vertex Buffer");
+    }
+
+    if (!m_staging_buffer.Create(sStagingBufferSize,
+                                 VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) {
+        LogFatal(sTag, "Could not create Staging Buffer");
+    }
 
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.GetVulkanDevice();
 
     void* vertex_buffer_memory_pointer;
-    result = vkMapMemory(device, m_vertex_buffer.GetMemory(), 0,
-                         m_vertex_buffer.GetSize(), 0,
+    result = vkMapMemory(device, m_staging_buffer.GetMemory(), 0,
+                         m_staging_buffer.GetSize(), 0,
                          &vertex_buffer_memory_pointer);
     if (result != VK_SUCCESS) {
         LogError(sTag,
@@ -743,13 +758,73 @@ bool Vk_RenderWindow::CreateVulkanVertexBuffer() {
     VkMappedMemoryRange flush_range = {
         VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,  // sType
         nullptr,                                // pNext
-        m_vertex_buffer.GetMemory(),            // memory
+        m_staging_buffer.GetMemory(),           // memory
         0,                                      // offset
-        VK_WHOLE_SIZE                           // size
+        m_vertex_buffer.GetSize()               // size
     };
     vkFlushMappedMemoryRanges(device, 1, &flush_range);
 
-    vkUnmapMemory(device, m_vertex_buffer.GetMemory());
+    vkUnmapMemory(device, m_staging_buffer.GetMemory());
+
+    // Prepare command buffer to copy data from staging buffer to a vertex
+    // buffer
+    VkCommandBufferBeginInfo command_buffer_begin_info = {
+        VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,  // sType
+        nullptr,                                      // pNext
+        VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,  // flags
+        nullptr                                       // pInheritanceInfo
+    };
+
+    VkCommandBuffer command_buffer = m_render_resources[0].command_buffer;
+
+    vkBeginCommandBuffer(command_buffer, &command_buffer_begin_info);
+
+    VkBufferCopy buffer_copy_info = {
+        0,                         // srcOffset
+        0,                         // dstOffset
+        m_vertex_buffer.GetSize()  // size
+    };
+    vkCmdCopyBuffer(command_buffer, m_staging_buffer.GetHandle(),
+                    m_vertex_buffer.GetHandle(), 1, &buffer_copy_info);
+
+    VkBufferMemoryBarrier buffer_memory_barrier = {
+        VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,  // sType;
+        nullptr,                                  // pNext
+        VK_ACCESS_MEMORY_WRITE_BIT,               // srcAccessMask
+        VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT,      // dstAccessMask
+        VK_QUEUE_FAMILY_IGNORED,                  // srcQueueFamilyIndex
+        VK_QUEUE_FAMILY_IGNORED,                  // dstQueueFamilyIndex
+        m_vertex_buffer.GetHandle(),              // buffer
+        0,                                        // offset
+        VK_WHOLE_SIZE                             // size
+    };
+    vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_TRANSFER_BIT,
+                         VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, 0, 0, nullptr, 1,
+                         &buffer_memory_barrier, 0, nullptr);
+
+    vkEndCommandBuffer(command_buffer);
+
+    // Submit command buffer and copy data from staging buffer to a vertex
+    // buffer
+    VkSubmitInfo submit_info = {
+        VK_STRUCTURE_TYPE_SUBMIT_INFO,  // sType
+        nullptr,                        // pNext
+        0,                              // waitSemaphoreCount
+        nullptr,                        // pWaitSemaphores
+        nullptr,                        // pWaitDstStageMask;
+        1,                              // commandBufferCount
+        &command_buffer,                // pCommandBuffers
+        0,                              // signalSemaphoreCount
+        nullptr                         // pSignalSemaphores
+    };
+
+    result = vkQueueSubmit(m_graphics_queue->handle, 1, &submit_info,
+                           VK_NULL_HANDLE);
+    if (result != VK_SUCCESS) {
+        return false;
+    }
+
+    vkDeviceWaitIdle(device);
 
     return true;
 }
