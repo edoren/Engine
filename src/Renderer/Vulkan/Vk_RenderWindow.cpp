@@ -44,10 +44,11 @@ bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
     math::ivec2 initial_pos(SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
     uint32 window_flags(SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE |
                         SDL_WINDOW_VULKAN);
+
     m_window = SDL_CreateWindow(name.GetData(), initial_pos.x, initial_pos.y,
                                 size.x, size.y, window_flags);
     if (!m_window) {
-        LogError(sTag, "SDL_CreateWindow fail: "_format(SDL_GetError()));
+        LogError(sTag, "SDL_CreateWindow fail: {}"_format(SDL_GetError()));
         return false;
     }
 
@@ -66,32 +67,32 @@ bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
     }
     if (!CheckWSISupport()) {
         PhysicalDeviceParameters& physical_device = context.GetPhysicalDevice();
-        LogFatal(sTag,
+        LogError(sTag,
                  "Physical device {} doesn't include WSI "
                  "support"_format(physical_device.properties.deviceName));
         return false;
     }
 
     if (!m_swapchain.Create(m_surface, m_size.x, m_size.y)) {
-        LogFatal(sTag, "Could not create the SwapChain");
+        LogError(sTag, "Could not create the SwapChain");
         return false;
     }
     if (!CreateVulkanRenderPass()) {
-        LogFatal(sTag, "Could not create the RenderPass");
+        LogError(sTag, "Could not create the RenderPass");
         return false;
     }
     if (!CreateVulkanPipeline()) {
-        LogFatal(sTag, "Could not create the Pipeline");
+        LogError(sTag, "Could not create the Pipeline");
         return false;
     }
 
     if (!CreateRenderingResources()) {
-        LogFatal(sTag, "Could not create the RenderingResources");
+        LogError(sTag, "Could not create the RenderingResources");
         return false;
     }
 
     if (!CreateVulkanVertexBuffer()) {
-        LogFatal(sTag, "Could not create the VertexBuffer");
+        LogError(sTag, "Could not create the VertexBuffer");
         return false;
     }
 
@@ -202,6 +203,11 @@ void Vk_RenderWindow::SetVSyncEnabled(bool /*vsync*/) {
 }
 
 void Vk_RenderWindow::SwapBuffers() {
+    if (m_swapchain.GetHandle() == VK_NULL_HANDLE) {
+        LogWarning(sTag, "SwapChain not avaliable");
+        return;
+    }
+
     static size_t resource_index = 0;
 
     VkResult result = VK_SUCCESS;
@@ -1082,16 +1088,24 @@ void Vk_RenderWindow::OnAppDidEnterForeground() {
 
     if (device) {
         vkDeviceWaitIdle(device);
-    }
 
-    if (!m_surface.Create(m_window)) {
-        LogFatal(sTag, "Could not create the Surface");
-        return;
-    }
+        if (!m_surface.Create(m_window)) {
+            LogFatal(sTag, "Could not create the Surface");
+            return;
+        }
 
-    if (!m_swapchain.Create(m_surface, m_size.x, m_size.y)) {
-        LogFatal(sTag, "Could not create the SwapChain");
-        return;
+        if (!CheckWSISupport()) {
+            PhysicalDeviceParameters& physical_device = context.GetPhysicalDevice();
+            LogFatal(sTag,
+                     "Physical device {} doesn't include WSI "
+                             "support"_format(physical_device.properties.deviceName));
+            return;
+        }
+
+        if (!m_swapchain.Create(m_surface, m_size.x, m_size.y)) {
+            LogFatal(sTag, "Could not create the SwapChain");
+            return;
+        }
     }
 }
 
