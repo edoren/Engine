@@ -10,6 +10,7 @@ if (SDL2_FOUND)
     set(SDL2_LIBRARY ${SDL2_LIBRARY})
 else()
     # set(SDL_SHARED_ENABLED_BY_DEFAULT OFF)
+    set(CMAKE_DEBUG_POSTFIX "" CACHE STRING "" FORCE)
     add_subdirectory(${SDL2_DIR} "${TEMP_DIR}/sdl2" EXCLUDE_FROM_ALL)
     set(SDL2_INCLUDE_DIR "${SDL2_BINARY_DIR}/include"
                          "${SDL2_SOURCE_DIR}/include")
