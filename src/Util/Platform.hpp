@@ -58,6 +58,6 @@
     #endif
 #endif
 
-#define PLATFORM_IS(x) PLATFORM == x
-#define PLATFORM_TYPE_IS(x) PLATFORM_TYPE == x
+#define PLATFORM_IS(x) PLATFORM & (x)
+#define PLATFORM_TYPE_IS(x) PLATFORM_TYPE & (x)
 #define PLATFORM_HAS_API(x) PLATFORM_APIS & (x)
