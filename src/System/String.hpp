@@ -515,6 +515,41 @@ public:
     std::size_t Find(const String& str, std::size_t start = 0) const;
 
     ////////////////////////////////////////////////////////////
+    /// @brief Finds the first character equal to one of the
+    ///        characters in the given character sequence.
+    ///
+    /// This function searches for the first character equal to
+    /// one of the characters in \a str. The search considers
+    /// only the interval [\a pos, Size()]
+    ///
+    /// @param str   Characters to find
+    /// @param pos Where to begin searching
+    ///
+    /// @return Position of the first character of \a str found
+    ///         in the string, or String::InvalidPos if not found
+    ///
+    ////////////////////////////////////////////////////////////
+    std::size_t FindFirstOf(const String& str, std::size_t pos = 0) const;
+
+    ////////////////////////////////////////////////////////////
+    /// @brief Finds the last character equal to one of the
+    ///        characters in the given character sequence.
+    ///
+    /// This function searches for the last character equal to
+    /// one of the characters in \a str. The search considers
+    /// only the interval [0, \a pos]
+    ///
+    /// @param str   Characters to find
+    /// @param pos Where to begin searching
+    ///
+    /// @return Position of the last character of \a str found
+    ///         in the string, or String::InvalidPos if not found
+    ///
+    ////////////////////////////////////////////////////////////
+    std::size_t FindLastOf(const String& str,
+                           std::size_t pos = InvalidPos) const;
+
+    ////////////////////////////////////////////////////////////
     /// @brief Replace a SubString with another string
     ///
     /// This function replaces the SubString that starts at index \a position

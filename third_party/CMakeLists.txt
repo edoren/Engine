@@ -10,6 +10,7 @@ find_package(SDL2 2.0.6)
 if (NOT SDL2_FOUND)
     # set(SDL_SHARED_ENABLED_BY_DEFAULT OFF)
     set(SDL2_BINARY_DIR "${TEMP_DIR}/sdl2")
+    set(CMAKE_DEBUG_POSTFIX "" CACHE STRING "" FORCE)
     add_subdirectory(${SDL2_DIR} "${SDL2_BINARY_DIR}" EXCLUDE_FROM_ALL)
     set(SDL2_INCLUDE_DIR "${SDL2_BINARY_DIR}/include"
                          "${SDL2_SOURCE_DIR}/include")

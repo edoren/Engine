@@ -6,11 +6,13 @@
 #include <Renderer/RenderWindow.hpp>
 #include <System/String.hpp>
 
+#include "Vk_Buffer.hpp"
 #include "Vk_Config.hpp"
 #include "Vk_Context.hpp"
-#include "Vk_VulkanParameters.hpp"
 #include "Vk_Dependencies.hpp"
-#include "Vk_Buffer.hpp"
+#include "Vk_Surface.hpp"
+#include "Vk_SwapChain.hpp"
+#include "Vk_VulkanParameters.hpp"
 
 namespace engine {
 
@@ -54,34 +56,25 @@ public:
     virtual bool IsVisible() override;
 
 private:
-    bool CreateVulkanSurface();
-    bool CreateVulkanQueues();  // CheckWSISupport
-    bool CreateVulkanSemaphores();
-    bool CreateVulkanFences();
-    bool CreateVulkanSwapChain();
-    bool CreateVulkanCommandBuffers();
+    bool CheckWSISupport();
+
     bool CreateVulkanRenderPass();
     bool CreateVulkanPipeline();
     bool CreateVulkanVertexBuffer();
+
+    bool CreateVulkanCommandPool(QueueParameters& queue,
+                                 VkCommandPool* cmd_pool);
+    bool AllocateVulkanCommandBuffers(VkCommandPool& cmd_pool, uint32_t count,
+                                      VkCommandBuffer* command_buffer);
+    bool CreateVulkanSemaphore(VkSemaphore* semaphore);
+    bool CreateVulkanFence(VkFenceCreateFlags flags, VkFence* fence);
+    bool CreateRenderingResources();
 
     bool CreateVulkanFrameBuffer(VkFramebuffer& framebuffer,
                                  VkImageView& image_view);
     bool PrepareFrame(VkCommandBuffer command_buffer,
                       ImageParameters& image_parameters,
                       VkFramebuffer& framebuffer);
-
-    uint32 GetVulkanSwapChainNumImages(
-        const VkSurfaceCapabilitiesKHR& surface_capabilities);
-    VkSurfaceFormatKHR GetVulkanSwapChainFormat(
-        const std::vector<VkSurfaceFormatKHR>& surface_formats);
-    VkExtent2D GetVulkanSwapChainExtent(
-        const VkSurfaceCapabilitiesKHR& surface_capabilities);
-    VkImageUsageFlags GetVulkanSwapChainUsageFlags(
-        const VkSurfaceCapabilitiesKHR& surface_capabilities);
-    VkSurfaceTransformFlagBitsKHR GetVulkanSwapChainTransform(
-        const VkSurfaceCapabilitiesKHR& surface_capabilities);
-    VkPresentModeKHR GetVulkanSwapChainPresentMode(
-        const std::vector<VkPresentModeKHR>& present_modes);
 
     bool AllocateVulkanBufferMemory(VkBuffer buffer, VkDeviceMemory* memory);
 
@@ -95,12 +88,12 @@ private:
 private:
     SDL_Window* m_window;
 
-    VkSurfaceKHR m_surface;
+    Vk_Surface m_surface;
 
-    QueueParameters m_graphics_queue;
-    QueueParameters m_present_queue;
+    QueueParameters* m_graphics_queue;
+    QueueParameters* m_present_queue;
 
-    SwapChainParameters m_swapchain;
+    Vk_SwapChain m_swapchain;
     VkPipeline m_graphics_pipeline;
 
     VkCommandPool m_graphics_queue_cmd_pool;
@@ -108,6 +101,7 @@ private:
     VkRenderPass m_render_pass;
 
     Vk_Buffer m_vertex_buffer;
+    Vk_Buffer m_staging_buffer;
     std::vector<RenderingResourcesData> m_render_resources;
 };
 

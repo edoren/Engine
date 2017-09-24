@@ -13,6 +13,8 @@ const String sTag("Vk_RenderWindow");
 
 const size_t sResourceCount(3);
 
+const size_t sStagingBufferSize(4000);
+
 }  // namespace
 
 struct VertexData {
@@ -22,11 +24,15 @@ struct VertexData {
 
 Vk_RenderWindow::Vk_RenderWindow()
       : m_window(nullptr),
-        m_surface(VK_NULL_HANDLE),
+        m_surface(),
+        m_graphics_queue(nullptr),
+        m_present_queue(nullptr),
+        m_swapchain(),
         m_graphics_pipeline(VK_NULL_HANDLE),
         m_graphics_queue_cmd_pool(VK_NULL_HANDLE),
         m_render_pass(VK_NULL_HANDLE),
         m_vertex_buffer(),
+        m_staging_buffer(),
         m_render_resources(sResourceCount) {}
 
 Vk_RenderWindow::~Vk_RenderWindow() {
@@ -38,29 +44,57 @@ bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
     math::ivec2 initial_pos(SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
     uint32 window_flags(SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE |
                         SDL_WINDOW_VULKAN);
+
     m_window = SDL_CreateWindow(name.GetData(), initial_pos.x, initial_pos.y,
                                 size.x, size.y, window_flags);
     if (!m_window) {
-        LogError(sTag, "SDL_CreateWindow fail: "_format(SDL_GetError()));
+        LogError(sTag, "SDL_CreateWindow fail: {}"_format(SDL_GetError()));
         return false;
     }
+
+    // We assume that the graphics queue can also present
+    Vk_Context& context = Vk_Context::GetInstance();
+    m_graphics_queue = &context.GetGraphicsQueue();
+    m_present_queue = m_graphics_queue;
 
     // Update the base class attributes
     SDL_GetWindowSize(m_window, &m_size.x, &m_size.y);
     m_name = name;
 
-    CreateVulkanSurface();
-    CreateVulkanQueues();
-    CreateVulkanSwapChain();
+    if (!m_surface.Create(m_window)) {
+        LogFatal(sTag, "Could not create the Surface");
+        return false;
+    }
+    if (!CheckWSISupport()) {
+        PhysicalDeviceParameters& physical_device = context.GetPhysicalDevice();
+        LogError(sTag,
+                 "Physical device {} doesn't include WSI "
+                 "support"_format(physical_device.properties.deviceName));
+        return false;
+    }
 
-    CreateVulkanRenderPass();
-    CreateVulkanPipeline();
-    CreateVulkanVertexBuffer();
+    if (!m_swapchain.Create(m_surface, m_size.x, m_size.y)) {
+        LogError(sTag, "Could not create the SwapChain");
+        return false;
+    }
+    if (!CreateVulkanRenderPass()) {
+        LogError(sTag, "Could not create the RenderPass");
+        return false;
+    }
+    if (!CreateVulkanPipeline()) {
+        LogError(sTag, "Could not create the Pipeline");
+        return false;
+    }
 
-    // CreateRenderingResources
-    CreateVulkanCommandBuffers();
-    CreateVulkanSemaphores();
-    CreateVulkanFences();
+    if (!CreateRenderingResources()) {
+        LogError(sTag, "Could not create the RenderingResources");
+        return false;
+    }
+
+    if (!CreateVulkanVertexBuffer()) {
+        LogError(sTag, "Could not create the VertexBuffer");
+        return false;
+    }
 
     return true;
 }
@@ -103,15 +137,9 @@ void Vk_RenderWindow::Destroy() {
             m_graphics_queue_cmd_pool = VK_NULL_HANDLE;
         }
 
-        if (m_vertex_buffer.handle) {
-            vkDestroyBuffer(device, m_vertex_buffer.handle, nullptr);
-            m_vertex_buffer.handle = VK_NULL_HANDLE;
-        }
+        m_vertex_buffer.Destroy();
 
-        if (m_vertex_buffer.memory) {
-            vkFreeMemory(device, m_vertex_buffer.memory, nullptr);
-            m_vertex_buffer.memory = VK_NULL_HANDLE;
-        }
+        m_staging_buffer.Destroy();
 
         if (m_graphics_pipeline) {
             vkDestroyPipeline(device, m_graphics_pipeline, nullptr);
@@ -123,26 +151,13 @@ void Vk_RenderWindow::Destroy() {
             m_render_pass = VK_NULL_HANDLE;
         }
 
-        if (m_swapchain.handle) {
-            vkDestroySwapchainKHR(device, m_swapchain.handle, nullptr);
-            m_swapchain.handle = VK_NULL_HANDLE;
-            for (size_t i = 0; i < m_swapchain.images.size(); i++) {
-                if (m_swapchain.images[i].view) {
-                    vkDestroyImageView(device, m_swapchain.images[i].view,
-                                       nullptr);
-                }
-            }
-            m_swapchain.images.clear();
-        }
+        m_swapchain.Destroy();
     }
 
-    m_present_queue.handle = VK_NULL_HANDLE;
-    m_graphics_queue.handle = VK_NULL_HANDLE;
+    m_present_queue = nullptr;
+    m_graphics_queue = nullptr;
 
-    if (instance && m_surface) {
-        vkDestroySurfaceKHR(instance, m_surface, nullptr);
-        m_surface = VK_NULL_HANDLE;
-    }
+    m_surface.Destroy();
 
     if (m_window) {
         SDL_DestroyWindow(m_window);
@@ -188,6 +203,11 @@ void Vk_RenderWindow::SetVSyncEnabled(bool /*vsync*/) {
 }
 
 void Vk_RenderWindow::SwapBuffers() {
+    if (m_swapchain.GetHandle() == VK_NULL_HANDLE) {
+        LogWarning(sTag, "SwapChain not avaliable");
+        return;
+    }
+
     static size_t resource_index = 0;
 
     VkResult result = VK_SUCCESS;
@@ -211,7 +231,7 @@ void Vk_RenderWindow::SwapBuffers() {
     vkResetFences(device, 1, &current_rendering_resource.fence);
 
     result = vkAcquireNextImageKHR(
-        device, m_swapchain.handle, UINT64_MAX,
+        device, m_swapchain.GetHandle(), UINT64_MAX,
         current_rendering_resource.image_available_semaphore, VK_NULL_HANDLE,
         &image_index);
     switch (result) {
@@ -228,7 +248,7 @@ void Vk_RenderWindow::SwapBuffers() {
     }
 
     if (!PrepareFrame(current_rendering_resource.command_buffer,
-                      m_swapchain.images[image_index],
+                      m_swapchain.GetImages()[image_index],
                       current_rendering_resource.framebuffer)) {
         return;
     }
@@ -249,7 +269,7 @@ void Vk_RenderWindow::SwapBuffers() {
              .finished_rendering_semaphore  // pSignalSemaphores
     };
 
-    result = vkQueueSubmit(m_graphics_queue.handle, 1, &submit_info,
+    result = vkQueueSubmit(m_graphics_queue->handle, 1, &submit_info,
                            current_rendering_resource.fence);
 
     if (result != VK_SUCCESS) {
@@ -264,12 +284,12 @@ void Vk_RenderWindow::SwapBuffers() {
         &current_rendering_resource
              .finished_rendering_semaphore,  // pWaitSemaphores
         1,                                   // swapchainCount
-        &m_swapchain.handle,                 // pSwapchains
+        &m_swapchain.GetHandle(),            // pSwapchains
         &image_index,                        // pImageIndices
         nullptr                              // pResults
     };
 
-    result = vkQueuePresentKHR(m_present_queue.handle, &present_info);
+    result = vkQueuePresentKHR(m_present_queue->handle, &present_info);
 
     switch (result) {
         case VK_SUCCESS:
@@ -295,79 +315,7 @@ bool Vk_RenderWindow::IsVisible() {
     return (mask & flags) == 0;
 }
 
-bool Vk_RenderWindow::CreateVulkanSurface() {
-    SDL_SysWMinfo wminfo;
-    SDL_VERSION(&wminfo.version);
-    if (!SDL_GetWindowWMInfo(m_window, &wminfo)) {
-        LogFatal(sTag, "Error on SDL_GetWindowWMInfo.");
-        return false;
-    }
-
-    VkResult result = VK_SUCCESS;
-
-    Vk_Context& context = Vk_Context::GetInstance();
-    VkInstance& instance = context.GetVulkanInstance();
-
-#if defined(VK_USE_PLATFORM_WIN32_KHR)
-    if (wminfo.subsystem == SDL_SYSWM_WINDOWS) {
-        VkWin32SurfaceCreateInfoKHR create_info = {
-            VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR,  // sType
-            nullptr,                                          // pNext
-            VkWin32SurfaceCreateFlagsKHR(),                   // flags
-            GetModuleHandle(nullptr),                         // hinstance
-            wminfo.info.win.window                            // hwnd
-        };
-        result = vkCreateWin32SurfaceKHR(instance, &create_info, nullptr,
-                                         &m_surface);
-    }
-#elif defined(VK_USE_PLATFORM_XCB_KHR)
-    if (wminfo.subsystem == SDL_SYSWM_X11) {
-        VkXcbSurfaceCreateInfoKHR create_info = {
-            VK_STRUCTURE_TYPE_XCB_SURFACE_CREATE_INFO_KHR,     // sType
-            nullptr,                                           // pNext
-            VkXcbSurfaceCreateFlagsKHR(),                      // flags
-            XGetXCBConnection(wminfo.info.x11.display),        // connection
-            static_cast<xcb_window_t>(wminfo.info.x11.window)  // window
-        };
-        result =
-            vkCreateXcbSurfaceKHR(instance, &create_info, nullptr, &m_surface);
-    }
-#elif defined(VK_USE_PLATFORM_XLIB_KHR)
-    if (wminfo.subsystem == SDL_SYSWM_X11) {
-        VkXlibSurfaceCreateInfoKHR create_info = {
-            VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR,  // sType
-            nullptr,                                         // pNext
-            VkXlibSurfaceCreateFlagsKHR(),                   // flags
-            wminfo.info.x11.display,                         // dpy
-            wminfo.info.x11.window                           // window
-        };
-        result =
-            vkCreateXlibSurfaceKHR(instance, &create_info, nullptr, &m_surface);
-    }
-#elif defined(VK_USE_PLATFORM_ANDROID_KHR)
-    if (wminfo.subsystem == SDL_SYSWM_ANDROID) {
-        VkAndroidSurfaceCreateInfoKHR create_info = {
-            VK_STRUCTURE_TYPE_ANDROID_SURFACE_CREATE_INFO_KHR,  // sType
-            nullptr,                                            // pNext
-            VkAndroidSurfaceCreateFlagsKHR(),                   // flags
-            wminfo.info.android.window,                         // window
-        };
-        result = vkCreateAndroidSurfaceKHR(instance, &create_info, nullptr,
-                                           &m_surface);
-    }
-#else
-#error "Unsupported Vulkan subsystem"
-#endif
-
-    if (result != VK_SUCCESS) {
-        LogFatal(sTag, "Error creating VkSurfaceKHR.");
-        return false;
-    }
-
-    return true;
-}
-
-bool Vk_RenderWindow::CreateVulkanQueues() {
+bool Vk_RenderWindow::CheckWSISupport() {
     // Check that the device graphics queue family has WSI support
     VkBool32 wsi_support;
     Vk_Context& context = Vk_Context::GetInstance();
@@ -375,48 +323,33 @@ bool Vk_RenderWindow::CreateVulkanQueues() {
     QueueParameters& graphics_queue = context.GetGraphicsQueue();
 
     vkGetPhysicalDeviceSurfaceSupportKHR(physical_device.handle,
-                                         graphics_queue.family_index, m_surface,
-                                         &wsi_support);
-    if (!wsi_support) {
-        LogFatal(sTag,
-                 "Physical device {} doesn't include WSI "
-                 "support"_format(physical_device.properties.deviceName));
-        return false;
-    }
-
-    m_graphics_queue = graphics_queue;
-    m_present_queue = graphics_queue;  // We assume that the graphics
-                                       // queue can also present
-    return true;
+                                         graphics_queue.family_index,
+                                         m_surface.GetHandle(), &wsi_support);
+    return wsi_support == VK_TRUE;
 }
 
-bool Vk_RenderWindow::CreateVulkanSemaphores() {
+bool Vk_RenderWindow::CreateVulkanSemaphore(VkSemaphore* semaphore) {
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.GetVulkanDevice();
 
     VkSemaphoreCreateInfo semaphore_create_info = {
         VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,  // sType
         nullptr,                                  // pNext
-        0                                         // flags
+        VkSemaphoreCreateFlags()                  // flags
     };
 
-    for (size_t i = 0; i < m_render_resources.size(); i++) {
-        VkResult result1 =
-            vkCreateSemaphore(device, &semaphore_create_info, nullptr,
-                              &m_render_resources[i].image_available_semaphore);
-        VkResult result2 = vkCreateSemaphore(
-            device, &semaphore_create_info, nullptr,
-            &m_render_resources[i].finished_rendering_semaphore);
-        if (result1 != VK_SUCCESS || result2 != VK_SUCCESS) {
-            LogError(sTag, "Could not create semaphores");
-            return false;
-        }
+    VkResult result =
+        vkCreateSemaphore(device, &semaphore_create_info, nullptr, semaphore);
+    if (result != VK_SUCCESS) {
+        LogError(sTag, "Could not create semaphore");
+        return false;
     }
 
     return true;
 }
 
-bool Vk_RenderWindow::CreateVulkanFences() {
+bool Vk_RenderWindow::CreateVulkanFence(VkFenceCreateFlags flags,
+                                        VkFence* fence) {
     VkResult result = VK_SUCCESS;
 
     Vk_Context& context = Vk_Context::GetInstance();
@@ -425,212 +358,20 @@ bool Vk_RenderWindow::CreateVulkanFences() {
     VkFenceCreateInfo fence_create_info = {
         VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,  // sType
         nullptr,                              // pNext
-        VK_FENCE_CREATE_SIGNALED_BIT          // flags
+        flags                                 // flags
     };
 
-    for (size_t i = 0; i < m_render_resources.size(); i++) {
-        result = vkCreateFence(device, &fence_create_info, nullptr,
-                               &m_render_resources[i].fence);
-        if (result != VK_SUCCESS) {
-            LogError(sTag, "Could not create fence");
-            return false;
-        }
-    }
-    return true;
-}
-
-bool Vk_RenderWindow::CreateVulkanSwapChain() {
-    VkResult result = VK_SUCCESS;
-
-    Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
-    VkPhysicalDevice physical_device = context.GetPhysicalDevice();
-
-    // Wait all the Device Queues to finish
-    if (device) {
-        vkDeviceWaitIdle(device);
-    }
-
-    // Destroy the old ImageViews
-    for (size_t i = 0; i < m_swapchain.images.size(); i++) {
-        if (m_swapchain.images[i].view) {
-            vkDestroyImageView(device, m_swapchain.images[i].view, nullptr);
-            m_swapchain.images[i].view = VK_NULL_HANDLE;
-        }
-    }
-    m_swapchain.images.clear();
-
-    // Get the Surface capabilities
-    VkSurfaceCapabilitiesKHR surface_capabilities;
-
-    result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
-        physical_device, m_surface, &surface_capabilities);
+    result = vkCreateFence(device, &fence_create_info, nullptr, fence);
     if (result != VK_SUCCESS) {
-        LogError(sTag, "Could not check presentation surface capabilities");
+        LogError(sTag, "Could not create fence");
         return false;
-    }
-
-    // Query all the supported Surface formats
-    uint32 formats_count = 0;
-    std::vector<VkSurfaceFormatKHR> surface_formats;
-    result = vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device, m_surface,
-                                                  &formats_count, nullptr);
-    if (formats_count > 0 && result == VK_SUCCESS) {
-        surface_formats.resize(formats_count);
-        result = vkGetPhysicalDeviceSurfaceFormatsKHR(
-            physical_device, m_surface, &formats_count, surface_formats.data());
-    }
-
-    // Check that the surface formats where queried successfully
-    if (formats_count == 0 || result != VK_SUCCESS) {
-        LogError(sTag,
-                 "Error occurred during presentation surface formats "
-                 "enumeration");
-        return false;
-    }
-
-    // Query all the supported Surface present modes
-    uint32 present_modes_count = 0;
-    std::vector<VkPresentModeKHR> present_modes;
-
-    result = vkGetPhysicalDeviceSurfacePresentModesKHR(
-        physical_device, m_surface, &present_modes_count, nullptr);
-    if (present_modes_count > 0 && result == VK_SUCCESS) {
-        present_modes.resize(present_modes_count);
-        result = vkGetPhysicalDeviceSurfacePresentModesKHR(
-            physical_device, m_surface, &present_modes_count,
-            present_modes.data());
-    }
-
-    // Check that the surface present modes where queried successfully
-    if (present_modes_count == 0 || result != VK_SUCCESS) {
-        LogError(sTag,
-                 "Error occurred during presentation surface formats "
-                 "enumeration");
-        return false;
-    }
-
-    // Retreive all the Swapchain related information
-    uint32 desired_number_of_images =
-        GetVulkanSwapChainNumImages(surface_capabilities);
-    VkSurfaceFormatKHR desired_format =
-        GetVulkanSwapChainFormat(surface_formats);
-    VkExtent2D desired_extent = GetVulkanSwapChainExtent(surface_capabilities);
-    VkImageUsageFlags desired_usage =
-        GetVulkanSwapChainUsageFlags(surface_capabilities);
-    VkSurfaceTransformFlagBitsKHR desired_transform =
-        GetVulkanSwapChainTransform(surface_capabilities);
-    VkPresentModeKHR desired_present_mode =
-        GetVulkanSwapChainPresentMode(present_modes);
-    VkSwapchainKHR old_swap_chain = m_swapchain.handle;
-
-    if (static_cast<int>(desired_usage) == -1) {
-        return false;
-    }
-
-    VkCompositeAlphaFlagBitsKHR composite_alpha =
-        VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-    if (!(surface_capabilities.supportedCompositeAlpha & composite_alpha)) {
-        composite_alpha = VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR;
-    }
-
-    VkSwapchainCreateInfoKHR swap_chain_create_info = {
-        VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,  // sType
-        nullptr,                                      // pNext
-        VkSwapchainCreateFlagsKHR(),                  // flags
-        m_surface,                                    // surface
-        desired_number_of_images,                     // minImageCount
-        desired_format.format,                        // imageFormat
-        desired_format.colorSpace,                    // imageColorSpace
-        desired_extent,                               // imageExtent
-        1,                                            // imageArrayLayers
-        desired_usage,                                // imageUsage
-        VK_SHARING_MODE_EXCLUSIVE,                    // imageSharingMode
-        0,                                            // queueFamilyIndexCount
-        nullptr,                                      // pQueueFamilyIndices
-        desired_transform,                            // preTransform
-        composite_alpha,                              // compositeAlpha
-        desired_present_mode,                         // presentMode
-        true,                                         // clipped
-        old_swap_chain                                // oldSwapchain
-    };
-
-    result = vkCreateSwapchainKHR(device, &swap_chain_create_info, nullptr,
-                                  &m_swapchain.handle);
-    if (result != VK_SUCCESS) {
-        LogFatal(sTag, "Could not create swap chain");
-        return false;
-    }
-    if (old_swap_chain) {
-        vkDestroySwapchainKHR(device, old_swap_chain, nullptr);
-    }
-
-    // Store all the necesary SwapChain parameters
-
-    // Get the SwapChain format
-    m_swapchain.format = desired_format.format;
-
-    // Get the SwapChain images
-    uint32 image_count = 0;
-    std::vector<VkImage> swapchain_images;
-    result = vkGetSwapchainImagesKHR(device, m_swapchain.handle, &image_count,
-                                     nullptr);
-
-    if (image_count > 0 && result == VK_SUCCESS) {
-        swapchain_images.resize(image_count);
-        result = vkGetSwapchainImagesKHR(device, m_swapchain.handle,
-                                         &image_count, swapchain_images.data());
-    }
-    // Check that all the images could be queried
-    if (image_count == 0 || result != VK_SUCCESS) {
-        LogError(sTag, "Could not get the number of swap chain images");
-        return false;
-    }
-    // Store all the Image handles
-    m_swapchain.images.resize(image_count);
-    for (size_t i = 0; i < swapchain_images.size(); i++) {
-        m_swapchain.images[i].handle = swapchain_images[i];
-    }
-    // Create all the ImageViews
-    for (size_t i = 0; i < m_swapchain.images.size(); i++) {
-        VkImageViewCreateInfo image_view_create_info = {
-            VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,  // sType
-            nullptr,                                   // pNext
-            VkImageViewCreateFlags(),                  // flags
-            m_swapchain.images[i].handle,              // image
-            VK_IMAGE_VIEW_TYPE_2D,                     // viewType
-            m_swapchain.format,                        // format
-            VkComponentMapping{
-                // components
-                VK_COMPONENT_SWIZZLE_IDENTITY,  // r
-                VK_COMPONENT_SWIZZLE_IDENTITY,  // g
-                VK_COMPONENT_SWIZZLE_IDENTITY,  // b
-                VK_COMPONENT_SWIZZLE_IDENTITY   // a
-            },
-            VkImageSubresourceRange{
-                VK_IMAGE_ASPECT_COLOR_BIT,  // aspectMask
-                0,                          // baseMipLevel
-                1,                          // levelCount
-                0,                          // baseArrayLayer
-                1                           // layerCount
-            },
-        };
-
-        Vk_Context& context = Vk_Context::GetInstance();
-
-        result = vkCreateImageView(context.GetVulkanDevice(),
-                                   &image_view_create_info, nullptr,
-                                   &m_swapchain.images[i].view);
-        if (result != VK_SUCCESS) {
-            LogError(sTag, "Could not create image view for framebuffer.");
-            return false;
-        }
     }
 
     return true;
 }
 
-bool Vk_RenderWindow::CreateVulkanCommandBuffers() {
+bool Vk_RenderWindow::CreateVulkanCommandPool(QueueParameters& queue,
+                                              VkCommandPool* cmd_pool) {
     VkResult result = VK_SUCCESS;
 
     Vk_Context& context = Vk_Context::GetInstance();
@@ -642,32 +383,39 @@ bool Vk_RenderWindow::CreateVulkanCommandBuffers() {
         nullptr,                                     // pNext
         (VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT |
          VK_COMMAND_POOL_CREATE_TRANSIENT_BIT),  // flags
-        m_graphics_queue.family_index            // queueFamilyIndex
+        queue.family_index                       // queueFamilyIndex
     };
 
-    result = vkCreateCommandPool(device, &cmd_pool_create_info, nullptr,
-                                 &m_graphics_queue_cmd_pool);
+    result =
+        vkCreateCommandPool(device, &cmd_pool_create_info, nullptr, cmd_pool);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Could not create a command pool");
         return false;
     }
 
-    // Allocate space in the pool for each buffer
-    for (size_t i = 0; i < m_render_resources.size(); i++) {
-        VkCommandBufferAllocateInfo cmd_buffer_allocate_info = {
-            VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,  // sType
-            nullptr,                                         // pNext
-            m_graphics_queue_cmd_pool,                       // commandPool
-            VK_COMMAND_BUFFER_LEVEL_PRIMARY,                 // level
-            1                                                // bufferCount
-        };
-        result =
-            vkAllocateCommandBuffers(device, &cmd_buffer_allocate_info,
-                                     &m_render_resources[i].command_buffer);
-        if (result != VK_SUCCESS) {
-            LogError(sTag, "Could not allocate command buffers");
-            return false;
-        }
+    return true;
+}
+
+bool Vk_RenderWindow::AllocateVulkanCommandBuffers(
+    VkCommandPool& cmd_pool, uint32_t count, VkCommandBuffer* command_buffer) {
+    VkResult result = VK_SUCCESS;
+
+    Vk_Context& context = Vk_Context::GetInstance();
+    VkDevice& device = context.GetVulkanDevice();
+
+    // Allocate space in the pool for the buffer
+    VkCommandBufferAllocateInfo cmd_buffer_allocate_info = {
+        VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,  // sType
+        nullptr,                                         // pNext
+        cmd_pool,                                        // commandPool
+        VK_COMMAND_BUFFER_LEVEL_PRIMARY,                 // level
+        count                                            // bufferCount
+    };
+    result = vkAllocateCommandBuffers(device, &cmd_buffer_allocate_info,
+                                      command_buffer);
+    if (result != VK_SUCCESS) {
+        LogError(sTag, "Could not allocate command buffer");
+        return false;
     }
 
     return true;
@@ -679,7 +427,7 @@ bool Vk_RenderWindow::CreateVulkanRenderPass() {
     // Create the attachment descriptions
     VkAttachmentDescription attachment_descriptions[] = {{
         VkAttachmentDescriptionFlags(),    // flags
-        m_swapchain.format,                // format
+        m_swapchain.GetFormat(),           // format
         VK_SAMPLE_COUNT_1_BIT,             // samples
         VK_ATTACHMENT_LOAD_OP_CLEAR,       // loadOp
         VK_ATTACHMENT_STORE_OP_STORE,      // storeOp
@@ -984,46 +732,26 @@ bool Vk_RenderWindow::CreateVulkanVertexBuffer() {
         {{0.7f, -0.7f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f, 1.0f}},
         {{0.7f, 0.7f, 0.0f, 1.0f}, {1.0f, 1.0f, 0.0f, 1.0f}}};
 
-    m_vertex_buffer.size = sizeof(vertex_data);
+    if (!m_vertex_buffer.Create(sizeof(vertex_data),
+                                (VK_BUFFER_USAGE_VERTEX_BUFFER_BIT |
+                                 VK_BUFFER_USAGE_TRANSFER_DST_BIT),
+                                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)) {
+        LogFatal(sTag, "Could not create Vertex Buffer");
+    }
 
-    VkBufferCreateInfo buffer_create_info = {
-        VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,  // sType
-        nullptr,                               // pNext
-        0,                                     // flags
-        m_vertex_buffer.size,                  // size
-        VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,     // sage
-        VK_SHARING_MODE_EXCLUSIVE,             // sharingMode
-        0,                                     // queueFamilyIndexCount
-        nullptr                                // pQueueFamilyIndices
-    };
+    if (!m_staging_buffer.Create(sStagingBufferSize,
+                                 VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) {
+        LogFatal(sTag, "Could not create Staging Buffer");
+    }
 
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.GetVulkanDevice();
 
-    result = vkCreateBuffer(device, &buffer_create_info, nullptr,
-                            &m_vertex_buffer.handle);
-    if (result != VK_SUCCESS) {
-        LogError(sTag, "Could not create a vertex buffer");
-        return false;
-    }
-
-    if (!AllocateVulkanBufferMemory(m_vertex_buffer.handle,
-                                    &m_vertex_buffer.memory)) {
-        LogError(sTag, "Could not allocate memory for a vertex buffer");
-        return false;
-    }
-
-    result = vkBindBufferMemory(device, m_vertex_buffer.handle,
-                                m_vertex_buffer.memory, 0);
-    if (result != VK_SUCCESS) {
-        LogError(sTag, "Could not bind memory for a vertex buffer");
-        return false;
-    }
-
     void* vertex_buffer_memory_pointer;
-    result =
-        vkMapMemory(device, m_vertex_buffer.memory, 0, m_vertex_buffer.size, 0,
-                    &vertex_buffer_memory_pointer);
+    result = vkMapMemory(device, m_staging_buffer.GetMemory(), 0,
+                         m_staging_buffer.GetSize(), 0,
+                         &vertex_buffer_memory_pointer);
     if (result != VK_SUCCESS) {
         LogError(sTag,
                  "Could not map memory and upload data to a vertex buffer");
@@ -1031,18 +759,101 @@ bool Vk_RenderWindow::CreateVulkanVertexBuffer() {
     }
 
     std::memcpy(vertex_buffer_memory_pointer, vertex_data,
-                m_vertex_buffer.size);
+                static_cast<size_t>(m_vertex_buffer.GetSize()));
 
     VkMappedMemoryRange flush_range = {
         VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,  // sType
         nullptr,                                // pNext
-        m_vertex_buffer.memory,                 // memory
+        m_staging_buffer.GetMemory(),           // memory
         0,                                      // offset
-        VK_WHOLE_SIZE                           // size
+        m_vertex_buffer.GetSize()               // size
     };
     vkFlushMappedMemoryRanges(device, 1, &flush_range);
 
-    vkUnmapMemory(device, m_vertex_buffer.memory);
+    vkUnmapMemory(device, m_staging_buffer.GetMemory());
+
+    // Prepare command buffer to copy data from staging buffer to a vertex
+    // buffer
+    VkCommandBufferBeginInfo command_buffer_begin_info = {
+        VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,  // sType
+        nullptr,                                      // pNext
+        VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,  // flags
+        nullptr                                       // pInheritanceInfo
+    };
+
+    VkCommandBuffer command_buffer = m_render_resources[0].command_buffer;
+
+    vkBeginCommandBuffer(command_buffer, &command_buffer_begin_info);
+
+    VkBufferCopy buffer_copy_info = {
+        0,                         // srcOffset
+        0,                         // dstOffset
+        m_vertex_buffer.GetSize()  // size
+    };
+    vkCmdCopyBuffer(command_buffer, m_staging_buffer.GetHandle(),
+                    m_vertex_buffer.GetHandle(), 1, &buffer_copy_info);
+
+    VkBufferMemoryBarrier buffer_memory_barrier = {
+        VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,  // sType;
+        nullptr,                                  // pNext
+        VK_ACCESS_MEMORY_WRITE_BIT,               // srcAccessMask
+        VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT,      // dstAccessMask
+        VK_QUEUE_FAMILY_IGNORED,                  // srcQueueFamilyIndex
+        VK_QUEUE_FAMILY_IGNORED,                  // dstQueueFamilyIndex
+        m_vertex_buffer.GetHandle(),              // buffer
+        0,                                        // offset
+        VK_WHOLE_SIZE                             // size
+    };
+    vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_TRANSFER_BIT,
+                         VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, 0, 0, nullptr, 1,
+                         &buffer_memory_barrier, 0, nullptr);
+
+    vkEndCommandBuffer(command_buffer);
+
+    // Submit command buffer and copy data from staging buffer to a vertex
+    // buffer
+    VkSubmitInfo submit_info = {
+        VK_STRUCTURE_TYPE_SUBMIT_INFO,  // sType
+        nullptr,                        // pNext
+        0,                              // waitSemaphoreCount
+        nullptr,                        // pWaitSemaphores
+        nullptr,                        // pWaitDstStageMask;
+        1,                              // commandBufferCount
+        &command_buffer,                // pCommandBuffers
+        0,                              // signalSemaphoreCount
+        nullptr                         // pSignalSemaphores
+    };
+
+    result = vkQueueSubmit(m_graphics_queue->handle, 1, &submit_info,
+                           VK_NULL_HANDLE);
+    if (result != VK_SUCCESS) {
+        return false;
+    }
+
+    vkDeviceWaitIdle(device);
+
+    return true;
+}
+
+bool Vk_RenderWindow::CreateRenderingResources() {
+    if (!CreateVulkanCommandPool(*m_graphics_queue,
+                                 &m_graphics_queue_cmd_pool)) {
+        return false;
+    }
+
+    for (size_t i = 0; i < m_render_resources.size(); ++i) {
+        if (!AllocateVulkanCommandBuffers(
+                m_graphics_queue_cmd_pool, 1,
+                &m_render_resources[i].command_buffer) ||
+            !CreateVulkanSemaphore(
+                &m_render_resources[i].image_available_semaphore) ||
+            !CreateVulkanSemaphore(
+                &m_render_resources[i].finished_rendering_semaphore) ||
+            !CreateVulkanFence(VK_FENCE_CREATE_SIGNALED_BIT,
+                               &m_render_resources[i].fence)) {
+            return false;
+        }
+    }
 
     return true;
 }
@@ -1106,7 +917,7 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer,
         1                           // layerCount
     };
 
-    if (m_present_queue.handle != m_graphics_queue.handle) {
+    if (m_present_queue->handle != m_graphics_queue->handle) {
         VkImageMemoryBarrier barrier_from_present_to_draw = {
             VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,  // sType
             nullptr,                                 // pNext
@@ -1114,8 +925,8 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer,
             VK_ACCESS_MEMORY_READ_BIT,               // dstAccessMask
             VK_IMAGE_LAYOUT_UNDEFINED,               // oldLayout
             VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,         // newLayout
-            m_present_queue.family_index,            // srcQueueFamilyIndex
-            m_graphics_queue.family_index,           // dstQueueFamilyIndex
+            m_present_queue->family_index,           // srcQueueFamilyIndex
+            m_graphics_queue->family_index,          // dstQueueFamilyIndex
             image_parameters.handle,                 // image
             image_subresource_range                  // subresourceRange
         };
@@ -1181,14 +992,14 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer,
     vkCmdSetScissor(command_buffer, 0, 1, &scissor);
 
     VkDeviceSize offset = 0;
-    vkCmdBindVertexBuffers(command_buffer, 0, 1, &m_vertex_buffer.handle,
+    vkCmdBindVertexBuffers(command_buffer, 0, 1, &m_vertex_buffer.GetHandle(),
                            &offset);
 
     vkCmdDraw(command_buffer, 4, 1, 0, 0);
 
     vkCmdEndRenderPass(command_buffer);
 
-    if (m_graphics_queue.handle != m_present_queue.handle) {
+    if (m_graphics_queue->handle != m_present_queue->handle) {
         VkImageMemoryBarrier barrier_from_draw_to_present = {
             VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,  // sType
             nullptr,                                 // pNext
@@ -1196,8 +1007,8 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer,
             VK_ACCESS_MEMORY_READ_BIT,               // dstAccessMask
             VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,         // oldLayout
             VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,         // newLayout
-            m_graphics_queue.family_index,           // srcQueueFamilyIndex
-            m_present_queue.family_index,            // dstQueueFamilyIndex
+            m_graphics_queue->family_index,          // srcQueueFamilyIndex
+            m_present_queue->family_index,           // dstQueueFamilyIndex
             image_parameters.handle,                 // image
             image_subresource_range                  // subresourceRange
         };
@@ -1214,112 +1025,6 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer,
     }
 
     return true;
-}
-
-uint32 Vk_RenderWindow::GetVulkanSwapChainNumImages(
-    const VkSurfaceCapabilitiesKHR& surface_capabilities) {
-    // Set of images defined in a swap chain may not always be available for
-    // application to render to:
-    // One may be displayed and one may wait in a queue to be presented
-    // If application wants to use more images at the same time it must ask
-    // for more images
-    uint32 image_count = surface_capabilities.minImageCount + 1;
-    if (surface_capabilities.maxImageCount > 0 &&
-        image_count > surface_capabilities.maxImageCount) {
-        image_count = surface_capabilities.maxImageCount;
-    }
-    return image_count;
-}
-
-VkSurfaceFormatKHR Vk_RenderWindow::GetVulkanSwapChainFormat(
-    const std::vector<VkSurfaceFormatKHR>& surface_formats) {
-    // If the list contains only one entry with undefined format
-    // it means that there are no preferred surface formats and any can be
-    // chosen
-    if (surface_formats.size() == 1 &&
-        surface_formats[0].format == VK_FORMAT_UNDEFINED) {
-        return {VK_FORMAT_R8G8B8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR};
-    }
-
-    // Check if list contains most widely used R8 G8 B8 A8 format
-    // with nonlinear color space
-    for (const VkSurfaceFormatKHR& surface_format : surface_formats) {
-        if (surface_format.format == VK_FORMAT_R8G8B8A8_UNORM) {
-            return surface_format;
-        }
-    }
-
-    // Return the first format from the list
-    return surface_formats[0];
-}
-
-VkExtent2D Vk_RenderWindow::GetVulkanSwapChainExtent(
-    const VkSurfaceCapabilitiesKHR& surface_capabilities) {
-    // Special value of surface extent is width == height == 0xFFFFFFFF
-    // If this is so we define the size by ourselves but it must fit within
-    // defined confines
-    if (surface_capabilities.currentExtent.width == 0xFFFFFFFF) {
-        VkExtent2D swap_chain_extent = {static_cast<uint32>(m_size.x),
-                                        static_cast<uint32>(m_size.y)};
-        swap_chain_extent.width = math::Clamp(
-            swap_chain_extent.width, surface_capabilities.minImageExtent.width,
-            surface_capabilities.maxImageExtent.width);
-        swap_chain_extent.height =
-            math::Clamp(swap_chain_extent.height,
-                        surface_capabilities.minImageExtent.height,
-                        surface_capabilities.maxImageExtent.height);
-        return swap_chain_extent;
-    }
-
-    // Most of the cases we define size of the swap_chain images equal to
-    // current window's size
-    return surface_capabilities.currentExtent;
-}
-
-VkImageUsageFlags Vk_RenderWindow::GetVulkanSwapChainUsageFlags(
-    const VkSurfaceCapabilitiesKHR& surface_capabilities) {
-    // Color attachment flag must always be supported
-    // We can define other usage flags but we always need to check if they
-    // are supported
-    if (surface_capabilities.supportedUsageFlags &
-        VK_IMAGE_USAGE_TRANSFER_DST_BIT) {
-        return VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT |
-               VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-    }
-    return VkImageUsageFlags(static_cast<VkImageUsageFlagBits>(-1));
-}
-
-VkSurfaceTransformFlagBitsKHR Vk_RenderWindow::GetVulkanSwapChainTransform(
-    const VkSurfaceCapabilitiesKHR& surface_capabilities) {
-    // Sometimes images must be transformed before they are presented (i.e.
-    // due to device's orienation being other than default orientation)
-    // If the specified transform is other than current transform,
-    // presentation engine will transform image during presentation operation;
-    // this operation
-    // may hit performance on some platforms
-    // Here we don't want any transformations to occur so if the identity
-    // transform is supported use it otherwise just use the same transform
-    // as current transform
-    if (surface_capabilities.supportedTransforms &
-        VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR) {
-        return VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
-    } else {
-        return surface_capabilities.currentTransform;
-    }
-}
-
-VkPresentModeKHR Vk_RenderWindow::GetVulkanSwapChainPresentMode(
-    const std::vector<VkPresentModeKHR>& present_modes) {
-    // MAILBOX is the lowest latency V-Sync enabled mode (something like
-    // triple-buffering) so use it if available
-    for (const VkPresentModeKHR& present_mode : present_modes) {
-        if (present_mode == VK_PRESENT_MODE_MAILBOX_KHR) {
-            return present_mode;
-        }
-    }
-    // FIFO is the only present mode that is required to be supported
-    // by the VulkanSDK.
-    return VK_PRESENT_MODE_FIFO_KHR;
 }
 
 bool Vk_RenderWindow::AllocateVulkanBufferMemory(VkBuffer buffer,
@@ -1362,33 +1067,15 @@ void Vk_RenderWindow::OnWindowResized(const math::ivec2& size) {
     m_size = size;
 
     // Recreate the Vulkan Swapchain
-    CreateVulkanSwapChain();
+    m_swapchain.Create(m_surface, m_size.x, m_size.y);
 }
 
 void Vk_RenderWindow::OnAppWillEnterBackground() {
     Vk_Context& context = Vk_Context::GetInstance();
     VkInstance& instance = context.GetVulkanInstance();
-    VkDevice& device = context.GetVulkanDevice();
 
-    if (device) {
-        vkDeviceWaitIdle(device);
-        if (m_swapchain.handle) {
-            vkDestroySwapchainKHR(device, m_swapchain.handle, nullptr);
-            m_swapchain.handle = VK_NULL_HANDLE;
-            for (size_t i = 0; i < m_swapchain.images.size(); i++) {
-                if (m_swapchain.images[i].view) {
-                    vkDestroyImageView(device, m_swapchain.images[i].view,
-                                       nullptr);
-                }
-            }
-            m_swapchain.images.clear();
-        }
-    }
-
-    if (instance && m_surface) {
-        vkDestroySurfaceKHR(instance, m_surface, nullptr);
-        m_surface = VK_NULL_HANDLE;
-    }
+    m_swapchain.Destroy();
+    m_surface.Destroy();
 }
 
 void Vk_RenderWindow::OnAppDidEnterBackground() {}
@@ -1401,21 +1088,24 @@ void Vk_RenderWindow::OnAppDidEnterForeground() {
 
     if (device) {
         vkDeviceWaitIdle(device);
-    }
 
-    if (!CreateVulkanSurface()) {
-        LogError(sTag, "Could not create the Vulkan Surface");
-        return;
-    }
+        if (!m_surface.Create(m_window)) {
+            LogFatal(sTag, "Could not create the Surface");
+            return;
+        }
 
-    if (!CreateVulkanQueues()) {
-        LogError(sTag, "Could not create the Vulkan Queues");
-        return;
-    }
+        if (!CheckWSISupport()) {
+            PhysicalDeviceParameters& physical_device = context.GetPhysicalDevice();
+            LogFatal(sTag,
+                     "Physical device {} doesn't include WSI "
+                             "support"_format(physical_device.properties.deviceName));
+            return;
+        }
 
-    if (!CreateVulkanSwapChain()) {
-        LogError(sTag, "Could not create the Vulkan SwapChain");
-        return;
+        if (!m_swapchain.Create(m_surface, m_size.x, m_size.y)) {
+            LogFatal(sTag, "Could not create the SwapChain");
+            return;
+        }
     }
 }
 

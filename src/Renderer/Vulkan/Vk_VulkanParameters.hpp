@@ -49,16 +49,4 @@ struct QueueParameters {
     }
 };
 
-struct SwapChainParameters {
-    VkSwapchainKHR handle;
-    VkFormat format;
-    std::vector<ImageParameters> images;
-
-    SwapChainParameters() : handle(VK_NULL_HANDLE), format(), images() {}
-
-    operator VkSwapchainKHR() {
-        return handle;
-    }
-};
-
 }  // namespace engine
