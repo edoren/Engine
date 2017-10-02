@@ -9,42 +9,46 @@ namespace {
 
 const String sTag("GL_Shader");
 
-GLenum sGlShaderTypes[] = {GL_VERTEX_SHADER, GL_FRAGMENT_SHADER};
+const std::array<GLenum, 3> sGlShaderTypes = {
+    GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_GEOMETRY_SHADER};
 
 }  // namespace
 
-GL_Shader::GL_Shader() : m_program(glCreateProgram()), m_linked(false) {
-    // reserve space minimum for a vetex an a fragment shader
-    m_shaders.reserve(2);
+GL_Shader::GL_Shader() : m_program(glCreateProgram()) {
+    for (size_t i = 0; i < m_shaders.size(); i++) {
+        m_shaders[i] = 0;
+    }
 }
 
 GL_Shader::GL_Shader(GL_Shader&& other)
       : m_program(other.m_program),
         m_shaders(std::move(other.m_shaders)),
-        m_linked(other.m_linked),
         m_uniforms(std::move(other.m_uniforms)) {
     other.m_program = 0;
-    other.m_linked = false;
+    for (size_t i = 0; i < other.m_shaders.size(); i++) {
+        other.m_shaders[i] = 0;
+    }
 }
 
 GL_Shader::~GL_Shader() {
-    if (!m_linked) CleanUpShaders();
+    if (!IsLinked()) CleanUpShaders();
     GL_CALL(glDeleteProgram(m_program));
 }
 
 GL_Shader& GL_Shader::operator=(GL_Shader&& other) {
     m_program = other.m_program;
     m_shaders = std::move(other.m_shaders);
-    m_linked = other.m_linked;
     m_uniforms = std::move(other.m_uniforms);
     other.m_program = 0;
-    other.m_linked = false;
+    for (size_t i = 0; i < other.m_shaders.size(); i++) {
+        other.m_shaders[i] = 0;
+    }
     return *this;
 }
 
 bool GL_Shader::LoadFromMemory(const byte* source, std::size_t source_size,
                                ShaderType type) {
-    if (m_linked) {
+    if (IsLinked()) {
         return false;
     }
 
@@ -53,17 +57,35 @@ bool GL_Shader::LoadFromMemory(const byte* source, std::size_t source_size,
         return false;
     }
 
+    size_t pos = static_cast<GLuint>(type);
+
+    if (m_shaders[pos]) {
+        GL_CALL(glDetachShader(m_program, m_shaders[pos]));
+        GL_CALL(glDeleteShader(m_shaders[pos]));
+        m_shaders[pos] = 0;
+    }
+
     GL_CALL(glAttachShader(m_program, shader));
-    m_shaders.push_back(shader);
+    m_shaders[pos] = shader;
 
     return true;
 }
 
+bool GL_Shader::IsLinked() {
+    GLint success = GL_TRUE;
+    GL_CALL(glGetProgramiv(m_program, GL_LINK_STATUS, &success));
+    return success == GL_TRUE;
+}
+
 bool GL_Shader::Link() {
+    if (IsLinked()) {
+        return true;
+    }
+
     GL_CALL(glLinkProgram(m_program));
 
-    GLint success = 0;
-    glGetProgramiv(m_program, GL_LINK_STATUS, &success);
+    GLint success = GL_TRUE;
+    GL_CALL(glGetProgramiv(m_program, GL_LINK_STATUS, &success));
     if (success == GL_FALSE) {
         GLint log_size = 0;
         GL_CALL(glGetProgramiv(m_program, GL_INFO_LOG_LENGTH, &log_size));
@@ -77,12 +99,13 @@ bool GL_Shader::Link() {
     // After the program is succesfully linked the shaders can be cleaned
     CleanUpShaders();
 
-    m_linked = true;
     return true;
 }
 
 void GL_Shader::Use() {
-    if (m_linked) GL_CALL(glUseProgram(m_program));
+    if (Link()) {
+        GL_CALL(glUseProgram(m_program));
+    };
 }
 
 void GL_Shader::SetUniform(const String& name, float val) {
@@ -166,9 +189,9 @@ void GL_Shader::CleanUpShaders() {
         if (m_shaders[i]) {
             GL_CALL(glDetachShader(m_program, m_shaders[i]));
             GL_CALL(glDeleteShader(m_shaders[i]));
+            m_shaders[i] = 0;
         }
     }
-    m_shaders.clear();
 }
 
 GLint GL_Shader::GetUniformLocation(const String& name) {

@@ -13,16 +13,18 @@ class OPENGL_PLUGIN_API GL_Shader : public Shader {
 public:
     GL_Shader();
     GL_Shader(GL_Shader&& other);
-    virtual ~GL_Shader();
+    ~GL_Shader() override;
 
-    virtual GL_Shader& operator=(GL_Shader&& other);
+    GL_Shader& operator=(GL_Shader&& other);
 
-    virtual bool LoadFromMemory(const byte* source, std::size_t source_size,
-                                ShaderType type);
+    bool LoadFromMemory(const byte* source, std::size_t source_size,
+                        ShaderType type) override;
 
-    virtual bool Link();
+    bool IsLinked();
 
-    virtual void Use();
+    bool Link();
+
+    void Use();
 
     void SetUniform(const String& name, float val);
     void SetUniform(const String& name, int32 val);
@@ -44,9 +46,7 @@ private:
 
 private:
     GLuint m_program;
-    std::vector<GLuint> m_shaders;
-
-    bool m_linked;
+    std::array<GLuint, sShaderTypeCount> m_shaders;
 
     std::map<String, GLint> m_uniforms;
 };

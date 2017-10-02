@@ -29,6 +29,7 @@ Vk_RenderWindow::Vk_RenderWindow()
         m_present_queue(nullptr),
         m_swapchain(),
         m_graphics_pipeline(VK_NULL_HANDLE),
+        m_pipeline_layout(VK_NULL_HANDLE),
         m_graphics_queue_cmd_pool(VK_NULL_HANDLE),
         m_render_pass(VK_NULL_HANDLE),
         m_vertex_buffer(),
@@ -144,6 +145,11 @@ void Vk_RenderWindow::Destroy() {
         if (m_graphics_pipeline) {
             vkDestroyPipeline(device, m_graphics_pipeline, nullptr);
             m_graphics_pipeline = VK_NULL_HANDLE;
+        }
+
+        if (m_pipeline_layout) {
+            vkDestroyPipelineLayout(device, m_pipeline_layout, nullptr);
+            m_pipeline_layout = VK_NULL_HANDLE;
         }
 
         if (m_render_pass) {
@@ -504,8 +510,7 @@ bool Vk_RenderWindow::CreateVulkanRenderPass() {
 bool Vk_RenderWindow::CreateVulkanPipeline() {
     VkResult result = VK_SUCCESS;
 
-    Vk_Shader vertex_shader_module;
-    Vk_Shader fragment_shader_module;
+    Vk_Shader shader;
 
     {
         std::vector<byte> vertex_shader_code;
@@ -516,16 +521,15 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         fs.LoadFileData("shaders/spirv/triangle.vert", &vertex_shader_code);
         fs.LoadFileData("shaders/spirv/triangle.frag", &fragment_shader_code);
 
-        vertex_shader_module.LoadFromMemory(vertex_shader_code.data(),
-                                            vertex_shader_code.size(),
-                                            ShaderType::eVertex);
-        fragment_shader_module.LoadFromMemory(fragment_shader_code.data(),
-                                              fragment_shader_code.size(),
-                                              ShaderType::eFragment);
+        shader.LoadFromMemory(vertex_shader_code.data(),
+                              vertex_shader_code.size(), ShaderType::eVertex);
+        shader.LoadFromMemory(fragment_shader_code.data(),
+                              fragment_shader_code.size(),
+                              ShaderType::eFragment);
     }
 
-    if (!vertex_shader_module.GetModule() ||
-        !fragment_shader_module.GetModule()) {
+    if (!shader.GetModule(ShaderType::eVertex) ||
+        !shader.GetModule(ShaderType::eFragment)) {
         return false;
     }
 
@@ -570,7 +574,7 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
             nullptr,                                              // pNext
             VkPipelineShaderStageCreateFlags(),                   // flags
             VK_SHADER_STAGE_VERTEX_BIT,                           // stage
-            vertex_shader_module.GetModule(),                     // module
+            shader.GetModule(ShaderType::eVertex),                // module
             "main",                                               // pName
             nullptr  // pSpecializationInfo
         },
@@ -580,7 +584,7 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
             nullptr,                                              // pNext
             VkPipelineShaderStageCreateFlags(),                   // flags
             VK_SHADER_STAGE_FRAGMENT_BIT,                         // stage
-            fragment_shader_module.GetModule(),                   // module
+            shader.GetModule(ShaderType::eFragment),              // module
             "main",                                               // pName
             nullptr  // pSpecializationInfo
         }};
@@ -677,12 +681,11 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         nullptr  // pPushConstantRanges
     };
 
-    VkPipelineLayout pipeline_layout;
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.GetVulkanDevice();
 
     result = vkCreatePipelineLayout(device, &layout_create_info, nullptr,
-                                    &pipeline_layout);
+                                    &m_pipeline_layout);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Could not create pipeline layout");
         return false;
@@ -703,7 +706,7 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         nullptr,                            // pDepthStencilState
         &color_blend_state_create_info,     // pColorBlendState
         &dynamic_state_create_info,         // pDynamicState
-        pipeline_layout,                    // layout
+        m_pipeline_layout,                  // layout
         m_render_pass,                      // renderPass
         0,                                  // subpass
         VK_NULL_HANDLE,                     // basePipelineHandle
@@ -715,11 +718,11 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
                                        &m_graphics_pipeline);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Could not create graphics pipeline");
-        vkDestroyPipelineLayout(device, pipeline_layout, nullptr);
+        vkDestroyPipelineLayout(device, m_pipeline_layout, nullptr);
+        m_pipeline_layout = VK_NULL_HANDLE;
         return false;
     }
 
-    vkDestroyPipelineLayout(device, pipeline_layout, nullptr);
     return true;
 }
 
@@ -748,17 +751,17 @@ bool Vk_RenderWindow::CreateVulkanVertexBuffer() {
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.GetVulkanDevice();
 
-    void* vertex_buffer_memory_pointer;
+    void* staging_buffer_memory_pointer;
     result = vkMapMemory(device, m_staging_buffer.GetMemory(), 0,
                          m_staging_buffer.GetSize(), 0,
-                         &vertex_buffer_memory_pointer);
+                         &staging_buffer_memory_pointer);
     if (result != VK_SUCCESS) {
         LogError(sTag,
                  "Could not map memory and upload data to a vertex buffer");
         return false;
     }
 
-    std::memcpy(vertex_buffer_memory_pointer, vertex_data,
+    std::memcpy(staging_buffer_memory_pointer, vertex_data,
                 static_cast<size_t>(m_vertex_buffer.GetSize()));
 
     VkMappedMemoryRange flush_range = {
@@ -830,7 +833,7 @@ bool Vk_RenderWindow::CreateVulkanVertexBuffer() {
         return false;
     }
 
-    vkDeviceWaitIdle(device);
+    vkQueueWaitIdle(m_graphics_queue->handle);
 
     return true;
 }
@@ -991,6 +994,10 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer,
     vkCmdSetViewport(command_buffer, 0, 1, &viewport);
     vkCmdSetScissor(command_buffer, 0, 1, &scissor);
 
+    // vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+    //                         m_pipeline_layout, 0, 1,
+    //                         &Vulkan.DescriptorSet.Handle, 0, nullptr);
+
     VkDeviceSize offset = 0;
     vkCmdBindVertexBuffers(command_buffer, 0, 1, &m_vertex_buffer.GetHandle(),
                            &offset);
@@ -1095,10 +1102,11 @@ void Vk_RenderWindow::OnAppDidEnterForeground() {
         }
 
         if (!CheckWSISupport()) {
-            PhysicalDeviceParameters& physical_device = context.GetPhysicalDevice();
+            PhysicalDeviceParameters& physical_device =
+                context.GetPhysicalDevice();
             LogFatal(sTag,
                      "Physical device {} doesn't include WSI "
-                             "support"_format(physical_device.properties.deviceName));
+                     "support"_format(physical_device.properties.deviceName));
             return;
         }
 

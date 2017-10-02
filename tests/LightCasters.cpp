@@ -1,12 +1,13 @@
 #include <Core/Main.hpp>
 #include <Graphics/3D/Camera.hpp>
-#include <Graphics/ResourceManager.hpp>
 #include <Input/InputManager.hpp>
 #include <Renderer/Model.hpp>
 #include <Renderer/RenderWindow.hpp>
 #include <Renderer/Renderer.hpp>
 #include <Renderer/Shader.hpp>
 #include <Renderer/Texture2D.hpp>
+#include <Renderer/TextureManager.hpp>
+#include <Renderer/ShaderManager.hpp>
 #include <System/Stopwatch.hpp>
 
 #include <Renderer/OpenGL/GL_Plugin.hpp>
@@ -204,7 +205,8 @@ int main(int argc, char* argv[]) {
     engine.Initialize();
 
     InputManager& input = InputManager::GetInstance();
-    ResourceManager& res = ResourceManager::GetInstance();
+    ShaderManager& shader_manager = ShaderManager::GetInstance();
+    TextureManager& texture_manager = TextureManager::GetInstance();
     Renderer& render = engine.GetActiveRenderer();
 
     {
@@ -223,24 +225,33 @@ int main(int argc, char* argv[]) {
         math::mat4 ViewMatrix;
         math::mat4 ModelMatrix;
 
-        Texture2D* texture = res.LoadTexture2D("textures/container2.png");
+        Texture2D* texture = texture_manager.LoadFromFile("container2.png");
         Texture2D* specularTexture =
-            res.LoadTexture2D("textures/container2_specular.png");
+            texture_manager.LoadFromFile("container2_specular.png");
         // Texture2D* specularTexture =
-        //     res.LoadTexture2D("textures/lighting_maps_specular_color.png");
+        //     texture_manager.LoadFromFile("lighting_maps_specular_color.png");
         // Texture2D* emissionTexture =
-        //     res.LoadTexture2D("textures/matrix.png");
+        //     texture_manager.LoadFromFile("matrix.png");
 
-        GL_Shader* cube_shader = static_cast<GL_Shader*>(
-            res.LoadShader("cube_shader", vertex_shader, fragment_shader));
-        GL_Shader* light_shader = static_cast<GL_Shader*>(res.LoadShader(
-            "light_shader", light_vertex_shader, light_fragment_shader));
+        GL_Shader* cube_shader =
+            static_cast<GL_Shader*>(shader_manager.LoadFromMemory(
+                "cube_shader",
+                {{ShaderType::eVertex, &vertex_shader},
+                 {ShaderType::eFragment, &fragment_shader}}));
+        GL_Shader* light_shader =
+            static_cast<GL_Shader*>(shader_manager.LoadFromMemory(
+                "light_shader",
+                {{ShaderType::eVertex, &light_vertex_shader},
+                 {ShaderType::eFragment, &light_fragment_shader}}));
 
-        GL_Shader* character_shader = static_cast<GL_Shader*>(res.LoadShader(
-            "model", character_vertex_shader, character_fragment_shader));
+        GL_Shader* character_shader =
+            static_cast<GL_Shader*>(shader_manager.LoadFromMemory(
+                "character_shader",
+                {{ShaderType::eVertex, &character_vertex_shader},
+                 {ShaderType::eFragment, &character_fragment_shader}}));
 
-        // Model character("models/CookKirby/DolCook.obj");
-        Model character("models/LinkOcarina/YoungLinkEquipped.obj");
+        // Model character("CookKirby/DolCook.obj");
+        Model character("LinkOcarina/YoungLinkEquipped.obj");
 
         std::vector<Vertex> vertex_buffer_data{
             // Red face
@@ -421,7 +432,7 @@ int main(int argc, char* argv[]) {
             auto lol = math::Rotate(angle, {0.0f, 1.0f, 0.0f}) *
                        math::vec4(light_position, 1.0f);
 
-            cube_shader->Use();
+            shader_manager.SetActiveShader("cube_shader");
             cube_shader->SetUniform("ViewPosition", camera.GetPosition());
 
             cube_shader->SetUniform("light.ambient", light_color * 0.2f);
@@ -461,7 +472,7 @@ int main(int argc, char* argv[]) {
             }
             glBindVertexArray(0);
 
-            character_shader->Use();
+            shader_manager.SetActiveShader("character_shader");
 
             character_shader->SetUniform("light.ambient", light_color * 0.2f);
             character_shader->SetUniform("light.diffuse", light_color * 0.7f);
@@ -490,7 +501,7 @@ int main(int argc, char* argv[]) {
             ModelMatrix *=
                 math::Scale(math::vec3(0.08f));  // Make it a smaller cube
 
-            light_shader->Use();
+            shader_manager.SetActiveShader("light_shader");
             light_shader->SetUniform(
                 "MVP", ProjectionMatrix * ViewMatrix * ModelMatrix);
 

@@ -94,14 +94,18 @@ private:
     QueueParameters* m_present_queue;
 
     Vk_SwapChain m_swapchain;
+
     VkPipeline m_graphics_pipeline;
+    VkPipelineLayout m_pipeline_layout;
 
     VkCommandPool m_graphics_queue_cmd_pool;
 
     VkRenderPass m_render_pass;
 
     Vk_Buffer m_vertex_buffer;
+    Vk_Buffer m_index_buffer;
     Vk_Buffer m_staging_buffer;
+
     std::vector<RenderingResourcesData> m_render_resources;
 };
 

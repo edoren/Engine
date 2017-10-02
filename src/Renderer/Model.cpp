@@ -1,8 +1,8 @@
 #include <Core/Main.hpp>
-#include <Graphics/ResourceManager.hpp>
 #include <Renderer/Model.hpp>
 #include <Renderer/RendererFactory.hpp>
 #include <Renderer/Texture2D.hpp>
+#include <Renderer/TextureManager.hpp>
 #include <System/FileSystem.hpp>
 #include <System/IOStream.hpp>
 #include <System/LogManager.hpp>
@@ -15,6 +15,10 @@
 #include <assimp/Importer.hpp>
 
 namespace engine {
+
+namespace {
+
+static const String sRootModelFolder("models");
 
 class CustomAssimpIOStream : public Assimp::IOStream {
     friend class CustomAssimpIOSystem;
@@ -91,6 +95,8 @@ public:
     }
 };
 
+}  // namespace
+
 Model::Model(const String& path) {
     LoadModel(path);
 }
@@ -110,10 +116,13 @@ void Model::Draw() {
 void Model::LoadModel(const String& path) {
     Assimp::Importer importer;
 
+    FileSystem& fs = FileSystem::GetInstance();
+    String filename = fs.Join(sRootModelFolder, path);
+
     importer.SetIOHandler(new CustomAssimpIOSystem());
 
     const aiScene* scene =
-        importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+        importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_FlipUVs);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE ||
         !scene->mRootNode) {
@@ -122,8 +131,7 @@ void Model::LoadModel(const String& path) {
         return;
     }
 
-    auto& str = path.ToUtf8();
-    m_relative_directory = str.substr(0, str.find_last_of("/\\") + 1);
+    m_relative_directory = path.SubString(0, path.FindLastOf("/\\"));
 
     ProcessNode(scene->mRootNode, scene);
 }
@@ -189,7 +197,7 @@ Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
         {aiTextureType_DIFFUSE, aiTextureType_SPECULAR},
     };
 
-    ResourceManager& res = ResourceManager::GetInstance();
+    TextureManager& texture_manager = TextureManager::GetInstance();
     FileSystem& fs = FileSystem::GetInstance();
     for (aiTextureType type : enabled_texture_types) {
         unsigned int texture_count = material->GetTextureCount(type);
@@ -199,7 +207,7 @@ Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 
             String name = fs.Join(m_relative_directory, str.C_Str());
 
-            Texture2D* texture = res.LoadTexture2D(name);
+            Texture2D* texture = texture_manager.LoadFromFile(name);
             TextureType texture_type = TextureType::eNone;
 
             switch (type) {

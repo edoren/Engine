@@ -13,23 +13,19 @@ class VULKAN_PLUGIN_API Vk_Shader : public Shader {
 public:
     Vk_Shader();
     Vk_Shader(Vk_Shader&& other);
-    ~Vk_Shader();
+    ~Vk_Shader() override;
 
     Vk_Shader& operator=(Vk_Shader&& other);
 
     bool LoadFromMemory(const byte* source, std::size_t source_size,
                         ShaderType type) override;
 
-    bool Link() override;
-
-    void Use() override;
-
-    VkShaderModule& GetModule();
+    VkShaderModule& GetModule(ShaderType type);
 
     VkShaderStageFlagBits GetShaderType();
 
 private:
-    VkShaderModule m_module;
+    std::array<VkShaderModule, sShaderTypeCount> m_modules;
 };
 
 }  // namespace engine

@@ -1,6 +1,6 @@
 #include "GL_Mesh.hpp"
 
-#include <Graphics/ResourceManager.hpp>
+#include <Renderer/ShaderManager.hpp>
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
 
@@ -90,11 +90,10 @@ void GL_Mesh::Draw() {
                 break;
         }
 
-        ResourceManager& res = ResourceManager::GetInstance();
+        ShaderManager& shader_manager = ShaderManager::GetInstance();
 
-        // TODO: Add a ShaderManager to handle the current used shader
         GL_Shader* shader =
-            reinterpret_cast<GL_Shader*>(res.FindShader("model"));
+            reinterpret_cast<GL_Shader*>(shader_manager.GetActiveShader());
         GL_Texture2D* curr_texture =
             reinterpret_cast<GL_Texture2D*>(m_textures[i].first);
 

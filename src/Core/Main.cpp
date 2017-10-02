@@ -31,19 +31,21 @@ Main::Main(int argc, char* argv[])
         m_logger(nullptr),
         m_sharedlibs(nullptr),
         m_input(nullptr),
-        m_resources(nullptr) {
+        m_shader_manager(nullptr) {
     ENGINE_UNUSED(argc);
     ENGINE_UNUSED(argv);
     m_logger = new LogManager();
     m_file_system = new FileSystem();
     m_sharedlibs = new SharedLibManager();
     m_input = new InputManager();
-    m_resources = new ResourceManager();
+    m_shader_manager = new ShaderManager();
+    m_texture_manager = new TextureManager();
 }
 
 Main::~Main() {
     Shutdown();
-    delete m_resources;
+    delete m_texture_manager;
+    delete m_shader_manager;
     delete m_input;
     delete m_sharedlibs;
     delete m_file_system;
@@ -63,7 +65,6 @@ void Main::Initialize() {
         SDL_Init(0);
 
         InputManager::GetInstance().Initialize();
-        ResourceManager::GetInstance().Initialize();
 
         bool status = GetActiveRenderer().Initialize();
         if (!status) {
@@ -81,7 +82,6 @@ void Main::Shutdown() {
         LogInfo(sTag, "Stopping Engine");
 
         InputManager::GetInstance().Shutdown();
-        ResourceManager::GetInstance().Shutdown();
 
         ShutdownPlugins();
 
@@ -200,8 +200,7 @@ void Main::ShutdownPlugins() {
 
         if (!pFunc) {
             const String& name = (*i)->GetName();
-            LogFatal(sTag,
-                     "Cannot find symbol StopPlugin in library: " + name);
+            LogFatal(sTag, "Cannot find symbol StopPlugin in library: " + name);
         }
 
         // This must call UninstallPlugin

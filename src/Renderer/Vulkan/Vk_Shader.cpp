@@ -10,27 +10,39 @@ namespace {
 
 const String sTag("Vk_Shader");
 
-VkShaderStageFlagBits sVkShaderTypes[] = {VK_SHADER_STAGE_VERTEX_BIT,
-                                          VK_SHADER_STAGE_FRAGMENT_BIT};
+const std::array<VkShaderStageFlagBits, 3> sVkShaderTypes = {
+    VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_FRAGMENT_BIT,
+    VK_SHADER_STAGE_GEOMETRY_BIT};
 
 }  // namespace
 
-Vk_Shader::Vk_Shader() : m_module(VK_NULL_HANDLE) {}
+Vk_Shader::Vk_Shader() {
+    for (size_t i = 0; i < m_modules.size(); i++) {
+        m_modules[i] = VK_NULL_HANDLE;
+    }
+}
 
-Vk_Shader::Vk_Shader(Vk_Shader&& other) : m_module(other.m_module) {
-    other.m_module = VK_NULL_HANDLE;
+Vk_Shader::Vk_Shader(Vk_Shader&& other)
+      : m_modules(std::move(other.m_modules)) {
+    for (size_t i = 0; i < other.m_modules.size(); i++) {
+        other.m_modules[i] = VK_NULL_HANDLE;
+    }
 }
 
 Vk_Shader::~Vk_Shader() {
-    if (m_module) {
-        VkDevice& device = Vk_Context::GetInstance().GetVulkanDevice();
-        vkDestroyShaderModule(device, m_module, nullptr);
+    VkDevice& device = Vk_Context::GetInstance().GetVulkanDevice();
+    for (size_t i = 0; i < m_modules.size(); i++) {
+        if (m_modules[i] != VK_NULL_HANDLE) {
+            vkDestroyShaderModule(device, m_modules[i], nullptr);
+        }
     }
 }
 
 Vk_Shader& Vk_Shader::operator=(Vk_Shader&& other) {
-    m_module = other.m_module;
-    other.m_module = VK_NULL_HANDLE;
+    m_modules = std::move(other.m_modules);
+    for (size_t i = 0; i < other.m_modules.size(); i++) {
+        other.m_modules[i] = VK_NULL_HANDLE;
+    }
     return *this;
 }
 
@@ -52,8 +64,14 @@ bool Vk_Shader::LoadFromMemory(const byte* source, std::size_t source_size,
 
     VkDevice& device = Vk_Context::GetInstance().GetVulkanDevice();
 
+    size_t pos = static_cast<size_t>(type);
+
+    if (m_modules[pos] != VK_NULL_HANDLE) {
+        vkDestroyShaderModule(device, m_modules[pos], nullptr);
+    }
+
     result = vkCreateShaderModule(device, &shader_module_create_info, nullptr,
-                                  &m_module);
+                                  &m_modules[pos]);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Could not create shader module.");
         return false;
@@ -62,18 +80,8 @@ bool Vk_Shader::LoadFromMemory(const byte* source, std::size_t source_size,
     return true;
 }
 
-VkShaderModule& Vk_Shader::GetModule() {
-    return m_module;
+VkShaderModule& Vk_Shader::GetModule(ShaderType type) {
+    return m_modules[static_cast<size_t>(type)];
 }
-
-VkShaderStageFlagBits Vk_Shader::GetShaderType() {
-    return sVkShaderTypes[0];
-}
-
-bool Vk_Shader::Link() {
-    return true;
-}
-
-void Vk_Shader::Use() {}
 
 }  // namespace engine

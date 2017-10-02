@@ -38,7 +38,7 @@ FileSystem::FileSystem() {
 #if PLATFORM_IS(PLATFORM_ANDROID)
         ""
 #else
-        "data/"
+        "data"
 #endif
     };
 }
