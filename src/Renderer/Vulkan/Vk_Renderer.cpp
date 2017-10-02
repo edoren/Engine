@@ -1,5 +1,7 @@
 #include "Vk_Renderer.hpp"
 #include "Vk_RendererFactory.hpp"
+#include "Vk_ShaderManager.hpp"
+#include "Vk_TextureManager.hpp"
 
 namespace engine {
 
@@ -16,11 +18,17 @@ bool Vk_Renderer::Initialize() {
         ok = ok && m_context->Initialize();
         m_render_window = new Vk_RenderWindow();
         m_renderer_factory = new Vk_RendererFactory();
+        m_shader_manager = new Vk_ShaderManager();
+        m_texture_manager = new Vk_TextureManager();
     }
     return ok;
 }
 
 void Vk_Renderer::Shutdown() {
+    delete m_texture_manager;
+    m_texture_manager = nullptr;
+    delete m_shader_manager;
+    m_shader_manager = nullptr;
     delete m_renderer_factory;
     m_renderer_factory = nullptr;
     delete m_render_window;

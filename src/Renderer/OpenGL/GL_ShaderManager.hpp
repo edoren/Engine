@@ -9,13 +9,13 @@ namespace engine {
 
 class String;
 
-class OPENGL_PLUGIN_API GL_ShaderManagerDelegate
-    : public ShaderManagerDelegate {
+class OPENGL_PLUGIN_API GL_ShaderManager : public ShaderManager {
 public:
-    GL_ShaderManagerDelegate();
+    GL_ShaderManager();
 
-    ~GL_ShaderManagerDelegate();
+    ~GL_ShaderManager();
 
+protected:
     Shader* CreateShader() override;
 
     void DeleteShader(Shader* shader) override;

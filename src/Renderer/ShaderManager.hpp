@@ -7,33 +7,18 @@
 
 namespace engine {
 
-class ENGINE_API ShaderManagerDelegate {
-public:
-    ShaderManagerDelegate() {}
-
-    virtual ~ShaderManagerDelegate() {}
-
-    virtual Shader* CreateShader() = 0;
-
-    virtual void DeleteShader(Shader* shader) = 0;
-
-    virtual void SetActiveShader(Shader* shader) = 0;
-
-    virtual const String& GetShaderFolder() const = 0;
-};
-
 class ENGINE_API ShaderManager : public Singleton<ShaderManager> {
 public:
     ShaderManager();
-    ~ShaderManager();
+    virtual ~ShaderManager();
 
     ////////////////////////////////////////////////////////////
     /// @brief Load a shader from the filesystem
     ///
     /// @details This will search for files with the next extensions:
-    ///          - .vs : Vertex shader
-    ///          - .fs : Fragment shader
-    ///          - .gs : Geometry shader
+    ///          - .vert : Vertex shader
+    ///          - .frag : Fragment shader
+    ///          - .geom : Geometry shader
     ///
     /// @warning Vertex and Fragment shaders are required
     ///
@@ -59,10 +44,14 @@ public:
 
     Shader* GetActiveShader();
 
-    void SetDelegate(ShaderManagerDelegate* delegate);
+protected:
+    virtual Shader* CreateShader() = 0;
 
-private:
-    ShaderManagerDelegate* m_delegate;
+    virtual void DeleteShader(Shader* shader) = 0;
+
+    virtual void SetActiveShader(Shader* shader) = 0;
+
+    virtual const String& GetShaderFolder() const = 0;
 
     Shader* m_active_shader;
     std::map<String, Shader*> m_shaders;

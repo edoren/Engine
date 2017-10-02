@@ -9,13 +9,13 @@ namespace engine {
 
 class String;
 
-class VULKAN_PLUGIN_API Vk_ShaderManagerDelegate
-    : public ShaderManagerDelegate {
+class VULKAN_PLUGIN_API Vk_ShaderManager : public ShaderManager {
 public:
-    Vk_ShaderManagerDelegate();
+    Vk_ShaderManager();
 
-    ~Vk_ShaderManagerDelegate();
+    ~Vk_ShaderManager();
 
+protected:
     Shader* CreateShader() override;
 
     void DeleteShader(Shader* shader) override;

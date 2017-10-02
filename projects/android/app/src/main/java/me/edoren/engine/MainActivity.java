@@ -9,7 +9,7 @@ public class MainActivity extends SDLActivity {
         return new String[] {
             "SDL2",
             "engine-d",
-            "LightCasters"
+            "CreateWindow"
         };
     }
 

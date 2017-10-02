@@ -4,6 +4,7 @@
 
 #include "Vk_RenderWindow.hpp"
 #include "Vk_Shader.hpp"
+#include "Vk_ShaderManager.hpp"
 
 namespace engine {
 
@@ -102,7 +103,6 @@ bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
 
 void Vk_RenderWindow::Destroy() {
     Vk_Context& context = Vk_Context::GetInstance();
-    VkInstance& instance = context.GetVulkanInstance();
     VkDevice& device = context.GetVulkanDevice();
 
     if (device) {
@@ -510,26 +510,11 @@ bool Vk_RenderWindow::CreateVulkanRenderPass() {
 bool Vk_RenderWindow::CreateVulkanPipeline() {
     VkResult result = VK_SUCCESS;
 
-    Vk_Shader shader;
+    Vk_Shader* shader = reinterpret_cast<Vk_Shader*>(
+        ShaderManager::GetInstance().LoadFromFile("triangle"));
 
-    {
-        std::vector<byte> vertex_shader_code;
-        std::vector<byte> fragment_shader_code;
-
-        FileSystem& fs = FileSystem::GetInstance();
-
-        fs.LoadFileData("shaders/spirv/triangle.vert", &vertex_shader_code);
-        fs.LoadFileData("shaders/spirv/triangle.frag", &fragment_shader_code);
-
-        shader.LoadFromMemory(vertex_shader_code.data(),
-                              vertex_shader_code.size(), ShaderType::eVertex);
-        shader.LoadFromMemory(fragment_shader_code.data(),
-                              fragment_shader_code.size(),
-                              ShaderType::eFragment);
-    }
-
-    if (!shader.GetModule(ShaderType::eVertex) ||
-        !shader.GetModule(ShaderType::eFragment)) {
+    if (!shader->GetModule(ShaderType::eVertex) ||
+        !shader->GetModule(ShaderType::eFragment)) {
         return false;
     }
 
@@ -574,7 +559,7 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
             nullptr,                                              // pNext
             VkPipelineShaderStageCreateFlags(),                   // flags
             VK_SHADER_STAGE_VERTEX_BIT,                           // stage
-            shader.GetModule(ShaderType::eVertex),                // module
+            shader->GetModule(ShaderType::eVertex),                // module
             "main",                                               // pName
             nullptr  // pSpecializationInfo
         },
@@ -584,7 +569,7 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
             nullptr,                                              // pNext
             VkPipelineShaderStageCreateFlags(),                   // flags
             VK_SHADER_STAGE_FRAGMENT_BIT,                         // stage
-            shader.GetModule(ShaderType::eFragment),              // module
+            shader->GetModule(ShaderType::eFragment),              // module
             "main",                                               // pName
             nullptr  // pSpecializationInfo
         }};
@@ -1078,9 +1063,6 @@ void Vk_RenderWindow::OnWindowResized(const math::ivec2& size) {
 }
 
 void Vk_RenderWindow::OnAppWillEnterBackground() {
-    Vk_Context& context = Vk_Context::GetInstance();
-    VkInstance& instance = context.GetVulkanInstance();
-
     m_swapchain.Destroy();
     m_surface.Destroy();
 }

@@ -6,8 +6,6 @@
 #include <Core/SharedLibManager.hpp>
 #include <Input/InputManager.hpp>
 #include <Renderer/Renderer.hpp>
-#include <Renderer/ShaderManager.hpp>
-#include <Renderer/TextureManager.hpp>
 #include <System/FileSystem.hpp>
 #include <System/LogManager.hpp>
 #include <System/String.hpp>
@@ -117,8 +115,6 @@ private:
     FileSystem* m_file_system;
     SharedLibManager* m_sharedlibs;
     InputManager* m_input;
-    ShaderManager* m_shader_manager;
-    TextureManager* m_texture_manager;
 };
 
 }  // namespace engine

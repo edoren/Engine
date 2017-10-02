@@ -9,13 +9,13 @@ namespace engine {
 
 class String;
 
-class OPENGL_PLUGIN_API GL_TextureManagerDelegate
-    : public TextureManagerDelegate {
+class OPENGL_PLUGIN_API GL_TextureManager : public TextureManager {
 public:
-    GL_TextureManagerDelegate();
+    GL_TextureManager();
 
-    ~GL_TextureManagerDelegate();
+    ~GL_TextureManager();
 
+protected:
     Texture2D* CreateTexture2D() override;
 
     void DeleteTexture2D(Texture2D* shader) override;

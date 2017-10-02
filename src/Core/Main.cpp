@@ -30,22 +30,17 @@ Main::Main(int argc, char* argv[])
         m_active_renderer(nullptr),
         m_logger(nullptr),
         m_sharedlibs(nullptr),
-        m_input(nullptr),
-        m_shader_manager(nullptr) {
+        m_input(nullptr) {
     ENGINE_UNUSED(argc);
     ENGINE_UNUSED(argv);
     m_logger = new LogManager();
     m_file_system = new FileSystem();
     m_sharedlibs = new SharedLibManager();
     m_input = new InputManager();
-    m_shader_manager = new ShaderManager();
-    m_texture_manager = new TextureManager();
 }
 
 Main::~Main() {
     Shutdown();
-    delete m_texture_manager;
-    delete m_shader_manager;
     delete m_input;
     delete m_sharedlibs;
     delete m_file_system;
@@ -164,6 +159,7 @@ void Main::UninstallPlugin(Plugin* plugin) {
     LogInfo(sTag, "Plugin successfully uninstalled");
 }
 
+// TODO: Remove Renderer from Main
 void Main::AddRenderer(Renderer* new_renderer) {
     m_renderers.push_back(new_renderer);
 }

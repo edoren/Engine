@@ -16,62 +16,45 @@ const String sRootShaderFolder("shaders");
 template <>
 ShaderManager* Singleton<ShaderManager>::sInstance = nullptr;
 
-ShaderManager::ShaderManager()
-      : m_delegate(nullptr), m_active_shader(nullptr), m_shaders() {}
+ShaderManager::ShaderManager() : m_active_shader(nullptr), m_shaders() {}
 
 ShaderManager::~ShaderManager() {
-    if (m_delegate != nullptr) {
-        LogDebug(sTag, "Delegate not removed before ShaderManager was deleted");
+    if (m_shaders.size() > 0) {
+        LogDebug(sTag, "Shaders not deleted.");
     }
-}
-
-void ShaderManager::SetDelegate(ShaderManagerDelegate* delegate) {
-    // Delete all the shaders before removing the
-    if (delegate == nullptr) {
-        for (auto shader_pair : m_shaders) {
-            m_delegate->DeleteShader(shader_pair.second);
-        }
-        m_shaders.clear();
-    }
-    m_delegate = delegate;
 }
 
 Shader* ShaderManager::LoadFromFile(const String& basename) {
-    if (m_delegate == nullptr) {
-        LogDebug(sTag, "Delegate not set for ShaderManager");
-        return nullptr;
-    }
-
     if (GetShader(basename) != nullptr) {
         LogError(sTag, "Shader '{}' already loaded");
         return nullptr;
     }
 
-    Shader* new_shader = m_delegate->CreateShader();
+    Shader* new_shader = CreateShader();
 
     FileSystem& fs = FileSystem::GetInstance();
 
-    String folder = fs.Join(sRootShaderFolder, m_delegate->GetShaderFolder());
+    String folder = fs.Join(sRootShaderFolder, GetShaderFolder());
 
     auto shader_types = {ShaderType::eVertex, ShaderType::eFragment,
                          ShaderType::eGeometry};
     for (auto shader_type : shader_types) {
         bool ok = true;
 
-        String shader_extension;
+        const char* shader_extension;
         switch (shader_type) {
             case ShaderType::eVertex:
-                shader_extension = ".vs";
+                shader_extension = ".vert";
                 break;
             case ShaderType::eFragment:
-                shader_extension = ".fs";
+                shader_extension = ".frag";
                 break;
             case ShaderType::eGeometry:
-                shader_extension = ".gs";
+                shader_extension = ".geom";
                 break;
         }
 
-        String filename = fs.Join(folder, basename, shader_extension);
+        String filename = fs.Join(folder, basename + shader_extension);
 
         bool filename_exist = fs.FileExists(filename);
 
@@ -94,7 +77,7 @@ Shader* ShaderManager::LoadFromFile(const String& basename) {
         }
 
         if (!ok) {
-            m_delegate->DeleteShader(new_shader);
+            DeleteShader(new_shader);
             return nullptr;
         }
     }
@@ -107,11 +90,6 @@ Shader* ShaderManager::LoadFromFile(const String& basename) {
 
 Shader* ShaderManager::LoadFromMemory(
     const String& name, std::map<ShaderType, String*> shader_data) {
-    if (m_delegate == nullptr) {
-        LogDebug(sTag, "Delegate not set for ShaderManager");
-        return nullptr;
-    }
-
     if (GetShader(name) != nullptr) {
         LogError(sTag, "Shader '{}' already loaded");
         return nullptr;
@@ -125,7 +103,7 @@ Shader* ShaderManager::LoadFromMemory(
         return nullptr;
     }
 
-    Shader* new_shader = m_delegate->CreateShader();
+    Shader* new_shader = CreateShader();
 
     for (auto& shader_data_pair : shader_data) {
         bool ok = true;
@@ -143,7 +121,7 @@ Shader* ShaderManager::LoadFromMemory(
         }
 
         if (!ok) {
-            m_delegate->DeleteShader(new_shader);
+            DeleteShader(new_shader);
             return nullptr;
         }
     }
@@ -161,7 +139,7 @@ void ShaderManager::SetActiveShader(const String& name) {
     Shader* found_shader = GetShader(name);
     if (found_shader != nullptr) {
         m_active_shader = found_shader;
-        m_delegate->SetActiveShader(m_active_shader);
+        SetActiveShader(m_active_shader);
     } else {
         LogError(sTag,
                  "Could not find a Shader named: {}"_format(name.ToUtf8()));

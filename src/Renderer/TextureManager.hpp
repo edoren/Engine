@@ -10,23 +10,10 @@ class Texture2D;
 class Image;
 class String;
 
-class ENGINE_API TextureManagerDelegate {
-public:
-    TextureManagerDelegate() {}
-
-    virtual ~TextureManagerDelegate() {}
-
-    virtual Texture2D* CreateTexture2D() = 0;
-
-    virtual void DeleteTexture2D(Texture2D* texture) = 0;
-
-    virtual void SetActiveTexture2D(Texture2D* texture) = 0;
-};
-
 class ENGINE_API TextureManager : public Singleton<TextureManager> {
 public:
     TextureManager();
-    ~TextureManager();
+    virtual ~TextureManager();
 
     ////////////////////////////////////////////////////////////
     /// @brief Load a texture from the filesystem
@@ -48,10 +35,12 @@ public:
 
     Texture2D* GetActiveTexture2D();
 
-    void SetDelegate(TextureManagerDelegate* delegate);
+protected:
+    virtual Texture2D* CreateTexture2D() = 0;
 
-private:
-    TextureManagerDelegate* m_delegate;
+    virtual void DeleteTexture2D(Texture2D* texture) = 0;
+
+    virtual void SetActiveTexture2D(Texture2D* texture) = 0;
 
     Texture2D* m_active_texture;
     std::map<String, Texture2D*> m_textures;
