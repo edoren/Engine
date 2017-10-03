@@ -11,7 +11,12 @@ const String sTag("Vk_TextureManager");
 
 Vk_TextureManager::Vk_TextureManager() {}
 
-Vk_TextureManager::~Vk_TextureManager() {}
+Vk_TextureManager::~Vk_TextureManager() {
+    for (auto texture_pair : m_textures) {
+        DeleteTexture2D(texture_pair.second);
+    }
+    m_textures.clear();
+}
 
 Texture2D* Vk_TextureManager::CreateTexture2D() {
     return nullptr;

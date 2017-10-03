@@ -13,7 +13,12 @@ const String sShaderFolder("spirv");
 
 Vk_ShaderManager::Vk_ShaderManager() {}
 
-Vk_ShaderManager::~Vk_ShaderManager() {}
+Vk_ShaderManager::~Vk_ShaderManager() {
+    for (auto shader_pair : m_shaders) {
+        DeleteShader(shader_pair.second);
+    }
+    m_shaders.clear();
+}
 
 Shader* Vk_ShaderManager::CreateShader() {
     return new Vk_Shader();
