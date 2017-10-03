@@ -4,18 +4,18 @@ android {
     compileSdkVersion 24
     buildToolsVersion "26.0.0"
     defaultConfig {
-        applicationId "me.edoren.engine"
+        applicationId "@APP_PACKAGE_ID@"
         minSdkVersion 24
         targetSdkVersion 24
         versionCode 1
         versionName "1.0"
-        // testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         ndk {
             abiFilters "armeabi-v7a"
         }
         externalNativeBuild {
             cmake {
-                // targets ""
+                // targets "",
+                arguments "@CMAKE_ARGUMENTS@"
             }
         }
     }
@@ -27,31 +27,19 @@ android {
     }
     externalNativeBuild {
         cmake {
-            path "../../../CMakeLists.txt"
+            path "@APP_ROOT_DIRECTORY@/CMakeLists.txt"
         }
     }
-    // productFlavors {
-    //     x86 {
-    //         ndk {
-    //             abiFilter 'x86'
-    //         }
-    //     }
-    //     x86_64 {
-    //         ndk {
-    //             abiFilter 'x86_64'
-    //         }
-    //     }
-    //     arm7 {
-    //         ndk {
-    //             abiFilter 'armeabi-v7a'
-    //         }
-    //     }
-    //     universal {
-    //         ndk {
-    //             abiFilters "x86", "x86_64", "armeabi-v7a"
-    //         }
-    //     }
-    // }
+
+    sourceSets {
+        main {
+            manifest.srcFile "@APP_BUILD_DIRECTORY@/AndroidManifest.xml"
+            java.srcDirs = ["@APP_BUILD_DIRECTORY@/src"]
+            res.srcDirs = ["@APP_BUILD_DIRECTORY@/res"]
+            assets.srcDirs = ["@APP_BUILD_DIRECTORY@/assets"]
+            jniLibs.srcDirs = ['@APP_BUILD_DIRECTORY@/jniLibs']
+        }
+    }
 }
 
 dependencies {

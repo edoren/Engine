@@ -1,31 +1,13 @@
 #!/usr/bin/env python3
 
+import errno
 import os
 import os.path
-import sys
-import errno
 import shutil
 import subprocess
+import sys
 
-
-def copy_directory(src, dst):
-    try:
-        shutil.copytree(src, dst)
-    except OSError as exc:  # python >2.5
-        if exc.errno == errno.ENOTDIR:
-            shutil.copy(src, dst)
-        else:
-            raise
-
-
-def remove_directory(dir):
-    if os.path.exists(dir):
-        shutil.rmtree(dir)
-
-
-def exit_with_msg(message, code=0):
-    print(message)
-    exit(0)
+import file_utils
 
 
 def generate_spirv_shaders(data_folder):
@@ -33,7 +15,8 @@ def generate_spirv_shaders(data_folder):
     if glslang_exe is None:
         vulkan_dir = os.environ.get("VULKAN_SDK")
         if vulkan_dir is None:
-            exit_with_msg("Vulkan SDK not installed", 1)
+            print("Vulkan SDK not installed")
+            exit(1)
         vulkan_dir = os.path.abspath(vulkan_dir)
         glslang_exe = os.path.join(vulkan_dir, "bin", "glslangValidator")
 
@@ -59,22 +42,24 @@ def generate_spirv_shaders(data_folder):
         ret_value = subprocess.call(command, shell=True)
 
         if ret_value != 0:
-            exit_with_msg("Error compiling shaders", ret_value)
+            print("Error compiling shaders")
+            exit(ret_value)
 
 
 def main(argv):
     if len(argv) != 3:
-        exit_with_msg("Usage:\n"
-                      "{} input_folder output_folder".format(argv[0]))
+        print("Usage:\n"
+              "{} input_folder output_folder".format(argv[0]))
+        exit()
 
     input_folder = os.path.abspath(argv[1])
     output_folder = os.path.abspath(argv[2])
     if not os.path.exists(input_folder):
-        exit_with_msg("Target folder does not exist", 1)
+        print("Target folder does not exist", 1)
+        exit(1)
 
     print("================== Processing engine data ==================")
-    remove_directory(output_folder)
-    copy_directory(input_folder, output_folder)
+    file_utils.copy_directory(input_folder, output_folder, force=True)
     generate_spirv_shaders(output_folder)
     print("============================================================")
 

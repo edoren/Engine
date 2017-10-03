@@ -5,12 +5,15 @@
 # Gradle files
 .gradle
 .gradletasknamecache
-/local.properties
+local.properties
 
 # MacOS .DS_Store file
 .DS_Store
 
 # Build files
-/build
-/captures
+build
 .externalNativeBuild
+
+# Copied assets
+/assets
+/jniLibs

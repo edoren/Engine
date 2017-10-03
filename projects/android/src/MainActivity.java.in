@@ -1,4 +1,4 @@
-package me.edoren.engine;
+package @APP_PACKAGE_ID@;
 
 import org.libsdl.app.SDLActivity;
 
@@ -9,7 +9,7 @@ public class MainActivity extends SDLActivity {
         return new String[] {
             "SDL2",
             "engine-d",
-            "CreateWindow"
+            "@APP_NAME@"
         };
     }
 

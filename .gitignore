@@ -1,5 +1,9 @@
 # CMake build directory
-build/
+/build/
 
 # Visual Studio Code folder
-.vscode/
+/.vscode/
+
+# Python files
+__pycache__
+*.pyc
