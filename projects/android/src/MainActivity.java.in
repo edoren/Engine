@@ -1,4 +1,4 @@
-package @APP_PACKAGE_ID@;
+package @APP_PACKAGE@;
 
 import org.libsdl.app.SDLActivity;
 

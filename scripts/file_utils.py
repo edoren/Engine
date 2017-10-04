@@ -35,9 +35,23 @@ def copy_directory(src, dst, symlinks=False, ignore=None, force=False):
             shutil.copytree(s, d, symlinks, ignore)
 
 
-def remove_directory(dir):
-    if os.path.exists(dir):
-        shutil.rmtree(dir)
+def remove_directory(path):
+    if os.path.isdir(path):
+        shutil.rmtree(path)
+
+
+def remove_directory_contents(path):
+    if os.path.isdir(path):
+        for entrie in os.listdir(path):
+            entrie = os.path.join(path, entrie)
+            if os.path.isdir(entrie):
+                remove_directory(entrie)
+            elif os.path.isfile(entrie):
+                os.remove(entrie)
+
+
+def find_executable(name):
+    return shutil.which(name)
 
 
 def configure_file(input_file_path, output_file_path, config_dict):
