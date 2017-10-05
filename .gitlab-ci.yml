@@ -10,7 +10,6 @@ variables:
   tags:
     - docker
   before_script:
-    - echo Vulkan Version $VULKAN_SDK_VERSION
     # System configuration
     - apt-get update -qq
     - apt-get install -qq curl software-properties-common  # install add-apt-repository
@@ -39,13 +38,13 @@ build:linux_gcc:
   script:
     - export CC=gcc-6
     - export CXX=g++-6
-    - mkdir build
-    - cd build
-    - cmake .. -DCMAKE_BUILD_TYPE=Release -DENGINE_BUILD_STATIC=OFF
-    - make
+    - ./generate.py --name Engine --platform linux --package me.edoren.engine --build-type Release
+    - cd build/linux
+    - ./build.py
   artifacts:
+    expire_in: 1 hour
     paths:
-      - build/
+      - build/linux/
 
 build:linux_clang:
   <<: *linux_image
@@ -53,19 +52,19 @@ build:linux_clang:
   script:
     - export CC=clang
     - export CXX=clang++
-    - mkdir build
-    - cd build
-    - cmake .. -DCMAKE_BUILD_TYPE=Release -DENGINE_BUILD_STATIC=OFF
-    - make
+    - ./generate.py --name Engine --platform linux --package me.edoren.engine --build-type Release
+    - cd build/linux
+    - ./build.py
   artifacts:
+    expire_in: 1 hour
     paths:
-      - build/
+      - build/linux/
 
 test:linux_gcc:
   <<: *linux_image
   stage: test
   script:
-    - cd build/tests/
+    - cd build/linux/tests/
     - ctest -V
   dependencies:
     - build:linux_gcc
@@ -74,7 +73,7 @@ test:linux_clang:
   <<: *linux_image
   stage: test
   script:
-    - cd build/tests/
+    - cd build/linux/tests/
     - ctest -V
   dependencies:
     - build:linux_clang
