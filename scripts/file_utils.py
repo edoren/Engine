@@ -6,6 +6,10 @@ import re
 import shutil
 
 
+def join(*args):
+    return os.path.join(*args).replace("\\", "/")
+
+
 def create_directory(path):
     try:
         os.makedirs(path)
