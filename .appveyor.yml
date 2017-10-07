@@ -44,7 +44,9 @@ install:
 # scripts to run before build
 before_build:
   - cd C:\projects\engine
-  - python.exe generate.py --name Engine --package me.edoren.engine --platform windows
+  - if "%PLATFORM%"=="Win32" set CMAKE_GENERATOR_PLATFORM=""
+  - if "%PLATFORM%"=="x64"   set CMAKE_GENERATOR_PLATFORM="x64"
+  - python.exe generate.py --name Engine --package me.edoren.engine --platform windows --cmake-args CMAKE_GENERATOR_PLATFORM=%CMAKE_GENERATOR_PLATFORM%
   - cd build\windows
 
 build_script:
