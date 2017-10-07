@@ -28,6 +28,22 @@ variables:
     - export VK_LAYER_PATH="$VULKAN_SDK/etc/explicit_layer.d"
     - export PATH="$PATH:$VULKAN_SDK/bin"
 
+.android_config: &android_image
+  image: lakoo/android-ndk:25-26.0.2-r15c
+  tags:
+    - docker
+  before_script:
+    # System configuration
+    - apt-get update -qq
+    - apt-get install -qq cmake build-essential gcc g++ python3
+    # Install glslang
+    - git clone https://github.com/KhronosGroup/glslang.git --depth 1
+    - mkdir -p glslang/build
+    - cd glslang/build
+    - cmake .. -DCMAKE_BUILD_TYPE=Release
+    - cmake --build . --config Release --target install
+    - cd -
+
 stages:
   - build
   - test
@@ -59,6 +75,18 @@ build:linux_clang:
     expire_in: 1 hour
     paths:
       - build/linux/
+
+build:android:
+  <<: *android_image
+  stage: build
+  script:
+    - ./generate.py --name Engine --platform android --package me.edoren.engine --build-type Release
+    - cd build/android
+    - ./build.py
+  artifacts:
+    expire_in: 1 hour
+    paths:
+      - build/android/
 
 test:linux_gcc:
   <<: *linux_image
