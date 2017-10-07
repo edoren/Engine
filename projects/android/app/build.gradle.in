@@ -45,7 +45,7 @@ android {
 }
 
 task runProcessAssets(type: Exec) {
-    commandLine 'python', '@APP_ROOT_DIRECTORY@/scripts/process_data.py', '@APP_ROOT_DIRECTORY@/data', '@APP_BUILD_DIRECTORY@/assets'
+    commandLine '@PYTHON_EXECUTABLE@', '@APP_ROOT_DIRECTORY@/scripts/process_data.py', '@APP_ROOT_DIRECTORY@/data', '@APP_BUILD_DIRECTORY@/assets'
 }
 
 gradle.projectsEvaluated {

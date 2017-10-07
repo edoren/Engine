@@ -124,7 +124,9 @@ endif()
 ###############################################################################
 ## Data processing
 
-find_package(PythonInterp 3 REQUIRED)
+if(NOT PYTHON_EXECUTABLE)
+    find_package(PythonInterp 3 REQUIRED)
+endif()
 
 set(SCRIPTS_FOLDER "${CMAKE_SOURCE_DIR}/scripts")
 

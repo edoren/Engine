@@ -7,6 +7,7 @@ import os
 import os.path
 import platform
 import stat
+import sys
 
 from scripts import file_utils
 
@@ -73,7 +74,8 @@ class CMakeBuildGenerator:
             "APP_PLATFORM": self.app_platform,
             "APP_BUILD_TYPE": self.app_build_type,
             "APP_ROOT_DIRECTORY": self.app_root_dir,
-            "APP_BUILD_DIRECTORY": self.app_build_dir
+            "APP_BUILD_DIRECTORY": self.app_build_dir,
+            "PYTHON_EXECUTABLE": file_utils.join(sys.executable)
         }
 
         # Create the CMake commandline arguments
