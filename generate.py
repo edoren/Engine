@@ -18,20 +18,39 @@ if platform.system() == "Linux":
 if platform.system() == "Darwin":
     platform_choices = ["macosx", "android"]
 
-parser = argparse.ArgumentParser(
-    description="Generate Engine project files for the selected platform.")
-parser.add_argument("--name", required=True, type=str, dest="name",
-                    help="The application name")
-parser.add_argument("--package", required=True, type=str, dest="package",
-                    help="The application package id")
-parser.add_argument("--platform", required=True, choices=platform_choices,
-                    dest="platform", help="The name of the platform to build")
-parser.add_argument("--build-type", choices=["Release", "Debug"],
-                    dest="build_type", default="Debug",
-                    help="The build type, Release or Debug")
-parser.add_argument("--cmake-args", nargs="*", metavar="CMAKE_ARG=VALUE",
-                    dest="cmake_args", default=[],
-                    help="CMake additional arguments")
+parser = argparse.ArgumentParser(description="Generate Engine project files "
+                                 "for the selected platform.")
+parser.add_argument(
+    "--name",
+    required=True,
+    type=str,
+    dest="name",
+    help="The application name")
+parser.add_argument(
+    "--package",
+    required=True,
+    type=str,
+    dest="package",
+    help="The application package id")
+parser.add_argument(
+    "--platform",
+    required=True,
+    choices=platform_choices,
+    dest="platform",
+    help="The name of the platform to build")
+parser.add_argument(
+    "--build-type",
+    choices=["Release", "Debug"],
+    dest="build_type",
+    default="Debug",
+    help="The build type, Release or Debug")
+parser.add_argument(
+    "--cmake-args",
+    nargs="*",
+    metavar="CMAKE_ARG=VALUE",
+    dest="cmake_args",
+    default=[],
+    help="CMake additional arguments")
 
 args = parser.parse_args()
 
@@ -44,8 +63,8 @@ class CMakeBuildGenerator:
         self.app_build_type = args.build_type
         self.app_root_dir = file_utils.join(
             os.path.dirname(os.path.realpath(__file__)))
-        self.app_build_dir = file_utils.join(self.app_root_dir,
-                                             "build", args.platform)
+        self.app_build_dir = file_utils.join(self.app_root_dir, "build",
+                                             args.platform)
 
         # Dictionary used to configure the project files
         self.file_config = {
@@ -60,8 +79,15 @@ class CMakeBuildGenerator:
         # Create the CMake commandline arguments
         cmake_args_dict = self.file_config.copy()
         cmake_args_dict.update([arg.split("=") for arg in args.cmake_args])
-        self.cmake_args = ["-D{}='{}'".format(*arg)
-                           for arg in cmake_args_dict.items()]
+
+        if "CMAKE_GENERATOR_PLATFORM" not in cmake_args_dict and \
+                self.app_platform == "windows" and \
+                platform.machine().endswith("64"):
+            cmake_args_dict["CMAKE_GENERATOR_PLATFORM"] = "x64"
+
+        self.cmake_args = [
+            "-D{}='{}'".format(*arg) for arg in cmake_args_dict.items()
+        ]
 
         self.file_config["CMAKE_ARGUMENTS"] = " ".join(self.cmake_args)
 
@@ -69,8 +95,8 @@ class CMakeBuildGenerator:
         android_sdk_home = os.environ.get("ANDROID_HOME")
         android_ndk_home = os.environ.get("ANDROID_NDK_HOME")
 
-        android_project = file_utils.join(self.app_root_dir,
-                                          "projects", "android")
+        android_project = file_utils.join(self.app_root_dir, "projects",
+                                          "android")
 
         thirdparty_dir = file_utils.join(self.app_root_dir, "third_party")
 
@@ -80,8 +106,8 @@ class CMakeBuildGenerator:
 
         # Copy and configure the android project
         print("Configuring build directory")
-        file_utils.configure_directory(android_project,
-                                       self.app_build_dir, self.file_config)
+        file_utils.configure_directory(android_project, self.app_build_dir,
+                                       self.file_config)
 
         # Create additional folders
         file_utils.create_directory(assets_dir)
@@ -161,9 +187,9 @@ class CMakeBuildGenerator:
                 gradle_executable = "gradlew"
             gradle_path = file_utils.join(self.app_build_dir,
                                           gradle_executable)
-            build_commands = [
-                [gradle_path, "assemble{}".format(self.app_build_type)]
-            ]
+            build_commands = [[
+                gradle_path, "assemble{}".format(self.app_build_type)
+            ]]
 
         build_file_template = [
             "#!/usr/bin/env python3",

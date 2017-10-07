@@ -44,18 +44,14 @@ install:
 # scripts to run before build
 before_build:
   - cd C:\projects\engine
-  - mkdir build
-  - cd build
-  - if "%PLATFORM%"=="Win32" set CMAKE_GENERATOR_NAME=Visual Studio 14 2015
-  - if "%PLATFORM%"=="x64"   set CMAKE_GENERATOR_NAME=Visual Studio 14 2015 Win64
-  - cmake .. -G "%CMAKE_GENERATOR_NAME%" -DCMAKE_BUILD_TYPE=%CONFIGURATION% -DENGINE_BUILD_STATIC=OFF
+  - %PYTHON%\python.exe generate.py --name Engine --package me.edoren.engine --platform windows
+  - cd build\windows
 
 build:
-  project: C:\projects\engine\build\ALL_BUILD.vcxproj
-  verbosity: minimal
+  - %PYTHON%\python.exe build.py
 
 test: on
 
 test_script:
-  - cd C:\projects\engine\build\tests
+  - cd C:\projects\engine\build\windows\tests
   - ctest -V -C %CONFIGURATION%
