@@ -58,17 +58,20 @@ def configure_file(input_file_path, output_file_path, config_dict):
     with open(input_file_path, "r") as input_file:
         with open(output_file_path, "w") as ouput_file:
             for line in input_file:
+                out_line = ""
                 matches = [it for it in re.finditer(r"@([\w_]+)@", line)]
+                start = end = 0
                 for match in matches:
                     key = match.group(1)
                     if key in config_dict:
-                        start = match.start(0)
-                        end = match.end(0)
-                        line = line[:start] + config_dict[key] + line[end:]
+                        end = match.start(0)
+                        out_line += line[start:end] + config_dict[key]
+                        start = match.end(0)
                     else:
                         print("Error, key @" + key +
                               "@ not found. File: " + input_file_path)
-                ouput_file.write(line)
+                out_line += line[start:]
+                ouput_file.write(out_line)
 
 
 def configure_directory(input_dir, output_dir,
