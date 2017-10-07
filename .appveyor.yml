@@ -44,11 +44,11 @@ install:
 # scripts to run before build
 before_build:
   - cd C:\projects\engine
-  - %PYTHON%\python.exe generate.py --name Engine --package me.edoren.engine --platform windows
+  - python.exe generate.py --name Engine --package me.edoren.engine --platform windows
   - cd build\windows
 
-build:
-  - %PYTHON%\python.exe build.py
+build_script:
+  - python.exe build.py
 
 test: on
 
