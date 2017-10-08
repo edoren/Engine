@@ -180,7 +180,8 @@ class CMakeBuildGenerator:
             cmake_path = file_utils.find_executable("cmake")
             build_commands = [
                 [cmake_path, self.app_root_dir] + self.cmake_args,
-                [cmake_path, "--build", self.app_build_dir]
+                [cmake_path, "--build", self.app_build_dir,
+                 "--config", self.app_build_type]
             ]
         elif self.app_platform == "android":
             if platform.system() == "Windows":
@@ -189,9 +190,9 @@ class CMakeBuildGenerator:
                 gradle_executable = "gradlew"
             gradle_path = file_utils.join(self.app_build_dir,
                                           gradle_executable)
-            build_commands = [[
-                gradle_path, "assemble{}".format(self.app_build_type)
-            ]]
+            build_commands = [
+                [gradle_path, "assemble{}".format(self.app_build_type)]
+            ]
 
         build_file_template = [
             "#!/usr/bin/env python3",
