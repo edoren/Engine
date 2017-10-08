@@ -11,23 +11,15 @@ endif()
 # Set the default Android NDK STL to LLVM libc++
 set(ANDROID_STL "c++_static")
 
-set(PROJECT_NAME "Engine")
-set(PROJECT_DESCRIPTION "")
-
-project(${PROJECT_NAME})
+project(${APP_NAME})
 
 # Configure the projects to use folders
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 # Limit the build configurations
-set(CMAKE_CONFIGURATION_TYPES "Debug;Release;RelWithDebInfo"
-    CACHE STRING "Limited configurations" FORCE)
+set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
 mark_as_advanced(CMAKE_CONFIGURATION_TYPES)
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Debug
-        CACHE STRING "Choose the type of build, options are: Debug Release"
-        FORCE)
-endif()
+set(CMAKE_BUILD_TYPE ${APP_BUILD_TYPE} CACHE STRING "" FORCE)
 
 # Set the custom module path
 list(APPEND CMAKE_MODULE_PATH "${ENGINE_DIR}/cmake/Modules")
@@ -52,6 +44,9 @@ endif()
 if(COMPILER STREQUAL "GCC" OR COMPILER STREQUAL "Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 endif()
+if ( MSVC )
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+endif ( MSVC )
 
 ###############################################################################
 ## Engine configuration
