@@ -15,7 +15,7 @@ android {
         externalNativeBuild {
             cmake {
                 // targets "",
-                arguments "@CMAKE_ARGUMENTS@"
+                arguments @CMAKE_ARGUMENTS@
             }
         }
     }
@@ -39,13 +39,13 @@ android {
             java.srcDirs = ["@APP_BUILD_DIRECTORY@/src"]
             res.srcDirs = ["@APP_BUILD_DIRECTORY@/res"]
             assets.srcDirs = ["@APP_BUILD_DIRECTORY@/assets"]
-            jniLibs.srcDirs = ['@APP_BUILD_DIRECTORY@/jniLibs']
+            jniLibs.srcDirs = ["@APP_BUILD_DIRECTORY@/jniLibs"]
         }
     }
 }
 
 task runProcessAssets(type: Exec) {
-    commandLine '@PYTHON_EXECUTABLE@', '@APP_ROOT_DIRECTORY@/scripts/process_data.py', '@APP_ROOT_DIRECTORY@/data', '@APP_BUILD_DIRECTORY@/assets'
+    commandLine "@PYTHON_EXECUTABLE@", "@APP_ROOT_DIRECTORY@/scripts/process_data.py", "@APP_ROOT_DIRECTORY@/data", "@APP_BUILD_DIRECTORY@/assets"
 }
 
 gradle.projectsEvaluated {

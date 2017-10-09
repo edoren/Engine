@@ -91,8 +91,6 @@ class CMakeBuildGenerator:
             "-D{}='{}'".format(*arg) for arg in cmake_args_dict.items()
         ]
 
-        self.file_config["CMAKE_ARGUMENTS"] = " ".join(self.cmake_args)
-
     def configure_android(self):
         android_sdk_home = os.environ.get("ANDROID_HOME")
         android_ndk_home = os.environ.get("ANDROID_NDK_HOME")
@@ -108,6 +106,9 @@ class CMakeBuildGenerator:
 
         # Copy and configure the android project
         print("Configuring build directory")
+        cmake_args_str = ", ".join(['"{}"'.format(arg)
+                                    for arg in self.cmake_args])
+        self.file_config["CMAKE_ARGUMENTS"] = cmake_args_str
         file_utils.configure_directory(android_project, self.app_build_dir,
                                        self.file_config)
 

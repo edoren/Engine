@@ -4,12 +4,16 @@
 cmake_minimum_required(VERSION 2.8.12)
 
 # Engine directory
-if (NOT DEFINED ENGINE_DIR)
+if(NOT DEFINED ENGINE_DIR)
     set (ENGINE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 endif()
 
 # Set the default Android NDK STL to LLVM libc++
 set(ANDROID_STL "c++_static")
+
+if(NOT APP_NAME)
+    message(FATAL_ERROR "APP_NAME not set")
+endif()
 
 project(${APP_NAME})
 
@@ -21,12 +25,10 @@ set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
 mark_as_advanced(CMAKE_CONFIGURATION_TYPES)
 
 # Select the build type for the application
-if(NOT CMAKE_BUILD_TYPE)
-    if(APP_BUILD_TYPE)
-        set(CMAKE_BUILD_TYPE ${APP_BUILD_TYPE} CACHE STRING "" FORCE)
-    else()
-        set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "" FORCE)
-    endif()
+if(APP_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE ${APP_BUILD_TYPE} CACHE STRING "" FORCE)
+else()
+    set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "" FORCE)
 endif()
 
 # Set the custom module path
