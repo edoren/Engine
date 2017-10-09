@@ -58,7 +58,7 @@ build:linux_gcc:
     - cd build/linux
     - ./build.py
   artifacts:
-    expire_in: 1 hour
+    expire_in: 1 day
     paths:
       - build/linux/
 
@@ -72,7 +72,7 @@ build:linux_clang:
     - cd build/linux
     - ./build.py
   artifacts:
-    expire_in: 1 hour
+    expire_in: 1 day
     paths:
       - build/linux/
 
@@ -84,7 +84,7 @@ build:android:
     - cd build/android
     - ./build.py
   artifacts:
-    expire_in: 1 hour
+    expire_in: 1 day
     paths:
       - build/android/
 
