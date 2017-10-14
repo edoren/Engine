@@ -40,4 +40,8 @@ const byte* Image::GetData() const {
     return m_pixels.data();
 }
 
+size_t Image::GetDataSize() const {
+    return m_size.x * m_size.y * sizeof(byte) * 4;
+}
+
 }  // namespace engine

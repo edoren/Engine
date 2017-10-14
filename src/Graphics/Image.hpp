@@ -25,6 +25,8 @@ public:
     byte* GetData();
     const byte* GetData() const;
 
+    size_t GetDataSize() const;
+
 private:
     math::Vector2<uint32> m_size;
     std::vector<byte> m_pixels;
