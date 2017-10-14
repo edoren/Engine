@@ -16,6 +16,15 @@ const String sRootShaderFolder("shaders");
 template <>
 ShaderManager* Singleton<ShaderManager>::sInstance = nullptr;
 
+ShaderManager& ShaderManager::GetInstance() {
+    assert(sInstance);
+    return (*sInstance);
+}
+
+ShaderManager* ShaderManager::GetInstancePtr() {
+    return sInstance;
+}
+
 ShaderManager::ShaderManager() : m_active_shader(nullptr), m_shaders() {}
 
 ShaderManager::~ShaderManager() {
@@ -41,7 +50,7 @@ Shader* ShaderManager::LoadFromFile(const String& basename) {
     for (auto shader_type : shader_types) {
         bool ok = true;
 
-        const char* shader_extension;
+        const char* shader_extension = "";
         switch (shader_type) {
             case ShaderType::eVertex:
                 shader_extension = ".vert";
@@ -139,7 +148,7 @@ void ShaderManager::SetActiveShader(const String& name) {
     Shader* found_shader = GetShader(name);
     if (found_shader != nullptr) {
         m_active_shader = found_shader;
-        SetActiveShader(m_active_shader);
+        UseShader(m_active_shader);
     } else {
         LogError(sTag,
                  "Could not find a Shader named: {}"_format(name.ToUtf8()));

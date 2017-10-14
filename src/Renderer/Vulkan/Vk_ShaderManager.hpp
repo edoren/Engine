@@ -15,12 +15,16 @@ public:
 
     ~Vk_ShaderManager();
 
+    static Vk_ShaderManager& GetInstance();
+
+    static Vk_ShaderManager* GetInstancePtr();
+
 protected:
     Shader* CreateShader() override;
 
     void DeleteShader(Shader* shader) override;
 
-    void SetActiveShader(Shader* shader) override;
+    void UseShader(Shader* shader) override;
 
     const String& GetShaderFolder() const override;
 };

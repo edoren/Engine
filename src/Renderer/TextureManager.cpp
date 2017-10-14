@@ -16,6 +16,15 @@ const String sRootTextureFolder("textures");
 template <>
 TextureManager* Singleton<TextureManager>::sInstance = nullptr;
 
+TextureManager& TextureManager::GetInstance() {
+    assert(sInstance);
+    return (*sInstance);
+}
+
+TextureManager* TextureManager::GetInstancePtr() {
+    return sInstance;
+}
+
 TextureManager::TextureManager() : m_active_texture(nullptr), m_textures() {}
 
 TextureManager::~TextureManager() {
@@ -79,7 +88,7 @@ void TextureManager::SetActiveTexture2D(const String& name) {
     Texture2D* found_texture = GetTexture2D(name);
     if (found_texture != nullptr) {
         m_active_texture = found_texture;
-        SetActiveTexture2D(m_active_texture);
+        UseTexture2D(m_active_texture);
     } else {
         LogError(sTag,
                  "Could not find a Texture2D named: {}"_format(name.ToUtf8()));
