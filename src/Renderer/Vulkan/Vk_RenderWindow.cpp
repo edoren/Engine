@@ -5,6 +5,8 @@
 #include "Vk_RenderWindow.hpp"
 #include "Vk_Shader.hpp"
 #include "Vk_ShaderManager.hpp"
+#include "Vk_Texture2D.hpp"
+#include "Vk_TextureManager.hpp"
 
 namespace engine {
 
@@ -20,7 +22,7 @@ const size_t sStagingBufferSize(4000);
 
 struct VertexData {
     math::Vector4<float> position;
-    math::Vector4<float> color;
+    math::Vector2<float> tex_coords;
 };
 
 Vk_RenderWindow::Vk_RenderWindow()
@@ -31,7 +33,6 @@ Vk_RenderWindow::Vk_RenderWindow()
         m_swapchain(),
         m_graphics_pipeline(VK_NULL_HANDLE),
         m_pipeline_layout(VK_NULL_HANDLE),
-        m_graphics_queue_cmd_pool(VK_NULL_HANDLE),
         m_render_pass(VK_NULL_HANDLE),
         m_vertex_buffer(),
         m_staging_buffer(),
@@ -98,6 +99,9 @@ bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
         return false;
     }
 
+    Vk_TextureManager::GetInstance().LoadFromFile("container2.png");
+    Vk_TextureManager::GetInstance().SetActiveTexture2D("container2.png");
+
     return true;
 }
 
@@ -114,8 +118,8 @@ void Vk_RenderWindow::Destroy() {
                                      nullptr);
             }
             if (m_render_resources[i].command_buffer) {
-                vkFreeCommandBuffers(device, m_graphics_queue_cmd_pool, 1,
-                                     &m_render_resources[i].command_buffer);
+                vkFreeCommandBuffers(device, context.GetGraphicsQueueCmdPool(),
+                                     1, &m_render_resources[i].command_buffer);
             }
             if (m_render_resources[i].image_available_semaphore) {
                 vkDestroySemaphore(
@@ -132,11 +136,6 @@ void Vk_RenderWindow::Destroy() {
             }
         }
         m_render_resources.clear();
-
-        if (m_graphics_queue_cmd_pool) {
-            vkDestroyCommandPool(device, m_graphics_queue_cmd_pool, nullptr);
-            m_graphics_queue_cmd_pool = VK_NULL_HANDLE;
-        }
 
         m_vertex_buffer.Destroy();
 
@@ -376,32 +375,6 @@ bool Vk_RenderWindow::CreateVulkanFence(VkFenceCreateFlags flags,
     return true;
 }
 
-bool Vk_RenderWindow::CreateVulkanCommandPool(QueueParameters& queue,
-                                              VkCommandPool* cmd_pool) {
-    VkResult result = VK_SUCCESS;
-
-    Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
-
-    // Create the pool for the command buffers
-    VkCommandPoolCreateInfo cmd_pool_create_info = {
-        VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,  // sType
-        nullptr,                                     // pNext
-        (VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT |
-         VK_COMMAND_POOL_CREATE_TRANSIENT_BIT),  // flags
-        queue.family_index                       // queueFamilyIndex
-    };
-
-    result =
-        vkCreateCommandPool(device, &cmd_pool_create_info, nullptr, cmd_pool);
-    if (result != VK_SUCCESS) {
-        LogError(sTag, "Could not create a command pool");
-        return false;
-    }
-
-    return true;
-}
-
 bool Vk_RenderWindow::AllocateVulkanCommandBuffers(
     VkCommandPool& cmd_pool, uint32_t count, VkCommandBuffer* command_buffer) {
     VkResult result = VK_SUCCESS;
@@ -508,6 +481,9 @@ bool Vk_RenderWindow::CreateVulkanRenderPass() {
 }
 
 bool Vk_RenderWindow::CreateVulkanPipeline() {
+    Vk_Context& context = Vk_Context::GetInstance();
+    VkDevice& device = context.GetVulkanDevice();
+
     VkResult result = VK_SUCCESS;
 
     Vk_Shader* shader = reinterpret_cast<Vk_Shader*>(
@@ -536,8 +512,8 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
             {
                 1,                                       // location
                 vertex_binding_descriptions[0].binding,  // binding
-                VK_FORMAT_R32G32B32A32_SFLOAT,           // format
-                offsetof(struct VertexData, color)       // offset
+                VK_FORMAT_R32G32_SFLOAT,                 // format
+                offsetof(struct VertexData, tex_coords)  // offset
             }};
 
     VkPipelineVertexInputStateCreateInfo vertex_input_state_create_info = {
@@ -559,7 +535,7 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
             nullptr,                                              // pNext
             VkPipelineShaderStageCreateFlags(),                   // flags
             VK_SHADER_STAGE_VERTEX_BIT,                           // stage
-            shader->GetModule(ShaderType::eVertex),                // module
+            shader->GetModule(ShaderType::eVertex),               // module
             "main",                                               // pName
             nullptr  // pSpecializationInfo
         },
@@ -569,7 +545,7 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
             nullptr,                                              // pNext
             VkPipelineShaderStageCreateFlags(),                   // flags
             VK_SHADER_STAGE_FRAGMENT_BIT,                         // stage
-            shader->GetModule(ShaderType::eFragment),              // module
+            shader->GetModule(ShaderType::eFragment),             // module
             "main",                                               // pName
             nullptr  // pSpecializationInfo
         }};
@@ -655,19 +631,18 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         dynamic_states.data()                          // pDynamicStates
     };
 
+    Vk_TextureManager& texture_manager = Vk_TextureManager::GetInstance();
+
     // Create the PipelineLayout
     VkPipelineLayoutCreateInfo layout_create_info = {
         VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,  // sType
         nullptr,                                        // pNext
         VkPipelineLayoutCreateFlags(),                  // flags
-        0,                                              // setLayoutCount
-        nullptr,                                        // pSetLayouts
+        1,                                              // setLayoutCount
+        &texture_manager.GetDescriptorSetLayout(),      // pSetLayouts
         0,       // pushConstantRangeCount
         nullptr  // pPushConstantRanges
     };
-
-    Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
 
     result = vkCreatePipelineLayout(device, &layout_create_info, nullptr,
                                     &m_pipeline_layout);
@@ -714,11 +689,10 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
 bool Vk_RenderWindow::CreateVulkanVertexBuffer() {
     VkResult result = VK_SUCCESS;
 
-    VertexData vertex_data[] = {
-        {{-0.7f, -0.7f, 0.0f, 1.0f}, {1.0f, 0.0f, 0.0f, 1.0f}},
-        {{-0.7f, 0.7f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f, 1.0f}},
-        {{0.7f, -0.7f, 0.0f, 1.0f}, {0.0f, 0.0f, 1.0f, 1.0f}},
-        {{0.7f, 0.7f, 0.0f, 1.0f}, {1.0f, 1.0f, 0.0f, 1.0f}}};
+    VertexData vertex_data[] = {{{-0.7f, -0.7f, 0.0f, 1.0f}, {0.0f, 0.0f}},
+                                {{-0.7f, 0.7f, 0.0f, 1.0f}, {0.0f, 1.0f}},
+                                {{0.7f, -0.7f, 0.0f, 1.0f}, {1.0f, 0.0f}},
+                                {{0.7f, 0.7f, 0.0f, 1.0f}, {1.0f, 1.0f}}};
 
     if (!m_vertex_buffer.Create(sizeof(vertex_data),
                                 (VK_BUFFER_USAGE_VERTEX_BUFFER_BIT |
@@ -824,14 +798,11 @@ bool Vk_RenderWindow::CreateVulkanVertexBuffer() {
 }
 
 bool Vk_RenderWindow::CreateRenderingResources() {
-    if (!CreateVulkanCommandPool(*m_graphics_queue,
-                                 &m_graphics_queue_cmd_pool)) {
-        return false;
-    }
+    Vk_Context& context = Vk_Context::GetInstance();
 
     for (size_t i = 0; i < m_render_resources.size(); ++i) {
         if (!AllocateVulkanCommandBuffers(
-                m_graphics_queue_cmd_pool, 1,
+                context.GetGraphicsQueueCmdPool(), 1,
                 &m_render_resources[i].command_buffer) ||
             !CreateVulkanSemaphore(
                 &m_render_resources[i].image_available_semaphore) ||
@@ -979,9 +950,14 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer,
     vkCmdSetViewport(command_buffer, 0, 1, &viewport);
     vkCmdSetScissor(command_buffer, 0, 1, &scissor);
 
-    // vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-    //                         m_pipeline_layout, 0, 1,
-    //                         &Vulkan.DescriptorSet.Handle, 0, nullptr);
+    Vk_TextureManager& m_texture_manager = Vk_TextureManager::GetInstance();
+    Vk_Texture2D* current_texture = m_texture_manager.GetActiveTexture2D();
+    if (current_texture) {
+        VkDescriptorSet& desciptor_set = current_texture->GetDescriptorSet();
+        vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                m_pipeline_layout, 0, 1, &desciptor_set, 0,
+                                nullptr);
+    }
 
     VkDeviceSize offset = 0;
     vkCmdBindVertexBuffers(command_buffer, 0, 1, &m_vertex_buffer.GetHandle(),

@@ -31,6 +31,8 @@ struct RenderingResourcesData {
             fence(VK_NULL_HANDLE) {}
 };
 
+class Vk_TextureManager;
+
 class VULKAN_PLUGIN_API Vk_RenderWindow : public RenderWindow {
 public:
     Vk_RenderWindow();
@@ -62,8 +64,6 @@ private:
     bool CreateVulkanPipeline();
     bool CreateVulkanVertexBuffer();
 
-    bool CreateVulkanCommandPool(QueueParameters& queue,
-                                 VkCommandPool* cmd_pool);
     bool AllocateVulkanCommandBuffers(VkCommandPool& cmd_pool, uint32_t count,
                                       VkCommandBuffer* command_buffer);
     bool CreateVulkanSemaphore(VkSemaphore* semaphore);
@@ -97,8 +97,6 @@ private:
 
     VkPipeline m_graphics_pipeline;
     VkPipelineLayout m_pipeline_layout;
-
-    VkCommandPool m_graphics_queue_cmd_pool;
 
     VkRenderPass m_render_pass;
 
