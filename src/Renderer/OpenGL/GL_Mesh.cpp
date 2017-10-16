@@ -1,9 +1,9 @@
 #include "GL_Mesh.hpp"
 
-#include <Renderer/ShaderManager.hpp>
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
 
+#include "GL_ShaderManager.hpp"
 #include "GL_Dependencies.hpp"
 #include "GL_Shader.hpp"
 #include "GL_Texture2D.hpp"
@@ -90,10 +90,9 @@ void GL_Mesh::Draw() {
                 break;
         }
 
-        ShaderManager& shader_manager = ShaderManager::GetInstance();
+        GL_ShaderManager& shader_manager = GL_ShaderManager::GetInstance();
 
-        GL_Shader* shader =
-            reinterpret_cast<GL_Shader*>(shader_manager.GetActiveShader());
+        GL_Shader* shader = shader_manager.GetActiveShader();
         GL_Texture2D* curr_texture =
             reinterpret_cast<GL_Texture2D*>(m_textures[i].first);
 
