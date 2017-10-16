@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Vk_Config.hpp"
-#include "Vk_VulkanParameters.hpp"
 #include "Vk_Dependencies.hpp"
+#include "Vk_VulkanParameters.hpp"
 
 namespace engine {
 
@@ -22,6 +22,8 @@ public:
     PhysicalDeviceParameters& GetPhysicalDevice();
 
     QueueParameters& GetGraphicsQueue();
+
+    VkCommandPool& GetGraphicsQueueCmdPool();
 
     ////////////////////////////////////////////////////////////
     /// @brief Override standard Singleton retrieval.
@@ -68,12 +70,17 @@ private:
     bool CheckValidationLayerSupport() const;
     bool CheckInstanceExtensionsSupport() const;
 
+    bool CreateVulkanCommandPool(QueueParameters& queue,
+                                 VkCommandPool* cmd_pool);
+
 private:
     VkInstance m_instance;
     VkDevice m_device;
     PhysicalDeviceParameters m_physical_device;
 
     QueueParameters m_graphics_queue;
+
+    VkCommandPool m_graphics_queue_cmd_pool;
 
     VkDebugReportCallbackEXT m_debug_report_callback;
 

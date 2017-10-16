@@ -75,8 +75,13 @@ Vk_Context* Vk_Context::GetInstancePtr() {
 Vk_Context::Vk_Context()
       : m_instance(VK_NULL_HANDLE),
         m_device(VK_NULL_HANDLE),
+        m_graphics_queue(),
+        m_graphics_queue_cmd_pool(VK_NULL_HANDLE),
         m_debug_report_callback(VK_NULL_HANDLE),
-        m_validation_layers_enabled(true) {}
+        m_validation_layers_enabled(true),
+        m_validation_layers(),
+        m_instance_extensions(),
+        m_device_extensions() {}
 
 Vk_Context::~Vk_Context() {
     Shutdown();
@@ -151,13 +156,23 @@ bool Vk_Context::Initialize() {
         }
     }
 
+    if (!CreateVulkanCommandPool(m_graphics_queue,
+                                 &m_graphics_queue_cmd_pool)) {
+        return false;
+    }
+
     return true;
 }
 
 void Vk_Context::Shutdown() {
     if (m_device) {
+        if (m_graphics_queue_cmd_pool) {
+            vkDestroyCommandPool(m_device, m_graphics_queue_cmd_pool, nullptr);
+            m_graphics_queue_cmd_pool = VK_NULL_HANDLE;
+        }
+
         vkDestroyDevice(m_device, nullptr);
-        m_device = nullptr;
+        m_device = VK_NULL_HANDLE;
     }
 
     if (m_validation_layers_enabled && m_debug_report_callback) {
@@ -175,7 +190,7 @@ void Vk_Context::Shutdown() {
 
     if (m_instance) {
         vkDestroyInstance(m_instance, nullptr);
-        m_instance = nullptr;
+        m_instance = VK_NULL_HANDLE;
     }
 }
 
@@ -193,6 +208,10 @@ PhysicalDeviceParameters& Vk_Context::GetPhysicalDevice() {
 
 QueueParameters& Vk_Context::GetGraphicsQueue() {
     return m_graphics_queue;
+}
+
+VkCommandPool& Vk_Context::GetGraphicsQueueCmdPool() {
+    return m_graphics_queue_cmd_pool;
 }
 
 bool Vk_Context::CreateInstance() {
@@ -306,6 +325,32 @@ bool Vk_Context::CreateDevice() {
     // Get the Queue handles
     vkGetDeviceQueue(m_device, m_graphics_queue.family_index, 0,
                      &m_graphics_queue.handle);
+
+    return true;
+}
+
+bool Vk_Context::CreateVulkanCommandPool(QueueParameters& queue,
+                                         VkCommandPool* cmd_pool) {
+    VkResult result = VK_SUCCESS;
+
+    Vk_Context& context = Vk_Context::GetInstance();
+    VkDevice& device = context.GetVulkanDevice();
+
+    // Create the pool for the command buffers
+    VkCommandPoolCreateInfo cmd_pool_create_info = {
+        VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,  // sType
+        nullptr,                                     // pNext
+        (VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT |
+         VK_COMMAND_POOL_CREATE_TRANSIENT_BIT),  // flags
+        queue.family_index                       // queueFamilyIndex
+    };
+
+    result =
+        vkCreateCommandPool(device, &cmd_pool_create_info, nullptr, cmd_pool);
+    if (result != VK_SUCCESS) {
+        LogError(sTag, "Could not create a command pool");
+        return false;
+    }
 
     return true;
 }
