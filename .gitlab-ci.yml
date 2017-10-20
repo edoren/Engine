@@ -51,6 +51,8 @@ stages:
 build:linux_gcc:
   <<: *linux_image
   stage: build
+  only:
+    - master
   script:
     - export CC=gcc-6
     - export CXX=g++-6
@@ -65,6 +67,8 @@ build:linux_gcc:
 build:linux_clang:
   <<: *linux_image
   stage: build
+  only:
+    - master
   script:
     - export CC=clang
     - export CXX=clang++
@@ -79,6 +83,8 @@ build:linux_clang:
 build:android:
   <<: *android_image
   stage: build
+  only:
+    - master
   script:
     - ./generate.py --name Engine --platform android --package me.edoren.engine --build-type Release
     - cd build/android
@@ -91,6 +97,8 @@ build:android:
 test:linux_gcc:
   <<: *linux_image
   stage: test
+  only:
+    - master
   script:
     - cd build/linux/tests/
     - ctest -V
@@ -100,6 +108,8 @@ test:linux_gcc:
 test:linux_clang:
   <<: *linux_image
   stage: test
+  only:
+    - master
   script:
     - cd build/linux/tests/
     - ctest -V
