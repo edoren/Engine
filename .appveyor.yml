@@ -28,10 +28,9 @@ clone_folder: C:\projects\engine
 
 # branches to build
 branches:
-  only:
-    - master
   except:
     - gh-pages
+    - tmp
 
 # scripts that run after cloning repository
 install:
