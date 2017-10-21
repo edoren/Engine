@@ -201,7 +201,8 @@ class CMakeBuildGenerator:
             "from subprocess import run"
         ]
         for command in build_commands:
-            build_file_template.append("run({}, check=True)".format(command))
+            build_file_template.append("run({}, cwd='{}', check=True)"
+                                       .format(command, self.app_build_dir))
 
         with open(build_file_path, 'w') as build_file:
             for line in build_file_template:
