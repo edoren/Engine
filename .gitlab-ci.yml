@@ -33,6 +33,8 @@ variables:
   tags:
     - docker
   before_script:
+    # Accept all the Android SDK licenses
+    - yes | sdkmanager --licenses
     # System configuration
     - apt-get update -qq
     - apt-get install -qq cmake build-essential gcc g++ python3
