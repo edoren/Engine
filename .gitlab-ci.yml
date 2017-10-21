@@ -34,7 +34,7 @@ variables:
     - docker
   before_script:
     # Accept all the Android SDK licenses
-    - yes | sdkmanager --licenses
+    - (for i in {0..100}; do echo y; done) | sdkmanager --licenses
     # System configuration
     - apt-get update -qq
     - apt-get install -qq cmake build-essential gcc g++ python3
