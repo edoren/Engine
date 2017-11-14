@@ -1,7 +1,6 @@
 #include <Renderer/Renderer.hpp>
 #include <Input/InputManager.hpp>
 #include <Graphics/Color32.hpp>
-#include <Graphics/ResourceManager.hpp>
 #include <Graphics/3D/Camera.hpp>
 #include <Graphics/Image.hpp>
 #include <System/Stopwatch.hpp>
@@ -52,7 +51,6 @@ struct Vertex {
 int main(int argc, char* argv[]) {
     Renderer render;
     InputManager input;
-    ResourceManager resources;
 
     math::ivec2 window_size = { 800, 600 };
 

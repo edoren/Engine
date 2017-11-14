@@ -5,17 +5,16 @@ namespace engine {
 math::vec3 Camera::WORLD_UP(0.0f, 1.0f, 0.0f);
 
 Camera::Camera()
-      : m_position(0.0f, 0.0f, 0.0f), m_yaw(0.0f), m_pitch(0.0f), m_zoom(45.0f) {
+      : m_position(0.0f, 0.0f, 0.0f),
+        m_yaw(0.0f),
+        m_pitch(0.0f),
+        m_zoom(45.0f) {
     UpdateCameraVectors();
 }
 
 Camera::Camera(const math::vec3& position)
       : m_position(position), m_yaw(0.0f), m_pitch(0.0f), m_zoom(45.0f) {
     UpdateCameraVectors();
-}
-
-math::mat4 Camera::GetViewMatrix() {
-    return math::LookAt(m_position, m_position + m_front, WORLD_UP);
 }
 
 void Camera::Move(const math::vec3& direction) {
@@ -53,16 +52,8 @@ void Camera::LookAt(const math::vec3& position) {
     UpdateCameraVectors();
 }
 
-void Camera::UpdateCameraVectors() {
-    float sin_yaw = std::sin(math::Radians(m_yaw));
-    float cos_yaw = std::cos(math::Radians(m_yaw));
-    float sin_pitch = std::sin(math::Radians(m_pitch));
-    float cos_pitch = std::cos(math::Radians(m_pitch));
-
-    m_front = math::Normalize(
-        math::vec3(cos_pitch * cos_yaw, sin_pitch, cos_pitch * sin_yaw));
-    m_right = math::Normalize(math::Cross(m_front, WORLD_UP));
-    m_up = math::Normalize(math::Cross(m_right, m_front));
+math::mat4 Camera::GetViewMatrix() const {
+    return math::LookAt(m_position, m_position + m_front, WORLD_UP);
 }
 
 const math::vec3& Camera::GetPosition() const {
@@ -80,4 +71,17 @@ const math::vec3& Camera::GetRightVector() const {
 const math::vec3& Camera::GetFrontVector() const {
     return m_front;
 }
+
+void Camera::UpdateCameraVectors() {
+    float sin_yaw = std::sin(math::Radians(m_yaw));
+    float cos_yaw = std::cos(math::Radians(m_yaw));
+    float sin_pitch = std::sin(math::Radians(m_pitch));
+    float cos_pitch = std::cos(math::Radians(m_pitch));
+
+    m_front = math::Normalize(
+        math::vec3(cos_pitch * cos_yaw, sin_pitch, cos_pitch * sin_yaw));
+    m_right = math::Normalize(math::Cross(m_front, WORLD_UP));
+    m_up = math::Normalize(math::Cross(m_right, m_front));
 }
+
+}  // namespace engine

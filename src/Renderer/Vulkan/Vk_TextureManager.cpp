@@ -10,7 +10,9 @@ namespace {
 
 const String sTag("Vk_TextureManager");
 
-const uint32 sMaxDescriptorSets(1);
+const uint32 sDescriptorSetBinding(0);
+
+const uint32 sMaxDescriptorSets(16);
 
 Vk_TextureManager* sDerivedInstance = nullptr;
 
@@ -120,7 +122,7 @@ bool Vk_TextureManager::CreateDescriptorSetLayout() {
     VkResult result = VK_SUCCESS;
 
     VkDescriptorSetLayoutBinding layout_binding = {
-        0,                                          // binding
+        sDescriptorSetBinding,                      // binding
         VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,  // descriptorType
         1,                                          // descriptorCount
         VK_SHADER_STAGE_FRAGMENT_BIT,               // stageFlags

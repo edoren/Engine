@@ -2,6 +2,7 @@
 
 #include <Math/Math.hpp>
 #include <Renderer/Shader.hpp>
+#include <Renderer/UniformBufferObject.hpp>
 #include <System/String.hpp>
 
 #include "GL_Config.hpp"
@@ -26,6 +27,8 @@ public:
 
     void Use();
 
+    void SetUniformBufferObject(const UniformBufferObject& ubo);
+
     void SetUniform(const String& name, float val);
     void SetUniform(const String& name, int32 val);
     void SetUniform(const String& name, uint32 val);
@@ -47,6 +50,8 @@ private:
 private:
     GLuint m_program;
     std::array<GLuint, sShaderTypeCount> m_shaders;
+
+    GLuint m_uniform_buffer;
 
     std::map<String, GLint> m_uniforms;
 };

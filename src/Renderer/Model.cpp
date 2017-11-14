@@ -107,7 +107,8 @@ Model::~Model() {
     }
 }
 
-void Model::Draw() {
+void Model::Draw(RenderWindow& target) const {
+    ENGINE_UNUSED(target);
     for (size_t i = 0; i < m_meshes.size(); i++) {
         m_meshes[i]->Draw();
     }
@@ -161,13 +162,13 @@ Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
         vector.x = mesh->mVertices[i].x;
         vector.y = mesh->mVertices[i].y;
         vector.z = mesh->mVertices[i].z;
-        vertex.m_position = vector;
+        vertex.position = vector;
 
         if (mesh->HasNormals()) {
             vector.x = mesh->mNormals[i].x;
             vector.y = mesh->mNormals[i].y;
             vector.z = mesh->mNormals[i].z;
-            vertex.m_normal = vector;
+            vertex.normal = vector;
         }
 
         // Does the mesh contain texture coordinates
@@ -175,7 +176,7 @@ Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
             math::vec2 vec;
             vec.x = mesh->mTextureCoords[0][i].x;
             vec.y = mesh->mTextureCoords[0][i].y;
-            vertex.m_tex_coords = vec;
+            vertex.tex_coords = vec;
         }
 
         // Process vertex positions, normals and texture coordinates

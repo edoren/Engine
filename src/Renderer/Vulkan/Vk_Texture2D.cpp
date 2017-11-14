@@ -84,9 +84,7 @@ bool Vk_Texture2D::LoadFromImage(const Image& img) {
     return true;
 }
 
-void Vk_Texture2D::Use() {
-
-}
+void Vk_Texture2D::Use() {}
 
 VkDescriptorSet& Vk_Texture2D::GetDescriptorSet() {
     return m_descriptor_set;
@@ -267,14 +265,20 @@ bool Vk_Texture2D::CopyTextureData(const Image& img) {
 
     // Prepare command buffer to copy data from staging buffer to a vertex
     // buffer
-    VkCommandBufferAllocateInfo allocInfo = {};
-    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandPool = context.GetGraphicsQueueCmdPool();
-    allocInfo.commandBufferCount = 1;
+    VkCommandBufferAllocateInfo allocInfo = {
+        VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,  // sType
+        nullptr,                                         // pNext
+        context.GetGraphicsQueueCmdPool(),               // commandPool
+        VK_COMMAND_BUFFER_LEVEL_PRIMARY,                 // level
+        1                                                // commandBufferCount
+    };
 
     VkCommandBuffer command_buffer = VK_NULL_HANDLE;
-    vkAllocateCommandBuffers(device, &allocInfo, &command_buffer);
+    result = vkAllocateCommandBuffers(device, &allocInfo, &command_buffer);
+    if (result != VK_SUCCESS || command_buffer == VK_NULL_HANDLE) {
+        LogError(sTag, "Could not allocate command buffer");
+        return false;
+    }
 
     VkCommandBufferBeginInfo command_buffer_begin_info = {
         VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,  // sType
@@ -329,9 +333,9 @@ bool Vk_Texture2D::CopyTextureData(const Image& img) {
         },
         {
             // VkExtent3D imageExtent
-            img.GetSize().x,   // width
+            img.GetSize().x,  // width
             img.GetSize().y,  // height
-            1        // depth
+            1                 // depth
         },
     };
     vkCmdCopyBufferToImage(command_buffer, m_staging_buffer.GetHandle(),

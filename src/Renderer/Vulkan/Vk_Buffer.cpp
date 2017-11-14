@@ -15,13 +15,17 @@ Vk_Buffer::Vk_Buffer()
       : m_handle(VK_NULL_HANDLE), m_memory(VK_NULL_HANDLE), m_size(0) {}
 
 Vk_Buffer::~Vk_Buffer() {
-    if (m_handle) {
+    if (m_handle != VK_NULL_HANDLE) {
         Destroy();
     }
 }
 
 bool Vk_Buffer::Create(VkDeviceSize size, VkBufferUsageFlags usage,
-                       VkMemoryPropertyFlagBits memory_properties) {
+                       VkMemoryPropertyFlags memory_properties) {
+    if (m_handle != VK_NULL_HANDLE) {
+        Destroy();
+    }
+
     VkResult result = VK_SUCCESS;
 
     Vk_Context& context = Vk_Context::GetInstance();
@@ -86,7 +90,7 @@ VkDeviceSize Vk_Buffer::GetSize() const {
     return m_size;
 }
 
-bool Vk_Buffer::AllocateMemory(VkMemoryPropertyFlagBits memory_property) {
+bool Vk_Buffer::AllocateMemory(VkMemoryPropertyFlags memory_properties) {
     VkResult result = VK_SUCCESS;
 
     Vk_Context& context = Vk_Context::GetInstance();
@@ -97,13 +101,14 @@ bool Vk_Buffer::AllocateMemory(VkMemoryPropertyFlagBits memory_property) {
     vkGetBufferMemoryRequirements(device, m_handle,
                                   &buffer_memory_requirements);
 
-    VkPhysicalDeviceMemoryProperties memory_properties;
-    vkGetPhysicalDeviceMemoryProperties(physical_device, &memory_properties);
+    VkPhysicalDeviceMemoryProperties physical_memory_properties;
+    vkGetPhysicalDeviceMemoryProperties(physical_device,
+                                        &physical_memory_properties);
 
-    for (uint32_t i = 0; i < memory_properties.memoryTypeCount; i++) {
+    for (uint32_t i = 0; i < physical_memory_properties.memoryTypeCount; i++) {
         if ((buffer_memory_requirements.memoryTypeBits & (1 << i)) &&
-            (memory_properties.memoryTypes[i].propertyFlags &
-             memory_property)) {
+            (physical_memory_properties.memoryTypes[i].propertyFlags &
+             memory_properties)) {
             VkMemoryAllocateInfo memory_allocate_info = {
                 VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,  // sType
                 nullptr,                                 // pNext

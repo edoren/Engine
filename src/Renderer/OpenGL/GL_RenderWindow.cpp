@@ -1,7 +1,11 @@
-#include "GL_RenderWindow.hpp"
-#include "GL_Utilities.hpp"
-
+#include <Graphics/3D/Camera.hpp>
+#include <Renderer/Drawable.hpp>
 #include <System/LogManager.hpp>
+
+#include "GL_RenderWindow.hpp"
+#include "GL_Shader.hpp"
+#include "GL_ShaderManager.hpp"
+#include "GL_Utilities.hpp"
 
 namespace engine {
 
@@ -26,8 +30,8 @@ bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
 #if PLATFORM_TYPE_IS(PLATFORM_TYPE_DESKTOP)
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
                         SDL_GL_CONTEXT_PROFILE_CORE);
 #endif
@@ -42,7 +46,9 @@ bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
         return false;
     }
 
+    // Update the base class attributes
     SDL_GetWindowSize(m_window, &m_size.x, &m_size.y);
+    m_name = name;
 
     m_context = SDL_GL_CreateContext(m_window);
     if (!m_context) {
@@ -74,10 +80,6 @@ bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
 
     // TODO: User enable depth test
     GL_CALL(glEnable(GL_DEPTH_TEST));
-
-    // Update the base class attributes
-    m_name = name;
-    m_size = size;
 
     return true;
 }
@@ -163,6 +165,50 @@ bool GL_RenderWindow::IsVisible() {
     Uint32 flags = SDL_WINDOW_HIDDEN | SDL_WINDOW_MINIMIZED;
     Uint32 mask = SDL_GetWindowFlags(m_window);
     return (mask & flags) == 0;
+}
+
+void GL_RenderWindow::Draw(Drawable& drawable) {
+    GL_Shader* shader = GL_ShaderManager::GetInstance().GetActiveShader();
+
+    // Create all the MVP matrices as Identity matrices
+    math::mat4 model_matrix = math::mat4();
+    math::mat4 view_matrix = math::mat4();
+    math::mat4 projection_matrix = math::mat4();
+    math::vec3 front_vector;
+
+    // TMP: Move this to other part
+    math::vec3 light_position(3.0f, 3.0f, 3.0f);
+
+    // TODO: Set Model position
+    model_matrix *= math::Translate(math::vec3(0.0f, 0.0f, 0.0f));
+    // TODO: Normalize model sizes
+    model_matrix *= math::Scale(math::vec3(0.05f));
+
+    if (m_active_camera != nullptr) {
+        view_matrix = m_active_camera->GetViewMatrix();
+        front_vector = m_active_camera->GetFrontVector();
+    }
+
+    float fov = math::Radians(45.f);
+    float aspect_ratio = m_size.x / static_cast<float>(m_size.y);
+    float z_near = 0.1f;
+    float z_far = 100.0f;
+    projection_matrix = math::Perspective(fov, aspect_ratio, z_near, z_far);
+
+    if (shader != nullptr) {
+        math::mat4 mvp_matrix = projection_matrix * view_matrix * model_matrix;
+        math::mat4 normal_matrix = model_matrix.Inverse().Transpose();
+
+        UniformBufferObject ubo;
+        ubo.model = model_matrix;
+        ubo.normalMatrix = normal_matrix;
+        ubo.mvp = mvp_matrix;
+        ubo.cameraFront = front_vector;
+        ubo.lightPosition = light_position;
+        shader->SetUniformBufferObject(ubo);
+    }
+
+    RenderWindow::Draw(drawable);  // This calls drawable.Draw(*this);
 }
 
 }  // namespace engine

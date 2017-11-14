@@ -1,3 +1,7 @@
+#include <Graphics/3D/Camera.hpp>
+#include <Renderer/Drawable.hpp>
+#include <Renderer/UniformBufferObject.hpp>
+#include <Renderer/Vertex.hpp>
 #include <System/FileSystem.hpp>
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
@@ -18,12 +22,11 @@ const size_t sResourceCount(3);
 
 const size_t sStagingBufferSize(4000);
 
-}  // namespace
+const uint32 sVertexBufferBindId(0);
 
-struct VertexData {
-    math::Vector4<float> position;
-    math::Vector2<float> tex_coords;
-};
+const char* sShaderEntryPoint("main");
+
+}  // namespace
 
 Vk_RenderWindow::Vk_RenderWindow()
       : m_window(nullptr),
@@ -36,6 +39,9 @@ Vk_RenderWindow::Vk_RenderWindow()
         m_render_pass(VK_NULL_HANDLE),
         m_vertex_buffer(),
         m_staging_buffer(),
+        m_ubo_descriptor_pool(VK_NULL_HANDLE),
+        m_ubo_descriptor_set_layout(VK_NULL_HANDLE),
+        m_ubo_descriptor_set(VK_NULL_HANDLE),
         m_render_resources(sResourceCount) {}
 
 Vk_RenderWindow::~Vk_RenderWindow() {
@@ -73,6 +79,11 @@ bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
         LogError(sTag,
                  "Physical device {} doesn't include WSI "
                  "support"_format(physical_device.properties.deviceName));
+        return false;
+    }
+
+    if (!CreateUBODescriptorSetLayout()) {
+        LogError(sTag, "Could not create the UBO DescriptorSetLayout");
         return false;
     }
 
@@ -158,6 +169,20 @@ void Vk_RenderWindow::Destroy() {
 
         m_swapchain.Destroy();
     }
+
+    if (m_ubo_descriptor_set_layout) {
+        vkDestroyDescriptorSetLayout(device, m_ubo_descriptor_set_layout,
+                                     nullptr);
+        m_ubo_descriptor_set_layout = VK_NULL_HANDLE;
+    }
+
+    if (m_ubo_descriptor_pool) {
+        vkDestroyDescriptorPool(device, m_ubo_descriptor_pool, nullptr);
+        m_ubo_descriptor_pool = VK_NULL_HANDLE;
+        m_ubo_descriptor_set = VK_NULL_HANDLE;
+    }
+
+    m_uniform_buffer.Destroy();
 
     m_present_queue = nullptr;
     m_graphics_queue = nullptr;
@@ -274,7 +299,7 @@ void Vk_RenderWindow::SwapBuffers() {
              .finished_rendering_semaphore  // pSignalSemaphores
     };
 
-    result = vkQueueSubmit(m_graphics_queue->handle, 1, &submit_info,
+    result = vkQueueSubmit(m_graphics_queue->GetHandle(), 1, &submit_info,
                            current_rendering_resource.fence);
 
     if (result != VK_SUCCESS) {
@@ -294,7 +319,7 @@ void Vk_RenderWindow::SwapBuffers() {
         nullptr                              // pResults
     };
 
-    result = vkQueuePresentKHR(m_present_queue->handle, &present_info);
+    result = vkQueuePresentKHR(m_present_queue->GetHandle(), &present_info);
 
     switch (result) {
         case VK_SUCCESS:
@@ -320,6 +345,54 @@ bool Vk_RenderWindow::IsVisible() {
     return (mask & flags) == 0;
 }
 
+void Vk_RenderWindow::Draw(Drawable& drawable) {
+    Vk_Shader* shader = Vk_ShaderManager::GetInstance().GetActiveShader();
+
+    // Create all the MVP matrices as Identity matrices
+    math::mat4 model_matrix = math::mat4();
+    math::mat4 view_matrix = math::mat4();
+    math::mat4 projection_matrix = math::mat4();
+    math::vec3 front_vector;
+
+    // TMP: Move this to other part
+    math::vec3 light_position(3.0f, 3.0f, 3.0f);
+
+    // TODO: Set Model position
+    model_matrix *= math::Translate(math::vec3(0.0f, 0.0f, 0.0f));
+    // TODO: Normalize model sizes
+    model_matrix *= math::Scale(math::vec3(0.05f));
+
+    if (m_active_camera != nullptr) {
+        view_matrix = m_active_camera->GetViewMatrix();
+        front_vector = m_active_camera->GetFrontVector();
+    }
+
+    float fov = math::Radians(45.f);
+    float aspect_ratio = m_size.x / static_cast<float>(m_size.y);
+    float z_near = 0.1f;
+    float z_far = 100.0f;
+    projection_matrix = math::Perspective(fov, aspect_ratio, z_near, z_far);
+
+    if (shader != nullptr) {
+        math::mat4 mvp_matrix = projection_matrix * view_matrix * model_matrix;
+        math::mat4 normal_matrix = model_matrix.Inverse().Transpose();
+
+        UniformBufferObject ubo;
+        ubo.model = model_matrix;
+        ubo.normalMatrix = normal_matrix;
+        ubo.mvp = mvp_matrix;
+        ubo.cameraFront = front_vector;
+        ubo.lightPosition = light_position;
+        // shader->SetUniformBufferObject(ubo);
+    }
+
+    RenderWindow::Draw(drawable);  // This calls drawable.Draw(*this);
+}
+
+void Vk_RenderWindow::SetUniformBufferObject(const UniformBufferObject& ubo) {
+    UpdateUniformBuffer(ubo);
+}
+
 bool Vk_RenderWindow::CheckWSISupport() {
     // Check that the device graphics queue family has WSI support
     VkBool32 wsi_support;
@@ -327,7 +400,7 @@ bool Vk_RenderWindow::CheckWSISupport() {
     PhysicalDeviceParameters& physical_device = context.GetPhysicalDevice();
     QueueParameters& graphics_queue = context.GetGraphicsQueue();
 
-    vkGetPhysicalDeviceSurfaceSupportKHR(physical_device.handle,
+    vkGetPhysicalDeviceSurfaceSupportKHR(physical_device.GetHandle(),
                                          graphics_queue.family_index,
                                          m_surface.GetHandle(), &wsi_support);
     return wsi_support == VK_TRUE;
@@ -404,37 +477,44 @@ bool Vk_RenderWindow::CreateVulkanRenderPass() {
     VkResult result = VK_SUCCESS;
 
     // Create the attachment descriptions
-    VkAttachmentDescription attachment_descriptions[] = {{
-        VkAttachmentDescriptionFlags(),    // flags
-        m_swapchain.GetFormat(),           // format
-        VK_SAMPLE_COUNT_1_BIT,             // samples
-        VK_ATTACHMENT_LOAD_OP_CLEAR,       // loadOp
-        VK_ATTACHMENT_STORE_OP_STORE,      // storeOp
-        VK_ATTACHMENT_LOAD_OP_DONT_CARE,   // stencilLoadOp
-        VK_ATTACHMENT_STORE_OP_DONT_CARE,  // stencilStoreOp
-        VK_IMAGE_LAYOUT_UNDEFINED,         // initialLayout
-        VK_IMAGE_LAYOUT_PRESENT_SRC_KHR    // finalLayout
+    std::array<VkAttachmentDescription, 1> attachment_descriptions = {{
+        {
+            VkAttachmentDescriptionFlags(),    // flags
+            m_swapchain.GetFormat(),           // format
+            VK_SAMPLE_COUNT_1_BIT,             // samples
+            VK_ATTACHMENT_LOAD_OP_CLEAR,       // loadOp
+            VK_ATTACHMENT_STORE_OP_STORE,      // storeOp
+            VK_ATTACHMENT_LOAD_OP_DONT_CARE,   // stencilLoadOp
+            VK_ATTACHMENT_STORE_OP_DONT_CARE,  // stencilStoreOp
+            VK_IMAGE_LAYOUT_UNDEFINED,         // initialLayout
+            VK_IMAGE_LAYOUT_PRESENT_SRC_KHR    // finalLayout
+        },
     }};
 
-    VkAttachmentReference color_attachment_references[] = {{
-        0,                                        // attachment
-        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL  // layout
+    std::array<VkAttachmentReference, 1> color_attachment_references = {{
+        {
+            0,                                        // attachment
+            VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL  // layout
+        },
     }};
 
-    VkSubpassDescription subpass_descriptions[] = {{
-        VkSubpassDescriptionFlags(),      // flags
-        VK_PIPELINE_BIND_POINT_GRAPHICS,  // pipelineBindPoint
-        0,                                // inputAttachmentCount
-        nullptr,                          // pInputAttachments
-        1,                                // colorAttachmentCount
-        color_attachment_references,      // pColorAttachments
-        nullptr,                          // pResolveAttachments
-        nullptr,                          // pDepthStencilAttachment
-        0,                                // preserveAttachmentCount
-        nullptr                           // pPreserveAttachments
+    std::array<VkSubpassDescription, 1> subpass_descriptions = {{
+        {
+            VkSubpassDescriptionFlags(),      // flags
+            VK_PIPELINE_BIND_POINT_GRAPHICS,  // pipelineBindPoint
+            0,                                // inputAttachmentCount
+            nullptr,                          // pInputAttachments
+            static_cast<uint32_t>(
+                color_attachment_references.size()),  // colorAttachmentCount
+            color_attachment_references.data(),       // pColorAttachments
+            nullptr,                                  // pResolveAttachments
+            nullptr,                                  // pDepthStencilAttachment
+            0,                                        // preserveAttachmentCount
+            nullptr                                   // pPreserveAttachments
+        },
     }};
 
-    std::vector<VkSubpassDependency> dependencies = {
+    std::array<VkSubpassDependency, 2> dependencies = {{
         {
             VK_SUBPASS_EXTERNAL,                            // srcSubpass
             0,                                              // dstSubpass
@@ -452,18 +532,20 @@ bool Vk_RenderWindow::CreateVulkanRenderPass() {
             VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,           // srcAccessMask
             VK_ACCESS_MEMORY_READ_BIT,                      // dstAccessMask
             VK_DEPENDENCY_BY_REGION_BIT                     // dependencyFlags
-        }};
+        },
+    }};
 
     VkRenderPassCreateInfo render_pass_create_info = {
-        VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,   // sType
-        nullptr,                                     // pNext
-        VkRenderPassCreateFlags(),                   // flags
-        1,                                           // attachmentCount
-        attachment_descriptions,                     // pAttachments
-        1,                                           // subpassCount
-        subpass_descriptions,                        // pSubpasses
-        static_cast<uint32_t>(dependencies.size()),  // dependencyCount
-        dependencies.data()                          // pDependencies
+        VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO,  // sType
+        nullptr,                                    // pNext
+        VkRenderPassCreateFlags(),                  // flags
+        static_cast<uint32_t>(
+            attachment_descriptions.size()),                 // attachmentCount
+        attachment_descriptions.data(),                      // pAttachments
+        static_cast<uint32_t>(subpass_descriptions.size()),  // subpassCount
+        subpass_descriptions.data(),                         // pSubpasses
+        static_cast<uint32_t>(dependencies.size()),          // dependencyCount
+        dependencies.data()                                  // pDependencies
     };
 
     // NOTES: Dependencies are important for performance
@@ -494,27 +576,42 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         return false;
     }
 
-    std::vector<VkVertexInputBindingDescription> vertex_binding_descriptions = {
-        {
-            0,                           // binding
-            sizeof(VertexData),          // stride
-            VK_VERTEX_INPUT_RATE_VERTEX  // inputRate
+    std::array<VkVertexInputBindingDescription, 1> vertex_binding_descriptions =
+        {{
+            {
+                sVertexBufferBindId,         // binding
+                sizeof(Vertex),              // stride
+                VK_VERTEX_INPUT_RATE_VERTEX  // inputRate
+            },
         }};
 
-    std::vector<VkVertexInputAttributeDescription>
-        vertex_attribute_descriptions = {
+    std::array<VkVertexInputAttributeDescription, 4>
+        vertex_attribute_descriptions = {{
             {
-                0,                                       // location
-                vertex_binding_descriptions[0].binding,  // binding
-                VK_FORMAT_R32G32B32A32_SFLOAT,           // format
-                offsetof(struct VertexData, position)    // offset
+                0,                           // location
+                sVertexBufferBindId,         // binding
+                VK_FORMAT_R32G32B32_SFLOAT,  // format
+                offsetof(Vertex, position)   // offset
             },
             {
-                1,                                       // location
-                vertex_binding_descriptions[0].binding,  // binding
-                VK_FORMAT_R32G32_SFLOAT,                 // format
-                offsetof(struct VertexData, tex_coords)  // offset
-            }};
+                1,                           // location
+                sVertexBufferBindId,         // binding
+                VK_FORMAT_R32G32B32_SFLOAT,  // format
+                offsetof(Vertex, normal)     // offset
+            },
+            {
+                2,                            // location
+                sVertexBufferBindId,          // binding
+                VK_FORMAT_R32G32_SFLOAT,      // format
+                offsetof(Vertex, tex_coords)  // offset
+            },
+            {
+                3,                              // location
+                sVertexBufferBindId,            // binding
+                VK_FORMAT_R32G32B32A32_SFLOAT,  // format
+                offsetof(Vertex, color)         // offset
+            },
+        }};
 
     VkPipelineVertexInputStateCreateInfo vertex_input_state_create_info = {
         VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,  // sType
@@ -528,26 +625,28 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         vertex_attribute_descriptions.data()  // pVertexAttributeDescriptions
     };
 
-    std::vector<VkPipelineShaderStageCreateInfo> shader_stage_create_infos = {
-        // Vertex shader
+    std::array<VkPipelineShaderStageCreateInfo, 2> shader_stage_create_infos = {
         {
-            VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,  // sType
-            nullptr,                                              // pNext
-            VkPipelineShaderStageCreateFlags(),                   // flags
-            VK_SHADER_STAGE_VERTEX_BIT,                           // stage
-            shader->GetModule(ShaderType::eVertex),               // module
-            "main",                                               // pName
-            nullptr  // pSpecializationInfo
-        },
-        // Fragment shader
-        {
-            VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,  // sType
-            nullptr,                                              // pNext
-            VkPipelineShaderStageCreateFlags(),                   // flags
-            VK_SHADER_STAGE_FRAGMENT_BIT,                         // stage
-            shader->GetModule(ShaderType::eFragment),             // module
-            "main",                                               // pName
-            nullptr  // pSpecializationInfo
+            // Vertex shader
+            {
+                VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,  // sType
+                nullptr,                                              // pNext
+                VkPipelineShaderStageCreateFlags(),                   // flags
+                VK_SHADER_STAGE_VERTEX_BIT,                           // stage
+                shader->GetModule(ShaderType::eVertex),               // module
+                sShaderEntryPoint,                                    // pName
+                nullptr  // pSpecializationInfo
+            },
+            // Fragment shader
+            {
+                VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,  // sType
+                nullptr,                                              // pNext
+                VkPipelineShaderStageCreateFlags(),                   // flags
+                VK_SHADER_STAGE_FRAGMENT_BIT,                         // stage
+                shader->GetModule(ShaderType::eFragment),             // module
+                sShaderEntryPoint,                                    // pName
+                nullptr  // pSpecializationInfo
+            },
         }};
 
     VkPipelineInputAssemblyStateCreateInfo input_assembly_state_create_info = {
@@ -620,9 +719,9 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
     };
 
     // Define the pipeline dynamic states
-    std::vector<VkDynamicState> dynamic_states = {
+    std::array<VkDynamicState, 2> dynamic_states = {{
         VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR,
-    };
+    }};
     VkPipelineDynamicStateCreateInfo dynamic_state_create_info = {
         VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,  // sType
         nullptr,                                               // pNext
@@ -634,12 +733,16 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
     Vk_TextureManager& texture_manager = Vk_TextureManager::GetInstance();
 
     // Create the PipelineLayout
+
+    std::array<VkDescriptorSetLayout, 2> descriptor_set_layouts = {
+        texture_manager.GetDescriptorSetLayout(), m_ubo_descriptor_set_layout};
+
     VkPipelineLayoutCreateInfo layout_create_info = {
-        VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,  // sType
-        nullptr,                                        // pNext
-        VkPipelineLayoutCreateFlags(),                  // flags
-        1,                                              // setLayoutCount
-        &texture_manager.GetDescriptorSetLayout(),      // pSetLayouts
+        VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,         // sType
+        nullptr,                                               // pNext
+        VkPipelineLayoutCreateFlags(),                         // flags
+        static_cast<uint32_t>(descriptor_set_layouts.size()),  // setLayoutCount
+        descriptor_set_layouts.data(),                         // pSetLayouts
         0,       // pushConstantRangeCount
         nullptr  // pPushConstantRanges
     };
@@ -687,12 +790,29 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
 }
 
 bool Vk_RenderWindow::CreateVulkanVertexBuffer() {
+    Vk_Context& context = Vk_Context::GetInstance();
+    VkDevice& device = context.GetVulkanDevice();
+
     VkResult result = VK_SUCCESS;
 
-    VertexData vertex_data[] = {{{-0.7f, -0.7f, 0.0f, 1.0f}, {0.0f, 0.0f}},
-                                {{-0.7f, 0.7f, 0.0f, 1.0f}, {0.0f, 1.0f}},
-                                {{0.7f, -0.7f, 0.0f, 1.0f}, {1.0f, 0.0f}},
-                                {{0.7f, 0.7f, 0.0f, 1.0f}, {1.0f, 1.0f}}};
+    Vertex vertex_data[] = {
+        {{-0.7f, -0.7f, 0.0f},
+         {0.0f, 0.0f, 0.0f},
+         {0.0f, 0.0f},
+         {0.0f, 0.0f, 0.0f, 0.0f}},
+        {{-0.7f, 0.7f, 0.0f},
+         {0.0f, 0.0f, 0.0f},
+         {0.0f, 1.0f},
+         {0.0f, 0.0f, 0.0f, 0.0f}},
+        {{0.7f, -0.7f, 0.0f},
+         {0.0f, 0.0f, 0.0f},
+         {1.0f, 0.0f},
+         {0.0f, 0.0f, 0.0f, 0.0f}},
+        {{0.7f, 0.7f, 0.0f},
+         {0.0f, 0.0f, 0.0f},
+         {1.0f, 1.0f},
+         {0.0f, 0.0f, 0.0f, 0.0f}},
+    };
 
     if (!m_vertex_buffer.Create(sizeof(vertex_data),
                                 (VK_BUFFER_USAGE_VERTEX_BUFFER_BIT |
@@ -706,9 +826,6 @@ bool Vk_RenderWindow::CreateVulkanVertexBuffer() {
                                  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) {
         LogFatal(sTag, "Could not create Staging Buffer");
     }
-
-    Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
 
     void* staging_buffer_memory_pointer;
     result = vkMapMemory(device, m_staging_buffer.GetMemory(), 0,
@@ -786,13 +903,13 @@ bool Vk_RenderWindow::CreateVulkanVertexBuffer() {
         nullptr                         // pSignalSemaphores
     };
 
-    result = vkQueueSubmit(m_graphics_queue->handle, 1, &submit_info,
+    result = vkQueueSubmit(m_graphics_queue->GetHandle(), 1, &submit_info,
                            VK_NULL_HANDLE);
     if (result != VK_SUCCESS) {
         return false;
     }
 
-    vkQueueWaitIdle(m_graphics_queue->handle);
+    vkQueueWaitIdle(m_graphics_queue->GetHandle());
 
     return true;
 }
@@ -876,7 +993,7 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer,
         1                           // layerCount
     };
 
-    if (m_present_queue->handle != m_graphics_queue->handle) {
+    if (m_present_queue->GetHandle() != m_graphics_queue->GetHandle()) {
         VkImageMemoryBarrier barrier_from_present_to_draw = {
             VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,  // sType
             nullptr,                                 // pNext
@@ -886,7 +1003,7 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer,
             VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,         // newLayout
             m_present_queue->family_index,           // srcQueueFamilyIndex
             m_graphics_queue->family_index,          // dstQueueFamilyIndex
-            image_parameters.handle,                 // image
+            image_parameters.GetHandle(),            // image
             image_subresource_range                  // subresourceRange
         };
         vkCmdPipelineBarrier(
@@ -895,9 +1012,9 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer,
             nullptr, 1, &barrier_from_present_to_draw);
     }
 
-    VkClearValue clear_value = {
+    VkClearValue clear_value = {{
         {1.0f, 0.8f, 0.4f, 0.0f},  // color
-    };
+    }};
 
     VkRenderPassBeginInfo render_pass_begin_info = {
         VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,  // sType
@@ -936,16 +1053,18 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer,
         1.0f                           // maxDepth
     };
 
-    VkRect2D scissor = {{
-                            // offset
-                            0,  // x
-                            0   // y
-                        },
-                        {
-                            // extent
-                            static_cast<uint32_t>(m_size.x),  // width
-                            static_cast<uint32_t>(m_size.y),  // height
-                        }};
+    VkRect2D scissor = {
+        {
+            // offset
+            0,  // x
+            0   // y
+        },
+        {
+            // extent
+            static_cast<uint32_t>(m_size.x),  // width
+            static_cast<uint32_t>(m_size.y),  // height
+        },
+    };
 
     vkCmdSetViewport(command_buffer, 0, 1, &viewport);
     vkCmdSetScissor(command_buffer, 0, 1, &scissor);
@@ -967,7 +1086,7 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer,
 
     vkCmdEndRenderPass(command_buffer);
 
-    if (m_graphics_queue->handle != m_present_queue->handle) {
+    if (m_graphics_queue->GetHandle() != m_present_queue->GetHandle()) {
         VkImageMemoryBarrier barrier_from_draw_to_present = {
             VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,  // sType
             nullptr,                                 // pNext
@@ -977,7 +1096,7 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer,
             VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,         // newLayout
             m_graphics_queue->family_index,          // srcQueueFamilyIndex
             m_present_queue->family_index,           // dstQueueFamilyIndex
-            image_parameters.handle,                 // image
+            image_parameters.GetHandle(),            // image
             image_subresource_range                  // subresourceRange
         };
         vkCmdPipelineBarrier(
@@ -1073,6 +1192,141 @@ void Vk_RenderWindow::OnAppDidEnterForeground() {
             return;
         }
     }
+}
+
+bool Vk_RenderWindow::CreateUniformBuffer() {
+    return m_uniform_buffer.Create(sizeof(UniformBufferObject),
+                                   VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                                   (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                                    VK_MEMORY_PROPERTY_HOST_COHERENT_BIT));
+}
+
+bool Vk_RenderWindow::UpdateUniformBuffer(const UniformBufferObject& ubo) {
+    if (m_uniform_buffer.GetHandle() != VK_NULL_HANDLE) return false;
+    Vk_Context& context = Vk_Context::GetInstance();
+    VkDevice& device = context.GetVulkanDevice();
+    void* data;
+    vkMapMemory(device, m_uniform_buffer.GetMemory(), 0, sizeof(ubo), 0, &data);
+    std::memcpy(data, &ubo, sizeof(ubo));
+    vkUnmapMemory(device, m_uniform_buffer.GetMemory());
+    return true;
+}
+
+bool Vk_RenderWindow::CreateUBODescriptorPool() {
+    Vk_Context& context = Vk_Context::GetInstance();
+    VkDevice& device = context.GetVulkanDevice();
+
+    VkResult result = VK_SUCCESS;
+
+    uint32 sMaxDescriptorSets = 1;
+
+    VkDescriptorPoolSize pool_size = {
+        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,  // type
+        sMaxDescriptorSets                          // descriptorCount
+    };
+
+    VkDescriptorPoolCreateInfo descriptor_pool_create_info = {
+        VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,  // sType
+        nullptr,                                        // pNext
+        0,                                              // flags
+        sMaxDescriptorSets,                             // maxSets
+        1,                                              // poolSizeCount
+        &pool_size                                      // pPoolSizes
+    };
+
+    result = vkCreateDescriptorPool(device, &descriptor_pool_create_info,
+                                    nullptr, &m_ubo_descriptor_pool);
+    if (result != VK_SUCCESS) {
+        LogError(sTag, "Could not create descriptor pool");
+        return false;
+    }
+
+    return true;
+}
+
+bool Vk_RenderWindow::CreateUBODescriptorSetLayout() {
+    Vk_Context& context = Vk_Context::GetInstance();
+    VkDevice& device = context.GetVulkanDevice();
+
+    VkResult result = VK_SUCCESS;
+
+    VkDescriptorSetLayoutBinding layout_binding = {
+        1,                                  // binding
+        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,  // descriptorType
+        1,                                  // descriptorCount
+        VK_SHADER_STAGE_VERTEX_BIT,         // stageFlags
+        nullptr                             // pImmutableSamplers
+    };
+
+    VkDescriptorSetLayoutCreateInfo descriptor_set_layout_create_info = {
+        VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,  // sType
+        nullptr,                                              // pNext
+        0,                                                    // flags
+        1,                                                    // bindingCount
+        &layout_binding                                       // pBindings
+    };
+
+    result =
+        vkCreateDescriptorSetLayout(device, &descriptor_set_layout_create_info,
+                                    nullptr, &m_ubo_descriptor_set_layout);
+    if (result != VK_SUCCESS) {
+        LogError(sTag, "Could not create descriptor set layout");
+        return false;
+    }
+
+    return true;
+}
+
+bool Vk_RenderWindow::AllocateUBODescriptorSet() {
+    Vk_Context& context = Vk_Context::GetInstance();
+    VkDevice& device = context.GetVulkanDevice();
+
+    VkResult result = VK_SUCCESS;
+
+    VkDescriptorSetAllocateInfo descriptor_set_allocate_info = {
+        VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,  // sType
+        nullptr,                                         // pNext
+        m_ubo_descriptor_pool,                           // descriptorPool
+        1,                                               // descriptorSetCount
+        &m_ubo_descriptor_set_layout                     // pSetLayouts
+    };
+
+    result = vkAllocateDescriptorSets(device, &descriptor_set_allocate_info,
+                                      &m_ubo_descriptor_set);
+    if (result != VK_SUCCESS) {
+        LogError(sTag, "Could not allocate descriptor set");
+        return false;
+    }
+
+    return true;
+}
+
+bool Vk_RenderWindow::UpdateUBODescriptorSet() {
+    Vk_Context& context = Vk_Context::GetInstance();
+    VkDevice& device = context.GetVulkanDevice();
+
+    VkDescriptorBufferInfo bufferInfo = {
+        m_uniform_buffer.GetHandle(),  // buffer
+        0,                             // offset
+        sizeof(UniformBufferObject)    // range
+    };
+
+    VkWriteDescriptorSet descriptor_writes = {
+        VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,  // sType
+        nullptr,                                 // pNext
+        m_ubo_descriptor_set,                    // dstSet
+        0,                                       // dstBinding
+        0,                                       // dstArrayElement
+        1,                                       // descriptorCount
+        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,       // descriptorType
+        nullptr,                                 // pImageInfo
+        &bufferInfo,                             // pBufferInfo
+        nullptr                                  // pTexelBufferView
+    };
+
+    vkUpdateDescriptorSets(device, 1, &descriptor_writes, 0, nullptr);
+
+    return true;
 }
 
 }  // namespace engine

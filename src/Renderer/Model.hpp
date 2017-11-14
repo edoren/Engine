@@ -2,6 +2,7 @@
 
 #include <Util/Prerequisites.hpp>
 
+#include <Renderer/Drawable.hpp>
 #include <Renderer/Mesh.hpp>
 #include <System/String.hpp>
 
@@ -14,13 +15,14 @@ namespace engine {
 
 class Texture2D;
 
-class ENGINE_API Model {
+class ENGINE_API Model : public Drawable {
 public:
     Model(const String& path);
 
     ~Model();
 
-    void Draw();
+protected:
+    void Draw(RenderWindow& target) const override;
 
 private:
     void LoadModel(const String& path);
@@ -31,6 +33,8 @@ private:
 
     std::vector<Mesh*> m_meshes;
     String m_relative_directory;
+
+    math::mat4 m_model_matrix;
 };
 
 }  // namespace engine

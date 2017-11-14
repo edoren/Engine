@@ -5,9 +5,9 @@
 #include <Renderer/RenderWindow.hpp>
 #include <Renderer/Renderer.hpp>
 #include <Renderer/Shader.hpp>
+#include <Renderer/ShaderManager.hpp>
 #include <Renderer/Texture2D.hpp>
 #include <Renderer/TextureManager.hpp>
-#include <Renderer/ShaderManager.hpp>
 #include <System/Stopwatch.hpp>
 
 #include <Renderer/OpenGL/GL_Plugin.hpp>
@@ -22,6 +22,7 @@ String vertex_shader = R"(
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 texCoords;
+layout (location = 3) in vec4 color;
 
 out vec2 TexCoords;
 out vec3 FragPosition;
@@ -121,11 +122,13 @@ void main() {
 }
 )";
 
-String character_vertex_shader = R"(#version 330 core
+String character_vertex_shader = R"(
+#version 330 core
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 texCoords;
+layout (location = 3) in vec4 color;
 
 out vec2 TexCoords;
 out vec3 FragPosition;
@@ -186,7 +189,7 @@ void main()
     FragColor = texture(material.tex_diffuse1, TexCoords);
 }
 )";
-
+#include <iostream>
 int main(int argc, char* argv[]) {
     Main engine(argc, argv);
 
@@ -253,49 +256,49 @@ int main(int argc, char* argv[]) {
         // Model character("CookKirby/DolCook.obj");
         Model character("LinkOcarina/YoungLinkEquipped.obj");
 
-        std::vector<Vertex> vertex_buffer_data{
+        std::vector<Vertex> vertex_buffer_data = {
             // Red face
-            {{1, -1, 1}, {0, 0, 1}, {1, 1}},
-            {{1, 1, 1}, {0, 0, 1}, {1, 0}},
-            {{-1, 1, 1}, {0, 0, 1}, {0, 0}},
-            {{1, -1, 1}, {0, 0, 1}, {1, 1}},
-            {{-1, -1, 1}, {0, 0, 1}, {0, 1}},
-            {{-1, 1, 1}, {0, 0, 1}, {0, 0}},
+            {{1, -1, 1}, {0, 0, 1}, {1, 1}, {0, 0, 0, 0}},
+            {{1, 1, 1}, {0, 0, 1}, {1, 0}, {0, 0, 0, 0}},
+            {{-1, 1, 1}, {0, 0, 1}, {0, 0}, {0, 0, 0, 0}},
+            {{1, -1, 1}, {0, 0, 1}, {1, 1}, {0, 0, 0, 0}},
+            {{-1, -1, 1}, {0, 0, 1}, {0, 1}, {0, 0, 0, 0}},
+            {{-1, 1, 1}, {0, 0, 1}, {0, 0}, {0, 0, 0, 0}},
             // Green face
-            {{1, -1, 1}, {1, 0, 0}, {0, 1}},
-            {{1, 1, 1}, {1, 0, 0}, {0, 0}},
-            {{1, 1, -1}, {1, 0, 0}, {1, 0}},
-            {{1, -1, 1}, {1, 0, 0}, {0, 1}},
-            {{1, -1, -1}, {1, 0, 0}, {1, 1}},
-            {{1, 1, -1}, {1, 0, 0}, {1, 0}},
+            {{1, -1, 1}, {1, 0, 0}, {0, 1}, {0, 0, 0, 0}},
+            {{1, 1, 1}, {1, 0, 0}, {0, 0}, {0, 0, 0, 0}},
+            {{1, 1, -1}, {1, 0, 0}, {1, 0}, {0, 0, 0, 0}},
+            {{1, -1, 1}, {1, 0, 0}, {0, 1}, {0, 0, 0, 0}},
+            {{1, -1, -1}, {1, 0, 0}, {1, 1}, {0, 0, 0, 0}},
+            {{1, 1, -1}, {1, 0, 0}, {1, 0}, {0, 0, 0, 0}},
             // Yellow face
-            {{1, 1, 1}, {0, 1, 0}, {1, 0}},
-            {{-1, 1, 1}, {0, 1, 0}, {1, 1}},
-            {{-1, 1, -1}, {0, 1, 0}, {0, 1}},
-            {{1, 1, 1}, {0, 1, 0}, {1, 0}},
-            {{1, 1, -1}, {0, 1, 0}, {0, 0}},
-            {{-1, 1, -1}, {0, 1, 0}, {0, 1}},
+            {{1, 1, 1}, {0, 1, 0}, {1, 0}, {0, 0, 0, 0}},
+            {{-1, 1, 1}, {0, 1, 0}, {1, 1}, {0, 0, 0, 0}},
+            {{-1, 1, -1}, {0, 1, 0}, {0, 1}, {0, 0, 0, 0}},
+            {{1, 1, 1}, {0, 1, 0}, {1, 0}, {0, 0, 0, 0}},
+            {{1, 1, -1}, {0, 1, 0}, {0, 0}, {0, 0, 0, 0}},
+            {{-1, 1, -1}, {0, 1, 0}, {0, 1}, {0, 0, 0, 0}},
             // White face
-            {{1, -1, 1}, {0, -1, 0}, {1, 0}},
-            {{-1, -1, 1}, {0, -1, 0}, {1, 1}},
-            {{-1, -1, -1}, {0, -1, 0}, {0, 1}},
-            {{1, -1, 1}, {0, -1, 0}, {1, 0}},
-            {{1, -1, -1}, {0, -1, 0}, {0, 0}},
-            {{-1, -1, -1}, {0, -1, 0}, {0, 1}},
+            {{1, -1, 1}, {0, -1, 0}, {1, 0}, {0, 0, 0, 0}},
+            {{-1, -1, 1}, {0, -1, 0}, {1, 1}, {0, 0, 0, 0}},
+            {{-1, -1, -1}, {0, -1, 0}, {0, 1}, {0, 0, 0, 0}},
+            {{1, -1, 1}, {0, -1, 0}, {1, 0}, {0, 0, 0, 0}},
+            {{1, -1, -1}, {0, -1, 0}, {0, 0}, {0, 0, 0, 0}},
+            {{-1, -1, -1}, {0, -1, 0}, {0, 1}, {0, 0, 0, 0}},
             // Blue face
-            {{-1, -1, 1}, {-1, 0, 0}, {0, 1}},
-            {{-1, 1, 1}, {-1, 0, 0}, {0, 0}},
-            {{-1, 1, -1}, {-1, 0, 0}, {1, 0}},
-            {{-1, -1, 1}, {-1, 0, 0}, {0, 1}},
-            {{-1, -1, -1}, {-1, 0, 0}, {1, 1}},
-            {{-1, 1, -1}, {-1, 0, 0}, {1, 0}},
+            {{-1, -1, 1}, {-1, 0, 0}, {0, 1}, {0, 0, 0, 0}},
+            {{-1, 1, 1}, {-1, 0, 0}, {0, 0}, {0, 0, 0, 0}},
+            {{-1, 1, -1}, {-1, 0, 0}, {1, 0}, {0, 0, 0, 0}},
+            {{-1, -1, 1}, {-1, 0, 0}, {0, 1}, {0, 0, 0, 0}},
+            {{-1, -1, -1}, {-1, 0, 0}, {1, 1}, {0, 0, 0, 0}},
+            {{-1, 1, -1}, {-1, 0, 0}, {1, 0}, {0, 0, 0, 0}},
             // Orange face
-            {{1, -1, -1}, {0, 0, -1}, {1, 1}},
-            {{1, 1, -1}, {0, 0, -1}, {1, 0}},
-            {{-1, 1, -1}, {0, 0, -1}, {0, 0}},
-            {{1, -1, -1}, {0, 0, -1}, {1, 1}},
-            {{-1, -1, -1}, {0, 0, -1}, {0, 1}},
-            {{-1, 1, -1}, {0, 0, -1}, {0, 0}},
+            {{1, -1, -1}, {0, 0, -1}, {1, 1}, {0, 0, 0, 0}},
+            {{1, 1, -1}, {0, 0, -1}, {1, 0}, {0, 0, 0, 0}},
+            {{-1, 1, -1}, {0, 0, -1}, {0, 0}, {0, 0, 0, 0}},
+            {{1, -1, -1}, {0, 0, -1}, {1, 1}, {0, 0, 0, 0}},
+            {{-1, -1, -1}, {0, 0, -1}, {0, 1}, {0, 0, 0, 0}},
+            {{-1, 1, -1}, {0, 0, -1}, {0, 0}, {0, 0, 0, 0}},
         };
 
         std::vector<math::vec3> cube_positions = {
@@ -316,34 +319,39 @@ int main(int argc, char* argv[]) {
         glBindVertexArray(cube_VAO);
 
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0,
-                              3,               // size
-                              GL_FLOAT,        // type
-                              GL_FALSE,        // normalized?
-                              sizeof(Vertex),  // stride
-                              reinterpret_cast<void*>(offsetof(
-                                  Vertex, m_position))  // array buffer offset
-                              );
+        glVertexAttribPointer(
+            0,
+            3,               // size
+            GL_FLOAT,        // type
+            GL_FALSE,        // normalized?
+            sizeof(Vertex),  // stride
+            reinterpret_cast<void*>(offsetof(Vertex, position)));
 
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1,
-                              3,               // size
-                              GL_FLOAT,        // type
-                              GL_TRUE,         // normalized?
-                              sizeof(Vertex),  // stride
-                              reinterpret_cast<void*>(offsetof(
-                                  Vertex, m_normal))  // array buffer offset
-                              );
+        glVertexAttribPointer(
+            1,
+            3,               // size
+            GL_FLOAT,        // type
+            GL_TRUE,         // normalized?
+            sizeof(Vertex),  // stride
+            reinterpret_cast<void*>(offsetof(Vertex, normal)));
 
         glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2,
-                              2,               // size
+        glVertexAttribPointer(
+            2,
+            2,               // size
+            GL_FLOAT,        // type
+            GL_FALSE,        // normalized?
+            sizeof(Vertex),  // stride
+            reinterpret_cast<void*>(offsetof(Vertex, tex_coords)));
+
+        glEnableVertexAttribArray(3);
+        glVertexAttribPointer(3,
+                              4,               // size
                               GL_FLOAT,        // type
                               GL_FALSE,        // normalized?
                               sizeof(Vertex),  // stride
-                              reinterpret_cast<void*>(offsetof(
-                                  Vertex, m_tex_coords))  // array buffer offset
-                              );
+                              reinterpret_cast<void*>(offsetof(Vertex, color)));
 
         glBindVertexArray(0);
 
@@ -353,14 +361,13 @@ int main(int argc, char* argv[]) {
 
         // position attribute buffer : vertice
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0,
-                              3,               // size
-                              GL_FLOAT,        // type
-                              GL_FALSE,        // normalized?
-                              sizeof(Vertex),  // stride
-                              reinterpret_cast<void*>(offsetof(
-                                  Vertex, m_position))  // array buffer offset
-                              );
+        glVertexAttribPointer(
+            0,
+            3,               // size
+            GL_FLOAT,        // type
+            GL_FALSE,        // normalized?
+            sizeof(Vertex),  // stride
+            reinterpret_cast<void*>(offsetof(Vertex, position)));
 
         glBindVertexArray(0);
 
@@ -416,7 +423,7 @@ int main(int argc, char* argv[]) {
 
             ViewMatrix = camera.GetViewMatrix();
 
-            auto window_size = window.GetSize();
+            window_size = window.GetSize();
 
             float aspect_ratio =
                 window_size.x / static_cast<float>(window_size.y);
@@ -487,12 +494,12 @@ int main(int argc, char* argv[]) {
             ModelMatrix *= math::Scale(math::vec3(
                 0.08f));  // it's a bit too big for our scene, so scale it down
 
-            character_shader->SetUniform("Model", math::mat4());
+            character_shader->SetUniform("Model", ModelMatrix);
             character_shader->SetUniform("NormalMatrix",
                                          ModelMatrix.Inverse().Transpose());
             character_shader->SetUniform(
                 "MVP", ProjectionMatrix * ViewMatrix * ModelMatrix);
-            character.Draw();
+            window.Draw(character);
 
             // Draw the light cube
             ModelMatrix = math::mat4();

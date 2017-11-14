@@ -39,23 +39,27 @@ public:
 
     ~Vk_RenderWindow();
 
-    virtual bool Create(const String& name, const math::ivec2& size) override;
+    bool Create(const String& name, const math::ivec2& size) override;
 
-    virtual void Destroy(void) override;
+    void Destroy(void) override;
 
-    virtual void Reposition(int left, int top) override;
+    void Reposition(int left, int top) override;
 
-    virtual void Resize(int width, int height) override;
+    void Resize(int width, int height) override;
 
-    virtual void SetFullScreen(bool fullscreen, bool is_fake) override;
+    void SetFullScreen(bool fullscreen, bool is_fake) override;
 
-    virtual void SetVSyncEnabled(bool vsync) override;
+    void SetVSyncEnabled(bool vsync) override;
 
-    virtual void SwapBuffers() override;  // RenderTarget
+    void SwapBuffers() override;  // RenderTarget
 
-    virtual void Clear(const Color& color) override;  // Render Target
+    void Clear(const Color& color) override;  // RenderTarget
 
-    virtual bool IsVisible() override;
+    bool IsVisible() override;
+
+    void Draw(Drawable& drawable) override;  // RenderTarget
+
+    void SetUniformBufferObject(const UniformBufferObject& ubo) override;
 
 private:
     bool CheckWSISupport();
@@ -77,6 +81,14 @@ private:
                       VkFramebuffer& framebuffer);
 
     bool AllocateVulkanBufferMemory(VkBuffer buffer, VkDeviceMemory* memory);
+
+    bool CreateUniformBuffer();
+    bool UpdateUniformBuffer(const UniformBufferObject& ubo);
+
+    bool CreateUBODescriptorPool();
+    bool CreateUBODescriptorSetLayout();
+    bool AllocateUBODescriptorSet();
+    bool UpdateUBODescriptorSet();
 
     virtual void OnWindowResized(const math::ivec2& size) override;
 
@@ -103,6 +115,11 @@ private:
     Vk_Buffer m_vertex_buffer;
     Vk_Buffer m_index_buffer;
     Vk_Buffer m_staging_buffer;
+
+    Vk_Buffer m_uniform_buffer;
+    VkDescriptorPool m_ubo_descriptor_pool;
+    VkDescriptorSetLayout m_ubo_descriptor_set_layout;
+    VkDescriptorSet m_ubo_descriptor_set;
 
     std::vector<RenderingResourcesData> m_render_resources;
 };

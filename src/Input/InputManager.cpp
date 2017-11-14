@@ -11,14 +11,16 @@ namespace {
 const String sTag("InputManager");
 
 int EngineEventFilter(void* userdata, SDL_Event* event) {
-    InputManager* input_system = reinterpret_cast<InputManager*>(userdata);
-    if (input_system->exit_requested()) {
-        return 1;
-    }
-    switch (event->type) {
-        default:
-            break;
-    }
+    ENGINE_UNUSED(userdata);
+    ENGINE_UNUSED(event);
+    // InputManager* input_system = reinterpret_cast<InputManager*>(userdata);
+    // if (input_system->exit_requested()) {
+    //     return 1;
+    // }
+    // switch (event->type) {
+    //     default:
+    //         break;
+    // }
     return 1;
 }
 
