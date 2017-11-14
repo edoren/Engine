@@ -194,8 +194,6 @@ bool Vk_SwapChain::Create(Vk_Surface& surface, uint32 width, uint32 height) {
             },
         };
 
-        Vk_Context& context = Vk_Context::GetInstance();
-
         result = vkCreateImageView(context.GetVulkanDevice(),
                                    &image_view_create_info, nullptr,
                                    &m_images[i].view);

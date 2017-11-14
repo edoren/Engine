@@ -19,7 +19,7 @@ public:
         std::vector<Vertex> vertices, std::vector<uint32> indices,
         std::vector<std::pair<Texture2D*, TextureType>> textures) = 0;
 
-    virtual void Draw() = 0;
+    virtual void Draw() const = 0;
 
 protected:
     std::vector<Vertex> m_vertices;

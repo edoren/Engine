@@ -14,26 +14,25 @@ public:
     GL_RenderWindow();
     ~GL_RenderWindow();
 
-    ////////////////////////////////////////////////////////////////
-    // Overridden
-    virtual bool Create(const String& name, const math::ivec2& size);
+    bool Create(const String& name, const math::ivec2& size) override;
 
-    virtual void Destroy(void);
+    void Destroy(void) override;
 
-    virtual void Reposition(int left, int top);
+    void Reposition(int left, int top) override;
 
-    virtual void Resize(int width, int height);
+    void Resize(int width, int height) override;
 
-    virtual void SetFullScreen(bool fullscreen, bool is_fake);
+    void SetFullScreen(bool fullscreen, bool is_fake) override;
 
-    virtual void SetVSyncEnabled(bool vsync);
+    void SetVSyncEnabled(bool vsync) override;
 
-    virtual void SwapBuffers();  // RenderTarget
+    void SwapBuffers() override;  // RenderTarget
 
-    virtual void Clear(const Color& color);  // Render Target
+    void Clear(const Color& color) override;  // Render Target
 
-    virtual bool IsVisible();
-    ////////////////////////////////////////////////////////////////
+    bool IsVisible() override;
+
+    void Draw(Drawable& drawable) override;  // RenderTarget
 
 private:
     SDL_Window* m_window;

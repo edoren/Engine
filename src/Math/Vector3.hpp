@@ -9,7 +9,32 @@ namespace math {
 template <typename T>
 class Vector2;
 template <typename T>
+class Vector3;
+template <typename T>
 class Vector4;
+
+template <typename T>
+struct Vector3Packed {
+    typedef mathfu::VectorPacked<T, 3> data_type;
+
+    Vector3Packed() {}
+
+    explicit Vector3Packed(const Vector3<T>& vector) {
+        vector.Pack(this);
+    }
+
+    Vector3Packed& operator=(const Vector3<T>& vector) {
+        vector.Pack(this);
+        return *this;
+    }
+
+    union {
+        data_type m_data;
+        struct {
+            T x, y, z;
+        };
+    };
+};
 
 template <typename T>
 class Vector3 {
@@ -141,12 +166,17 @@ public:
         return Vector2<T>(m_data.xy());
     }
 
+    inline void Pack(Vector3Packed<T>* vector) const {
+        vector->x = x;
+        vector->y = y;
+        vector->z = z;
+    }
+
     static inline Vector3<T> Lerp(const Vector3<T>& v1, const Vector3<T>& v2,
                                   const T percent) {
         return Vector3<T>(data_type::Lerp(v1.m_data, v2.m_data, percent));
     }
 
-public:
     union {
         data_type m_data;
         struct {

@@ -10,6 +10,31 @@ template <typename T>
 class Vector2;
 template <typename T>
 class Vector3;
+template <typename T>
+class Vector4;
+
+template <typename T>
+struct Vector4Packed {
+    typedef mathfu::VectorPacked<T, 4> data_type;
+
+    Vector4Packed() {}
+
+    explicit Vector4Packed(const Vector4<T>& vector) {
+        vector.Pack(this);
+    }
+
+    Vector4Packed& operator=(const Vector4<T>& vector) {
+        vector.Pack(this);
+        return *this;
+    }
+
+    union {
+        data_type m_data;
+        struct {
+            T x, y, z, w;
+        };
+    };
+};
 
 template <typename T>
 class Vector4 {
@@ -23,7 +48,8 @@ public:
     inline Vector4(const T& x, const T& y, const T& z, const T& w)
           : m_data(x, y, z, w) {}
 
-    inline Vector4(const Vector3<T>& v, const T& w) : m_data(v.x, v.y, v.z, w) {}
+    inline Vector4(const Vector3<T>& v, const T& w)
+          : m_data(v.x, v.y, v.z, w) {}
 
     inline Vector4(const Vector2<T>& v, const T& z, const T& w)
           : m_data(v.x, v.y, z, w) {}
@@ -142,6 +168,13 @@ public:
 
     inline Vector3<T> xyz() const {
         return Vector3<T>(m_data.xyz());
+    }
+
+    inline void Pack(Vector4Packed<T>* vector) const {
+        vector->x = x;
+        vector->y = y;
+        vector->z = z;
+        vector->w = w;
     }
 
     static inline Vector4<T> Lerp(const Vector4<T>& v1, const Vector4<T>& v2,

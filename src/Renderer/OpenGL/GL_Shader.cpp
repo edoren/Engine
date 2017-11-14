@@ -91,7 +91,7 @@ bool GL_Shader::Link() {
         GL_CALL(glGetProgramiv(m_program, GL_INFO_LOG_LENGTH, &log_size));
         char* error = new char[log_size];
         GL_CALL(glGetProgramInfoLog(m_program, log_size, &log_size, error));
-        LogError(sTag, error);
+        LogError(sTag, String("Error linking shader:\n") + error);
         delete[] error;
         return false;
     }
@@ -105,7 +105,29 @@ bool GL_Shader::Link() {
 void GL_Shader::Use() {
     if (Link()) {
         GL_CALL(glUseProgram(m_program));
-    };
+    }
+    if (m_uniform_buffer) {
+        GL_CALL(glDeleteBuffers(1, &m_uniform_buffer));
+    }
+}
+
+void GL_Shader::SetUniformBufferObject(const UniformBufferObject& ubo) {
+    GLuint binding_point = 0;
+    GLuint block_index =
+        glGetUniformBlockIndex(m_program, "UniformBufferObject");
+    if (block_index == GL_INVALID_INDEX) {
+        LogError(sTag, "Error finding the UniformBufferObject");
+        return;
+    }
+
+    GL_CALL(glUniformBlockBinding(m_program, block_index, binding_point));
+    GL_CALL(glGenBuffers(1, &m_uniform_buffer));
+    GL_CALL(glBindBuffer(GL_UNIFORM_BUFFER, m_uniform_buffer));
+
+    GL_CALL(glBufferData(GL_UNIFORM_BUFFER, sizeof(UniformBufferObject), &ubo,
+                         GL_DYNAMIC_DRAW));
+    GL_CALL(
+        glBindBufferBase(GL_UNIFORM_BUFFER, binding_point, m_uniform_buffer));
 }
 
 void GL_Shader::SetUniform(const String& name, float val) {
@@ -175,7 +197,7 @@ GLuint GL_Shader::Compile(const byte* source, size_t source_size,
         GL_CALL(glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_size));
         char* error = new char[log_size];
         GL_CALL(glGetShaderInfoLog(shader, log_size, &log_size, error));
-        LogError(sTag, error);
+        LogError(sTag, String("Error compiling shader:\n") + error);
         delete[] error;
         GL_CALL(glDeleteShader(shader));
         return 0;

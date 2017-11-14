@@ -34,6 +34,26 @@ Vk_ShaderManager::~Vk_ShaderManager() {
     sDerivedInstance = nullptr;
 }
 
+Vk_Shader* Vk_ShaderManager::LoadFromFile(const String& basename) {
+    Shader* base_shader = ShaderManager::LoadFromFile(basename);
+    return reinterpret_cast<Vk_Shader*>(base_shader);
+}
+
+Vk_Shader* Vk_ShaderManager::LoadFromMemory(
+    const String& name, std::map<ShaderType, String*> shader_data_map) {
+    Shader* base_shader = ShaderManager::LoadFromMemory(name, shader_data_map);
+    return reinterpret_cast<Vk_Shader*>(base_shader);
+}
+
+Vk_Shader* Vk_ShaderManager::GetShader(const String& name) {
+    Shader* base_shader = ShaderManager::GetShader(name);
+    return reinterpret_cast<Vk_Shader*>(base_shader);
+}
+
+Vk_Shader* Vk_ShaderManager::GetActiveShader() {
+    return reinterpret_cast<Vk_Shader*>(m_active_shader);
+}
+
 Shader* Vk_ShaderManager::CreateShader() {
     return new Vk_Shader();
 }

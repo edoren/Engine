@@ -7,9 +7,34 @@ namespace engine {
 namespace math {
 
 template <typename T>
+class Vector2;
+template <typename T>
 class Vector3;
 template <typename T>
 class Vector4;
+
+template <typename T>
+struct Vector2Packed {
+    typedef mathfu::VectorPacked<T, 2> data_type;
+
+    Vector2Packed() {}
+
+    explicit Vector2Packed(const Vector2<T>& vector) {
+        vector.Pack(this);
+    }
+
+    Vector2Packed& operator=(const Vector2<T>& vector) {
+        vector.Pack(this);
+        return *this;
+    }
+
+    union {
+        data_type m_data;
+        struct {
+            T x, y;
+        };
+    };
+};
 
 template <typename T>
 class Vector2 {
@@ -133,6 +158,11 @@ public:
     inline Vector2<T>& operator-=(const T& s) {
         m_data -= s;
         return *this;
+    }
+
+    inline void Pack(Vector2Packed<T>* vector) const {
+        vector->x = x;
+        vector->y = y;
     }
 
     static inline Vector2<T> Lerp(const Vector2<T>& v1, const Vector2<T>& v2,

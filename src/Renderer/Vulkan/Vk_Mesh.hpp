@@ -1,17 +1,18 @@
 #pragma once
 
 #include <Renderer/Mesh.hpp>
-#include <Util/Prerequisites.hpp>
 
-#include "GL_Config.hpp"
+#include "Vk_Buffer.hpp"
+#include "Vk_Config.hpp"
+#include "Vk_Dependencies.hpp"
 
 namespace engine {
 
-class OPENGL_PLUGIN_API GL_Mesh : public Mesh {
+class VULKAN_PLUGIN_API Vk_Mesh : public Mesh {
 public:
-    GL_Mesh();
+    Vk_Mesh();
 
-    ~GL_Mesh();
+    ~Vk_Mesh() override;
 
     void LoadFromData(
         std::vector<Vertex> vertices, std::vector<uint32> indices,
@@ -22,7 +23,8 @@ public:
 private:
     void SetupMesh();
 
-    unsigned int m_VAO, m_VBO, m_EBO;
+    Vk_Buffer m_vertex_buffer;
+    Vk_Buffer m_index_buffer;
 };
 
 }  // namespace engine

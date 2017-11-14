@@ -20,7 +20,7 @@ public:
 
     void LookAt(const math::vec3& position);
 
-    math::mat4 GetViewMatrix();
+    math::mat4 GetViewMatrix() const;
 
     const math::vec3& GetPosition() const;
 

@@ -1,7 +1,7 @@
 #include "Vk_RendererFactory.hpp"
 #include "Vk_Shader.hpp"
-// #include "Vk_Mesh.hpp"
-// #include "Vk_Texture2D.hpp"
+#include "Vk_Mesh.hpp"
+#include "Vk_Texture2D.hpp"
 
 namespace engine {
 
@@ -18,7 +18,7 @@ Texture2D* Vk_RendererFactory::CreateTexture2D() {
 }
 
 Mesh* Vk_RendererFactory::CreateMesh() {
-    return nullptr;
+    return new Vk_Mesh();
 }
 
 }  // namespace engine

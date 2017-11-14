@@ -5,6 +5,7 @@
 #include <System/String.hpp>
 
 #include "Vk_Config.hpp"
+#include "Vk_Buffer.hpp"
 #include "Vk_Dependencies.hpp"
 
 namespace engine {
@@ -26,6 +27,8 @@ public:
 
 private:
     std::array<VkShaderModule, sShaderTypeCount> m_modules;
+
+    Vk_Buffer m_uniform_buffer;
 };
 
 }  // namespace engine

@@ -7,6 +7,10 @@
 
 namespace engine {
 
+class Camera;
+class Drawable;
+struct UniformBufferObject;
+
 class ENGINE_API RenderWindow {
 public:
     RenderWindow();
@@ -25,13 +29,25 @@ public:
 
     virtual void SetVSyncEnabled(bool vsync) = 0;
 
-    virtual void SwapBuffers() = 0;  // RenderTarget
+    // RenderTarget
+    virtual void SwapBuffers() = 0;
 
-    virtual void Clear(const Color& color) = 0;  // Render Target
+    // RenderTarget
+    virtual void Clear(const Color& color) = 0;
 
     virtual bool IsVisible() = 0;
 
-    void AdvanceFrame(bool minimized); // RenderTarget?
+    // RenderTarget
+    virtual void Draw(Drawable& drawable);
+
+    // RenderTarget?
+    virtual void SetUniformBufferObject(const UniformBufferObject& ubo);
+
+    // RenderTarget
+    void SetActiveCamera(const Camera* camera);
+
+    // RenderTarget?
+    void AdvanceFrame(bool minimized);
 
     const String& GetName() const;
 
@@ -54,6 +70,8 @@ protected:
     math::ivec2 m_size;
     bool m_is_fullscreen;
     bool m_is_vsync_enable;
+
+    const Camera* m_active_camera;
 
 private:
     uint32 on_window_resize_connection;

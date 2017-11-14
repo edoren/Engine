@@ -9,11 +9,22 @@ namespace engine {
 
 class String;
 
+class Vk_Shader;
+
 class VULKAN_PLUGIN_API Vk_ShaderManager : public ShaderManager {
 public:
     Vk_ShaderManager();
 
     ~Vk_ShaderManager();
+
+    Vk_Shader* LoadFromFile(const String& basename);
+
+    Vk_Shader* LoadFromMemory(const String& name,
+                              std::map<ShaderType, String*> shader_data_map);
+
+    Vk_Shader* GetShader(const String& name);
+
+    Vk_Shader* GetActiveShader();
 
     static Vk_ShaderManager& GetInstance();
 

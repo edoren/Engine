@@ -2,7 +2,7 @@
 #include <Renderer/Texture2D.hpp>
 #include <Renderer/Shader.hpp>
 #include <Input/InputManager.hpp>
-#include <Graphics/ResourceManager.hpp>
+#include <Renderer/TextureManager.hpp>
 #include <Graphics/3D/Camera.hpp>
 #include <System/Stopwatch.hpp>
 
@@ -119,8 +119,7 @@ int main(int argc, char* argv[]) {
     Renderer render;
     InputManager input;
 
-    ResourceManager res;
-    res.Initialize(argc, argv);
+    TextureManager texture_manager;
 
     math::ivec2 window_size = { 800, 600 };
 
@@ -138,10 +137,10 @@ int main(int argc, char* argv[]) {
 
     // Create the texture
     Texture2D *texture, *specularTexture, *emissionTexture;
-    texture = res.LoadTexture2D("data/textures/container2.png");
-    specularTexture = res.LoadTexture2D("data/textures/container2_specular.png");
-    emissionTexture = res.LoadTexture2D("data/textures/matrix.png");
-    // specularTexture = res.LoadTexture2D("data/textures/lighting_maps_specular_color.png");
+    texture = texture_manager.LoadFromFile("container2.png");
+    specularTexture = texture_manager.LoadFromFile("container2_specular.png");
+    emissionTexture = texture_manager.LoadFromFile("matrix.png");
+    // specularTexture = texture_manager.LoadFromFile("lighting_maps_specular_color.png");
 
     Shader cube_shader;
     cube_shader.LoadFromMemory(vertex_shader, fragment_shader);

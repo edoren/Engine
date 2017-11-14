@@ -1,10 +1,20 @@
-#include <Renderer/RenderWindow.hpp>
-
 #include <Input/InputManager.hpp>
+#include <Renderer/Drawable.hpp>
+#include <Renderer/RenderWindow.hpp>
 
 namespace engine {
 
-RenderWindow::RenderWindow() {
+RenderWindow::RenderWindow()
+      : m_name(),
+        m_size(),
+        m_is_fullscreen(false),
+        m_is_vsync_enable(false),
+        m_active_camera(nullptr),
+        on_window_resize_connection(0),
+        on_app_will_enter_background_connection(0),
+        on_app_did_enter_background_connection(0),
+        on_app_will_enter_foreground_connection(0),
+        on_app_did_enter_foreground_connection(0) {
     auto& input = InputManager::GetInstance();
 
     on_window_resize_connection =
@@ -37,6 +47,18 @@ RenderWindow::~RenderWindow() {
         on_app_will_enter_foreground_connection);
     input.OnAppDidEnterForeground.Disconnect(
         on_app_did_enter_foreground_connection);
+}
+
+void RenderWindow::Draw(Drawable& drawable) {
+    drawable.Draw(*this);
+}
+
+void RenderWindow::SetActiveCamera(const Camera* camera) {
+    m_active_camera = camera;
+}
+
+void RenderWindow::SetUniformBufferObject(const UniformBufferObject& ubo) {
+    ENGINE_UNUSED(ubo);
 }
 
 void RenderWindow::AdvanceFrame(bool minimized) {
