@@ -5,6 +5,7 @@
 #include <chrono>
 #include <functional>
 #include <type_traits>
+#include <utility>
 
 // Strings library
 #include <string>
@@ -25,3 +26,6 @@
 // Numerics library
 #include <numeric>
 #include <random>
+
+// Atomic operations library
+#include <atomic>

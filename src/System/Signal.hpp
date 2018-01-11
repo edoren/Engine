@@ -42,7 +42,7 @@ public:
     void Emit(Args... args);
 
 private:
-    uint32 m_current_id;
+    std::atomic<uint32> m_current_id;
     std::map<uint32, Slot<Args...>> m_slots;
 };
 
