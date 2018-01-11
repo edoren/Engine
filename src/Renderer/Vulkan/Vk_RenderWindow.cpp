@@ -568,8 +568,7 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
 
     VkResult result = VK_SUCCESS;
 
-    Vk_Shader* shader = reinterpret_cast<Vk_Shader*>(
-        ShaderManager::GetInstance().LoadFromFile("triangle"));
+    Vk_Shader* shader = Vk_ShaderManager::GetInstance().GetActiveShader();
 
     if (!shader->GetModule(ShaderType::eVertex) ||
         !shader->GetModule(ShaderType::eFragment)) {
@@ -1069,8 +1068,8 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer,
     vkCmdSetViewport(command_buffer, 0, 1, &viewport);
     vkCmdSetScissor(command_buffer, 0, 1, &scissor);
 
-    Vk_TextureManager& m_texture_manager = Vk_TextureManager::GetInstance();
-    Vk_Texture2D* current_texture = m_texture_manager.GetActiveTexture2D();
+    Vk_TextureManager& texture_manager = Vk_TextureManager::GetInstance();
+    Vk_Texture2D* current_texture = texture_manager.GetActiveTexture2D();
     if (current_texture) {
         VkDescriptorSet& desciptor_set = current_texture->GetDescriptorSet();
         vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
