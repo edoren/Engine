@@ -10,9 +10,10 @@ namespace {
 
 const String sTag("Vk_Shader");
 
-const std::array<VkShaderStageFlagBits, 3> sVkShaderTypes = {
-    VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_FRAGMENT_BIT,
-    VK_SHADER_STAGE_GEOMETRY_BIT};
+// const std::array<VkShaderStageFlagBits, 3> sVkShaderTypes = {{
+//     VK_SHADER_STAGE_VERTEX_BIT, VK_SHADER_STAGE_FRAGMENT_BIT,
+//     VK_SHADER_STAGE_GEOMETRY_BIT,
+// }};
 
 }  // namespace
 

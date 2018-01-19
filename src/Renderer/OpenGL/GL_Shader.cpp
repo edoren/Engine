@@ -9,8 +9,9 @@ namespace {
 
 const String sTag("GL_Shader");
 
-const std::array<GLenum, 3> sGlShaderTypes = {
-    GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_GEOMETRY_SHADER};
+const std::array<GLenum, 3> sGlShaderTypes = {{
+    GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_GEOMETRY_SHADER,
+}};
 
 }  // namespace
 

@@ -32,6 +32,7 @@ set(TESTS
     # LightingMaps
     LightCasters
     CreateWindow
+    LoadModel
     # Vulkan
 )
 

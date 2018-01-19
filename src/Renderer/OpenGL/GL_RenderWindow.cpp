@@ -1,6 +1,7 @@
 #include <Graphics/3D/Camera.hpp>
 #include <Renderer/Drawable.hpp>
 #include <System/LogManager.hpp>
+#include <System/StringFormat.hpp>
 
 #include "GL_RenderWindow.hpp"
 #include "GL_Shader.hpp"
@@ -12,6 +13,8 @@ namespace engine {
 namespace {
 
 const String sTag("GL_RenderWindow");
+
+const char* sRequiredExtensions[] = {"GL_ARB_separate_shader_objects", nullptr};
 
 }  // namespace
 
@@ -56,27 +59,54 @@ bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
         return false;
     }
 
-    String opengl_vendor =
-        reinterpret_cast<const char8*>(glGetString(GL_VENDOR));
-    String opengl_renderer =
-        reinterpret_cast<const char8*>(glGetString(GL_RENDERER));
-    String opengl_version =
-        reinterpret_cast<const char8*>(glGetString(GL_VERSION));
-    String glsl_version = reinterpret_cast<const char8*>(
-        glGetString(GL_SHADING_LANGUAGE_VERSION));
-
-    LogInfo(sTag, "OpenGL Vendor: " + opengl_vendor);
-    LogInfo(sTag, "OpenGL Renderer: " + opengl_renderer);
-    LogInfo(sTag, "OpenGL Version: " + opengl_version);
-    LogInfo(sTag, "GLSL Version: " + glsl_version);
-
 #if PLATFORM_TYPE_IS(PLATFORM_TYPE_DESKTOP)
+    // glewExperimental = GL_TRUE;
     GLenum status = glewInit();
     if (status != GLEW_OK) {
         LogError(sTag, "GLEW initialization failed.");
         return false;
     }
 #endif
+
+    const char* opengl_vendor =
+        reinterpret_cast<const char*>(glGetString(GL_VENDOR));
+    const char* opengl_renderer =
+        reinterpret_cast<const char*>(glGetString(GL_RENDERER));
+    const char* opengl_version =
+        reinterpret_cast<const char*>(glGetString(GL_VERSION));
+    const char* glsl_version =
+        reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+    LogInfo(sTag, String("OpenGL Vendor: ") + opengl_vendor);
+    LogInfo(sTag, String("OpenGL Renderer: ") + opengl_renderer);
+    LogInfo(sTag, String("OpenGL Version: ") + opengl_version);
+    LogInfo(sTag, String("GLSL Version: ") + glsl_version);
+
+    GLint num_extensions = 0;
+    GL_CALL(glGetIntegerv(GL_NUM_EXTENSIONS, &num_extensions));
+
+    LogInfo(sTag, "OpenGL Extensions: {}"_format(num_extensions));
+    std::vector<const char*> opengl_available_extensions;
+    opengl_available_extensions.reserve(num_extensions);
+    for (GLint i = 0; i < num_extensions; i++) {
+        const char* extension =
+            reinterpret_cast<const char*>(glGetStringi(GL_EXTENSIONS, i));
+        opengl_available_extensions.push_back(extension);
+        LogInfo(sTag, String("\t") + extension);
+    }
+
+    // Check that all the required extensions are available
+    for (auto it = std::begin(sRequiredExtensions);
+         it == std::end(sRequiredExtensions); it++) {
+        const char* required_extension = *it;
+        for (const char* extension : opengl_available_extensions) {
+            if (std::strcmp(required_extension, extension) != 0) {
+                LogError(sTag, "Extension '{}' not available"_format(
+                                   required_extension));
+                return false;
+            }
+        }
+    }
 
     // TODO: User enable depth test
     GL_CALL(glEnable(GL_DEPTH_TEST));
