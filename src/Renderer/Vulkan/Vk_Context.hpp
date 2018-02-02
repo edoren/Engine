@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Util/Singleton.hpp>
+
 #include "Vk_Config.hpp"
 #include "Vk_Dependencies.hpp"
 #include "Vk_VulkanParameters.hpp"

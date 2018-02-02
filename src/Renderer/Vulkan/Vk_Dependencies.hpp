@@ -1,6 +1,8 @@
 #pragma once
 
 #include <Util/Platform.hpp>
+#include <Util/STLHeaders.hpp>
+#include <Util/Types.hpp>
 
 #if PLATFORM_IS(PLATFORM_WINDOWS)
     #define VK_USE_PLATFORM_WIN32_KHR
