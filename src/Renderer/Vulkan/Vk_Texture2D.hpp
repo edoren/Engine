@@ -27,7 +27,6 @@ public:
 
 private:
     bool CreateImage(const Image& img);
-    bool AllocateImageMemory(VkMemoryPropertyFlagBits property);
     bool CreateImageView();
     bool CreateSampler();
 
