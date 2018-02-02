@@ -24,7 +24,8 @@ Vk_ShaderManager* Vk_ShaderManager::GetInstancePtr() {
 
 Vk_ShaderManager::Vk_ShaderManager() : ShaderManager() {
     ShaderManager& base_instance = ShaderManager::GetInstance();
-    sDerivedInstance = reinterpret_cast<Vk_ShaderManager*>(&base_instance);}
+    sDerivedInstance = reinterpret_cast<Vk_ShaderManager*>(&base_instance);
+}
 
 Vk_ShaderManager::~Vk_ShaderManager() {
     for (auto shader_pair : m_shaders) {
