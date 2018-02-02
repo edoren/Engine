@@ -59,6 +59,8 @@ int main(int argc, char* argv[]) {
     math::ivec2 window_size = {800, 600};
     RenderWindow& window = render.GetRenderWindow();
 
+    shader_manager.LoadFromFile("model");
+
     bool ok = window.Create("My Game Test", window_size);
 
     if (!ok) {
@@ -69,8 +71,6 @@ int main(int argc, char* argv[]) {
     math::mat4 projection_matrix;
     math::mat4 view_matrix;
     math::mat4 model_matrix;
-
-    shader_manager.LoadFromFile("model");
 
     Model* character = new Model("LinkOcarina/YoungLinkEquipped.obj");
 

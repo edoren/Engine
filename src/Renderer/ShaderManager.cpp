@@ -94,6 +94,11 @@ Shader* ShaderManager::LoadFromFile(const String& basename) {
     if (new_shader != nullptr) {
         m_shaders[basename] = new_shader;
     }
+
+    if (m_active_shader == nullptr) {
+        m_active_shader = new_shader;
+    }
+
     return new_shader;
 }
 

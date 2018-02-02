@@ -570,7 +570,7 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
 
     Vk_Shader* shader = Vk_ShaderManager::GetInstance().GetActiveShader();
 
-    if (!shader->GetModule(ShaderType::eVertex) ||
+    if (shader == nullptr || !shader->GetModule(ShaderType::eVertex) ||
         !shader->GetModule(ShaderType::eFragment)) {
         return false;
     }
