@@ -80,8 +80,6 @@ private:
                       ImageParameters& image_parameters,
                       VkFramebuffer& framebuffer);
 
-    bool AllocateVulkanBufferMemory(VkBuffer buffer, VkDeviceMemory* memory);
-
     bool CreateUniformBuffer();
     bool UpdateUniformBuffer(const UniformBufferObject& ubo);
 

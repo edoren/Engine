@@ -22,8 +22,6 @@ public:
     VkDeviceSize GetSize() const;
 
 private:
-    bool AllocateMemory(VkMemoryPropertyFlags memory_properties);
-
     VkBuffer m_handle;
     VkDeviceMemory m_memory;
     VkDeviceSize m_size;

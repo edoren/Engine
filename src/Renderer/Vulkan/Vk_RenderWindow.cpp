@@ -719,7 +719,8 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
 
     // Define the pipeline dynamic states
     std::array<VkDynamicState, 2> dynamic_states = {{
-        VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR,
+        VK_DYNAMIC_STATE_VIEWPORT,
+        VK_DYNAMIC_STATE_SCISSOR,
     }};
     VkPipelineDynamicStateCreateInfo dynamic_state_create_info = {
         VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO,  // sType
@@ -1111,41 +1112,6 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer,
     }
 
     return true;
-}
-
-bool Vk_RenderWindow::AllocateVulkanBufferMemory(VkBuffer buffer,
-                                                 VkDeviceMemory* memory) {
-    VkResult result = VK_SUCCESS;
-
-    Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
-    VkPhysicalDevice physical_device = context.GetPhysicalDevice();
-
-    VkMemoryRequirements buffer_memory_requirements;
-    vkGetBufferMemoryRequirements(device, buffer, &buffer_memory_requirements);
-
-    VkPhysicalDeviceMemoryProperties memory_properties;
-    vkGetPhysicalDeviceMemoryProperties(physical_device, &memory_properties);
-
-    for (uint32_t i = 0; i < memory_properties.memoryTypeCount; i++) {
-        if ((buffer_memory_requirements.memoryTypeBits & (1 << i)) &&
-            (memory_properties.memoryTypes[i].propertyFlags &
-             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) {
-            VkMemoryAllocateInfo memory_allocate_info = {
-                VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,  // sType
-                nullptr,                                 // pNext
-                buffer_memory_requirements.size,         // allocationSize
-                i                                        // memoryTypeIndex
-            };
-            result = vkAllocateMemory(device, &memory_allocate_info, nullptr,
-                                      memory);
-            if (result == VK_SUCCESS) {
-                return true;
-            }
-        }
-    }
-
-    return false;
 }
 
 void Vk_RenderWindow::OnWindowResized(const math::ivec2& size) {

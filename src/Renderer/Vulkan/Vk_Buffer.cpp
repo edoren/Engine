@@ -2,6 +2,7 @@
 
 #include "Vk_Buffer.hpp"
 #include "Vk_Context.hpp"
+#include "Vk_Utilities.hpp"
 
 namespace engine {
 
@@ -48,7 +49,7 @@ bool Vk_Buffer::Create(VkDeviceSize size, VkBufferUsageFlags usage,
         return false;
     }
 
-    if (!AllocateMemory(memory_properties)) {
+    if (!Vk_Utilities::AllocateMemory(memory_properties, m_handle, &m_memory)) {
         LogError(sTag, "Could not allocate memory for a buffer");
         return false;
     }
@@ -90,40 +91,4 @@ VkDeviceSize Vk_Buffer::GetSize() const {
     return m_size;
 }
 
-bool Vk_Buffer::AllocateMemory(VkMemoryPropertyFlags memory_properties) {
-    VkResult result = VK_SUCCESS;
-
-    Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
-    VkPhysicalDevice physical_device = context.GetPhysicalDevice();
-
-    VkMemoryRequirements buffer_memory_requirements;
-    vkGetBufferMemoryRequirements(device, m_handle,
-                                  &buffer_memory_requirements);
-
-    VkPhysicalDeviceMemoryProperties physical_memory_properties;
-    vkGetPhysicalDeviceMemoryProperties(physical_device,
-                                        &physical_memory_properties);
-
-    for (uint32_t i = 0; i < physical_memory_properties.memoryTypeCount; i++) {
-        if ((buffer_memory_requirements.memoryTypeBits & (1 << i)) &&
-            (physical_memory_properties.memoryTypes[i].propertyFlags &
-             memory_properties)) {
-            VkMemoryAllocateInfo memory_allocate_info = {
-                VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,  // sType
-                nullptr,                                 // pNext
-                buffer_memory_requirements.size,         // allocationSize
-                i                                        // memoryTypeIndex
-            };
-            result = vkAllocateMemory(device, &memory_allocate_info, nullptr,
-                                      &m_memory);
-            if (result == VK_SUCCESS) {
-                return true;
-            }
-        }
-    }
-
-    return false;
-}
-
-}  // engine
+}  // namespace engine

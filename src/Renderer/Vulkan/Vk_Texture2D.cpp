@@ -4,6 +4,7 @@
 #include "Vk_Context.hpp"
 #include "Vk_Texture2D.hpp"
 #include "Vk_TextureManager.hpp"
+#include "Vk_Utilities.hpp"
 
 namespace engine {
 
@@ -53,7 +54,8 @@ bool Vk_Texture2D::LoadFromImage(const Image& img) {
         return false;
     }
 
-    if (!AllocateImageMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)) {
+    if (!Vk_Utilities::AllocateMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+                                      m_image.handle, &m_memory)) {
         LogError(sTag, "Could not allocate memory for image");
         return false;
     }
@@ -124,40 +126,6 @@ bool Vk_Texture2D::CreateImage(const Image& img) {
         vkCreateImage(device, &image_create_info, nullptr, &m_image.handle);
 
     return result == VK_SUCCESS;
-}
-
-bool Vk_Texture2D::AllocateImageMemory(VkMemoryPropertyFlagBits property) {
-    Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
-    VkPhysicalDevice physical_device = context.GetPhysicalDevice();
-
-    VkResult result = VK_SUCCESS;
-
-    VkMemoryRequirements image_memory_requirements;
-    vkGetImageMemoryRequirements(device, m_image.handle,
-                                 &image_memory_requirements);
-
-    VkPhysicalDeviceMemoryProperties memory_properties;
-    vkGetPhysicalDeviceMemoryProperties(physical_device, &memory_properties);
-
-    for (uint32_t i = 0; i < memory_properties.memoryTypeCount; ++i) {
-        if ((image_memory_requirements.memoryTypeBits & (1 << i)) &&
-            (memory_properties.memoryTypes[i].propertyFlags & property)) {
-            VkMemoryAllocateInfo memory_allocate_info = {
-                VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,  // sType
-                nullptr,                                 // pNext
-                image_memory_requirements.size,          // allocationSize
-                i                                        // memoryTypeIndex
-            };
-            result = vkAllocateMemory(device, &memory_allocate_info, nullptr,
-                                      &m_memory);
-            if (result == VK_SUCCESS) {
-                return true;
-            }
-        }
-    }
-
-    return false;
 }
 
 bool Vk_Texture2D::CreateImageView() {
