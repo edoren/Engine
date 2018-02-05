@@ -23,7 +23,7 @@ bool Vk_Surface::Create(SDL_Window* m_window) {
     SDL_SysWMinfo wminfo;
     SDL_VERSION(&wminfo.version);
     if (!SDL_GetWindowWMInfo(m_window, &wminfo)) {
-        LogError(sTag, "Error on SDL_GetWindowWMInfo.");
+        LogError(sTag, "Error on SDL_GetWindowWMInfo");
         return false;
     }
 

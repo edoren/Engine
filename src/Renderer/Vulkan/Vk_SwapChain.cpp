@@ -198,7 +198,7 @@ bool Vk_SwapChain::Create(Vk_Surface& surface, uint32 width, uint32 height) {
                                    &image_view_create_info, nullptr,
                                    &m_images[i].view);
         if (result != VK_SUCCESS) {
-            LogError(sTag, "Could not create image view for framebuffer.");
+            LogError(sTag, "Could not create image view for framebuffer");
             return false;
         }
     }

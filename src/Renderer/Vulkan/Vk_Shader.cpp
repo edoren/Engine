@@ -74,7 +74,7 @@ bool Vk_Shader::LoadFromMemory(const byte* source, std::size_t source_size,
     result = vkCreateShaderModule(device, &shader_module_create_info, nullptr,
                                   &m_modules[pos]);
     if (result != VK_SUCCESS) {
-        LogError(sTag, "Could not create shader module.");
+        LogError(sTag, "Could not create shader module");
         return false;
     }
 

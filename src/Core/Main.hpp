@@ -12,13 +12,17 @@
 
 namespace engine {
 
+class App;
+
 class ENGINE_API Main : public Singleton<Main> {
 public:
     Main(int argc, char* argv[]);
 
     ~Main();
 
-    void Initialize();
+    void Initialize(App* app);
+
+    void Run();
 
     void Shutdown();
 
@@ -109,6 +113,8 @@ private:
 
     Renderer* m_active_renderer;
     std::vector<Renderer*> m_renderers;
+
+    App* m_app;
 
     // Singletons
     LogManager* m_logger;

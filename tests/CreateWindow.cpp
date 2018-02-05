@@ -1,13 +1,8 @@
+#include <Core/App.hpp>
 #include <Core/Main.hpp>
-#include <Input/InputManager.hpp>
-#include <Renderer/Renderer.hpp>
-#include <Renderer/RenderWindow.hpp>
-#include <System/StringFormat.hpp>
 
-// TODO: Remove this later
-#include <SDL.h>
-
-#include <iostream>
+// TODO: Remove this later - Required for calling main
+#include <SDL_main.h>
 
 #ifdef ENGINE_DEBUG
 #define VULKAN_PLUGIN_NAME "vulkan-plugin-d"
@@ -19,46 +14,50 @@
 
 using namespace engine;
 
-int main(int argc, char* argv[]) {
-    Main engine(argc, argv);
+class CreateWindowApp : public App {
+public:
+    CreateWindowApp() {}
 
-#if PLATFORM_TYPE_IS(PLATFORM_TYPE_MOBILE)
-    String plugin = "vulkan";
-#else
-    String plugin = (argc == 2) ? argv[1] : "";
-#endif
-    if (plugin == "vulkan") {
-        engine.LoadPlugin(VULKAN_PLUGIN_NAME);
-    } else if (plugin == "opengl") {
-        engine.LoadPlugin(OPENGL_PLUGIN_NAME);
-    } else {
-        String usage_msg = "Usage: {} [vulkan|opengl]"_format(argv[0]);
-        std::cout << usage_msg.ToUtf8() << std::endl;
-        return 0;
+protected:
+    bool Initialize() override {
+        return true;
     }
 
-    engine.Initialize();
+    void Update() override {}
 
-    InputManager& input = InputManager::GetInstance();
-    Renderer& render = engine.GetActiveRenderer();
+    void Shutdown() override {}
 
-    math::ivec2 window_size = {800, 600};
-    RenderWindow& window = render.GetRenderWindow();
+    String GetName() override {
+        return "CreateWindow";
+    }
 
-    bool ok = window.Create("My Game Test", window_size);
+    math::Vector2<int32> GetWindowSize() override {
+        return {800, 600};
+    }
+};
 
-    if (!ok) {
-        LogError("main", "Init failed, exiting!");
+int main(int argc, char* argv[]) {
+#if PLATFORM_TYPE_IS(PLATFORM_TYPE_MOBILE)
+    String renderer = "vulkan";
+#else
+    String renderer = (argc == 2) ? argv[1] : "";
+#endif
+
+    String plugin;
+    if (renderer == "vulkan") {
+        plugin = VULKAN_PLUGIN_NAME;
+    } else if (renderer == "opengl") {
+        plugin = OPENGL_PLUGIN_NAME;
+    } else {
         return 1;
     }
 
-    while (!input.exit_requested()) {
-        window.Clear(Color::BLACK);
+    CreateWindowApp app;
 
-        input.AdvanceFrame();
-        render.AdvanceFrame();
-    }
-
+    Main engine(argc, argv);
+    engine.LoadPlugin(plugin);
+    engine.Initialize(&app);
+    engine.Run();
     engine.Shutdown();
 
     return 0;
