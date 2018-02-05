@@ -31,7 +31,7 @@ TextureManager::TextureManager() : m_active_texture(nullptr), m_textures() {}
 
 TextureManager::~TextureManager() {
     if (m_textures.size() > 0) {
-        LogDebug(sTag, "Textures2D not deleted.");
+        LogDebug(sTag, "Textures2D not deleted");
     }
 }
 

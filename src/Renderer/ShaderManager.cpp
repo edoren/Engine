@@ -29,7 +29,7 @@ ShaderManager::ShaderManager() : m_active_shader(nullptr), m_shaders() {}
 
 ShaderManager::~ShaderManager() {
     if (m_shaders.size() > 0) {
-        LogDebug(sTag, "Shaders not deleted.");
+        LogDebug(sTag, "Shaders not deleted");
     }
 }
 

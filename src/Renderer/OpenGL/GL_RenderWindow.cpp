@@ -63,7 +63,7 @@ bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
     // glewExperimental = GL_TRUE;
     GLenum status = glewInit();
     if (status != GLEW_OK) {
-        LogError(sTag, "GLEW initialization failed.");
+        LogError(sTag, "GLEW initialization failed");
         return false;
     }
 #endif

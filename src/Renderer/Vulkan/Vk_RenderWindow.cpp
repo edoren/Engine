@@ -555,7 +555,7 @@ bool Vk_RenderWindow::CreateVulkanRenderPass() {
     result = vkCreateRenderPass(device, &render_pass_create_info, nullptr,
                                 &m_render_pass);
     if (result != VK_SUCCESS) {
-        LogError(sTag, "Could not create render pass.");
+        LogError(sTag, "Could not create render pass");
         return false;
     }
 
@@ -570,8 +570,14 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
 
     Vk_Shader* shader = Vk_ShaderManager::GetInstance().GetActiveShader();
 
-    if (shader == nullptr || !shader->GetModule(ShaderType::eVertex) ||
+    if (shader == nullptr) {
+        LogError(sTag, "Active shader not set");
+        return false;
+    }
+
+    if (!shader->GetModule(ShaderType::eVertex) ||
         !shader->GetModule(ShaderType::eFragment)) {
+        LogError(sTag, "Coud not get Vertex and/or Fragment shader module");
         return false;
     }
 
@@ -960,7 +966,7 @@ bool Vk_RenderWindow::CreateVulkanFrameBuffer(VkFramebuffer& framebuffer,
     result = vkCreateFramebuffer(device, &framebuffer_create_info, nullptr,
                                  &framebuffer);
     if (result != VK_SUCCESS) {
-        LogError(sTag, "Could not create a framebuffer.");
+        LogError(sTag, "Could not create a framebuffer");
         return false;
     }
 

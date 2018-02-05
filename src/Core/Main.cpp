@@ -1,4 +1,7 @@
-﻿#include <Core/Main.hpp>
+﻿#include <Core/App.hpp>
+#include <Core/Main.hpp>
+#include <Renderer/RenderWindow.hpp>
+#include <System/Stopwatch.hpp>
 
 #include <SDL.h>
 
@@ -47,34 +50,71 @@ Main::~Main() {
     delete m_logger;
 }
 
-void Main::Initialize() {
+void Main::Initialize(App* app) {
     SetActiveRenderer();  // TODO: Change this to a configurable way
 
     if (!m_active_renderer) {
         LogFatal(sTag, "Could not find an avaliable Renderer");
     }
 
-    if (!m_is_initialized) {
+    if (!m_is_initialized && app != nullptr) {
+        m_app = app;
+
+        bool ok = false;
+
         LogInfo(sTag, "Initializing Engine");
 
         SDL_Init(0);
 
         InputManager::GetInstance().Initialize();
 
-        bool status = GetActiveRenderer().Initialize();
-        if (!status) {
+        ok = m_active_renderer->Initialize();
+        if (!ok) {
             LogFatal(sTag, "Could not initialize the Renderer");
         }
 
         InitializePlugins();
 
+        RenderWindow& window = m_active_renderer->GetRenderWindow();
+        ok = window.Create(app->GetName(), app->GetWindowSize());
+        if (!ok) {
+            LogFatal(sTag, "Could not create the RenderWindow");
+        }
+
+        m_app->Initialize();
+
         m_is_initialized = true;
+    }
+}
+
+void Main::Run() {
+    if (!m_is_initialized) {
+        LogError(sTag, "The Engine has not being initialized");
+        return;
+    }
+
+    RenderWindow& window = m_active_renderer->GetRenderWindow();
+
+    Stopwatch timer;
+    timer.Start();
+    while (!m_input->exit_requested()) {
+        m_app->m_delta_time = timer.GetElapsedTime();
+        timer.Restart();
+
+        window.Clear(Color::BLACK);
+
+        m_app->Update();
+
+        m_input->AdvanceFrame();
+        m_active_renderer->AdvanceFrame();
     }
 }
 
 void Main::Shutdown() {
     if (m_is_initialized) {
         LogInfo(sTag, "Stopping Engine");
+
+        m_app->Shutdown();
 
         InputManager::GetInstance().Shutdown();
 

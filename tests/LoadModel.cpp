@@ -1,17 +1,14 @@
+#include <Core/App.hpp>
 #include <Core/Main.hpp>
 #include <Graphics/3D/Camera.hpp>
 #include <Input/InputManager.hpp>
 #include <Renderer/Model.hpp>
 #include <Renderer/RenderWindow.hpp>
 #include <Renderer/Renderer.hpp>
-#include <Renderer/Shader.hpp>
 #include <Renderer/ShaderManager.hpp>
-#include <System/Stopwatch.hpp>
-#include <System/StringFormat.hpp>
 
-#include <SDL.h>  // TMP
-
-using namespace engine;
+// TODO: Remove this later - Required for calling main and Input enums
+#include <SDL.h>
 
 #ifdef ENGINE_DEBUG
 #define VULKAN_PLUGIN_NAME "vulkan-plugin-d"
@@ -20,6 +17,8 @@ using namespace engine;
 #define VULKAN_PLUGIN_NAME "vulkan-plugin"
 #define OPENGL_PLUGIN_NAME "opengl-plugin"
 #endif
+
+using namespace engine;
 
 struct Vertex {
     Vertex(const math::vec3& position, const math::vec3& normal,
@@ -30,118 +29,120 @@ struct Vertex {
     math::vec2 tex_coords;
 };
 
-#include <iostream>
+class LoadModelApp : public App {
+public:
+    LoadModelApp() : m_window_size(800, 600) {}
 
-int main(int argc, char* argv[]) {
-    Main engine(argc, argv);
+protected:
+    bool Initialize() override {
+        Main& engine = Main::GetInstance();
 
-#if PLATFORM_TYPE_IS(PLATFORM_TYPE_MOBILE)
-    String plugin = "vulkan";
-#else
-    String plugin = (argc == 2) ? argv[1] : "";
-#endif
-    if (plugin == "vulkan") {
-        engine.LoadPlugin(VULKAN_PLUGIN_NAME);
-    } else if (plugin == "opengl") {
-        engine.LoadPlugin(OPENGL_PLUGIN_NAME);
-    } else {
-        String usage_msg = "Usage: {} [vulkan|opengl]"_format(argv[0]);
-        std::cout << usage_msg.ToUtf8() << std::endl;
-        return 0;
+        m_input = InputManager::GetInstancePtr();
+        m_shader_manager = ShaderManager::GetInstancePtr();
+        m_render = engine.GetActiveRendererPtr();
+        m_window = m_render->GetRenderWindowPtr();
+
+        m_shader_manager->LoadFromFile("model");
+
+        m_character = new Model("LinkOcarina/YoungLinkEquipped.obj");
+
+        Mouse& mouse = m_input->GetMouse();
+        mouse.SetRelativeMouseMode(true);
+        mouse.HideCursor();
+
+        m_camera = Camera({10, 10, 10});
+        m_camera.LookAt({0, 0, 0});
+        m_camera_speed = 2.5f;
+        m_mouse_sensivity = 0.1f;
+
+        m_window->SetActiveCamera(&m_camera);
+
+        return true;
     }
 
-    engine.Initialize();
-
-    InputManager& input = InputManager::GetInstance();
-    ShaderManager& shader_manager = ShaderManager::GetInstance();
-    Renderer& render = engine.GetActiveRenderer();
-
-    math::ivec2 window_size = {800, 600};
-    RenderWindow& window = render.GetRenderWindow();
-
-    shader_manager.LoadFromFile("model");
-
-    bool ok = window.Create("My Game Test", window_size);
-
-    if (!ok) {
-        SDL_LogError(SDL_LOG_CATEGORY_ERROR, "Init failed, exiting!");
-        return 1;
-    }
-
-    math::mat4 projection_matrix;
-    math::mat4 view_matrix;
-    math::mat4 model_matrix;
-
-    Model* character = new Model("LinkOcarina/YoungLinkEquipped.obj");
-
-    Mouse& mouse = input.GetMouse();
-    mouse.SetRelativeMouseMode(true);
-    mouse.HideCursor();
-
-    Camera camera({10, 10, 10});
-    camera.LookAt({0, 0, 0});
-    float camera_speed = 2.5f;
-    float mouse_sensivity = 0.1f;
-
-    window.SetActiveCamera(&camera);
-
-    Stopwatch timer;
-    float delta_time;
-
-    float angle = 0;
-
-    timer.Start();
-    while (!input.exit_requested()) {
-        delta_time = timer.GetElapsedTime().AsSeconds();
-        timer.Restart();
-
-        window.Clear(Color::BLACK);
-
+    void Update() override {
         // Camera movement
-        const math::vec3& camera_front = camera.GetFrontVector();
+        const math::vec3& camera_front = m_camera.GetFrontVector();
         math::vec3 camera_forward(camera_front.x, 0, camera_front.z);
         camera_forward = math::Normalize(camera_forward);
 
         // Camera mouse movement
+        Mouse& mouse = m_input->GetMouse();
         math::vec2 mouse_delta(mouse.pointer.mousedelta);
-        camera.Rotate(mouse_delta * mouse_sensivity);
+        m_camera.Rotate(mouse_delta * m_mouse_sensivity);
 
         // Camera key movements
-        float speed = camera_speed * delta_time;
-        if (input.GetButton(SDLK_w).IsDown())
-            camera.Move(speed * camera_forward);
-        if (input.GetButton(SDLK_s).IsDown())
-            camera.Move(speed * -camera_forward);
-        if (input.GetButton(SDLK_d).IsDown())
-            camera.Move(speed * camera.GetRightVector());
-        if (input.GetButton(SDLK_a).IsDown())
-            camera.Move(speed * -camera.GetRightVector());
+        float delta_time = GetDeltaTime().AsSeconds();
+        float speed = m_camera_speed * delta_time;
+        if (m_input->GetButton(SDLK_w).IsDown())
+            m_camera.Move(speed * camera_forward);
+        if (m_input->GetButton(SDLK_s).IsDown())
+            m_camera.Move(speed * -camera_forward);
+        if (m_input->GetButton(SDLK_d).IsDown())
+            m_camera.Move(speed * m_camera.GetRightVector());
+        if (m_input->GetButton(SDLK_a).IsDown())
+            m_camera.Move(speed * -m_camera.GetRightVector());
 
-        if (input.GetButton(SDLK_SPACE).IsDown())
-            camera.Move(speed * Camera::WORLD_UP);
-        if (input.GetButton(SDLK_LSHIFT).IsDown())
-            camera.Move(speed * -Camera::WORLD_UP);
+        if (m_input->GetButton(SDLK_SPACE).IsDown())
+            m_camera.Move(speed * Camera::WORLD_UP);
+        if (m_input->GetButton(SDLK_LSHIFT).IsDown())
+            m_camera.Move(speed * -Camera::WORLD_UP);
 
-        window_size = window.GetSize();
+        m_window_size = m_window->GetSize();
 
-        float aspect_ratio = window_size.x / static_cast<float>(window_size.y);
-        angle += math::Radians(delta_time * 90.f);
-
-        view_matrix = camera.GetViewMatrix();
-        projection_matrix =
-            math::Perspective(math::Radians(45.f), aspect_ratio, 0.1f, 100.0f);
-
-        shader_manager.SetActiveShader("model");
-
-        window.Draw(*character);
-
-        input.AdvanceFrame();
-        render.AdvanceFrame();
-        // render.DepthTest(false);
+        m_shader_manager->SetActiveShader("model");
+        m_window->Draw(*m_character);
     }
 
-    delete character;
+    void Shutdown() override {
+        delete m_character;
+    }
 
+    String GetName() override {
+        return "LoadModel";
+    }
+
+    math::Vector2<int32> GetWindowSize() override {
+        return m_window_size;
+    }
+
+private:
+    math::ivec2 m_window_size;
+
+    Camera m_camera;
+    float m_camera_speed;
+    float m_mouse_sensivity;
+
+    Model* m_character;
+
+    InputManager* m_input;
+    ShaderManager* m_shader_manager;
+    Renderer* m_render;
+    RenderWindow* m_window;
+};
+
+int main(int argc, char* argv[]) {
+#if PLATFORM_TYPE_IS(PLATFORM_TYPE_MOBILE)
+    String renderer = "vulkan";
+#else
+    String renderer = (argc == 2) ? argv[1] : "";
+#endif
+
+    String plugin;
+    if (renderer == "vulkan") {
+        plugin = VULKAN_PLUGIN_NAME;
+    } else if (renderer == "opengl") {
+        plugin = OPENGL_PLUGIN_NAME;
+    } else {
+        return 1;
+    }
+
+    LoadModelApp app;
+
+    Main engine(argc, argv);
+    engine.LoadPlugin(plugin);
+    engine.Initialize(&app);
+    engine.Run();
     engine.Shutdown();
 
     return 0;
