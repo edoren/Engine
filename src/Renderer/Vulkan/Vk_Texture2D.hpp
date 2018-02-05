@@ -15,7 +15,7 @@ class Image;
 
 class Vk_Texture2D : public Texture2D {
 public:
-    Vk_Texture2D(Vk_TextureManager* texture_manager);
+    Vk_Texture2D();
 
     virtual ~Vk_Texture2D();
 

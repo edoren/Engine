@@ -20,10 +20,6 @@ public:
     static GL_TextureManager* GetInstancePtr();
 
 protected:
-    Texture2D* CreateTexture2D() override;
-
-    void DeleteTexture2D(Texture2D* shader) override;
-
     void UseTexture2D(Texture2D* shader) override;
 };
 

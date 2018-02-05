@@ -1,3 +1,5 @@
+#include <Core/Main.hpp>
+#include <Renderer/RendererFactory.hpp>
 #include <Renderer/TextureManager.hpp>
 #include <System/FileSystem.hpp>
 #include <System/LogManager.hpp>
@@ -61,12 +63,15 @@ Texture2D* TextureManager::LoadFromImage(const String& name,
         return new_texture;
     }
 
-    new_texture = CreateTexture2D();
+    RendererFactory& factory =
+        Main::GetInstance().GetActiveRenderer().GetRendererFactory();
+
+    new_texture = factory.CreateTexture2D();
     if (new_texture != nullptr) {
         LogDebug(sTag, "Loading Texture: " + name);
         if (!new_texture->LoadFromImage(image)) {
             LogDebug(sTag, "Could not load Texture: " + name);
-            DeleteTexture2D(new_texture);
+            delete new_texture;
             new_texture = nullptr;
         }
     } else {
@@ -99,4 +104,4 @@ Texture2D* TextureManager::GetActiveTexture2D() {
     return m_active_texture;
 }
 
-}  // engine
+}  // namespace engine

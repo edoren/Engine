@@ -72,10 +72,6 @@ public:
     static TextureManager* GetInstancePtr();
 
 protected:
-    virtual Texture2D* CreateTexture2D() = 0;
-
-    virtual void DeleteTexture2D(Texture2D* texture) = 0;
-
     virtual void UseTexture2D(Texture2D* texture) = 0;
 
     Texture2D* m_active_texture;

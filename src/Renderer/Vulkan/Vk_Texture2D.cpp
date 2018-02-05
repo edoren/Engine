@@ -14,8 +14,7 @@ const String sTag("Vk_Texture2D");
 
 }  // namespace
 
-Vk_Texture2D::Vk_Texture2D(Vk_TextureManager* texture_manager)
-      : m_texture_manager(texture_manager) {}
+Vk_Texture2D::Vk_Texture2D() {}
 
 Vk_Texture2D::~Vk_Texture2D() {
     Vk_Context& context = Vk_Context::GetInstance();
@@ -359,14 +358,16 @@ bool Vk_Texture2D::AllocateDescriptorSet() {
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.GetVulkanDevice();
 
+    Vk_TextureManager* texture_manager = Vk_TextureManager::GetInstancePtr();
+
     VkResult result = VK_SUCCESS;
 
     VkDescriptorSetAllocateInfo descriptor_set_allocate_info = {
         VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,  // sType
         nullptr,                                         // pNext
-        m_texture_manager->GetDescriptorPool(),          // descriptorPool
+        texture_manager->GetDescriptorPool(),          // descriptorPool
         1,                                               // descriptorSetCount
-        &m_texture_manager->GetDescriptorSetLayout()     // pSetLayouts
+        &texture_manager->GetDescriptorSetLayout()     // pSetLayouts
     };
 
     result = vkAllocateDescriptorSets(device, &descriptor_set_allocate_info,
