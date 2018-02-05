@@ -14,7 +14,7 @@ namespace {
 
 const String sTag("GL_RenderWindow");
 
-const char* sRequiredExtensions[] = {"GL_ARB_separate_shader_objects", nullptr};
+const char* sRequiredExtensions[] = {"GL_ARB_separate_shader_objects"};
 
 }  // namespace
 
@@ -96,16 +96,25 @@ bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
     }
 
     // Check that all the required extensions are available
+    bool all_extensions_found = true;
     for (auto it = std::begin(sRequiredExtensions);
-         it == std::end(sRequiredExtensions); it++) {
+         it != std::end(sRequiredExtensions); it++) {
+        bool found = false;
         const char* required_extension = *it;
         for (const char* extension : opengl_available_extensions) {
-            if (std::strcmp(required_extension, extension) != 0) {
-                LogError(sTag, "Extension '{}' not available"_format(
-                                   required_extension));
-                return false;
+            if (std::strcmp(required_extension, extension) == 0) {
+                found = true;
+                break;
             }
         }
+        if (!found) {
+            LogError(sTag,
+                     "Extension '{}' not available"_format(required_extension));
+            all_extensions_found = false;
+        }
+    }
+    if (!all_extensions_found) {
+        return false;
     }
 
     // TODO: User enable depth test
