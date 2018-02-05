@@ -43,7 +43,7 @@ Vk_TextureManager::~Vk_TextureManager() {
     VkDevice& device = context.GetVulkanDevice();
 
     for (auto texture_pair : m_textures) {
-        DeleteTexture2D(texture_pair.second);
+        delete texture_pair.second;
     }
     m_textures.clear();
 
@@ -70,14 +70,6 @@ VkDescriptorSetLayout& Vk_TextureManager::GetDescriptorSetLayout() {
 
 Vk_Texture2D* Vk_TextureManager::GetActiveTexture2D() {
     return reinterpret_cast<Vk_Texture2D*>(m_active_texture);
-}
-
-Texture2D* Vk_TextureManager::CreateTexture2D() {
-    return new Vk_Texture2D(this);
-}
-
-void Vk_TextureManager::DeleteTexture2D(Texture2D* texture) {
-    delete texture;
 }
 
 void Vk_TextureManager::UseTexture2D(Texture2D* texture) {
