@@ -83,6 +83,10 @@ VkBuffer& Vk_Buffer::GetHandle() {
     return m_handle;
 }
 
+const VkBuffer& Vk_Buffer::GetHandle() const {
+    return m_handle;
+}
+
 VkDeviceMemory& Vk_Buffer::GetMemory() {
     return m_memory;
 }
