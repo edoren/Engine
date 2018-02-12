@@ -18,6 +18,7 @@ public:
     void Destroy();
 
     VkBuffer& GetHandle();
+    const VkBuffer& GetHandle() const;
     VkDeviceMemory& GetMemory();
     VkDeviceSize GetSize() const;
 
