@@ -971,6 +971,19 @@ ENGINE_API String operator+(const String& left, char8 right);
 ////////////////////////////////////////////////////////////
 ENGINE_API String operator+(char8 left, const String& right);
 
+////////////////////////////////////////////////////////////
+/// @relates String
+/// @brief Overload of << operator add support to using the
+///        String class with STL ostream classes
+///
+/// @param os  A std::ostream
+/// @param str A String
+///
+/// @return Returns os
+///
+////////////////////////////////////////////////////////////
+ENGINE_API std::ostream& operator<<(std::ostream& os, const String& str);
+
 }  // namespace engine
 
 ////////////////////////////////////////////////////////////
