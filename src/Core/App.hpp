@@ -17,16 +17,55 @@ protected:
     App();
     virtual ~App();
 
+    ////////////////////////////////////////////////////////////
+    /// @brief Initialize the application
+    ///
+    /// @remark This is called before creating the RenderWindow
+    ////////////////////////////////////////////////////////////
     virtual bool Initialize() = 0;
 
+    ////////////////////////////////////////////////////////////
+    /// @brief Update the application the application
+    ///
+    /// @remark This is called each frame
+    ///
+    /// @see GetDeltaTime
+    ////////////////////////////////////////////////////////////
     virtual void Update() = 0;
 
+    ////////////////////////////////////////////////////////////
+    /// @brief Shutdown the application
+    ///
+    /// @remarks Called when the engine is closing, you should cleanup
+    ///          any allocated resources in this method.
+    ///
+    /// @see Initialize
+    ////////////////////////////////////////////////////////////
     virtual void Shutdown() = 0;
 
+    ////////////////////////////////////////////////////////////
+    /// @brief The obtain the name of the application
+    ///
+    /// @return String containing the name
+    ////////////////////////////////////////////////////////////
     virtual String GetName() = 0;
 
+    ////////////////////////////////////////////////////////////
+    /// @brief The intitial window size of the application
+    ///
+    /// @return 2D Vector containing the window size
+    ////////////////////////////////////////////////////////////
     virtual math::Vector2<int32> GetWindowSize() = 0;
 
+    ////////////////////////////////////////////////////////////
+    /// @brief Obtains the delta time of the last frame
+    ///
+    /// @remarks You can use this method from the Update method
+    ///          to get the delta time of the last frame
+    ///
+    /// @return A reference to a Time object containig the delta
+    ///         time of the last frame
+    ////////////////////////////////////////////////////////////
     const Time& GetDeltaTime();
 
 private:
