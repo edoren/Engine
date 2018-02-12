@@ -572,4 +572,8 @@ String operator+(char8 left, const String& right) {
     return string += right;
 }
 
+std::ostream& operator<<(std::ostream& os, const String& str) {
+    return os << str.ToUtf8();
+}
+
 }  // namespace engine
