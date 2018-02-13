@@ -7,13 +7,15 @@ namespace engine {
 
 class VULKAN_PLUGIN_API Vk_Utilities {
 public:
-    static bool AllocateMemory(const VkMemoryPropertyFlags& memory_properties,
-                               const VkBuffer& buffer, VkDeviceMemory* memory);
-    static bool AllocateMemory(const VkMemoryPropertyFlags& memory_properties,
-                               const VkImage& image, VkDeviceMemory* memory);
-    static bool AllocateMemory(const VkMemoryPropertyFlags& memory_properties,
-                               const VkMemoryRequirements& memory_requirements,
-                               VkDeviceMemory* memory);
+    static bool AllocateBufferMemory(
+        const VkBuffer& buffer, VkDeviceMemory* memory,
+        const VkMemoryPropertyFlags& memory_properties);
+    static bool AllocateImageMemory(
+        const VkImage& image, VkDeviceMemory* memory,
+        const VkMemoryPropertyFlags& memory_properties);
+    static bool AllocateMemory(VkDeviceMemory* memory,
+                               const VkMemoryPropertyFlags& memory_properties,
+                               const VkMemoryRequirements& memory_requirements);
 };
 
 }  // namespace engine

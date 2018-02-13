@@ -49,7 +49,7 @@ bool Vk_Buffer::Create(VkDeviceSize size, VkBufferUsageFlags usage,
         return false;
     }
 
-    if (!Vk_Utilities::AllocateMemory(memory_properties, m_handle, &m_memory)) {
+    if (!Vk_Utilities::AllocateBufferMemory(m_handle, &m_memory, memory_properties)) {
         LogError(sTag, "Could not allocate memory for a buffer");
         return false;
     }
