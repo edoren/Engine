@@ -3,34 +3,35 @@
 
 namespace engine {
 
-bool Vk_Utilities::AllocateMemory(
-    const VkMemoryPropertyFlags& memory_properties, const VkBuffer& buffer,
-    VkDeviceMemory* memory) {
+bool Vk_Utilities::AllocateBufferMemory(
+    const VkBuffer& buffer, VkDeviceMemory* memory,
+    const VkMemoryPropertyFlags& memory_properties) {
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.GetVulkanDevice();
 
     VkMemoryRequirements buffer_memory_requirements;
     vkGetBufferMemoryRequirements(device, buffer, &buffer_memory_requirements);
 
-    return AllocateMemory(memory_properties, buffer_memory_requirements,
-                          memory);
+    return Vk_Utilities::AllocateMemory(memory, memory_properties,
+                                        buffer_memory_requirements);
 }
 
-bool Vk_Utilities::AllocateMemory(
-    const VkMemoryPropertyFlags& memory_properties, const VkImage& image,
-    VkDeviceMemory* memory) {
+bool Vk_Utilities::AllocateImageMemory(
+    const VkImage& image, VkDeviceMemory* memory,
+    const VkMemoryPropertyFlags& memory_properties) {
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.GetVulkanDevice();
 
     VkMemoryRequirements image_memory_requirements;
     vkGetImageMemoryRequirements(device, image, &image_memory_requirements);
 
-    return AllocateMemory(memory_properties, image_memory_requirements, memory);
+    return Vk_Utilities::AllocateMemory(memory, memory_properties,
+                                        image_memory_requirements);
 }
 
 bool Vk_Utilities::AllocateMemory(
-    const VkMemoryPropertyFlags& memory_properties,
-    const VkMemoryRequirements& memory_requirements, VkDeviceMemory* memory) {
+    VkDeviceMemory* memory, const VkMemoryPropertyFlags& memory_properties,
+    const VkMemoryRequirements& memory_requirements) {
     VkResult result = VK_SUCCESS;
 
     Vk_Context& context = Vk_Context::GetInstance();

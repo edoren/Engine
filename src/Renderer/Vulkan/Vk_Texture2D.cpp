@@ -53,8 +53,8 @@ bool Vk_Texture2D::LoadFromImage(const Image& img) {
         return false;
     }
 
-    if (!Vk_Utilities::AllocateMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-                                      m_image.handle, &m_memory)) {
+    if (!Vk_Utilities::AllocateImageMemory(
+            m_image.handle, &m_memory, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)) {
         LogError(sTag, "Could not allocate memory for image");
         return false;
     }
@@ -365,9 +365,9 @@ bool Vk_Texture2D::AllocateDescriptorSet() {
     VkDescriptorSetAllocateInfo descriptor_set_allocate_info = {
         VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,  // sType
         nullptr,                                         // pNext
-        texture_manager->GetDescriptorPool(),          // descriptorPool
+        texture_manager->GetDescriptorPool(),            // descriptorPool
         1,                                               // descriptorSetCount
-        &texture_manager->GetDescriptorSetLayout()     // pSetLayouts
+        &texture_manager->GetDescriptorSetLayout()       // pSetLayouts
     };
 
     result = vkAllocateDescriptorSets(device, &descriptor_set_allocate_info,
