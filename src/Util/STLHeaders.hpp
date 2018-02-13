@@ -3,7 +3,6 @@
 // Utilites library
 #include <bitset>
 #include <chrono>
-#include <functional>
 #include <type_traits>
 #include <utility>
 

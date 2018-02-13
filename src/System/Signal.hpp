@@ -2,6 +2,8 @@
 
 #include <Util/Prerequisites.hpp>
 
+#include <Util/Function.hpp>
+
 // A signal object may call multiple slots with the
 // same signature. You can connect functions to the signal
 // which will be called when the Emit() method on the
@@ -14,7 +16,7 @@ template <typename... Args>
 class Signal {
 public:
     template <typename... Args2>
-    using Slot = std::function<void(Args2...)>;
+    using Slot = Function<void(Args2...)>;
 
     Signal();
 
@@ -28,7 +30,7 @@ public:
     template <typename T>
     uint32 Connect(T* inst, void (T::*func)(Args...) const);
 
-    // Connects a std::function to the signal. The returned
+    // Connects a Function to the signal. The returned
     // value can be used to disconnect the function again
     uint32 Connect(const Slot<Args...>& slot);
 
