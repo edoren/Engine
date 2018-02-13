@@ -7,6 +7,7 @@ namespace engine {
 class RendererFactory;
 class RenderWindow;
 class ShaderManager;
+class String;
 class TextureManager;
 
 class ENGINE_API Renderer {
@@ -20,6 +21,8 @@ public:
     virtual void Shutdown();
 
     virtual void AdvanceFrame();
+
+    virtual const String& GetName() const = 0;
 
     RenderWindow& GetRenderWindow();
     RenderWindow* GetRenderWindowPtr();

@@ -5,6 +5,12 @@
 
 namespace engine {
 
+namespace {
+
+String sRendererName("Vulkan");
+
+}  // namespace
+
 Vk_Renderer::Vk_Renderer() {}
 
 Vk_Renderer::~Vk_Renderer() {
@@ -42,6 +48,10 @@ void Vk_Renderer::AdvanceFrame() {
     Renderer::AdvanceFrame();
     // TODO: User enable depth test
     // Vk_CALL(glEnable(Vk_DEPTH_TEST));
+}
+
+const String& Vk_Renderer::GetName() const {
+    return sRendererName;
 }
 
 }  // namespace engine

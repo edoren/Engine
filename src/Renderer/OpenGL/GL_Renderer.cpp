@@ -7,6 +7,12 @@
 
 namespace engine {
 
+namespace {
+
+String sRendererName("OpenGL");
+
+}  // namespace
+
 GL_Renderer::GL_Renderer() {}
 
 GL_Renderer::~GL_Renderer() {
@@ -40,6 +46,10 @@ void GL_Renderer::AdvanceFrame() {
     Renderer::AdvanceFrame();
     // TODO: User enable depth test
     GL_CALL(glEnable(GL_DEPTH_TEST));
+}
+
+const String& GL_Renderer::GetName() const {
+    return sRendererName;
 }
 
 }  // namespace engine

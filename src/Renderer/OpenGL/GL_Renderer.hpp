@@ -17,6 +17,8 @@ public:
     void Shutdown() override;
 
     void AdvanceFrame() override;
+
+    const String& GetName() const override;
 };
 
 }  // namespace engine
