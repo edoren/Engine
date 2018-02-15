@@ -27,44 +27,23 @@ Vk_Texture2D::~Vk_Texture2D() {
         vkDestroySampler(device, m_sampler, nullptr);
         m_sampler = VK_NULL_HANDLE;
     }
-
-    if (m_image.view != VK_NULL_HANDLE) {
-        vkDestroyImageView(device, m_image.view, nullptr);
-        m_image.view = VK_NULL_HANDLE;
-    }
-
-    if (m_image.handle != VK_NULL_HANDLE) {
-        vkDestroyImage(device, m_image.handle, nullptr);
-        m_image.handle = VK_NULL_HANDLE;
-    }
-
-    if (m_memory != VK_NULL_HANDLE) {
-        vkFreeMemory(device, m_memory, nullptr);
-        m_memory = VK_NULL_HANDLE;
-    }
 }
 
 bool Vk_Texture2D::LoadFromImage(const Image& img) {
-    Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
-
-    if (!CreateImage(img)) {
+    if (!m_image.CreateImage(
+            img.GetSize(), VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL,
+            (VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT))) {
         LogError(sTag, "Could not create image");
         return false;
     }
 
-    if (!Vk_Utilities::AllocateImageMemory(
-            m_image.handle, &m_memory, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)) {
+    if (!m_image.AllocateMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)) {
         LogError(sTag, "Could not allocate memory for image");
         return false;
     }
 
-    if (vkBindImageMemory(device, m_image.handle, m_memory, 0) != VK_SUCCESS) {
-        LogError(sTag, "Could not bind memory to an image");
-        return false;
-    }
-
-    if (!CreateImageView()) {
+    if (!m_image.CreateImageView(VK_FORMAT_R8G8B8A8_UNORM,
+                                 VK_IMAGE_ASPECT_COLOR_BIT)) {
         LogError(sTag, "Could not create image view");
         return false;
     }
@@ -89,74 +68,6 @@ void Vk_Texture2D::Use() {}
 
 VkDescriptorSet& Vk_Texture2D::GetDescriptorSet() {
     return m_descriptor_set;
-}
-
-bool Vk_Texture2D::CreateImage(const Image& img) {
-    Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
-
-    VkResult result = VK_SUCCESS;
-
-    VkImageCreateInfo image_create_info = {
-        VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,  // sType;
-        nullptr,                              // pNext
-        0,                                    // flags
-        VK_IMAGE_TYPE_2D,                     // imageType
-        VK_FORMAT_R8G8B8A8_UNORM,             // format
-        VkExtent3D{
-            // extent
-            img.GetSize().x,  // width
-            img.GetSize().y,  // height
-            1                 // depth
-        },
-        1,                        // mipLevels
-        1,                        // arrayLayers
-        VK_SAMPLE_COUNT_1_BIT,    // samples
-        VK_IMAGE_TILING_OPTIMAL,  // tiling
-        (VK_IMAGE_USAGE_TRANSFER_DST_BIT |
-         VK_IMAGE_USAGE_SAMPLED_BIT),  // usage
-        VK_SHARING_MODE_EXCLUSIVE,     // sharingMode
-        0,                             // queueFamilyIndexCount
-        nullptr,                       // pQueueFamilyIndices
-        VK_IMAGE_LAYOUT_UNDEFINED      // initialLayout
-    };
-
-    result =
-        vkCreateImage(device, &image_create_info, nullptr, &m_image.handle);
-
-    return result == VK_SUCCESS;
-}
-
-bool Vk_Texture2D::CreateImageView() {
-    Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
-
-    VkImageViewCreateInfo image_view_create_info = {
-        VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,  // sType
-        nullptr,                                   // pNext
-        0,                                         // flags
-        m_image.handle,                            // image
-        VK_IMAGE_VIEW_TYPE_2D,                     // viewType
-        VK_FORMAT_R8G8B8A8_UNORM,                  // format
-        {
-            // components
-            VK_COMPONENT_SWIZZLE_IDENTITY,  // r
-            VK_COMPONENT_SWIZZLE_IDENTITY,  // g
-            VK_COMPONENT_SWIZZLE_IDENTITY,  // b
-            VK_COMPONENT_SWIZZLE_IDENTITY   // a
-        },
-        {
-            // subresourceRange
-            VK_IMAGE_ASPECT_COLOR_BIT,  // aspectMask
-            0,                          // baseMipLevel
-            1,                          // levelCount
-            0,                          // baseArrayLayer
-            1                           // layerCount
-        },
-    };
-
-    return vkCreateImageView(device, &image_view_create_info, nullptr,
-                             &m_image.view) == VK_SUCCESS;
 }
 
 bool Vk_Texture2D::CreateSampler() {
@@ -305,9 +216,9 @@ bool Vk_Texture2D::CopyTextureData(const Image& img) {
             1                 // depth
         },
     };
-    vkCmdCopyBufferToImage(command_buffer, m_staging_buffer.GetHandle(),
-                           m_image.handle, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                           1, &buffer_image_copy_info);
+    vkCmdCopyBufferToImage(
+        command_buffer, m_staging_buffer.GetHandle(), m_image.GetHandle(),
+        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &buffer_image_copy_info);
 
     VkImageMemoryBarrier image_memory_barrier_from_transfer_to_shader_read = {
         VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,    // sType
@@ -389,7 +300,7 @@ bool Vk_Texture2D::UpdateDescriptorSet() {
 
     VkDescriptorImageInfo image_info = {
         m_sampler,                                // sampler
-        m_image.view,                             // imageView
+        m_image.GetView(),                        // imageView
         VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL  // imageLayout
     };
 

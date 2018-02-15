@@ -2,6 +2,7 @@
 
 #include <Util/Prerequisites.hpp>
 
+#include <Renderer/Drawable.hpp>
 #include <Renderer/TextureType.hpp>
 #include <Renderer/Vertex.hpp>
 
@@ -9,7 +10,7 @@ namespace engine {
 
 class Texture2D;
 
-class ENGINE_API Mesh {
+class ENGINE_API Mesh : public Drawable {
 public:
     Mesh();
 
@@ -19,7 +20,7 @@ public:
         std::vector<Vertex> vertices, std::vector<uint32> indices,
         std::vector<std::pair<Texture2D*, TextureType>> textures) = 0;
 
-    virtual void Draw() const = 0;
+    virtual void Draw(RenderWindow& target) const = 0;
 
 protected:
     std::vector<Vertex> m_vertices;

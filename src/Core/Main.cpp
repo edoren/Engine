@@ -1,6 +1,7 @@
 ﻿#include <Core/App.hpp>
 #include <Core/Main.hpp>
 #include <Renderer/RenderWindow.hpp>
+#include <Renderer/ShaderManager.hpp>
 #include <System/Stopwatch.hpp>
 
 #include <SDL.h>
@@ -60,27 +61,29 @@ void Main::Initialize(App* app) {
     if (!m_is_initialized && app != nullptr) {
         m_app = app;
 
-        bool ok = false;
-
         LogInfo(sTag, "Initializing Engine");
 
+        // 1. Initialize dependencies
         SDL_Init(0);
 
+        // 2. Initialize the engine core subsystems
         InputManager::GetInstance().Initialize();
 
-        ok = m_active_renderer->Initialize();
-        if (!ok) {
+        // 3. Initialize plugins
+        InitializePlugins();
+
+        // 4 Initialize the active Renderer
+        if (!m_active_renderer->Initialize()) {
             LogFatal(sTag, "Could not initialize the Renderer");
         }
 
-        InitializePlugins();
-
+        // 5. Create the render window using the active renderer
         RenderWindow& window = m_active_renderer->GetRenderWindow();
-        ok = window.Create(app->GetName(), app->GetWindowSize());
-        if (!ok) {
+        if (!window.Create(app->GetName(), app->GetWindowSize())) {
             LogFatal(sTag, "Could not create the RenderWindow");
         }
 
+        // 6. Initialize the application
         m_app->Initialize();
 
         m_is_initialized = true;

@@ -78,7 +78,9 @@ void GL_Mesh::SetupMesh() {
     GL_CALL(glBindVertexArray(0));
 }
 
-void GL_Mesh::Draw() const {
+void GL_Mesh::Draw(RenderWindow& target) const {
+    ENGINE_UNUSED(target);
+
     GL_Shader* shader = GL_ShaderManager::GetInstance().GetActiveShader();
 
     uint32 diffuse_num = 1;
@@ -109,12 +111,6 @@ void GL_Mesh::Draw() const {
         }
     }
     GL_CALL(glActiveTexture(GL_TEXTURE0));
-
-    if (shader != nullptr) {
-        // shader->SetUniform("ubo.model", m_model_matrix);
-        // shader->SetUniform("ubo.normalMatrix",
-        //                           m_model_matrix.Inverse().Transpose());
-    }
 
     GL_CALL(glBindVertexArray(m_VAO));
     GL_CALL(glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_indices.size()),

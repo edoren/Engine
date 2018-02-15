@@ -10,12 +10,10 @@ public:
     static bool AllocateBufferMemory(
         const VkBuffer& buffer, VkDeviceMemory* memory,
         const VkMemoryPropertyFlags& memory_properties);
-    static bool AllocateImageMemory(
-        const VkImage& image, VkDeviceMemory* memory,
-        const VkMemoryPropertyFlags& memory_properties);
     static bool AllocateMemory(VkDeviceMemory* memory,
                                const VkMemoryPropertyFlags& memory_properties,
                                const VkMemoryRequirements& memory_requirements);
+
 };
 
 }  // namespace engine

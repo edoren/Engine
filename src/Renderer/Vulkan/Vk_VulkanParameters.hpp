@@ -23,20 +23,11 @@ struct PhysicalDeviceParameters {
     VkPhysicalDevice& GetHandle() {
         return handle;
     }
-};
 
-struct ImageParameters {
-    VkImage handle;
-    VkImageView view;
-
-    ImageParameters() : handle(VK_NULL_HANDLE), view() {}
-
-    operator VkImage() {
-        return handle;
-    }
-
-    VkImage& GetHandle() {
-        return handle;
+    VkFormatProperties GetFormatProperties(VkFormat format) {
+        VkFormatProperties properties;
+        vkGetPhysicalDeviceFormatProperties(handle, format, &properties);
+        return properties;
     }
 };
 

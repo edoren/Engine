@@ -35,9 +35,9 @@ bool Vk_SwapChain::Create(Vk_Surface& surface, uint32 width, uint32 height) {
 
     // Destroy the old ImageViews
     for (size_t i = 0; i < m_images.size(); i++) {
-        if (m_images[i].view) {
-            vkDestroyImageView(device, m_images[i].view, nullptr);
-            m_images[i].view = VK_NULL_HANDLE;
+        if (m_images[i].GetView()) {
+            vkDestroyImageView(device, m_images[i].GetView(), nullptr);
+            m_images[i].GetView() = VK_NULL_HANDLE;
         }
     }
     m_images.clear();
@@ -167,7 +167,7 @@ bool Vk_SwapChain::Create(Vk_Surface& surface, uint32 width, uint32 height) {
     // Store all the Image handles
     m_images.resize(image_count);
     for (size_t i = 0; i < swapchain_images.size(); i++) {
-        m_images[i].handle = swapchain_images[i];
+        m_images[i].GetHandle() = swapchain_images[i];
     }
     // Create all the ImageViews
     for (size_t i = 0; i < m_images.size(); i++) {
@@ -175,7 +175,7 @@ bool Vk_SwapChain::Create(Vk_Surface& surface, uint32 width, uint32 height) {
             VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,  // sType
             nullptr,                                   // pNext
             VkImageViewCreateFlags(),                  // flags
-            m_images[i].handle,                        // image
+            m_images[i].GetHandle(),                   // image
             VK_IMAGE_VIEW_TYPE_2D,                     // viewType
             m_format,                                  // format
             VkComponentMapping{
@@ -196,7 +196,7 @@ bool Vk_SwapChain::Create(Vk_Surface& surface, uint32 width, uint32 height) {
 
         result = vkCreateImageView(context.GetVulkanDevice(),
                                    &image_view_create_info, nullptr,
-                                   &m_images[i].view);
+                                   &m_images[i].GetView());
         if (result != VK_SUCCESS) {
             LogError(sTag, "Could not create image view for framebuffer");
             return false;
@@ -214,8 +214,8 @@ void Vk_SwapChain::Destroy() {
         vkDestroySwapchainKHR(device, m_handle, nullptr);
         m_handle = VK_NULL_HANDLE;
         for (size_t i = 0; i < m_images.size(); i++) {
-            if (m_images[i].view) {
-                vkDestroyImageView(device, m_images[i].view, nullptr);
+            if (m_images[i].GetView()) {
+                vkDestroyImageView(device, m_images[i].GetView(), nullptr);
             }
         }
         m_images.clear();
@@ -230,7 +230,7 @@ VkFormat& Vk_SwapChain::GetFormat() {
     return m_format;
 }
 
-std::vector<ImageParameters>& Vk_SwapChain::GetImages() {
+std::vector<Vk_Image>& Vk_SwapChain::GetImages() {
     return m_images;
 }
 
@@ -340,4 +340,4 @@ VkPresentModeKHR Vk_SwapChain::GetPresentMode(
     return VK_PRESENT_MODE_FIFO_KHR;
 }
 
-}  // engine
+}  // namespace engine

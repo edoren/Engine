@@ -14,7 +14,11 @@ namespace {
 
 const String sTag("GL_RenderWindow");
 
-const char* sRequiredExtensions[] = {"GL_ARB_separate_shader_objects"};
+std::vector<const char*> sRequiredExtensions = {
+#ifdef OPENGL_USE_GL
+    {"GL_ARB_separate_shader_objects", "GL_ARB_shading_language_420pack"}
+#endif
+};
 
 }  // namespace
 

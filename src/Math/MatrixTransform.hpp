@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Util/Prerequisites.hpp>
+
 #include <mathfu/glsl_mappings.h>  // TMP
 
 #include <Math/Matrix3x3.hpp>
@@ -7,19 +9,63 @@
 #include <Math/Vector3.hpp>
 #include <Math/Vector4.hpp>
 
+#define MATH_DEPTH_ZERO_TO_ONE         0x00000001
+#define MATH_DEPTH_NEGATIVE_ONE_TO_ONE 0x00000002
+
+#ifdef MATH_FORCE_DEPTH_ZERO_TO_ONE
+#    define MATH_DEPTH_CLIP_SPACE MATH_DEPTH_ZERO_TO_ONE
+#else
+#    define MATH_DEPTH_CLIP_SPACE MATH_DEPTH_NEGATIVE_ONE_TO_ONE
+#endif
+
+#define MATH_LEFT_HANDED  0x00000001    // For DirectX, Metal, Vulkan
+#define MATH_RIGHT_HANDED 0x00000002    // For OpenGL, default in GLM
+
+#ifdef MATH_FORCE_LEFT_HANDED
+#    define MATH_COORDINATE_SYSTEM MATH_LEFT_HANDED
+#else
+#    define MATH_COORDINATE_SYSTEM MATH_RIGHT_HANDED
+#endif
+
 namespace engine {
 
 namespace math {
 
 template <typename T>
-inline Matrix4x4<T> Perspective(T fovy, T aspect, T zNear, T zFar) {
+inline Matrix4x4<T> PerspectiveLH(T fovy, T aspect, T zNear, T zFar) {
     assert(std::abs(aspect - std::numeric_limits<T>::epsilon()) >
            static_cast<T>(0));
 
     T one = static_cast<T>(1);
     T two = static_cast<T>(2);
 
-    T const tan_half_fovy = static_cast<T>(tan(fovy / two));
+    T const tan_half_fovy = static_cast<T>(std::tan(fovy / two));
+
+    return Matrix4x4<T>(
+        one / (aspect * tan_half_fovy), 0.f, 0.f, 0.f,
+        0.f, one / (tan_half_fovy), 0.f, 0.f,
+        0.f, 0.f, (zFar + zNear) / (zFar - zNear), one,
+        0.f, 0.f, -(two * zFar * zNear) / (zFar - zNear), 0.f
+    );
+
+    // // DEPTH_ZERO_TO_ONE
+    // return Matrix4x4<T>(
+    //     one / (aspect * tan_half_fovy), 0.f, 0.f, 0.f,
+    //     0.f, one / (tan_half_fovy), 0.f, 0.f,
+    //     0.f, 0.f, zFar / (zFar - zNear), one,
+    //     0.f, 0.f, -(zFar * zNear) / (zFar - zNear), 0.f
+    // );
+}
+
+template <typename T>
+inline Matrix4x4<T> PerspectiveRH(T fovy, T aspect, T zNear, T zFar) {
+    assert(std::abs(aspect - std::numeric_limits<T>::epsilon()) >
+           static_cast<T>(0));
+
+    T one = static_cast<T>(1);
+    T two = static_cast<T>(2);
+
+    T const tan_half_fovy = static_cast<T>(std::tan(fovy / two));
 
     return Matrix4x4<T>(
         one / (aspect * tan_half_fovy), 0.f, 0.f, 0.f,
@@ -27,6 +73,23 @@ inline Matrix4x4<T> Perspective(T fovy, T aspect, T zNear, T zFar) {
         0.f, 0.f, -(zFar + zNear) / (zFar - zNear), -one,
         0.f, 0.f, -(two * zFar * zNear) / (zFar - zNear), 0.f
     );
+
+    // // DEPTH_ZERO_TO_ONE
+    // return Matrix4x4<T>(
+    //     one / (aspect * tan_half_fovy), 0.f, 0.f, 0.f,
+    //     0.f, one / (tan_half_fovy), 0.f, 0.f,
+    //     0.f, 0.f, zFar / (zNear - zFar), -one,
+    //     0.f, 0.f, -(zFar * zNear) / (zFar - zNear), 0.f
+    // );
+}
+
+template <typename T>
+inline Matrix4x4<T> Perspective(T fovy, T aspect, T zNear, T zFar) {
+#if MATH_COORDINATE_SYSTEM == MATH_LEFT_HANDED
+    return PerspectiveLH(fovy, aspect, zNear, zFar);
+#else
+    return PerspectiveRH(fovy, aspect, zNear, zFar);
+#endif
 }
 
 template <typename T>
@@ -41,10 +104,10 @@ inline Matrix4x4<T> Ortho(T left, T right, T bottom, T top, T zNear, T zFar) {
 }
 
 template <typename T>
-inline Matrix4x4<T> LookAt(const Vector3<T>& position,
+inline Matrix4x4<T> LookAtLH(const Vector3<T>& position,
                            const Vector3<T>& target,
                            const Vector3<T>& up) {
-    const Vector3<T> f(Normalize(position - target));
+    const Vector3<T> f(Normalize(target - position));
     const Vector3<T> s(Normalize(Cross(up, f)));
     const Vector3<T> u(Cross(f, s));
 
@@ -54,6 +117,33 @@ inline Matrix4x4<T> LookAt(const Vector3<T>& position,
         s.z, u.z, f.z, 0.f,
         -Dot(s, position), -Dot(u, position), -Dot(f, position), 1.f
     );
+}
+
+template <typename T>
+inline Matrix4x4<T> LookAtRH(const Vector3<T>& position,
+                             const Vector3<T>& target,
+                             const Vector3<T>& up) {
+    const Vector3<T> f(Normalize(target - position));
+    const Vector3<T> s(Normalize(Cross(f, up)));
+    const Vector3<T> u(Cross(s, f));
+
+    return Matrix4x4<T>(
+        s.x, u.x, -f.x, 0.f,
+        s.y, u.y, -f.y, 0.f,
+        s.z, u.z, -f.z, 0.f,
+        -Dot(s, position), -Dot(u, position), Dot(f, position), 1.f
+    );
+}
+
+template <typename T>
+inline Matrix4x4<T> LookAt(const Vector3<T>& position,
+                           const Vector3<T>& target,
+                           const Vector3<T>& up) {
+#if MATH_COORDINATE_SYSTEM == MATH_LEFT_HANDED
+    return LookAtLH(position, target, up);
+#else
+    return LookAtRH(position, target, up);
+#endif
 }
 
 template <typename T>

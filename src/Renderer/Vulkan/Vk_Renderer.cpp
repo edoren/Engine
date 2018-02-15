@@ -26,6 +26,8 @@ bool Vk_Renderer::Initialize() {
         m_renderer_factory = new Vk_RendererFactory();
         m_shader_manager = new Vk_ShaderManager();
         m_texture_manager = new Vk_TextureManager();
+
+        m_shader_manager->LoadFromFile("model");
     }
     return ok;
 }

@@ -2,8 +2,8 @@
 
 #include "Vk_Config.hpp"
 #include "Vk_Dependencies.hpp"
+#include "Vk_Image.hpp"
 #include "Vk_Surface.hpp"
-#include "Vk_VulkanParameters.hpp"
 
 namespace engine {
 
@@ -17,7 +17,7 @@ public:
 
     VkSwapchainKHR& GetHandle();
     VkFormat& GetFormat();
-    std::vector<ImageParameters>& GetImages();
+    std::vector<Vk_Image>& GetImages();
 
 private:
     uint32 GetNumImages(const VkSurfaceCapabilitiesKHR& surface_capabilities);
@@ -34,7 +34,7 @@ private:
 
     VkSwapchainKHR m_handle;
     VkFormat m_format;
-    std::vector<ImageParameters> m_images;
+    std::vector<Vk_Image> m_images;
 };
 
 }  // namespace engine

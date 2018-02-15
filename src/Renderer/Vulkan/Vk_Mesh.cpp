@@ -6,6 +6,7 @@
 
 #include "Vk_Context.hpp"
 #include "Vk_Mesh.hpp"
+#include "Vk_RenderWindow.hpp"
 
 namespace engine {
 
@@ -18,6 +19,10 @@ const String sTag("Vk_Mesh");
 Vk_Mesh::Vk_Mesh() : m_vertex_buffer(), m_index_buffer() {}
 
 Vk_Mesh::~Vk_Mesh() {
+    Vk_Context& context = Vk_Context::GetInstance();
+    QueueParameters& graphics_queue = context.GetGraphicsQueue();
+    vkQueueWaitIdle(graphics_queue.GetHandle());
+
     m_vertex_buffer.Destroy();
     m_index_buffer.Destroy();
 }
@@ -38,8 +43,8 @@ void Vk_Mesh::SetupMesh() {
 
     VkResult result = VK_SUCCESS;
 
-    size_t vertex_buffer_data_size = sizeof(Vertex) * m_vertices.size();
-    size_t index_buffer_data_size = sizeof(uint32) * m_indices.size();
+    VkDeviceSize vertex_buffer_data_size = sizeof(Vertex) * m_vertices.size();
+    VkDeviceSize index_buffer_data_size = sizeof(uint32) * m_indices.size();
 
     if (!m_vertex_buffer.Create(vertex_buffer_data_size,
                                 (VK_BUFFER_USAGE_VERTEX_BUFFER_BIT |
@@ -201,43 +206,41 @@ void Vk_Mesh::SetupMesh() {
     staging_buffer.Destroy();
 }
 
-void Vk_Mesh::Draw() const {
-    // uint32 diffuse_num = 1;
-    // uint32 specular_num = 1;
-    // for (size_t i = 0; i < m_textures.size(); i++) {
-    //     GL_CALL(glActiveTexture(GL_TEXTURE0 + i));
+void Vk_Mesh::Draw(RenderWindow& target) const {
+    Vk_RenderWindow* window = static_cast<Vk_RenderWindow*>(&target);
 
-    //     String uniform_name = "material.";
-    //     switch (m_textures[i].second) {
+    // for (auto& texture : m_textures) {
+    //     switch (texture.second) {
     //         case TextureType::eDiffuse:
-    //             uniform_name += "tex_diffuse" + std::to_string(diffuse_num++);
     //             break;
     //         case TextureType::eSpecular:
-    //             uniform_name += "tex_specular" + std::to_string(specular_num++);
-    //             break;
     //         default:
     //             break;
     //     }
 
-    //     GL_ShaderManager& shader_manager = GL_ShaderManager::GetInstance();
-
-    //     GL_Shader* shader = shader_manager.GetActiveShader();
-    //     GL_Texture2D* curr_texture =
-    //         reinterpret_cast<GL_Texture2D*>(m_textures[i].first);
-
-    //     if (shader) {
-    //         shader->SetUniform(uniform_name, static_cast<GLint>(i));
-    //     }
-
+    //     Vk_Texture2D* curr_texture =
+    //         reinterpret_cast<Vk_Texture2D*>(texture.first);
     //     if (curr_texture) {
     //         curr_texture->Use();
     //     }
     // }
-    // GL_CALL(glActiveTexture(GL_TEXTURE0));
 
-    // GL_CALL(glBindVertexArray(VAO));
-    // GL_CALL(glDrawElements(GL_TRIANGLES, m_indices.size(), GL_UNSIGNED_INT, 0));
-    // GL_CALL(glBindVertexArray(0));
+    auto lambda = [this](VkCommandBuffer& command_buffer) {
+        if (m_vertex_buffer.GetHandle() != VK_NULL_HANDLE) {
+            VkDeviceSize offset = 0;
+            vkCmdBindVertexBuffers(command_buffer, 0, 1,
+                                   &m_vertex_buffer.GetHandle(), &offset);
+        }
+        if (m_index_buffer.GetHandle() != VK_NULL_HANDLE) {
+            vkCmdBindIndexBuffer(command_buffer, m_index_buffer.GetHandle(), 0,
+                                 VK_INDEX_TYPE_UINT32);
+        }
+
+        uint32 indices_size = static_cast<uint32>(m_indices.size());
+        vkCmdDrawIndexed(command_buffer, indices_size, 1, 0, 0, 0);
+    };
+
+    window->AddCommandExecution(std::move(lambda));
 }
 
 }  // namespace engine
