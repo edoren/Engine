@@ -81,6 +81,12 @@ Texture2D* TextureManager::LoadFromImage(const String& name,
     if (new_texture != nullptr) {
         m_textures[name] = new_texture;
     }
+
+    // TMP
+    if (m_active_texture == nullptr) {
+        m_active_texture = new_texture;
+    }
+
     return new_texture;
 }
 

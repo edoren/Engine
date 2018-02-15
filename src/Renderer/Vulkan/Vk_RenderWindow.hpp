@@ -3,8 +3,11 @@
 #include <Util/Prerequisites.hpp>
 
 #include <Math/Math.hpp>
+#include <Renderer/Model.hpp>
 #include <Renderer/RenderWindow.hpp>
-#include <System/String.hpp>
+#include <Renderer/Vertex.hpp>
+#include <Util/Function.hpp>
+#include <Util/SafeQueue.hpp>
 
 #include "Vk_Buffer.hpp"
 #include "Vk_Config.hpp"
@@ -13,6 +16,7 @@
 #include "Vk_Surface.hpp"
 #include "Vk_SwapChain.hpp"
 #include "Vk_VulkanParameters.hpp"
+#include "Vk_Image.hpp"
 
 namespace engine {
 
@@ -30,6 +34,8 @@ struct RenderingResourcesData {
             finished_rendering_semaphore(VK_NULL_HANDLE),
             fence(VK_NULL_HANDLE) {}
 };
+
+class String;
 
 class Vk_TextureManager;
 
@@ -61,12 +67,18 @@ public:
 
     void SetUniformBufferObject(const UniformBufferObject& ubo) override;
 
+    void SetBuffers(const Vk_Buffer* vertex_buffer,
+                    const Vk_Buffer* index_buffer);
+
+    void AddCommandExecution(Function<void(VkCommandBuffer&)>&& func);
+
+    void SubmitGraphicsCommand(Function<void(VkCommandBuffer&)>&& func);
+
 private:
     bool CheckWSISupport();
 
     bool CreateVulkanRenderPass();
     bool CreateVulkanPipeline();
-    bool CreateVulkanVertexBuffer();
 
     bool AllocateVulkanCommandBuffers(VkCommandPool& cmd_pool, uint32_t count,
                                       VkCommandBuffer* command_buffer);
@@ -77,8 +89,10 @@ private:
     bool CreateVulkanFrameBuffer(VkFramebuffer& framebuffer,
                                  VkImageView& image_view);
     bool PrepareFrame(VkCommandBuffer command_buffer,
-                      ImageParameters& image_parameters,
+                      Vk_Image& image,
                       VkFramebuffer& framebuffer);
+
+    bool CreateDepthResources();
 
     bool CreateUniformBuffer();
     bool UpdateUniformBuffer(const UniformBufferObject& ubo);
@@ -110,9 +124,10 @@ private:
 
     VkRenderPass m_render_pass;
 
-    Vk_Buffer m_vertex_buffer;
-    Vk_Buffer m_index_buffer;
-    Vk_Buffer m_staging_buffer;
+    SafeQueue<Function<void(VkCommandBuffer&)>> m_command_queue;
+
+    Vk_Image m_depth_image;
+    VkFormat m_depth_format;
 
     Vk_Buffer m_uniform_buffer;
     VkDescriptorPool m_ubo_descriptor_pool;

@@ -20,9 +20,10 @@ const String sTag("Vk_RenderWindow");
 
 const size_t sResourceCount(3);
 
-const size_t sStagingBufferSize(4000);
-
 const uint32 sVertexBufferBindId(0);
+
+// TODO: JSON SHADER
+const uint32 sUBODescriptorSetBinding(0);
 
 const char* sShaderEntryPoint("main");
 
@@ -37,8 +38,6 @@ Vk_RenderWindow::Vk_RenderWindow()
         m_graphics_pipeline(VK_NULL_HANDLE),
         m_pipeline_layout(VK_NULL_HANDLE),
         m_render_pass(VK_NULL_HANDLE),
-        m_vertex_buffer(),
-        m_staging_buffer(),
         m_ubo_descriptor_pool(VK_NULL_HANDLE),
         m_ubo_descriptor_set_layout(VK_NULL_HANDLE),
         m_ubo_descriptor_set(VK_NULL_HANDLE),
@@ -82,8 +81,33 @@ bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
         return false;
     }
 
+    if (!CreateUniformBuffer()) {
+        LogError(sTag, "Could not create the UBO buffer");
+        return false;
+    }
+
     if (!CreateUBODescriptorSetLayout()) {
-        LogError(sTag, "Could not create the UBO DescriptorSetLayout");
+        LogError(sTag, "Could not create the UBO descriptor set layout");
+        return false;
+    }
+
+    if (!CreateUBODescriptorPool()) {
+        LogError(sTag, "Could not create the UBO descriptor pool");
+        return false;
+    }
+
+    if (!AllocateUBODescriptorSet()) {
+        LogError(sTag, "Could not create the UBO descriptor set");
+        return false;
+    }
+
+    if (!UpdateUBODescriptorSet()) {
+        LogError(sTag, "Could not update the UBO descriptor set");
+        return false;
+    }
+
+    if (!CreateDepthResources()) {
+        LogError(sTag, "Could not create the DepthResources");
         return false;
     }
 
@@ -104,14 +128,6 @@ bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
         LogError(sTag, "Could not create the RenderingResources");
         return false;
     }
-
-    if (!CreateVulkanVertexBuffer()) {
-        LogError(sTag, "Could not create the VertexBuffer");
-        return false;
-    }
-
-    Vk_TextureManager::GetInstance().LoadFromFile("container2.png");
-    Vk_TextureManager::GetInstance().SetActiveTexture2D("container2.png");
 
     return true;
 }
@@ -147,10 +163,6 @@ void Vk_RenderWindow::Destroy() {
             }
         }
         m_render_resources.clear();
-
-        m_vertex_buffer.Destroy();
-
-        m_staging_buffer.Destroy();
 
         if (m_graphics_pipeline) {
             vkDestroyPipeline(device, m_graphics_pipeline, nullptr);
@@ -373,8 +385,13 @@ void Vk_RenderWindow::Draw(Drawable& drawable) {
     float z_far = 100.0f;
     projection_matrix = math::Perspective(fov, aspect_ratio, z_near, z_far);
 
+    // Vulkan clip space has inverted Y and half Z.
+    const math::mat4 clip(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+                          0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.5f, 1.0f);
+
     if (shader != nullptr) {
-        math::mat4 mvp_matrix = projection_matrix * view_matrix * model_matrix;
+        math::mat4 mvp_matrix =
+            clip * projection_matrix * view_matrix * model_matrix;
         math::mat4 normal_matrix = model_matrix.Inverse().Transpose();
 
         UniformBufferObject ubo;
@@ -383,7 +400,7 @@ void Vk_RenderWindow::Draw(Drawable& drawable) {
         ubo.mvp = mvp_matrix;
         ubo.cameraFront = front_vector;
         ubo.lightPosition = light_position;
-        // shader->SetUniformBufferObject(ubo);
+        SetUniformBufferObject(ubo);
     }
 
     RenderWindow::Draw(drawable);  // This calls drawable.Draw(*this);
@@ -391,6 +408,73 @@ void Vk_RenderWindow::Draw(Drawable& drawable) {
 
 void Vk_RenderWindow::SetUniformBufferObject(const UniformBufferObject& ubo) {
     UpdateUniformBuffer(ubo);
+}
+
+void Vk_RenderWindow::AddCommandExecution(
+    Function<void(VkCommandBuffer&)>&& func) {
+    m_command_queue.Push(std::move(func));
+}
+
+void Vk_RenderWindow::SubmitGraphicsCommand(
+    Function<void(VkCommandBuffer&)>&& func) {
+    Vk_Context& context = Vk_Context::GetInstance();
+    VkDevice& device = context.GetVulkanDevice();
+
+    VkResult result = VK_SUCCESS;
+
+    // Prepare command buffer to copy data from staging buffer to the vertex
+    // and index buffer
+    VkCommandBufferAllocateInfo allocInfo = {
+        VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,  // sType
+        nullptr,                                         // pNext
+        context.GetGraphicsQueueCmdPool(),               // commandPool
+        VK_COMMAND_BUFFER_LEVEL_PRIMARY,                 // level
+        1                                                // commandBufferCount
+    };
+
+    VkCommandBuffer command_buffer = VK_NULL_HANDLE;
+    result = vkAllocateCommandBuffers(device, &allocInfo, &command_buffer);
+    if (result != VK_SUCCESS || command_buffer == VK_NULL_HANDLE) {
+        LogError(sTag, "Could not allocate command buffer");
+        return;
+    }
+
+    VkCommandBufferBeginInfo command_buffer_begin_info = {
+        VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,  // sType
+        nullptr,                                      // pNext
+        VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,  // flags
+        nullptr                                       // pInheritanceInfo
+    };
+
+    vkBeginCommandBuffer(command_buffer, &command_buffer_begin_info);
+
+    // Call the function and pass the command buffer
+    func(command_buffer);
+
+    vkEndCommandBuffer(command_buffer);
+
+    // Submit command buffer and copy data from staging buffer to the vertex
+    // and index buffer
+    VkSubmitInfo submit_info = {
+        VK_STRUCTURE_TYPE_SUBMIT_INFO,  // sType
+        nullptr,                        // pNext
+        0,                              // waitSemaphoreCount
+        nullptr,                        // pWaitSemaphores
+        nullptr,                        // pWaitDstStageMask;
+        1,                              // commandBufferCount
+        &command_buffer,                // pCommandBuffers
+        0,                              // signalSemaphoreCount
+        nullptr                         // pSignalSemaphores
+    };
+
+    result = vkQueueSubmit(context.GetGraphicsQueue().GetHandle(), 1,
+                           &submit_info, VK_NULL_HANDLE);
+    if (result != VK_SUCCESS) {
+        LogError(sTag, "Error submiting command buffer");
+        return;
+    }
+
+    vkQueueWaitIdle(context.GetGraphicsQueue().GetHandle());
 }
 
 bool Vk_RenderWindow::CheckWSISupport() {
@@ -477,7 +561,7 @@ bool Vk_RenderWindow::CreateVulkanRenderPass() {
     VkResult result = VK_SUCCESS;
 
     // Create the attachment descriptions
-    std::array<VkAttachmentDescription, 1> attachment_descriptions = {{
+    std::array<VkAttachmentDescription, 2> attachment_descriptions = {{
         {
             VkAttachmentDescriptionFlags(),    // flags
             m_swapchain.GetFormat(),           // format
@@ -489,12 +573,27 @@ bool Vk_RenderWindow::CreateVulkanRenderPass() {
             VK_IMAGE_LAYOUT_UNDEFINED,         // initialLayout
             VK_IMAGE_LAYOUT_PRESENT_SRC_KHR    // finalLayout
         },
+        {
+            VkAttachmentDescriptionFlags(),                    // flags
+            m_depth_format,                                    // format
+            VK_SAMPLE_COUNT_1_BIT,                             // samples
+            VK_ATTACHMENT_LOAD_OP_CLEAR,                       // loadOp
+            VK_ATTACHMENT_STORE_OP_DONT_CARE,                  // storeOp
+            VK_ATTACHMENT_LOAD_OP_DONT_CARE,                   // stencilLoadOp
+            VK_ATTACHMENT_STORE_OP_DONT_CARE,                  // stencilStoreOp
+            VK_IMAGE_LAYOUT_UNDEFINED,                         // initialLayout
+            VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,  // finalLayout
+        },
     }};
 
-    std::array<VkAttachmentReference, 1> color_attachment_references = {{
+    std::array<VkAttachmentReference, 2> attachment_references = {{
         {
             0,                                        // attachment
             VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL  // layout
+        },
+        {
+            1,                                                // attachment
+            VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL  // layout
         },
     }};
 
@@ -504,13 +603,12 @@ bool Vk_RenderWindow::CreateVulkanRenderPass() {
             VK_PIPELINE_BIND_POINT_GRAPHICS,  // pipelineBindPoint
             0,                                // inputAttachmentCount
             nullptr,                          // pInputAttachments
-            static_cast<uint32_t>(
-                color_attachment_references.size()),  // colorAttachmentCount
-            color_attachment_references.data(),       // pColorAttachments
-            nullptr,                                  // pResolveAttachments
-            nullptr,                                  // pDepthStencilAttachment
-            0,                                        // preserveAttachmentCount
-            nullptr                                   // pPreserveAttachments
+            1,                                // colorAttachmentCount
+            &attachment_references[0],        // pColorAttachments
+            nullptr,                          // pResolveAttachments
+            &attachment_references[1],        // pDepthStencilAttachment
+            0,                                // preserveAttachmentCount
+            nullptr                           // pPreserveAttachments
         },
     }};
 
@@ -712,6 +810,21 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
          VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT)  // colorWriteMask
     };
 
+    VkPipelineDepthStencilStateCreateInfo depth_stencil_info = {
+        VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,  // sType
+        nullptr,                                                     // pNext
+        VkPipelineDepthStencilStateCreateFlags(),                    // flags
+        VK_TRUE,             // depthTestEnable
+        VK_TRUE,             // depthWriteEnable
+        VK_COMPARE_OP_LESS,  // depthCompareOp
+        VK_FALSE,            // depthBoundsTestEnable
+        VK_FALSE,            // stencilTestEnable
+        {},                  // front
+        {},                  // back
+        0.0f,                // minDepthBounds
+        1.0f,                // maxDepthBounds
+    };
+
     VkPipelineColorBlendStateCreateInfo color_blend_state_create_info = {
         VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,  // sType
         nullptr,                                                   // pNext
@@ -741,7 +854,8 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
     // Create the PipelineLayout
 
     std::array<VkDescriptorSetLayout, 2> descriptor_set_layouts = {
-        texture_manager.GetDescriptorSetLayout(), m_ubo_descriptor_set_layout};
+        {m_ubo_descriptor_set_layout,
+         texture_manager.GetDescriptorSetLayout()}};
 
     VkPipelineLayoutCreateInfo layout_create_info = {
         VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,         // sType
@@ -772,7 +886,7 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         &viewport_state_create_info,        // pViewportState
         &rasterization_state_create_info,   // pRasterizationState
         &multisample_state_create_info,     // pMultisampleState
-        nullptr,                            // pDepthStencilState
+        &depth_stencil_info,                // pDepthStencilState
         &color_blend_state_create_info,     // pColorBlendState
         &dynamic_state_create_info,         // pDynamicState
         m_pipeline_layout,                  // layout
@@ -791,131 +905,6 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         m_pipeline_layout = VK_NULL_HANDLE;
         return false;
     }
-
-    return true;
-}
-
-bool Vk_RenderWindow::CreateVulkanVertexBuffer() {
-    Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
-
-    VkResult result = VK_SUCCESS;
-
-    Vertex vertex_data[] = {
-        {{-0.7f, -0.7f, 0.0f},
-         {0.0f, 0.0f, 0.0f},
-         {0.0f, 0.0f},
-         {0.0f, 0.0f, 0.0f, 0.0f}},
-        {{-0.7f, 0.7f, 0.0f},
-         {0.0f, 0.0f, 0.0f},
-         {0.0f, 1.0f},
-         {0.0f, 0.0f, 0.0f, 0.0f}},
-        {{0.7f, -0.7f, 0.0f},
-         {0.0f, 0.0f, 0.0f},
-         {1.0f, 0.0f},
-         {0.0f, 0.0f, 0.0f, 0.0f}},
-        {{0.7f, 0.7f, 0.0f},
-         {0.0f, 0.0f, 0.0f},
-         {1.0f, 1.0f},
-         {0.0f, 0.0f, 0.0f, 0.0f}},
-    };
-
-    if (!m_vertex_buffer.Create(sizeof(vertex_data),
-                                (VK_BUFFER_USAGE_VERTEX_BUFFER_BIT |
-                                 VK_BUFFER_USAGE_TRANSFER_DST_BIT),
-                                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)) {
-        LogFatal(sTag, "Could not create Vertex Buffer");
-    }
-
-    if (!m_staging_buffer.Create(sStagingBufferSize,
-                                 VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) {
-        LogFatal(sTag, "Could not create Staging Buffer");
-    }
-
-    void* staging_buffer_memory_pointer;
-    result = vkMapMemory(device, m_staging_buffer.GetMemory(), 0,
-                         m_staging_buffer.GetSize(), 0,
-                         &staging_buffer_memory_pointer);
-    if (result != VK_SUCCESS) {
-        LogError(sTag,
-                 "Could not map memory and upload data to a vertex buffer");
-        return false;
-    }
-
-    std::memcpy(staging_buffer_memory_pointer, vertex_data,
-                static_cast<size_t>(m_vertex_buffer.GetSize()));
-
-    VkMappedMemoryRange flush_range = {
-        VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,  // sType
-        nullptr,                                // pNext
-        m_staging_buffer.GetMemory(),           // memory
-        0,                                      // offset
-        m_vertex_buffer.GetSize()               // size
-    };
-    vkFlushMappedMemoryRanges(device, 1, &flush_range);
-
-    vkUnmapMemory(device, m_staging_buffer.GetMemory());
-
-    // Prepare command buffer to copy data from staging buffer to a vertex
-    // buffer
-    VkCommandBufferBeginInfo command_buffer_begin_info = {
-        VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,  // sType
-        nullptr,                                      // pNext
-        VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,  // flags
-        nullptr                                       // pInheritanceInfo
-    };
-
-    VkCommandBuffer command_buffer = m_render_resources[0].command_buffer;
-
-    vkBeginCommandBuffer(command_buffer, &command_buffer_begin_info);
-
-    VkBufferCopy buffer_copy_info = {
-        0,                         // srcOffset
-        0,                         // dstOffset
-        m_vertex_buffer.GetSize()  // size
-    };
-    vkCmdCopyBuffer(command_buffer, m_staging_buffer.GetHandle(),
-                    m_vertex_buffer.GetHandle(), 1, &buffer_copy_info);
-
-    VkBufferMemoryBarrier buffer_memory_barrier = {
-        VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,  // sType;
-        nullptr,                                  // pNext
-        VK_ACCESS_MEMORY_WRITE_BIT,               // srcAccessMask
-        VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT,      // dstAccessMask
-        VK_QUEUE_FAMILY_IGNORED,                  // srcQueueFamilyIndex
-        VK_QUEUE_FAMILY_IGNORED,                  // dstQueueFamilyIndex
-        m_vertex_buffer.GetHandle(),              // buffer
-        0,                                        // offset
-        VK_WHOLE_SIZE                             // size
-    };
-    vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_TRANSFER_BIT,
-                         VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, 0, 0, nullptr, 1,
-                         &buffer_memory_barrier, 0, nullptr);
-
-    vkEndCommandBuffer(command_buffer);
-
-    // Submit command buffer and copy data from staging buffer to a vertex
-    // buffer
-    VkSubmitInfo submit_info = {
-        VK_STRUCTURE_TYPE_SUBMIT_INFO,  // sType
-        nullptr,                        // pNext
-        0,                              // waitSemaphoreCount
-        nullptr,                        // pWaitSemaphores
-        nullptr,                        // pWaitDstStageMask;
-        1,                              // commandBufferCount
-        &command_buffer,                // pCommandBuffers
-        0,                              // signalSemaphoreCount
-        nullptr                         // pSignalSemaphores
-    };
-
-    result = vkQueueSubmit(m_graphics_queue->GetHandle(), 1, &submit_info,
-                           VK_NULL_HANDLE);
-    if (result != VK_SUCCESS) {
-        return false;
-    }
-
-    vkQueueWaitIdle(m_graphics_queue->GetHandle());
 
     return true;
 }
@@ -951,13 +940,17 @@ bool Vk_RenderWindow::CreateVulkanFrameBuffer(VkFramebuffer& framebuffer,
         vkDestroyFramebuffer(device, framebuffer, nullptr);
     }
 
+    std::array<VkImageView, 2> attachments = {
+        {image_view, m_depth_image.GetView()},
+    };
+
     VkFramebufferCreateInfo framebuffer_create_info = {
         VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,  // sType
         nullptr,                                    // pNext
         VkFramebufferCreateFlags(),                 // flags
         m_render_pass,                              // renderPass
-        1,                                          // attachmentCount
-        &image_view,                                // pAttachments
+        static_cast<uint32_t>(attachments.size()),  // attachmentCount
+        attachments.data(),                         // pAttachments
         static_cast<uint32_t>(m_size.x),            // width
         static_cast<uint32_t>(m_size.y),            // height
         1                                           // layers
@@ -974,11 +967,11 @@ bool Vk_RenderWindow::CreateVulkanFrameBuffer(VkFramebuffer& framebuffer,
 }
 
 bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer,
-                                   ImageParameters& image_parameters,
+                                   Vk_Image& image,
                                    VkFramebuffer& framebuffer) {
     VkResult result = VK_SUCCESS;
 
-    if (!CreateVulkanFrameBuffer(framebuffer, image_parameters.view)) {
+    if (!CreateVulkanFrameBuffer(framebuffer, image.GetView())) {
         return false;
     }
 
@@ -1009,7 +1002,7 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer,
             VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,         // newLayout
             m_present_queue->family_index,           // srcQueueFamilyIndex
             m_graphics_queue->family_index,          // dstQueueFamilyIndex
-            image_parameters.GetHandle(),            // image
+            image.GetHandle(),                       // image
             image_subresource_range                  // subresourceRange
         };
         vkCmdPipelineBarrier(
@@ -1018,9 +1011,9 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer,
             nullptr, 1, &barrier_from_present_to_draw);
     }
 
-    VkClearValue clear_value = {{
-        {1.0f, 0.8f, 0.4f, 0.0f},  // color
-    }};
+    std::array<VkClearValue, 2> clear_values = {};
+    clear_values[0].color = {{0.0f, 0.0f, 0.0f, 0.0f}};
+    clear_values[1].depthStencil = {1.0f, 0};
 
     VkRenderPassBeginInfo render_pass_begin_info = {
         VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,  // sType
@@ -1040,8 +1033,8 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer,
                 static_cast<uint32_t>(m_size.y),  // height
             },
         },
-        1,            // clearValueCount
-        &clear_value  // pClearValues
+        static_cast<uint32_t>(clear_values.size()),  // clearValueCount
+        clear_values.data()                          // pClearValues
     };
 
     vkCmdBeginRenderPass(command_buffer, &render_pass_begin_info,
@@ -1075,20 +1068,23 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer,
     vkCmdSetViewport(command_buffer, 0, 1, &viewport);
     vkCmdSetScissor(command_buffer, 0, 1, &scissor);
 
+    std::vector<VkDescriptorSet> descriptor_sets = {m_ubo_descriptor_set};
+
     Vk_TextureManager& texture_manager = Vk_TextureManager::GetInstance();
     Vk_Texture2D* current_texture = texture_manager.GetActiveTexture2D();
     if (current_texture) {
-        VkDescriptorSet& desciptor_set = current_texture->GetDescriptorSet();
-        vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                m_pipeline_layout, 0, 1, &desciptor_set, 0,
-                                nullptr);
+        descriptor_sets.push_back(current_texture->GetDescriptorSet());
     }
 
-    VkDeviceSize offset = 0;
-    vkCmdBindVertexBuffers(command_buffer, 0, 1, &m_vertex_buffer.GetHandle(),
-                           &offset);
+    vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                            m_pipeline_layout, 0,
+                            static_cast<uint32>(descriptor_sets.size()),
+                            descriptor_sets.data(), 0, nullptr);
 
-    vkCmdDraw(command_buffer, 4, 1, 0, 0);
+    while (m_command_queue.GetSize() > 0) {
+        auto task = m_command_queue.Pop();
+        task(command_buffer);
+    }
 
     vkCmdEndRenderPass(command_buffer);
 
@@ -1102,7 +1098,7 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer,
             VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,         // newLayout
             m_graphics_queue->family_index,          // srcQueueFamilyIndex
             m_present_queue->family_index,           // dstQueueFamilyIndex
-            image_parameters.GetHandle(),            // image
+            image.GetHandle(),                       // image
             image_subresource_range                  // subresourceRange
         };
         vkCmdPipelineBarrier(
@@ -1116,6 +1112,109 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer,
         LogError(sTag, "Could not record command buffer");
         return false;
     }
+
+    return true;
+}
+
+bool Vk_RenderWindow::CreateDepthResources() {
+    Vk_Context& context = Vk_Context::GetInstance();
+    PhysicalDeviceParameters& physical_device = context.GetPhysicalDevice();
+
+    auto lFindSupportedFormat = [&physical_device](
+                                    const std::vector<VkFormat>& candidates,
+                                    VkImageTiling tiling,
+                                    VkFormatFeatureFlags features) -> VkFormat {
+        for (VkFormat format : candidates) {
+            VkFormatProperties properties =
+                physical_device.GetFormatProperties(format);
+            switch (tiling) {
+                case VK_IMAGE_TILING_LINEAR:
+                    if ((properties.linearTilingFeatures & features) ==
+                        features) {
+                        return format;
+                    }
+                    break;
+                case VK_IMAGE_TILING_OPTIMAL:
+                    if ((properties.optimalTilingFeatures & features) ==
+                        features) {
+                        return format;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        return VK_FORMAT_UNDEFINED;
+    };
+
+    auto lFindDepthFormat = [&lFindSupportedFormat]() -> VkFormat {
+        return lFindSupportedFormat(
+            {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT,
+             VK_FORMAT_D24_UNORM_S8_UINT},
+            VK_IMAGE_TILING_OPTIMAL,
+            VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+    };
+
+    m_depth_format = lFindDepthFormat();
+
+    if (m_depth_format == VK_FORMAT_UNDEFINED) {
+        LogError(sTag, "Supported Depth format not found");
+        return false;
+    }
+
+    if (!m_depth_image.CreateImage(
+            {m_size.x, m_size.y}, m_depth_format, VK_IMAGE_TILING_OPTIMAL,
+            VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT)) {
+        LogError(sTag, "Could not create depth image");
+        return false;
+    }
+
+    if (!m_depth_image.AllocateMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)) {
+        LogError(sTag, "Could not allocate memory for depth image");
+        return false;
+    }
+
+    if (!m_depth_image.CreateImageView(m_depth_format,
+                                       VK_IMAGE_ASPECT_DEPTH_BIT)) {
+        LogError(sTag, "Could not create depth image view");
+        return false;
+    }
+
+    SubmitGraphicsCommand([this](VkCommandBuffer& command_buffer) {
+        bool has_stencil_component =
+            (m_depth_format == VK_FORMAT_D32_SFLOAT_S8_UINT ||
+             m_depth_format == VK_FORMAT_D24_UNORM_S8_UINT);
+
+        VkImageAspectFlags aspect_mask = VK_IMAGE_ASPECT_DEPTH_BIT;
+        if (has_stencil_component) {
+            aspect_mask |= VK_IMAGE_ASPECT_STENCIL_BIT;
+        }
+
+        VkImageMemoryBarrier depth_barrier = {
+            VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,  // sType
+            nullptr,                                 // pNext
+            0,                                       // srcAccessMask
+            (VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT |
+             VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT),    // dstAccessMask
+            VK_IMAGE_LAYOUT_UNDEFINED,                         // oldLayout
+            VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,  // newLayout
+            VK_QUEUE_FAMILY_IGNORED,    // srcQueueFamilyIndex
+            VK_QUEUE_FAMILY_IGNORED,    // dstQueueFamilyIndex
+            m_depth_image.GetHandle(),  // image
+            {
+                aspect_mask,  // aspectMask
+                0,            // baseMipLevel
+                1,            // levelCount
+                0,            // baseArrayLayer
+                1             // layerCount
+            }                 // subresourceRange
+        };
+
+        vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+                             VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT, 0, 0,
+                             nullptr, 0, nullptr, 1, &depth_barrier);
+    });
 
     return true;
 }
@@ -1173,7 +1272,7 @@ bool Vk_RenderWindow::CreateUniformBuffer() {
 }
 
 bool Vk_RenderWindow::UpdateUniformBuffer(const UniformBufferObject& ubo) {
-    if (m_uniform_buffer.GetHandle() != VK_NULL_HANDLE) return false;
+    if (m_uniform_buffer.GetHandle() == VK_NULL_HANDLE) return false;
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.GetVulkanDevice();
     void* data;
@@ -1189,18 +1288,18 @@ bool Vk_RenderWindow::CreateUBODescriptorPool() {
 
     VkResult result = VK_SUCCESS;
 
-    uint32 sMaxDescriptorSets = 1;
+    uint32 sMaxUBODescriptorSets = 1;
 
     VkDescriptorPoolSize pool_size = {
-        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,  // type
-        sMaxDescriptorSets                          // descriptorCount
+        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,  // type
+        sMaxUBODescriptorSets               // descriptorCount
     };
 
     VkDescriptorPoolCreateInfo descriptor_pool_create_info = {
         VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,  // sType
         nullptr,                                        // pNext
         0,                                              // flags
-        sMaxDescriptorSets,                             // maxSets
+        sMaxUBODescriptorSets,                          // maxSets
         1,                                              // poolSizeCount
         &pool_size                                      // pPoolSizes
     };
@@ -1222,7 +1321,7 @@ bool Vk_RenderWindow::CreateUBODescriptorSetLayout() {
     VkResult result = VK_SUCCESS;
 
     VkDescriptorSetLayoutBinding layout_binding = {
-        1,                                  // binding
+        sUBODescriptorSetBinding,           // binding
         VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,  // descriptorType
         1,                                  // descriptorCount
         VK_SHADER_STAGE_VERTEX_BIT,         // stageFlags

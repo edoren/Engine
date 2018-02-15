@@ -28,3 +28,7 @@
 
 // Atomic operations library
 #include <atomic>
+
+// Thread support library
+#include <mutex>
+#include <thread>

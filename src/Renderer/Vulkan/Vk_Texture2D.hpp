@@ -5,7 +5,7 @@
 #include "Vk_Buffer.hpp"
 #include "Vk_Config.hpp"
 #include "Vk_Dependencies.hpp"
-#include "Vk_VulkanParameters.hpp"
+#include "Vk_Image.hpp"
 
 namespace engine {
 
@@ -26,8 +26,6 @@ public:
     VkDescriptorSet& GetDescriptorSet();
 
 private:
-    bool CreateImage(const Image& img);
-    bool CreateImageView();
     bool CreateSampler();
 
     bool CopyTextureData(const Image& img);
@@ -35,10 +33,7 @@ private:
     bool AllocateDescriptorSet();
     bool UpdateDescriptorSet();
 
-    Vk_TextureManager* m_texture_manager;
-
-    ImageParameters m_image;
-    VkDeviceMemory m_memory;
+    Vk_Image m_image;
     VkSampler m_sampler;
     Vk_Buffer m_staging_buffer;
     VkDescriptorSet m_descriptor_set;

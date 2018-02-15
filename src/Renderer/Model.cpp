@@ -108,9 +108,8 @@ Model::~Model() {
 }
 
 void Model::Draw(RenderWindow& target) const {
-    ENGINE_UNUSED(target);
     for (size_t i = 0; i < m_meshes.size(); i++) {
-        m_meshes[i]->Draw();
+        m_meshes[i]->Draw(target);
     }
 }
 
