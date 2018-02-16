@@ -34,11 +34,10 @@ bool Vk_SwapChain::Create(Vk_Surface& surface, uint32 width, uint32 height) {
     }
 
     // Destroy the old ImageViews
-    for (size_t i = 0; i < m_images.size(); i++) {
-        if (m_images[i].GetView()) {
-            vkDestroyImageView(device, m_images[i].GetView(), nullptr);
-            m_images[i].GetView() = VK_NULL_HANDLE;
-        }
+    for (auto& image : m_images) {
+        // Image handles are managed by the swapchain
+        // and must be destroyed my it
+        image.GetHandle() = VK_NULL_HANDLE;
     }
     m_images.clear();
 
@@ -213,10 +212,10 @@ void Vk_SwapChain::Destroy() {
         vkDeviceWaitIdle(device);
         vkDestroySwapchainKHR(device, m_handle, nullptr);
         m_handle = VK_NULL_HANDLE;
-        for (size_t i = 0; i < m_images.size(); i++) {
-            if (m_images[i].GetView()) {
-                vkDestroyImageView(device, m_images[i].GetView(), nullptr);
-            }
+        for (auto& image : m_images) {
+            // Image handles are managed by the swapchain
+            // and must be destroyed my it
+            image.GetHandle() = VK_NULL_HANDLE;
         }
         m_images.clear();
     }

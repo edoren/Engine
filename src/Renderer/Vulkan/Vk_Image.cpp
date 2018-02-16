@@ -15,7 +15,10 @@ const String sTag("Vk_Image");
 
 }  // namespace
 
-Vk_Image::Vk_Image() {}
+Vk_Image::Vk_Image()
+      : m_handle(VK_NULL_HANDLE),
+        m_view(VK_NULL_HANDLE),
+        m_memory(VK_NULL_HANDLE) {}
 
 Vk_Image::~Vk_Image() {
     Vk_Context& context = Vk_Context::GetInstance();
