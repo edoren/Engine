@@ -7,11 +7,11 @@ import shutil
 import subprocess
 import sys
 
-import file_utils
+from file_utils import FileUtils
 
 
 def generate_spirv_shaders(data_folder):
-    glslang_exe = shutil.which("glslangValidator")
+    glslang_exe = FileUtils.which("glslangValidator")
     if glslang_exe is None:
         vulkan_dir = os.environ.get("VULKAN_SDK")
         if vulkan_dir is None:
@@ -59,7 +59,7 @@ def main(argv):
         exit(1)
 
     print("================== Processing engine data ==================")
-    file_utils.copy_directory(input_folder, output_folder, force=True)
+    FileUtils.cp_r(input_folder, output_folder, force=True)
     generate_spirv_shaders(output_folder)
     print("============================================================")
 
