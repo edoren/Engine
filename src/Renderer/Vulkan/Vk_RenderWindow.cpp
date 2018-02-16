@@ -1164,7 +1164,7 @@ bool Vk_RenderWindow::CreateDepthResources() {
     }
 
     if (!m_depth_image.CreateImage(
-            {m_size.x, m_size.y}, m_depth_format, VK_IMAGE_TILING_OPTIMAL,
+            math::uvec2(m_size), m_depth_format, VK_IMAGE_TILING_OPTIMAL,
             VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT)) {
         LogError(sTag, "Could not create depth image");
         return false;
