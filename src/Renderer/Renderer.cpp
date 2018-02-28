@@ -4,7 +4,7 @@
 #include <Renderer/ShaderManager.hpp>
 #include <Renderer/TextureManager.hpp>
 
-#include <SDL.h>
+#include <SDL2.h>
 
 namespace engine {
 

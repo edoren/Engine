@@ -19,12 +19,11 @@ template <>
 TextureManager* Singleton<TextureManager>::sInstance = nullptr;
 
 TextureManager& TextureManager::GetInstance() {
-    assert(sInstance);
-    return (*sInstance);
+    return Singleton<TextureManager>::GetInstance();
 }
 
 TextureManager* TextureManager::GetInstancePtr() {
-    return sInstance;
+    return Singleton<TextureManager>::GetInstancePtr();
 }
 
 TextureManager::TextureManager() : m_active_texture(nullptr), m_textures() {}

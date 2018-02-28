@@ -13,12 +13,11 @@ template <>
 SharedLibManager* Singleton<SharedLibManager>::sInstance = nullptr;
 
 SharedLibManager& SharedLibManager::GetInstance() {
-    assert(sInstance);
-    return (*sInstance);
+    return Singleton<SharedLibManager>::GetInstance();
 }
 
 SharedLibManager* SharedLibManager::GetInstancePtr() {
-    return sInstance;
+    return Singleton<SharedLibManager>::GetInstancePtr();
 }
 
 SharedLibManager::SharedLibManager() {}

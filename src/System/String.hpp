@@ -156,6 +156,11 @@ public:
     String(String&& other);
 
     ////////////////////////////////////////////////////////////
+    /// @brief Destructor
+    ////////////////////////////////////////////////////////////
+    ~String();
+
+    ////////////////////////////////////////////////////////////
     /// @brief Create a new String from a UTF-8 encoded string
     ///
     /// This function is provided for consistency, it is equivalent to
@@ -217,6 +222,23 @@ public:
     static String FromUtf16(Iterator begin, Iterator end) {
         return FromUtf16(const_cast<const char16*>(&(*begin)),
                          const_cast<const char16*>(&(*end)));
+    }
+
+    ////////////////////////////////////////////////////////////
+    /// @brief Create a new String from a value
+    ///
+    /// This method make use of the std::ostream << operator
+    ///
+    /// @param value The value to be converted to a String
+    ///
+    /// @return A String containing the converted value
+    ///
+    ////////////////////////////////////////////////////////////
+    template <typename T>
+    static String FromValue(T value) {
+        std::stringstream stream;
+        stream << value;
+        return stream.str();
     }
 
     ////////////////////////////////////////////////////////////

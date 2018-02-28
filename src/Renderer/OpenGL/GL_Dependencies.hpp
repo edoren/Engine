@@ -13,6 +13,6 @@
 #include <OpenGLES/ES2/glext.h>
 #endif
 
-#include <SDL.h>
+#include <SDL2.h>
 
 #include "GL_Utilities.hpp"

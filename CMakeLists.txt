@@ -1,15 +1,12 @@
 ###############################################################################
 ## CMake configuration
 
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.3)
 
 # Engine directory
 if(NOT DEFINED ENGINE_DIR)
     set (ENGINE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 endif()
-
-# Set the default Android NDK STL to LLVM libc++
-set(ANDROID_STL "c++_static")
 
 if(NOT APP_NAME)
     message(FATAL_ERROR "APP_NAME not set")
@@ -46,17 +43,17 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Enable Unicode in Windows
-if(OS STREQUAL "Windows")
+if(OS_WINDOWS)
     add_definitions(-DUNICODE -D_UNICODE)
 endif()
 
 # If compiler is GNU GCC or Clang enable the warnings
-if(COMPILER STREQUAL "GCC" OR COMPILER STREQUAL "Clang")
+if(COMPILER_GCC OR COMPILER_CLANG)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 endif()
-if(MSVC)
+if(COMPILER_MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /wd4201")
-endif(MSVC)
+endif()
 
 ###############################################################################
 ## Engine configuration
@@ -79,23 +76,20 @@ endif()
 
 # Output directories
 if(NOT ANDROID)
-    string(TOLOWER ${CMAKE_BUILD_TYPE} BUILD_TYPE)
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${BUILD_TYPE}")
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${BUILD_TYPE}")
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${BUILD_TYPE}")
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/debug")
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/debug")
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/debug")
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/release")
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/release")
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/release")
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/relwithdebinfo")
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/relwithdebinfo")
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/relwithdebinfo")
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/Debug")
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/Debug")
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/Debug")
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/Release")
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/Release")
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/Release")
 endif()
 
 set(THIRD_PARTY_DIR "${ENGINE_DIR}/third_party")
 set(ENGINE_SOURCE_DIR "${ENGINE_DIR}/src")
+set(ENGINE_INCLUDE_DIR "${ENGINE_DIR}/src")
 set(TESTS_DIR "${ENGINE_DIR}/tests")
 set(DOCS_DIR "${ENGINE_DIR}/docs")
 set(TEMP_DIR "${CMAKE_BINARY_DIR}/obj")
@@ -103,8 +97,41 @@ set(TEMP_DIR "${CMAKE_BINARY_DIR}/obj")
 ###############################################################################
 
 # Set the dependencies folder
-add_subdirectory(${THIRD_PARTY_DIR})
-include_directories(SYSTEM ${THIRD_PARTY_INCLUDES})
+if(OS_WINDOWS)
+    set(SDL2MAIN_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/windows/Release/SDL2main.lib)
+    set(SDL2_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/windows/Release/SDL2.lib)
+    set(ASSIMP_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/windows/Release/assimp.lib)
+elseif(OS_LINUX)
+    set(SDL2MAIN_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/linux/Release/libSDL2main.a)
+    set(SDL2_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/linux/Release/libSDL2.a)
+    set(ASSIMP_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/linux/Release/libassimp.a)
+elseif(OS_ANDROID)
+    set(SDL2MAIN_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/android/armeabi-v7a/Release/libSDL2main.a)
+    set(SDL2_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/android/armeabi-v7a/Release/libSDL2.a)
+    set(ASSIMP_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/android/armeabi-v7a/Release/libassimp.a)
+elseif(OS_MACOS)
+    set(SDL2MAIN_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/macos/Release/libSDL2main.a)
+    set(SDL2_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/macos/Release/libSDL2.a
+                    "-framework Cocoa"
+                    "-framework ForceFeedback"
+                    "-framework IOKit"
+                    "-framework CoreVideo"
+                    "-framework Carbon"
+                    iconv)
+    set(ASSIMP_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/macos/Release/libassimp.a
+                        z)
+endif()
+
+if(OS_WINDOWS)
+    include_directories(SYSTEM "${THIRD_PARTY_DIR}/include/windows")
+elseif(OS_LINUX)
+    include_directories(SYSTEM "${THIRD_PARTY_DIR}/include/linux")
+elseif(OS_ANDROID)
+    include_directories(SYSTEM "${THIRD_PARTY_DIR}/include/android")
+elseif(OS_MACOS)
+    include_directories(SYSTEM "${THIRD_PARTY_DIR}/include/macos")
+endif()
+include_directories(SYSTEM "${THIRD_PARTY_DIR}/include/common")
 
 ###############################################################################
 
@@ -136,7 +163,7 @@ endif()
 set(SCRIPTS_FOLDER "${CMAKE_SOURCE_DIR}/scripts")
 
 set(DATA_SOURCE_FOLDER "${CMAKE_SOURCE_DIR}/data")
-if(OS STREQUAL "Android")
+if(OS_ANDROID)
     set(DATA_OUTPUT_FOLDER "${CMAKE_SOURCE_DIR}/projects/android/app/src/main/assets")
 else()
     set(DATA_OUTPUT_FOLDER "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/data")

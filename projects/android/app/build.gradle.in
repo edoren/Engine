@@ -2,7 +2,7 @@ apply plugin: "com.android.application"
 
 android {
     compileSdkVersion 24
-    buildToolsVersion "26.0.0"
+
     defaultConfig {
         applicationId "@APP_PACKAGE@"
         minSdkVersion 24
@@ -14,13 +14,19 @@ android {
         }
         externalNativeBuild {
             cmake {
-                // targets "",
-                arguments @CMAKE_ARGUMENTS@
+                // targets "@APP_NAME@",
+                arguments = [
+                    @CMAKE_ARGUMENTS@,
+                    "--no-warn-unused-cli"
+                ]
             }
         }
     }
 
     buildTypes {
+        debug {
+            debuggable = true
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
@@ -48,15 +54,33 @@ task runProcessAssets(type: Exec) {
     commandLine "@PYTHON_EXECUTABLE@", "@APP_ROOT_DIRECTORY@/scripts/process_data.py", "@APP_ROOT_DIRECTORY@/data", "@APP_BUILD_DIRECTORY@/assets"
 }
 
-project.afterEvaluate {
-    preBuild.dependsOn runProcessAssets
+task copyRelease(type: Copy) {
+    from("build/outputs/apk")
+    into("../bin")
+    include("app-release-unsigned.apk")
+    rename("app-release-unsigned.apk", "@APP_NAME@-Release.apk")
+}
+
+task copyDebug(type: Copy) {
+    from("build/outputs/apk")
+    into("../bin")
+    include("app-debug.apk")
+    rename("app-debug.apk", "@APP_NAME@-Debug.apk")
+}
+
+afterEvaluate {
+    if (project.hasProperty("assembleRelease")) {
+        assembleRelease.finalizedBy copyRelease
+        externalNativeBuildRelease.dependsOn runProcessAssets
+    }
+    if (project.hasProperty("assembleDebug")) {
+        assembleDebug.finalizedBy copyDebug
+        externalNativeBuildDebug.dependsOn runProcessAssets
+    }
 }
 
 dependencies {
-    compile fileTree(dir: "libs", include: ["*.jar"])
-    androidTestCompile("com.android.support.test.espresso:espresso-core:2.2.2", {
-        exclude group: "com.android.support", module: "support-annotations"
-    })
-    compile "com.android.support:appcompat-v7:24.2.1"
-    compile "com.android.support.constraint:constraint-layout:1.0.2"
+    implementation fileTree(dir: "@APP_BUILD_DIRECTORY@/libs", include: ["*.jar"])
+    implementation fileTree(dir: "@APP_ROOT_DIRECTORY@/third_party/prebuilt/android/armeabi-v7a/Release", include: ["*.jar"])
+    implementation "com.android.support.constraint:constraint-layout:1.0.2"
 }

@@ -1,26 +1,4 @@
 ###############################################################################
-## Third party libraries
-
-# Configurable locations of dependencies of this project.
-set(MATHFU_DIR "${THIRD_PARTY_DIR}/mathfu")
-set(STB_DIR "${THIRD_PARTY_DIR}/stb")
-set(UTFCPP_DIR "${THIRD_PARTY_DIR}/utfcpp")
-set(FMT_DIR "${THIRD_PARTY_DIR}/fmt")
-
-# Mathfu
-set(MATHFU_INCLUDE_DIR "${MATHFU_DIR}/include"
-                       "${MATHFU_DIR}/dependencies/vectorial/include")
-
-# STB
-set(STB_INCLUDE_DIR ${STB_DIR})
-
-# UTFCPP
-set(UTFCPP_INCLUDE_DIR "${UTFCPP_DIR}/source")
-
-# FMT
-set(FMT_INCLUDE_DIR "${FMT_DIR}")
-
-###############################################################################
 ## Engine library
 
 set(EXTENSIONS c cpp h hpp)
@@ -34,7 +12,6 @@ engine_add_sources(TARGET ENGINE_MATH_SRCS
 # System sources
 engine_add_sources(TARGET ENGINE_SYSTEM_SRCS
                    BASE_FOLDER "${ENGINE_SOURCE_DIR}/System"
-                   MODULES FileSystem IO
                    EXTENSIONS "${EXTENSIONS}")
 
 # Utils sources
@@ -81,10 +58,34 @@ engine_add_library(TARGET ${ENGINE_LIBRARY}
                    TYPE ${ENGINE_LIBRARY_TYPE}
                    SOURCES "${ENGINE_SRCS}")
 
-target_link_libraries(${ENGINE_LIBRARY} ${SDL2_LIBRARY} ${ASSIMP_LIBRARY})
+if(OS_WINDOWS)
+    target_link_libraries(${ENGINE_LIBRARY}
+        ${SDL2_LIBRARY}
+        ${ASSIMP_LIBRARY}
+    )
+elseif(OS_LINUX)
+    target_link_libraries(${ENGINE_LIBRARY}
+        dl
+        pthread
+        sndio
+        z
+    )
+elseif(OS_ANDROID)
+    target_link_libraries(${ENGINE_LIBRARY}
+        ${SDL2_LIBRARY}
+        ${ASSIMP_LIBRARY}
+        android
+        log
+        z
+        EGL GLESv2  # TMP: For some reason a SDL2 dependency
+    )
+elseif(OS_MACOS)
+    target_link_libraries(${ENGINE_LIBRARY}
+        ${SDL2_LIBRARY}
+        ${ASSIMP_LIBRARY}
+    )
+endif()
 
-target_include_directories(${ENGINE_LIBRARY} SYSTEM
-                           PUBLIC ${MATHFU_INCLUDE_DIR} ${FMT_INCLUDE_DIR} # TMP?
-                           PRIVATE ${STB_INCLUDE_DIR} ${UTFCPP_INCLUDE_DIR})
+set_target_properties(${ENGINE_LIBRARY} PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 set(ENGINE_LIBRARY ${ENGINE_LIBRARY} PARENT_SCOPE)

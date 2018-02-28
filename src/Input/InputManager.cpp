@@ -2,7 +2,7 @@
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
 
-#include <SDL.h>
+#include <SDL2.h>
 
 namespace engine {
 
@@ -30,12 +30,12 @@ template <>
 InputManager* Singleton<InputManager>::sInstance = nullptr;
 
 InputManager& InputManager::GetInstance() {
-    assert(sInstance);
-    return (*sInstance);
+    return Singleton<InputManager>::GetInstance();
+
 }
 
 InputManager* InputManager::GetInstancePtr() {
-    return sInstance;
+    return Singleton<InputManager>::GetInstancePtr();
 }
 
 InputManager::InputManager()

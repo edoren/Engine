@@ -1,7 +1,7 @@
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
 
-#include <SDL.h>
+#include <SDL2.h>
 
 #if PLATFORM_IS(PLATFORM_ANDROID)
 #include <android/log.h>
@@ -41,12 +41,11 @@ template <>
 LogManager* Singleton<LogManager>::sInstance = nullptr;
 
 LogManager& LogManager::GetInstance() {
-    assert(sInstance);
-    return (*sInstance);
+    return Singleton<LogManager>::GetInstance();
 }
 
 LogManager* LogManager::GetInstancePtr() {
-    return sInstance;
+    return Singleton<LogManager>::GetInstancePtr();
 }
 
 LogManager::LogManager()
