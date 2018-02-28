@@ -17,12 +17,11 @@ template <>
 ShaderManager* Singleton<ShaderManager>::sInstance = nullptr;
 
 ShaderManager& ShaderManager::GetInstance() {
-    assert(sInstance);
-    return (*sInstance);
+    return Singleton<ShaderManager>::GetInstance();
 }
 
 ShaderManager* ShaderManager::GetInstancePtr() {
-    return sInstance;
+    return Singleton<ShaderManager>::GetInstancePtr();
 }
 
 ShaderManager::ShaderManager() : m_active_shader(nullptr), m_shaders() {}
@@ -164,4 +163,4 @@ Shader* ShaderManager::GetActiveShader() {
     return m_active_shader;
 }
 
-}  // engine
+}  // namespace engine

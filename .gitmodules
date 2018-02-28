@@ -1,26 +1,4 @@
-[submodule "third_party/sdl2"]
-	path = third_party/sdl2
-	url = https://github.com/spurious/SDL-mirror.git
+[submodule "third_party"]
+	path = third_party
+	url = git@gitlab.com:edoren/EngineDependencies.git
 	ignore = dirty
-[submodule "third_party/glew"]
-	path = third_party/glew
-	url = https://github.com/edoren/glew.git
-	ignore = dirty
-[submodule "third_party/mathfu"]
-	path = third_party/mathfu
-	url = https://github.com/google/mathfu.git
-[submodule "third_party/stb"]
-	path = third_party/stb
-	url = https://github.com/nothings/stb.git
-[submodule "third_party/utfcpp"]
-	path = third_party/utfcpp
-	url = https://github.com/nemtrif/utfcpp.git
-[submodule "third_party/fmt"]
-	path = third_party/fmt
-	url = https://github.com/fmtlib/fmt.git
-[submodule "third_party/assimp"]
-	path = third_party/assimp
-	url = https://github.com/assimp/assimp.git
-[submodule "third_party/json"]
-	path = third_party/json
-	url = https://github.com/nlohmann/json.git

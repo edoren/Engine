@@ -84,7 +84,7 @@ macro(engine_add_library)
     if(THIS_TYPE STREQUAL "SHARED")
         add_library(${THIS_TARGET} SHARED ${THIS_SOURCES})
         set_target_properties(${THIS_TARGET} PROPERTIES DEBUG_POSTFIX "-d")
-        if (OS STREQUAL "Windows" AND COMPILER STREQUAL "GCC")
+        if (OS_WINDOWS AND COMPILER_GCC)
             # On Windows using GCC get rid of "lib" prefix for shared libraries,
             # and transform the ".dll.a" suffix into ".a" for import libraries
             set_target_properties(${THIS_TARGET} PROPERTIES PREFIX "")

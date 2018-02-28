@@ -2,7 +2,7 @@
 #include <Core/Main.hpp>
 
 // TODO: Remove this later - Required for calling main
-#include <SDL_main.h>
+#include <SDL2/SDL_main.h>
 
 #ifdef ENGINE_DEBUG
 #define VULKAN_PLUGIN_NAME "vulkan-plugin-d"

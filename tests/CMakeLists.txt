@@ -10,7 +10,7 @@ enable_testing()
 # add_executable(Light "${TEST_DIR}/Light.cpp")
 # add_executable(Materials "${TEST_DIR}/Materials.cpp")
 # add_executable(LightingMaps "${TEST_DIR}/LightingMaps.cpp")
-if(OS STREQUAL "Android")
+if(OS_ANDROID)
     # add_library(PerlinMap    SHARED "${TEST_DIR}/PerlinMap.cpp")
     # add_library(LightCasters SHARED "${TEST_DIR}/LightCasters.cpp")
     add_library(CreateWindow SHARED "${TEST_DIR}/CreateWindow.cpp")
@@ -37,16 +37,36 @@ set(TESTS
 )
 
 foreach(TEST ${TESTS})
-    target_link_libraries(${TEST}
-        ${ENGINE_LIBRARY}
-        ${ENGINE_OPENGL_PLUGIN}  # TMP
-        ${SDL2MAIN_LIBRARY}
-    )
+    if(OS_WINDOWS)
+        target_link_libraries(${TEST}
+            ${SDL2MAIN_LIBRARY}
+            ${ENGINE_LIBRARY}
+            ${SDL2_LIBRARY}
+            ${ASSIMP_LIBRARY}
+        )
+    elseif(OS_LINUX)
+        target_link_libraries(${TEST}
+            ${SDL2MAIN_LIBRARY}
+            "-Wl,--whole-archive"
+            ${ENGINE_LIBRARY}
+            "-Wl,--no-whole-archive"
+            ${SDL2_LIBRARY}
+            ${ASSIMP_LIBRARY}
+        )
+    elseif(OS_ANDROID)
+        target_link_libraries(${TEST}
+            # ${SDL2MAIN_LIBRARY}
+            ${ENGINE_LIBRARY}
+        )
+    elseif(OS_MACOS)
+        target_link_libraries(${TEST}
+            # ${SDL2MAIN_LIBRARY}
+            ${ENGINE_LIBRARY}
+        )
+    endif()
 endforeach()
-
-target_link_libraries(LoadModel ${ENGINE_LIBRARY} ${SDL2MAIN_LIBRARY})
 
 set_property(TARGET ${TESTS} PROPERTY FOLDER "Tests")
 
-add_subdirectory("${TEST_DIR}/SharedLibrary")
-add_subdirectory("${TEST_DIR}/Unitary")
+# add_subdirectory("${TEST_DIR}/SharedLibrary")
+# add_subdirectory("${TEST_DIR}/Unitary")

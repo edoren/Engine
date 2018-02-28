@@ -137,6 +137,8 @@ String::String(const String& other) : m_string(other.m_string) {}
 
 String::String(String&& other) : m_string(std::move(other.m_string)) {}
 
+String::~String() {}
+
 String String::FromUtf8(const char8* begin, const char8* end) {
     String string;
     if (utf8::is_valid(begin, end)) {

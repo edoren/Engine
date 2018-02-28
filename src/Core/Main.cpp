@@ -4,7 +4,7 @@
 #include <Renderer/ShaderManager.hpp>
 #include <System/Stopwatch.hpp>
 
-#include <SDL.h>
+#include <SDL2.h>
 
 namespace engine {
 
@@ -21,12 +21,11 @@ template <>
 Main* Singleton<Main>::sInstance = nullptr;
 
 Main& Main::GetInstance() {
-    assert(sInstance);
-    return (*sInstance);
+    return Singleton<Main>::GetInstance();
 }
 
 Main* Main::GetInstancePtr() {
-    return sInstance;
+    return Singleton<Main>::GetInstancePtr();
 }
 
 Main::Main(int argc, char* argv[])

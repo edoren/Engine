@@ -3,11 +3,11 @@
 #include <System/LogManager.hpp>
 #include <Util/Prerequisites.hpp>
 
-#include <SDL.h>
+#include <SDL2.h>
 
 #if PLATFORM_IS(PLATFORM_WINDOWS)
 #include <windows.h>
-#elif PLATFORM_IS(PLATFORM_LINUX | PLATFORM_MAC | PLATFORM_ANDROID)
+#elif PLATFORM_IS(PLATFORM_LINUX | PLATFORM_MACOS | PLATFORM_ANDROID)
 #include <unistd.h>
 #endif
 
@@ -25,12 +25,11 @@ template <>
 FileSystem* Singleton<FileSystem>::sInstance = nullptr;
 
 FileSystem& FileSystem::GetInstance() {
-    assert(sInstance);
-    return (*sInstance);
+    return Singleton<FileSystem>::GetInstance();
 }
 
 FileSystem* FileSystem::GetInstancePtr() {
-    return sInstance;
+    return Singleton<FileSystem>::GetInstancePtr();
 }
 
 FileSystem::FileSystem() {
@@ -127,7 +126,7 @@ String FileSystem::CurrentWorkingDirectory() const {
         free(buffer);
         buffer_length *= 2;
     }
-#elif PLATFORM_IS(PLATFORM_LINUX | PLATFORM_MAC | PLATFORM_ANDROID)
+#elif PLATFORM_IS(PLATFORM_LINUX | PLATFORM_MACOS | PLATFORM_ANDROID)
     size_t buffer_length = PATH_MAX_LENGTH;
     char8* buffer = nullptr;
     while (true) {
@@ -257,7 +256,7 @@ bool FileSystem::IsAbsolutePath(const String& path) const {
     if (internal.size() > 2 && internal[1] == ':' && internal[2] == '\\') {
         return true;
     }
-#elif PLATFORM_IS(PLATFORM_LINUX | PLATFORM_MAC | PLATFORM_ANDROID)
+#elif PLATFORM_IS(PLATFORM_LINUX | PLATFORM_MACOS | PLATFORM_ANDROID)
     if (internal[0] == '/') {
         return true;
     }

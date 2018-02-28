@@ -90,6 +90,7 @@ class CMakeBuildGenerator:
         self.cmake_args = [
             "-D{}='{}'".format(*arg) for arg in cmake_args_dict.items()
         ]
+        self.cmake_args.append("--no-warn-unused-cli")
 
     def configure_android(self):
         android_sdk_home = os.environ.get("ANDROID_HOME")
@@ -123,14 +124,6 @@ class CMakeBuildGenerator:
                                      os.sep.join(self.app_package.split(".")))
         FileUtils.mkdir_p(package_dir)
         FileUtils.mv(java_src_file, package_dir, force=True)
-
-        # Copy the thirdparty Java files
-        print("Copying thirdparty Java files")
-        thirdparty_java_dirs = [
-            FileUtils.join(thirdparty_dir, "sdl2", "android-project", "src")
-        ]
-        for directory in thirdparty_java_dirs:
-            FileUtils.cp_r(directory, java_src_dir, force=True)
 
         # Copy the validation layers to the folder
         if self.app_build_type == "Debug":

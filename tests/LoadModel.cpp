@@ -8,7 +8,7 @@
 #include <Renderer/ShaderManager.hpp>
 
 // TODO: Remove this later - Required for calling main and Input enums
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 #ifdef ENGINE_DEBUG
 #define VULKAN_PLUGIN_NAME "vulkan-plugin-d"
