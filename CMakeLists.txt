@@ -29,7 +29,7 @@ else()
 endif()
 
 # Set the custom module path
-list(APPEND CMAKE_MODULE_PATH "${ENGINE_DIR}/cmake/Modules")
+set(CMAKE_MODULE_PATH "${ENGINE_DIR}/cmake/Modules")
 
 # Include the config and macros file
 include("${ENGINE_DIR}/cmake/Config.cmake")
