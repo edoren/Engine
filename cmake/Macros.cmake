@@ -1,5 +1,7 @@
 include(CMakeParseArguments)
 
+include("${CMAKE_CURRENT_LIST_DIR}/Config.cmake")
+
 # Macro to create the filters for Visual Studio and other IDEs
 macro(engine_create_filters SOURCES)
     foreach(FILE ${SOURCES})
@@ -9,9 +11,9 @@ macro(engine_create_filters SOURCES)
         file(RELATIVE_PATH FILE_RELATIVE_DIR ${ENGINE_SOURCE_DIR} ${FILE_DIRECTORY})
 
         string(REPLACE "/" "\\" FILTER ${FILE_RELATIVE_DIR})
-        if(${FILE_EXTENSION} STREQUAL ".cpp")
+        if(${FILE_EXTENSION} MATCHES "\.(c|cpp|m|mm)$")
             set(FILTER "Source Files\\${FILTER}")
-        elseif(${FILE_EXTENSION} STREQUAL ".hpp")
+        elseif(${FILE_EXTENSION} MATCHES "\.(h|hpp)$")
             set(FILTER "Header Files\\${FILTER}")
         endif()
         source_group(${FILTER} FILES ${FILE})
@@ -43,6 +45,9 @@ function(engine_add_sources)
 
     if(NOT EXTENSIONS)
         set(EXTENSIONS c cpp h hpp)
+        if(OS_MACOS OR OS_IOS)
+            list(APPEND EXTENSIONS m mm)
+        endif()
     endif()
 
     if(NOT IGNORE_BASE_FOLDER)

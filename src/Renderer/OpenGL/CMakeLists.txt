@@ -1,53 +1,68 @@
 ###############################################################################
-# Third party libraries
-
-# Configurable locations of dependencies of this project.
-set(GLEW_DIRECTORY "${THIRD_PARTY_DIR}/glew")
-
-###############################################################################
 # OpenGL / OpenGL ES Renderer
 
-set(DEPENDENCY_SOURCES "")
-set(DEPENDENCY_LIBRARIES ${ENGINE_LIBRARY})
-set(DEPENDENCY_INCLUDE_DIRS ${ENGINE_SOURCE_DIR})
+set(OPENGL_PLUGIN_BUILD_STATIC FALSE)
 
-if(OS STREQUAL "Android")
+if(OS_ANDROID OR OS_IOS)
     find_package(OpenGLES3)
-    list(APPEND DEPENDENCY_LIBRARIES ${OPENGLES3_LIBRARIES})
-    list(APPEND DEPENDENCY_INCLUDE_DIRS ${OPENGLES3_INCLUDE_DIR})
 else()
     find_package(OpenGL)
-    list(APPEND DEPENDENCY_LIBRARIES ${OPENGL_LIBRARY})
-
-    find_package(GLEW)
-    if(NOT GLEW_FOUND)
-        set(GLEW_INCLUDE_DIR "${GLEW_DIRECTORY}/include")
-        set(GLEW_SOURCES "${GLEW_DIRECTORY}/src/glew.c")
-        list(APPEND DEPENDENCY_SOURCES ${GLEW_SOURCES})
-    else()
-        list(APPEND DEPENDENCY_LIBRARIES ${GLEW_LIBRARY})
-    endif()
-    list(APPEND DEPENDENCY_INCLUDE_DIRS ${GLEW_INCLUDE_DIR})
 endif()
 
-set(ENGINE_OPENGL_PLUGIN OpenGL_Plugin)
+if(NOT OPENGL_FOUND AND NOT OPENGLES3_FOUND)
+    message(FATAL_ERROR "OpenGL or OpenGLES3 not found")
+endif()
+
+if(OS_ANDROID)
+    set(DEPENDENCY_LIBRARIES
+        ${OPENGLES3_LIBRARIES}
+    )
+    set(DEPENDENCY_INCLUDE_DIRS
+        ${OPENGLES3_INCLUDE_DIR}
+    )
+else()
+    set(DEPENDENCY_LIBRARIES
+        ${OPENGL_LIBRARIES}
+    )
+    set(DEPENDENCY_INCLUDE_DIRS
+        ${OPENGL_INCLUDE_DIR}
+    )
+endif()
+
+# Windows, Linux and Mac implementation use GLEW
+if(OS_WINDOWS OR OS_LINUX OR OS_MACOS)
+    set(GLEW_SOURCES "${THIRD_PARTY_DIR}/src/GLEW/glew.c")
+    set(DEPENDENCY_SOURCES ${GLEW_SOURCES})
+endif()
+
+if(OPENGL_PLUGIN_BUILD_STATIC)
+    set(BUILD_TYPE_NAME "STATIC")
+else()
+    set(BUILD_TYPE_NAME "SHARED")
+endif()
 
 engine_add_sources(TARGET PLUGIN_SOURCES
-                   BASE_FOLDER "${ENGINE_SOURCE_DIR}/Renderer/OpenGL"
-                   EXTENSIONS "cpp;hpp")
+                   BASE_FOLDER "${ENGINE_SOURCE_DIR}/Renderer/OpenGL")
 
-engine_add_library(TARGET ${ENGINE_OPENGL_PLUGIN}
-                   TYPE ${ENGINE_LIBRARY_TYPE}
+engine_add_library(TARGET OpenGL_Plugin
+                   TYPE ${BUILD_TYPE_NAME}
                    SOURCES ${PLUGIN_SOURCES} ${DEPENDENCY_SOURCES})
 
-# TMP: GLEW should not export any symbols when compiled internally
-if(ENGINE_BUILD_STATIC)
-    target_compile_definitions(${ENGINE_OPENGL_PLUGIN} PRIVATE GLEW_STATIC=1)
+# GLEW should not export any symbols when compiled internally
+if(OPENGL_PLUGIN_BUILD_STATIC)
+    target_compile_definitions(OpenGL_Plugin PRIVATE GLEW_STATIC=1)
 else()
-    target_compile_definitions(${ENGINE_OPENGL_PLUGIN} PRIVATE GLEW_BUILD=1)
+    target_compile_definitions(OpenGL_Plugin PRIVATE GLEW_BUILD=1)
 endif()
 
-target_link_libraries(${ENGINE_OPENGL_PLUGIN} ${DEPENDENCY_LIBRARIES})
-target_include_directories(${ENGINE_OPENGL_PLUGIN} SYSTEM PUBLIC ${DEPENDENCY_INCLUDE_DIRS})
+target_link_libraries(OpenGL_Plugin
+    ${DEPENDENCY_LIBRARIES}
+    ${ENGINE_LIBRARY}
+)
 
-set(ENGINE_OPENGL_PLUGIN ${ENGINE_OPENGL_PLUGIN} PARENT_SCOPE)
+target_include_directories(OpenGL_Plugin SYSTEM
+    PRIVATE ${DEPENDENCY_INCLUDE_DIRS}
+    PRIVATE ${ENGINE_INCLUDE_DIR}
+)
+
+set(ENGINE_OPENGL_PLUGIN OpenGL_Plugin PARENT_SCOPE)

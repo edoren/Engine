@@ -64,12 +64,11 @@ template <>
 Vk_Context* Singleton<Vk_Context>::sInstance = nullptr;
 
 Vk_Context& Vk_Context::GetInstance() {
-    assert(sInstance);
-    return (*sInstance);
+    return Singleton<Vk_Context>::GetInstance();
 }
 
 Vk_Context* Vk_Context::GetInstancePtr() {
-    return sInstance;
+    return Singleton<Vk_Context>::GetInstancePtr();
 }
 
 Vk_Context::Vk_Context()
@@ -106,15 +105,36 @@ bool Vk_Context::Initialize() {
 
     // Add the required Instance extensions
     m_instance_extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
-#if defined(VK_USE_PLATFORM_WIN32_KHR)
-    m_instance_extensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
-#elif defined(VK_USE_PLATFORM_XCB_KHR)
-    m_instance_extensions.push_back(VK_KHR_XCB_SURFACE_EXTENSION_NAME);
-#elif defined(VK_USE_PLATFORM_XLIB_KHR)
-    m_instance_extensions.push_back(VK_KHR_XLIB_SURFACE_EXTENSION_NAME);
-#elif defined(VK_USE_PLATFORM_ANDROID_KHR)
-    m_instance_extensions.push_back(VK_KHR_ANDROID_SURFACE_EXTENSION_NAME);
+#if defined(SDL_VIDEO_DRIVER_WINDOWS)
+    m_instance_extensions.push_back("VK_KHR_win32_surface");
 #endif
+#if defined(SDL_VIDEO_DRIVER_X11)
+    void* x11_xcb_lib = SDL_LoadObject("libX11-xcb.so");
+    if (x11_xcb_lib) {
+        m_instance_extensions.push_back("VK_KHR_xcb_surface");
+        SDL_UnloadObject(x11_xcb_lib);
+    } else {
+        m_instance_extensions.push_back("VK_KHR_xlib_surface");
+    }
+#endif
+#if defined(SDL_VIDEO_DRIVER_WAYLAND)
+    m_instance_extensions.push_back("VK_KHR_wayland_surface");
+#endif
+#if defined(SDL_VIDEO_DRIVER_MIR)
+    m_instance_extensions.push_back("VK_KHR_mir_surface");
+#endif
+#if defined(SDL_VIDEO_DRIVER_ANDROID)
+    m_instance_extensions.push_back("VK_KHR_android_surface");
+#endif
+#if defined(SDL_VIDEO_DRIVER_COCOA)
+    m_instance_extensions.push_back("VK_MVK_macos_surface");
+#endif
+#if defined(SDL_VIDEO_DRIVER_UIKIT)
+    m_instance_extensions.push_back("VK_MVK_ios_surface");
+#endif
+    if (m_instance_extensions.size() < 2) {
+        LogFatal(sTag, "Platform does not has a supported surface extension");
+    }
     if (m_validation_layers_enabled) {
         m_instance_extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
     }
@@ -508,17 +528,18 @@ bool Vk_Context::CheckInstanceExtensionsSupport() const {
     }
 
     // Check that all the required instance extensions exists
+    bool all_extensions_found = true;
     for (size_t i = 0; i < m_instance_extensions.size(); i++) {
         if (!CheckExtensionAvailability(m_instance_extensions[i],
                                         available_extensions)) {
             LogError(sTag,
                      "Could not find instance extension "
                      "named: {}"_format(m_instance_extensions[i]));
-            return false;
+            all_extensions_found = false;
         }
     }
 
-    return true;
+    return all_extensions_found;
 }
 
 }  // namespace engine
