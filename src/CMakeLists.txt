@@ -76,8 +76,6 @@ elseif(OS_ANDROID)
         ${ASSIMP_LIBRARY}
         android
         log
-        z
-        EGL GLESv2  # TMP: For some reason a SDL2 dependency
     )
 elseif(OS_MACOS)
     target_link_libraries(${ENGINE_LIBRARY}

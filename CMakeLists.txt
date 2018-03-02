@@ -92,7 +92,6 @@ set(ENGINE_SOURCE_DIR "${ENGINE_DIR}/src")
 set(ENGINE_INCLUDE_DIR "${ENGINE_DIR}/src")
 set(TESTS_DIR "${ENGINE_DIR}/tests")
 set(DOCS_DIR "${ENGINE_DIR}/docs")
-set(TEMP_DIR "${CMAKE_BINARY_DIR}/obj")
 
 ###############################################################################
 
@@ -108,7 +107,7 @@ elseif(OS_LINUX)
 elseif(OS_ANDROID)
     set(SDL2MAIN_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/android/armeabi-v7a/Release/libSDL2main.a)
     set(SDL2_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/android/armeabi-v7a/Release/libSDL2.a)
-    set(ASSIMP_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/android/armeabi-v7a/Release/libassimp.a)
+    set(ASSIMP_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/android/armeabi-v7a/Release/libassimp.a z)
 elseif(OS_MACOS)
     set(SDL2MAIN_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/macos/Release/libSDL2main.a)
     set(SDL2_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/macos/Release/libSDL2.a
@@ -118,8 +117,7 @@ elseif(OS_MACOS)
                     "-framework CoreVideo"
                     "-framework Carbon"
                     iconv)
-    set(ASSIMP_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/macos/Release/libassimp.a
-                        z)
+    set(ASSIMP_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/macos/Release/libassimp.a z)
 endif()
 
 if(OS_WINDOWS)
