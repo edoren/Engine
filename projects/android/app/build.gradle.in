@@ -55,14 +55,14 @@ task runProcessAssets(type: Exec) {
 }
 
 task copyRelease(type: Copy) {
-    from("build/outputs/apk")
+    from("build/outputs/apk/release")
     into("../bin")
     include("app-release-unsigned.apk")
     rename("app-release-unsigned.apk", "@APP_NAME@-Release.apk")
 }
 
 task copyDebug(type: Copy) {
-    from("build/outputs/apk")
+    from("build/outputs/apk/debug")
     into("../bin")
     include("app-debug.apk")
     rename("app-debug.apk", "@APP_NAME@-Debug.apk")

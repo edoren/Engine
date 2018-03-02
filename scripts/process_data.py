@@ -4,8 +4,8 @@ import errno
 import os
 import os.path
 import shutil
-import subprocess
 import sys
+from subprocess import run
 
 from file_utils import FileUtils
 
@@ -36,14 +36,7 @@ def generate_spirv_shaders(data_folder):
         print("[{:>3}%] Compiling shader ".format(percentage),
               end="", flush=True)
 
-        command = "{} -V {} -o {}".format(glslang_exe,
-                                          glsl_shader_path,
-                                          spriv_shader_path)
-        ret_value = subprocess.call(command, shell=True)
-
-        if ret_value != 0:
-            print("Error compiling shaders")
-            exit(ret_value)
+        run([glslang_exe, "-V", glsl_shader_path, "-o", spriv_shader_path])
 
 
 def main(argv):
