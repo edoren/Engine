@@ -55,7 +55,7 @@ String::String(const char8* utf8String) {
             if (utf8::is_valid(utf8String, utf8String + length)) {
                 m_string.assign(utf8String);
             } else {
-                throw std::runtime_error("invalid utf8 convertion.");
+                ENGINE_THROW(std::runtime_error("invalid utf8 convertion."));
             }
         };
     }
@@ -103,7 +103,7 @@ String::String(const std::basic_string<char8>& utf8String) {
         if (utf8::is_valid(utf8String.cbegin(), utf8String.cend())) {
             m_string.assign(utf8String);
         } else {
-            throw std::runtime_error("invalid utf8 convertion.");
+            ENGINE_THROW(std::runtime_error("invalid utf8 convertion."));
         }
     };
 }
@@ -113,7 +113,7 @@ String::String(std::basic_string<char8>&& utf8String) {
         if (utf8::is_valid(utf8String.cbegin(), utf8String.cend())) {
             m_string = std::move(utf8String);
         } else {
-            throw std::runtime_error("invalid utf8 convertion.");
+            ENGINE_THROW(std::runtime_error("invalid utf8 convertion."));
         }
     };
 }
@@ -144,7 +144,7 @@ String String::FromUtf8(const char8* begin, const char8* end) {
     if (utf8::is_valid(begin, end)) {
         string.m_string.assign(begin, end);
     } else {
-        throw std::runtime_error("invalid utf8 convertion.");
+        ENGINE_THROW(std::runtime_error("invalid utf8 convertion."));
     }
     return string;
 }
@@ -273,11 +273,12 @@ void String::Erase(std::size_t position, std::size_t count) {
     // Iterate to the start codepoint
     auto start_it(m_string.begin());
     for (std::size_t i = 0; i < position; i++) {
-        try {
+        ENGINE_TRY {
             utf8::next(start_it, m_string.end());
-        } catch (utf8::not_enough_room) {
-            throw std::out_of_range(
-                "the specified position is out of the string range");
+        }
+        ENGINE_CATCH(utf8::not_enough_room) {
+            ENGINE_THROW(std::out_of_range(
+                "the specified position is out of the string range"));
         }
     }
     // Iterate to the end codepoint
@@ -293,11 +294,12 @@ void String::Insert(std::size_t position, const String& str) {
     // Iterate to the start codepoint
     auto start_it(m_string.begin());
     for (std::size_t i = 0; i < position; i++) {
-        try {
+        ENGINE_TRY {
             utf8::next(start_it, m_string.end());
-        } catch (utf8::not_enough_room) {
-            throw std::out_of_range(
-                "the specified position is out of the string range");
+        }
+        ENGINE_CATCH(utf8::not_enough_room) {
+            ENGINE_THROW(std::out_of_range(
+                "the specified position is out of the string range"));
         }
     }
     m_string.insert(start_it, str.m_string.cbegin(), str.m_string.cend());
@@ -377,11 +379,12 @@ void String::Replace(std::size_t position, std::size_t length,
     // Iterate to the start codepoint
     auto start_it(m_string.begin());
     for (std::size_t i = 0; i < position; i++) {
-        try {
+        ENGINE_TRY {
             utf8::next(start_it, m_string.end());
-        } catch (utf8::not_enough_room) {
-            throw std::out_of_range(
-                "the specified position is out of the string range");
+        }
+        ENGINE_CATCH(utf8::not_enough_room) {
+            ENGINE_THROW(std::out_of_range(
+                "the specified position is out of the string range"));
         }
     }
     // Iterate to the end codepoint
@@ -437,11 +440,12 @@ String String::SubString(std::size_t position, std::size_t length) const {
     // Iterate to the start codepoint
     auto start_it(m_string.begin());
     for (std::size_t i = 0; i < position; i++) {
-        try {
+        ENGINE_TRY {
             utf8::next(start_it, m_string.end());
-        } catch (utf8::not_enough_room) {
-            throw std::out_of_range(
-                "the specified position is out of the string range");
+        }
+        ENGINE_CATCH(utf8::not_enough_room) {
+            ENGINE_THROW(std::out_of_range(
+                "the specified position is out of the string range"));
         }
     }
     // Iterate to the end codepoint
