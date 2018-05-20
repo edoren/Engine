@@ -1,4 +1,4 @@
 [submodule "third_party"]
 	path = third_party
-	url = git@gitlab.com:edoren/EngineDependencies.git
+	url = https://gitlab.com/edoren/EngineDependencies.git
 	ignore = dirty
