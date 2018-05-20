@@ -21,7 +21,7 @@ variables:
   before_script:
     # System configuration
     - apt-get update -qq
-    - apt-get install -qq curl software-properties-common  # install add-apt-repository
+    - apt-get install -qq python3 software-properties-common  # install add-apt-repository
     - add-apt-repository -y ppa:ubuntu-toolchain-r/test
     - apt-get update -qq
     # Engine dependencies
@@ -29,10 +29,8 @@ variables:
     # SDL2 dependencies
     - apt-get install -qq libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev libxinerama-dev libxxf86vm-dev libxss-dev
     # Install the VulkanSDK
-    - curl -fsS -o VulkanSDK.run https://vulkan.lunarg.com/sdk/download/$VULKAN_SDK_VERSION/linux/vulkansdk-linux-x86_64-$VULKAN_SDK_VERSION.run?human=true
-    - chmod +x VulkanSDK.run
-    - ./VulkanSDK.run --quiet
-    - export VULKAN_SDK=$PWD/VulkanSDK/$VULKAN_SDK_VERSION/x86_64
+    - python3 scripts/download_vulkan.py $PWD
+    - export VULKAN_SDK=$PWD/VulkanSDK/x86_64
     - export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$VULKAN_SDK/lib"
     - export VK_LAYER_PATH="$VULKAN_SDK/etc/explicit_layer.d"
     - export PATH="$PATH:$VULKAN_SDK/bin"

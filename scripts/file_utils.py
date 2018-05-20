@@ -67,24 +67,24 @@ class FileUtils:
             print(STRING_CP_VERBOSE.format(src, dest))
 
     def remove_entry(path, force=False, verbose=False):
-        if not os.path.exists(path):
+        if not os.path.lexists(path):
             if not force:
                 print(STRING_RM_NOEXIST.format(path))
             return
 
-        if os.path.isfile(path):
+        if os.path.isfile(path) or os.path.islink(path):
             FileUtils.remove_file(path, force, verbose)
         else:
-            dirs = []
-            for dirpath, _, filenames in os.walk(path):
-                for filename in filenames:
-                    filepath = os.path.join(dirpath, filename)
-                    FileUtils.remove_file(filepath, force, verbose)
-                dirs.append(dirpath)
-            while len(dirs):
+            dirs = [path]
+            for entry in os.listdir(path):
+                entry_path = os.path.join(path, entry)
+                FileUtils.remove_entry(entry_path, force, verbose)
+                if os.path.isdir(entry_path) and not os.path.islink(entry_path):
+                    dirs.append(entry_path)
+            for entry in reversed(dirs):
                 if verbose:
-                    print(STRING_RM_VERBOSE.format(dirs[-1]))
-                FileUtils.rmdir(dirs.pop())
+                    print(STRING_RM_VERBOSE.format(entry))
+                FileUtils.rmdir(entry)
 
     def remove_entry_secure(path, force=False, verbose=False):
         print(STRING_NOT_IMPLEMENTED)
@@ -99,7 +99,10 @@ class FileUtils:
             print(STRING_RM_ISDIRECTORY.format(path))
             return
 
-        os.remove(path)
+        if os.path.islink(path):
+            os.unlink(path)
+        else:
+            os.remove(path)
         if verbose:
             print(STRING_RM_VERBOSE.format(path))
 
