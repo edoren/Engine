@@ -37,8 +37,8 @@ install:
   - set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
   - git submodule update --init --recursive
   - set PATH=C:\Program Files\Git\mingw64\bin;%PATH% # to get curl
-  - curl -fsS -o VulkanSDK.exe https://vulkan.lunarg.com/sdk/download/%VULKAN_SDK_VERSION%/windows/VulkanSDK-%VULKAN_SDK_VERSION%-Installer.exe?human=true
-  - start /wait VulkanSDK.exe /S
+  - python.exe scripts\download_vulkan.py .
+  - start /wait vulkan_sdk.exe /S
   - set VULKAN_SDK=C:\VulkanSDK\%VULKAN_SDK_VERSION%
   - set VK_SDK_PATH=%VULKAN_SDK%
 

@@ -17,17 +17,30 @@ VULKAN_LATEST_URLS = {
 CHUNK_SIZE = 1024
 
 
-def download_for_linux(output_path):
-    output_file = FileUtils.join(output_path, "vulkan_sdk.run")
-
-    # Download the latest version of Vulkan
-    url = VULKAN_LATEST_URLS["linux"]
+def download_file(url, output_file):
     with open(output_file, "wb") as handle:
         response = urllib.request.urlopen(url)
         for chunk in iter(lambda: response.read(CHUNK_SIZE), ''):
             if not chunk:
                 break
             handle.write(chunk)
+
+
+def download_for_windows(output_path):
+    # Download the latest version of Vulkan
+    url = VULKAN_LATEST_URLS["windows"]
+    output_file = FileUtils.join(output_path, "vulkan_sdk.exe")
+    download_file(url, output_file)
+
+    if os.path.isfile(output_file):
+        print("VulkanSDK location: {}".format(output_file))
+
+
+def download_for_linux(output_path):
+    # Download the latest version of Vulkan
+    url = VULKAN_LATEST_URLS["linux"]
+    output_file = FileUtils.join(output_path, "vulkan_sdk.run")
+    download_file(url, output_file)
 
     vulkan_sdk_folder = FileUtils.join(output_path, "VulkanSDK")
     extract_folder = FileUtils.join(output_path, "VulkanSDK_TMP")
@@ -68,9 +81,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if (sys.platform == "win32"):
-        print("ERROR: Not implemented for Windows")
+        download_for_windows(args.output)
     elif (sys.platform == "linux"):
         download_for_linux(args.output)
     elif (sys.platform == "darwin"):
         print("ERROR: Not implemented for Mac")
-        download_for_linux(args.output)
