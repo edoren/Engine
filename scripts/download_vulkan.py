@@ -1,12 +1,13 @@
-import os
+#!/usr/bin/env python3
+
 import argparse
+import os
 import os.path
 import sys
 import urllib.request
 from subprocess import run
 
 from file_utils import FileUtils
-
 
 VULKAN_LATEST_URLS = {
     "windows": "https://sdk.lunarg.com/sdk/download/latest/windows/vulkan-sdk.exe?Human=true",
