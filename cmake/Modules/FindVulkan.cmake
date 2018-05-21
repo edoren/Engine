@@ -11,17 +11,34 @@
 ###############################################################################
 
 if(WIN32)
+    # Search for the default VulkanSDK installation folder
+    set(VK_DEFAULT_INSTALL_PATH "C:/VulkanSDK")
+    if(EXISTS ${VK_DEFAULT_INSTALL_PATH})
+        file(GLOB VK_SDK_SUBDIR_CONTENTS "${VK_DEFAULT_INSTALL_PATH}/*")
+        foreach(VK_SDK_SUBDIR ${VK_SDK_SUBDIR_CONTENTS})
+            if(IS_DIRECTORY ${VK_SDK_SUBDIR})
+                list(APPEND VK_INCLUDE_PATHS "${VK_SDK_SUBDIR}/Include")
+                list(APPEND VK_LIB64_PATHS "${VK_SDK_SUBDIR}/Bin" "${VK_SDK_SUBDIR}/Lib")
+                list(APPEND VK_LIB_PATHS "${VK_SDK_SUBDIR}/Bin32" "${VK_SDK_SUBDIR}/Lib32")
+            endif()
+        endforeach()
+    endif()
+
+    # Use the VULKAN_SDK or VK_SDK_PATH environment variable
     set(VULKAN_SHARED_LIBRARY_NAMES vulkan-1)
     set(VULKAN_STATIC_LIBRARY_NAMES vkstatic.1 VKstatic.1)
-    set(VULKAN_INCLUDE_PATHS "$ENV{VULKAN_SDK}/Include"
+    set(VULKAN_INCLUDE_PATHS ${VK_INCLUDE_PATHS}
+                             "$ENV{VULKAN_SDK}/Include"
                              "$ENV{VK_SDK_PATH}/Include")
     if(CMAKE_CL_64)
-        set(VULKAN_LIBRARY_PATHS "$ENV{VULKAN_SDK}/Bin"
+        set(VULKAN_LIBRARY_PATHS ${VK_LIB64_PATHS}
+                                 "$ENV{VULKAN_SDK}/Bin"
                                  "$ENV{VK_SDK_PATH}/Bin"
                                  "$ENV{VULKAN_SDK}/Lib"
                                  "$ENV{VK_SDK_PATH}/Lib")
     else()
-        set(VULKAN_LIBRARY_PATHS "$ENV{VULKAN_SDK}/Bin32"
+        set(VULKAN_LIBRARY_PATHS ${VK_LIB_PATHS}
+                                 "$ENV{VULKAN_SDK}/Bin32"
                                  "$ENV{VK_SDK_PATH}/Bin32"
                                  "$ENV{VULKAN_SDK}/Lib32"
                                  "$ENV{VK_SDK_PATH}/Lib32")
