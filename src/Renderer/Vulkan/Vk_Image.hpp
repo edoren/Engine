@@ -8,9 +8,11 @@
 
 namespace engine {
 
-class Vk_Image {
+class VULKAN_PLUGIN_API Vk_Image : private NonCopyable {
 public:
     Vk_Image();
+
+    Vk_Image(Vk_Image&& other);
 
     virtual ~Vk_Image();
 
