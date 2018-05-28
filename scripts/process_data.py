@@ -3,6 +3,8 @@
 import errno
 import os
 import os.path
+import platform
+import glob
 import shutil
 import sys
 from subprocess import run
@@ -11,14 +13,31 @@ from file_utils import FileUtils
 
 
 def generate_spirv_shaders(data_folder):
-    glslang_exe = FileUtils.which("glslangValidator")
-    if glslang_exe is None:
-        vulkan_dir = os.environ.get("VULKAN_SDK")
-        if vulkan_dir is None:
-            print("Vulkan SDK not installed")
-            exit(1)
-        vulkan_dir = os.path.abspath(vulkan_dir)
-        glslang_exe = os.path.join(vulkan_dir, "bin", "glslangValidator")
+    shader_compiler = "glslangValidator"
+
+    search_paths = []
+    if platform.system() == "Windows":
+        shader_compiler += ".exe"
+        matches = glob.glob("C:\\VulkanSDK\\*\\")
+        for match in matches:
+            if os.path.isdir(match):
+                search_paths.append(os.path.join(match, "Bin"))
+    if "VULKAN_SDK" in os.environ:
+        search_paths.append(os.path.join(os.environ["VULKAN_SDK"], "bin"))
+    if "PATH" in os.environ:
+        search_paths += os.environ["PATH"].split(os.pathsep)
+
+    shader_compiler_exe = None
+    for path in search_paths:
+        if os.path.exists(path):
+            file_path = os.path.join(path, shader_compiler)
+            if os.path.isfile(file_path):
+                shader_compiler_exe = file_path
+                break
+
+    if shader_compiler_exe is None:
+        print("Vulkan SDK not installed")
+        exit(1)
 
     glsl_shaders_folder = os.path.join(data_folder, "shaders", "glsl")
     spirv_shaders_folder = os.path.join(data_folder, "shaders", "spirv")
@@ -36,7 +55,7 @@ def generate_spirv_shaders(data_folder):
         print("[{:>3}%] Compiling shader ".format(percentage),
               end="", flush=True)
 
-        run([glslang_exe, "-V", glsl_shader_path, "-o", spriv_shader_path])
+        run([shader_compiler_exe, "-V", glsl_shader_path, "-o", spriv_shader_path])
 
 
 def main(argv):
