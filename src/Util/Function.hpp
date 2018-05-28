@@ -13,10 +13,10 @@
 namespace engine {
 
 template <typename, size_t MaxSize = LAMBDA_DEFAULT_MAX_SIZE>
-class ENGINE_API Function;
+class Function;
 
 template <typename Ret, typename... Args, size_t MaxSize>
-class ENGINE_API Function<Ret(Args...), MaxSize> {
+class Function<Ret(Args...), MaxSize> {
 public:
     Function() : m_data(), m_invoker(nullptr), m_manager(nullptr) {}
 

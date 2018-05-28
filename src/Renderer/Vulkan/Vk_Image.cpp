@@ -20,6 +20,15 @@ Vk_Image::Vk_Image()
         m_view(VK_NULL_HANDLE),
         m_memory(VK_NULL_HANDLE) {}
 
+Vk_Image::Vk_Image(Vk_Image&& other)
+      : m_handle(other.m_handle),
+        m_view(other.m_view),
+        m_memory(other.m_memory) {
+    other.m_handle = VK_NULL_HANDLE;
+    other.m_view = VK_NULL_HANDLE;
+    other.m_memory = VK_NULL_HANDLE;
+}
+
 Vk_Image::~Vk_Image() {
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.GetVulkanDevice();

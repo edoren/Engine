@@ -62,6 +62,8 @@ if(OS_WINDOWS)
     target_link_libraries(${ENGINE_LIBRARY}
         ${SDL2_LIBRARY}
         ${ASSIMP_LIBRARY}
+        imm32
+        version
     )
 elseif(OS_LINUX)
     target_link_libraries(${ENGINE_LIBRARY}

@@ -7,7 +7,7 @@
 
 namespace engine {
 
-class VULKAN_PLUGIN_API Vk_SwapChain {
+class VULKAN_PLUGIN_API Vk_SwapChain : private NonCopyable {
 public:
     Vk_SwapChain();
     ~Vk_SwapChain();

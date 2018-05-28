@@ -25,9 +25,9 @@ struct PhysicalDeviceParameters {
     }
 
     VkFormatProperties GetFormatProperties(VkFormat format) {
-        VkFormatProperties properties;
-        vkGetPhysicalDeviceFormatProperties(handle, format, &properties);
-        return properties;
+        VkFormatProperties format_properties;
+        vkGetPhysicalDeviceFormatProperties(handle, format, &format_properties);
+        return format_properties;
     }
 };
 
