@@ -1,10 +1,11 @@
+import filecmp
+import glob
 import itertools
 import os
 import os.path
 import re
 import shutil
 import stat
-import filecmp
 
 OPTION_FORCE = "force"
 OPTION_VERBOSE = "verbose"
@@ -356,6 +357,9 @@ class FileUtils:
 
     def which(name):
         return shutil.which(name)
+
+    def glob(pathname, *, recursive=True):
+        return glob.glob(pathname, recursive=recursive)
 
     def configure_file(input_file_path, output_file_path, config_dict):
         with open(input_file_path, "r") as input_file:
