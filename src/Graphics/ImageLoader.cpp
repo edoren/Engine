@@ -36,17 +36,20 @@ bool ImageLoader::LoadFromFileInMemory(const byte* buffer, uint32 len,
     byte* data = stbi_load_from_memory(buffer, len, &width, &height, &comp,
                                        STBI_rgb_alpha);
 
-    if (data != nullptr && comp == STBI_rgb_alpha) {
-        // Fill the vector with the pixels
-        pixels.assign(data, data + (width * height * comp));
-        size.x = static_cast<uint32>(width);
-        size.y = static_cast<uint32>(height);
+    if (data != nullptr) {
+        size_t num_pixels = width * height;
+        size_t data_size = (num_pixels * STBI_rgb_alpha);
+        byte* data_end = data + data_size;
+        pixels.assign(data, data_end);
     } else {
         String error = String("STB_Image error: ") + stbi_failure_reason();
         LogError(sTag, error);
         stbi_image_free(data);
         return false;
     }
+
+    size.x = static_cast<uint32>(width);
+    size.y = static_cast<uint32>(height);
 
     stbi_image_free(data);
     return true;
