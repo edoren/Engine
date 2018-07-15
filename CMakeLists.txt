@@ -38,8 +38,8 @@ include("${ENGINE_DIR}/cmake/Macros.cmake")
 ###############################################################################
 ## Compiler configuration
 
-# Require C++11 support
-set(CMAKE_CXX_STANDARD 11)
+# Require C++14 support
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Enable Unicode in Windows
