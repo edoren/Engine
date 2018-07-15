@@ -12,21 +12,43 @@ from subprocess import run
 from file_utils import FileUtils
 
 
-def generate_spirv_shaders(data_folder):
-    shader_compiler = "glslangValidator"
-
+def find_glslc_executable():
+    shader_compiler = "glslc"
     search_paths = []
+
     if platform.system() == "Windows":
         shader_compiler += ".exe"
+
+    # Try to find glslc from the path
+    glslc_exe = FileUtils.which(shader_compiler)
+    if glslc_exe is not None:
+        return glslc_exe
+
+    # Try to find the shader compiler in the Vulkan SDK
+    if platform.system() == "Windows":
         matches = glob.glob("C:\\VulkanSDK\\*\\")
         for match in matches:
             if os.path.isdir(match):
                 search_paths.append(os.path.join(match, "Bin"))
-    if "VULKAN_SDK" in os.environ:
-        search_paths.append(os.path.join(os.environ["VULKAN_SDK"], "bin"))
-    if "PATH" in os.environ:
-        search_paths += os.environ["PATH"].split(os.pathsep)
+    vulkan_sdk_dir = os.environ.get("VULKAN_SDK")
+    if vulkan_sdk_dir is not None:
+        vulkan_sdk_dir = os.path.abspath(vulkan_sdk_dir)
+        search_paths.append(os.path.join(vulkan_sdk_dir, "bin"))
 
+    # Try to find the shader compiler using the Android NDK
+    android_ndk_dir = os.environ.get("ANDROID_NDK_HOME")
+    if android_ndk_dir is not None:
+        android_ndk_dir = os.path.abspath(android_ndk_dir)
+        glob_pattern = os.path.join(android_ndk_dir, "shader-tools", "*")
+        glob_list = FileUtils.glob(glob_pattern)
+        search_paths += glob_list
+
+    # Try to find it in the PATH
+    path_env = os.environ["PATH"]
+    if "PATH" in os.environ:
+        search_paths += path_env.split(os.pathsep)
+
+    # Search the shader compiler
     shader_compiler_exe = None
     for path in search_paths:
         if os.path.exists(path):
@@ -36,7 +58,15 @@ def generate_spirv_shaders(data_folder):
                 break
 
     if shader_compiler_exe is None:
-        print("Vulkan SDK not installed")
+        print(shader_compiler + " not found. Is the Vulkan SDK installed?")
+
+    return shader_compiler_exe
+
+
+def generate_spirv_shaders(data_folder):
+    glslc_exe = find_glslc_executable()
+    if glslc_exe is None:
+        print("Error: glslc not found")
         exit(1)
 
     glsl_shaders_folder = os.path.join(data_folder, "shaders", "glsl")
@@ -52,10 +82,21 @@ def generate_spirv_shaders(data_folder):
 
         processed += 1
         percentage = int(100 * (processed / float(len(glsl_shaders))))
-        print("[{:>3}%] Compiling shader ".format(percentage),
-              end="", flush=True)
+        print_format = "[{:>3}%] Compiling shader {}"
+        print(print_format.format(percentage, spriv_shader_path),
+              flush=True)
 
-        run([shader_compiler_exe, "-V", glsl_shader_path, "-o", spriv_shader_path])
+        std = "450core"
+        # std = "320es"
+
+        glslc_command = [
+            glslc_exe,
+            "-std={}".format(std),
+            glsl_shader_path,
+            "-o",
+            spriv_shader_path
+        ]
+        run(glslc_command, stdout=open(os.devnull, 'wb'), check=True)
 
 
 def main(argv):
