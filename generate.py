@@ -171,8 +171,13 @@ class CMakeBuildGenerator:
         if os.path.isfile(build_file_path):
             os.remove(build_file_path)
 
+        cmake_path = FileUtils.which("cmake")
+
+        if cmake_path is None:
+            print("Error: CMake not installed")
+            exit()
+
         if self.app_platform in ["windows", "linux", "macosx"]:
-            cmake_path = FileUtils.which("cmake")
             build_commands = [
                 [cmake_path, self.app_root_dir] + self.cmake_args,
                 [cmake_path, "--build", self.app_build_dir,
