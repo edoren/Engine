@@ -477,7 +477,7 @@ public:
     ///
     /// This function removes all the characters from the string.
     ///
-    /// @see isEmpty, erase
+    /// @see IsEmpty, erase
     ////////////////////////////////////////////////////////////
     void Clear();
 
@@ -486,7 +486,7 @@ public:
     ///
     /// @return Number of UTF-8 codepoints in the string
     ///
-    /// @see isEmpty
+    /// @see IsEmpty
     ////////////////////////////////////////////////////////////
     std::size_t GetSize() const;
 

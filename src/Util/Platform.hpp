@@ -1,5 +1,7 @@
 #pragma once
 
+// clang-format off
+
 /*
     This header file defines some useful macros to detect the current
     running system, as well as which system APIs are avaliable on it.
@@ -47,7 +49,7 @@
 // Detect the platform avaliable APIs
 #if defined(_WIN32)
     #if defined(_WIN64)
-        #define PLATFORM_APIS PLATFORM_API_WIN32 & PLATFORM_API_WIN64
+        #define PLATFORM_APIS (PLATFORM_API_WIN32 & PLATFORM_API_WIN64)
     #else
         #define PLATFORM_APIS PLATFORM_API_WIN32
     #endif
@@ -58,6 +60,8 @@
     #endif
 #endif
 
-#define PLATFORM_IS(x) PLATFORM & (x)
-#define PLATFORM_TYPE_IS(x) PLATFORM_TYPE & (x)
-#define PLATFORM_HAS_API(x) PLATFORM_APIS & (x)
+#define PLATFORM_IS(x)      (PLATFORM & (x))
+#define PLATFORM_TYPE_IS(x) (PLATFORM_TYPE & (x))
+#define PLATFORM_HAS_API(x) (PLATFORM_APIS & (x))
+
+// clang-format on

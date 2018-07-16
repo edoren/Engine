@@ -78,4 +78,4 @@ protected:
     std::map<String, Texture2D*> m_textures;
 };
 
-}  // engine
+}  // namespace engine

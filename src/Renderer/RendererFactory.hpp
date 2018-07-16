@@ -2,9 +2,9 @@
 
 #include <Util/Prerequisites.hpp>
 
+#include <Renderer/Mesh.hpp>
 #include <Renderer/Shader.hpp>
 #include <Renderer/Texture2D.hpp>
-#include <Renderer/Mesh.hpp>
 
 namespace engine {
 

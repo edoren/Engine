@@ -31,7 +31,6 @@ InputManager* Singleton<InputManager>::sInstance = nullptr;
 
 InputManager& InputManager::GetInstance() {
     return Singleton<InputManager>::GetInstance();
-
 }
 
 InputManager* InputManager::GetInstancePtr() {

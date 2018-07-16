@@ -93,4 +93,4 @@ protected:
     std::map<String, Shader*> m_shaders;
 };
 
-}  // engine
+}  // namespace engine

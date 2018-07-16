@@ -7,8 +7,8 @@
 #include <utility>
 
 // Strings library
-#include <string>
 #include <sstream>
+#include <string>
 
 // Containers library
 #include <array>

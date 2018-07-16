@@ -82,4 +82,4 @@ protected:
     std::map<String, Mesh*> m_textures;
 };
 
-}  // engine
+}  // namespace engine
