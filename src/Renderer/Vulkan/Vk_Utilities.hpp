@@ -13,7 +13,6 @@ public:
     static bool AllocateMemory(VkDeviceMemory* memory,
                                const VkMemoryPropertyFlags& memory_properties,
                                const VkMemoryRequirements& memory_requirements);
-
 };
 
 }  // namespace engine

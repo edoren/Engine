@@ -48,4 +48,5 @@ public:
     // Camera options
     float m_zoom;
 };
-}
+
+}  // namespace engine

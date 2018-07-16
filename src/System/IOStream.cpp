@@ -82,4 +82,4 @@ const String& IOStream::GetLastError() const {
     return m_last_error;
 }
 
-}  // nemespace engine
+}  // namespace engine

@@ -84,8 +84,7 @@ void* SharedLibrary::GetSymbol(const char* name) {
     if (m_handle == nullptr) return nullptr;
     void* address = nullptr;
 #if PLATFORM_IS(PLATFORM_WINDOWS)
-    address =
-        GetProcAddress(reinterpret_cast<HMODULE>(m_handle), name);
+    address = GetProcAddress(reinterpret_cast<HMODULE>(m_handle), name);
 #elif PLATFORM_IS(PLATFORM_LINUX | PLATFORM_MACOS | PLATFORM_ANDROID)
     address = dlsym(m_handle, name);
 #endif

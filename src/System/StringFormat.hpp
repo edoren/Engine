@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Util/Prerequisites.hpp>
 #include <System/String.hpp>
+#include <Util/Prerequisites.hpp>
 
 #define FMT_HEADER_ONLY
 #define FMT_USE_WINDOWS_H 0
