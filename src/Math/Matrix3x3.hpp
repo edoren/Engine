@@ -43,27 +43,28 @@ public:
 
     // Access operators
 
-    inline value_type& operator()(const int row, const int column) {
+    inline value_type& operator()(const size_t row, const size_t column) {
         return m_data(row, column);
     }
 
-    inline const value_type& operator()(const int row, const int column) const {
+    inline const value_type& operator()(const size_t row,
+                                        const size_t column) const {
         return m_data(row, column);
     }
 
-    inline value_type& operator()(const int i) {
+    inline value_type& operator()(const size_t i) {
         return m_data[i];
     }
 
-    inline const value_type& operator()(const int i) const {
+    inline const value_type& operator()(const size_t i) const {
         return m_data[i];
     }
 
-    inline value_type& operator[](const int i) {
+    inline value_type& operator[](const size_t i) {
         return m_data[i];
     }
 
-    inline const value_type& operator[](const int i) const {
+    inline const value_type& operator[](const size_t i) const {
         return m_data[i];
     }
 
