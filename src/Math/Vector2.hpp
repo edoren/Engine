@@ -76,11 +76,11 @@ public:
         return *this;
     }
 
-    inline T& operator[](const int i) {
+    inline T& operator[](const size_t i) {
         return m_data[i];
     }
 
-    inline const T& operator[](const int i) const {
+    inline const T& operator[](const size_t i) const {
         return m_data[i];
     }
 

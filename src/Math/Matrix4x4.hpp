@@ -37,7 +37,7 @@ public:
                      const value_type& w0, const value_type& w1,
                      const value_type& w2, const value_type& w3)
           : m_data(x0, x1, x2, x3, y0, y1, y2, y3, z0, z1, z2, z3, w0, w1, w2,
-                  w3) {}
+                   w3) {}
 
     inline Matrix4x4(const col_type& column0, const col_type& column1,
                      const col_type& column2, const col_type& column3)
@@ -48,27 +48,28 @@ public:
 
     // Access operators
 
-    inline value_type& operator()(const int row, const int column) {
+    inline value_type& operator()(const size_t row, const size_t column) {
         return m_data(row, column);
     }
 
-    inline const value_type& operator()(const int row, const int column) const {
+    inline const value_type& operator()(const size_t row,
+                                        const size_t column) const {
         return m_data(row, column);
     }
 
-    inline value_type& operator()(const int i) {
+    inline value_type& operator()(const size_t i) {
         return m_data[i];
     }
 
-    inline const value_type& operator()(const int i) const {
+    inline const value_type& operator()(const size_t i) const {
         return m_data[i];
     }
 
-    inline value_type& operator[](const int i) {
+    inline value_type& operator[](const size_t i) {
         return m_data[i];
     }
 
-    inline const value_type& operator[](const int i) const {
+    inline const value_type& operator[](const size_t i) const {
         return m_data[i];
     }
 
