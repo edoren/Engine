@@ -49,28 +49,28 @@ public:
     // Access operators
 
     inline value_type& operator()(const size_t row, const size_t column) {
-        return m_data(row, column);
+        return m_data(static_cast<int>(row), static_cast<int>(column));
     }
 
     inline const value_type& operator()(const size_t row,
                                         const size_t column) const {
-        return m_data(row, column);
+        return m_data(static_cast<int>(row), static_cast<int>(column));
     }
 
     inline value_type& operator()(const size_t i) {
-        return m_data[i];
+        return m_data[static_cast<int>(i)];
     }
 
     inline const value_type& operator()(const size_t i) const {
-        return m_data[i];
+        return m_data[static_cast<int>(i)];
     }
 
     inline value_type& operator[](const size_t i) {
-        return m_data[i];
+        return m_data[static_cast<int>(i)];
     }
 
     inline const value_type& operator[](const size_t i) const {
-        return m_data[i];
+        return m_data[static_cast<int>(i)];
     }
 
     // Matrix arithmetic operators

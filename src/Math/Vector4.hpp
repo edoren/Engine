@@ -83,11 +83,11 @@ public:
     }
 
     inline T& operator[](const size_t i) {
-        return m_data[i];
+        return m_data[static_cast<int>(i)];
     }
 
     inline const T& operator[](const size_t i) const {
-        return m_data[i];
+        return m_data[static_cast<int>(i)];
     }
 
     inline Vector4<T> operator-() const {
