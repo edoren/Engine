@@ -10,28 +10,28 @@ RenderWindow::RenderWindow()
         m_is_fullscreen(false),
         m_is_vsync_enable(false),
         m_active_camera(nullptr),
-        on_window_resize_connection(0),
-        on_app_will_enter_background_connection(0),
-        on_app_did_enter_background_connection(0),
-        on_app_will_enter_foreground_connection(0),
-        on_app_did_enter_foreground_connection(0) {
+        on_window_resize_connection(),
+        on_app_will_enter_background_connection(),
+        on_app_did_enter_background_connection(),
+        on_app_will_enter_foreground_connection(),
+        on_app_did_enter_foreground_connection() {
     auto& input = InputManager::GetInstance();
 
     on_window_resize_connection =
-        input.OnWindowResized.Connect(this, &RenderWindow::OnWindowResized);
+        input.OnWindowResized.Connect(*this, &RenderWindow::OnWindowResized);
 
     on_app_will_enter_background_connection =
         input.OnAppWillEnterBackground.Connect(
-            this, &RenderWindow::OnAppWillEnterBackground);
+            *this, &RenderWindow::OnAppWillEnterBackground);
     on_app_did_enter_background_connection =
         input.OnAppDidEnterBackground.Connect(
-            this, &RenderWindow::OnAppDidEnterBackground);
+            *this, &RenderWindow::OnAppDidEnterBackground);
     on_app_will_enter_foreground_connection =
         input.OnAppWillEnterForeground.Connect(
-            this, &RenderWindow::OnAppWillEnterForeground);
+            *this, &RenderWindow::OnAppWillEnterForeground);
     on_app_did_enter_foreground_connection =
         input.OnAppDidEnterForeground.Connect(
-            this, &RenderWindow::OnAppDidEnterForeground);
+            *this, &RenderWindow::OnAppDidEnterForeground);
 }
 
 RenderWindow::~RenderWindow() {

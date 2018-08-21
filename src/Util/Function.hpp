@@ -6,14 +6,18 @@
 #include <type_traits>
 #include <utility>
 
-#ifndef LAMBDA_DEFAULT_MAX_SIZE
-#define LAMBDA_DEFAULT_MAX_SIZE sizeof(void*) * (6 + 2)
+#ifndef LAMBDA_DEFAULT_SIZE
+#define LAMBDA_DEFAULT_SIZE 6
 #endif
+
+#define LAMBDA_FUNCTION_SIZE(x) (sizeof(void*) * x)
 
 namespace engine {
 
-template <typename, size_t MaxSize = LAMBDA_DEFAULT_MAX_SIZE>
-class Function;
+template <typename, size_t MaxSize = LAMBDA_FUNCTION_SIZE(LAMBDA_DEFAULT_SIZE)>
+class Function {
+    static_assert(sizeof(MaxSize) > 0, "MaxSize must be at least 1");
+};
 
 template <typename Ret, typename... Args, size_t MaxSize>
 class Function<Ret(Args...), MaxSize> {
@@ -26,7 +30,7 @@ public:
     Function(const Function& other)
           : m_data(), m_invoker(nullptr), m_manager(nullptr) {
         if (other.m_manager) {
-            other.m_manager(&m_data, &other.m_data, Operation::Copy);
+            other.m_manager(&m_data, &other.m_data, Operation::COPY);
             m_invoker = other.m_invoker;
             m_manager = other.m_manager;
         }
@@ -56,7 +60,7 @@ public:
 
     ~Function() {
         if (m_manager != nullptr) {
-            m_manager(&m_data, nullptr, Operation::Destroy);
+            m_manager(&m_data, nullptr, Operation::DESTROY);
         }
     }
 
@@ -72,7 +76,7 @@ public:
 
     Function& operator=(std::nullptr_t) {
         if (m_manager != nullptr) {
-            m_manager(&m_data, nullptr, Operation::Destroy);
+            m_manager(&m_data, nullptr, Operation::DESTROY);
             m_manager = nullptr;
             m_invoker = nullptr;
         }
@@ -116,7 +120,7 @@ public:
     }
 
 private:
-    enum class Operation { Copy, Destroy };
+    enum class Operation { COPY, DESTROY };
 
     template <typename FunctionType>
     static Ret CallFunction(const void* data, Args&&... args) {
@@ -128,12 +132,12 @@ private:
     static void ManageFunction(void* dest, const void* src, Operation op) {
         auto dest_cast = static_cast<FunctionType*>(dest);
         switch (op) {
-            case Operation::Copy: {
+            case Operation::COPY: {
                 auto src_cast = static_cast<const FunctionType*>(src);
                 new (dest_cast) FunctionType(*src_cast);
                 break;
             }
-            case Operation::Destroy:
+            case Operation::DESTROY:
                 dest_cast->~FunctionType();
                 break;
         }
@@ -141,8 +145,7 @@ private:
 
     using Invoker = Ret (*)(const void*, Args&&...);
     using Manager = void (*)(void*, const void*, Operation);
-    using Storage = typename std::aligned_storage<
-        MaxSize - sizeof(Invoker) - sizeof(Manager), 8>::type;  // Why 8?
+    using Storage = typename std::aligned_storage<MaxSize, sizeof(void*)>::type;
 
     Storage m_data;     ///< Stores a copy of the Functor
     Invoker m_invoker;  ///< Pointer to the caller function for m_data
