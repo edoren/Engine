@@ -3,6 +3,7 @@
 #include <Util/Prerequisites.hpp>
 
 #include <Graphics/Color.hpp>
+#include <System/SignalConnection.hpp>
 #include <System/String.hpp>
 
 namespace engine {
@@ -74,11 +75,11 @@ protected:
     const Camera* m_active_camera;
 
 private:
-    uint32 on_window_resize_connection;
-    uint32 on_app_will_enter_background_connection;
-    uint32 on_app_did_enter_background_connection;
-    uint32 on_app_will_enter_foreground_connection;
-    uint32 on_app_did_enter_foreground_connection;
+    SignalConnection on_window_resize_connection;
+    SignalConnection on_app_will_enter_background_connection;
+    SignalConnection on_app_did_enter_background_connection;
+    SignalConnection on_app_will_enter_foreground_connection;
+    SignalConnection on_app_did_enter_foreground_connection;
 };
 
 }  // namespace engine

@@ -1,9 +1,10 @@
 set(THIS_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
 set(TESTS_SOURCES
-    "${THIS_DIR}/TestMain.cpp"
-    "${THIS_DIR}/StringTests.cpp"
     "${THIS_DIR}/FileSystemTests.cpp"
+    "${THIS_DIR}/SignalTests.cpp"
+    "${THIS_DIR}/StringTests.cpp"
+    "${THIS_DIR}/TestMain.cpp"
 )
 
 add_executable(UnitaryTests ${TESTS_SOURCES})
