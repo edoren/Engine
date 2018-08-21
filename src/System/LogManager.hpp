@@ -6,7 +6,7 @@
 
 namespace engine {
 
-enum class LogPriority : int {
+enum class LogPriority {
     VERBOSE = 1,
     DEBUG,
     INFO,

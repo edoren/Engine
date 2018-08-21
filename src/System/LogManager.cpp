@@ -11,6 +11,12 @@ namespace engine {
 
 namespace {
 
+#if PLATFORM_IS(PLATFORM_WINDOWS)
+const char* const sLineEnding = "\r\n";
+#else
+const char* const sLineEnding = "\n";
+#endif
+
 #if PLATFORM_IS(PLATFORM_ANDROID)
 android_LogPriority sAndroidLogPriorities[] = {
     ANDROID_LOG_UNKNOWN, ANDROID_LOG_VERBOSE, ANDROID_LOG_DEBUG,
@@ -101,7 +107,7 @@ void LogManager::LogMessage(LogPriority priority, const String& tag,
         pfile = SDL_RWFromFile(m_log_file.GetData(), "ab");
         const std::string& str = log_message.ToUtf8();
         SDL_RWwrite(pfile, str.data(), 1, str.size());
-        SDL_RWwrite(pfile, "\n", 1, 1);
+        SDL_RWwrite(pfile, sLineEnding, 1, strlen(sLineEnding));
         SDL_RWclose(pfile);
     }
 
