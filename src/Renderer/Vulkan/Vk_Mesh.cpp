@@ -1,5 +1,6 @@
 #include "Vk_Mesh.hpp"
 
+#include <Graphics/3D/Camera.hpp>
 #include <Math/Utilities.hpp>
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
@@ -7,6 +8,11 @@
 #include "Vk_Context.hpp"
 #include "Vk_Mesh.hpp"
 #include "Vk_RenderWindow.hpp"
+
+#include "Vk_Shader.hpp"
+#include "Vk_ShaderManager.hpp"
+#include "Vk_Texture2D.hpp"
+#include "Vk_TextureManager.hpp"
 
 namespace engine {
 
@@ -95,7 +101,7 @@ void Vk_Mesh::SetupMesh() {
         nullptr,                                // pNext
         staging_buffer.GetMemory(),             // memory
         0,                                      // offset
-        m_vertex_buffer.GetSize()               // size
+        VK_WHOLE_SIZE                           // size
     };
     vkFlushMappedMemoryRanges(device, 1, &flush_range);
 
@@ -206,26 +212,71 @@ void Vk_Mesh::SetupMesh() {
     staging_buffer.Destroy();
 }
 
-void Vk_Mesh::Draw(RenderWindow& target) const {
-    Vk_RenderWindow* window = static_cast<Vk_RenderWindow*>(&target);
+void Vk_Mesh::Draw(RenderWindow& target, const RenderStates& states) const {
+    m_transform = states.transform;
 
-    // for (auto& texture : m_textures) {
-    //     switch (texture.second) {
-    //         case TextureType::eDiffuse:
-    //             break;
-    //         case TextureType::eSpecular:
-    //         default:
-    //             break;
-    //     }
+    Vk_RenderWindow& window = static_cast<Vk_RenderWindow&>(target);
 
-    //     Vk_Texture2D* curr_texture =
-    //         reinterpret_cast<Vk_Texture2D*>(texture.first);
-    //     if (curr_texture) {
-    //         curr_texture->Use();
-    //     }
-    // }
+    LogInfo(sTag, "Vk_Mesh::Draw");
 
-    auto lambda = [this](VkCommandBuffer& command_buffer) {
+    auto lambda = [this, &window](VkCommandBuffer& command_buffer,
+                                  VkPipelineLayout& pipeline_layout) {
+        Vk_Texture2D* texture =
+            Vk_TextureManager::GetInstance().GetActiveTexture2D();
+        Vk_Shader* shader = Vk_ShaderManager::GetInstance().GetActiveShader();
+
+        // texture = m_textures[TextureType::DIFFUSE];
+        for (auto& pair : m_textures) {
+            if (pair.second == TextureType::DIFFUSE) {
+                texture = static_cast<Vk_Texture2D*>(pair.first);
+            }
+        }
+
+        std::array<VkDescriptorSet, 2> descriptor_sets;
+        size_t array_pos = 0;
+
+        if (shader) {
+            const Camera* active_camera = window.GetActiveCamera();
+
+            const math::mat4& model_matrix = m_transform.GetMatrix();
+            math::mat4 view_matrix = (active_camera != nullptr)
+                                         ? active_camera->GetViewMatrix()
+                                         : math::mat4();
+            const math::mat4& projection_matrix = window.GetProjectionMatrix();
+
+            math::mat4 mvp_matrix =
+                projection_matrix * view_matrix * model_matrix;
+            math::mat4 normal_matrix = model_matrix.Inverse().Transpose();
+
+            math::vec3 front_vector;
+            math::vec3 light_position;  // TMP: Get this from other
+                                        //      part a LightManager maybe?
+            if (active_camera != nullptr) {
+                front_vector = active_camera->GetFrontVector();
+                light_position = active_camera->GetPosition();
+            }
+
+            UniformBufferObject& ubo = shader->GetUBO();
+            ubo.SetAttributeValue("model", model_matrix);
+            ubo.SetAttributeValue("normalMatrix", normal_matrix);
+            ubo.SetAttributeValue("mvp", mvp_matrix);
+            ubo.SetAttributeValue("cameraFront", front_vector);
+            ubo.SetAttributeValue("lightPosition", light_position);
+            shader->UpdateUniformBuffer();
+
+            descriptor_sets[array_pos++] = shader->GetUBODescriptorSet();
+        }
+
+        if (texture) {
+            descriptor_sets[array_pos++] = texture->GetDescriptorSet();
+        } else {
+            LogFatal(sTag, "Texture not found for Mesh");
+        }
+
+        vkCmdBindDescriptorSets(
+            command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_layout, 0,
+            static_cast<uint32>(array_pos), &descriptor_sets[0], 0, nullptr);
+
         if (m_vertex_buffer.GetHandle() != VK_NULL_HANDLE) {
             VkDeviceSize offset = 0;
             vkCmdBindVertexBuffers(command_buffer, 0, 1,
@@ -240,7 +291,7 @@ void Vk_Mesh::Draw(RenderWindow& target) const {
         vkCmdDrawIndexed(command_buffer, indices_size, 1, 0, 0, 0);
     };
 
-    window->AddCommandExecution(std::move(lambda));
+    window.AddCommandExecution(std::move(lambda));
 }
 
 }  // namespace engine

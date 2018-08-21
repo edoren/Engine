@@ -1,10 +1,12 @@
 #include <Core/Main.hpp>
 #include <Renderer/Model.hpp>
+#include <Renderer/RenderStates.hpp>
 #include <Renderer/RendererFactory.hpp>
 #include <Renderer/Texture2D.hpp>
 #include <Renderer/TextureManager.hpp>
 #include <System/FileSystem.hpp>
 #include <System/IOStream.hpp>
+#include <System/JSON.hpp>
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
 
@@ -17,6 +19,8 @@
 namespace engine {
 
 namespace {
+
+static const String sTag("Model");
 
 static const String sRootModelFolder("models");
 
@@ -95,6 +99,37 @@ public:
     }
 };
 
+TextureType GetTextureTypeFromString(const String& name) {
+    if (name == "diffuse") return TextureType::DIFFUSE;
+    if (name == "specular") return TextureType::SPECULAR;
+    if (name == "normals") return TextureType::NORMALS;
+    if (name == "lightmap") return TextureType::LIGHTMAP;
+    if (name == "emissive") return TextureType::EMISSIVE;
+    return TextureType::UNKNOWN;
+}
+
+TextureType GetTextureTypeFromAiTextureType(aiTextureType type) {
+    switch (type) {
+        case aiTextureType_DIFFUSE:
+            return TextureType::DIFFUSE;
+
+        case aiTextureType_SPECULAR:
+            return TextureType::SPECULAR;
+
+        case aiTextureType_NORMALS:
+            return TextureType::NORMALS;
+
+        case aiTextureType_LIGHTMAP:
+            return TextureType::LIGHTMAP;
+
+        case aiTextureType_EMISSIVE:
+            return TextureType::EMISSIVE;
+
+        default:
+            return TextureType::UNKNOWN;
+    }
+}
+
 }  // namespace
 
 Model::Model(const String& path) {
@@ -108,8 +143,11 @@ Model::~Model() {
 }
 
 void Model::Draw(RenderWindow& target) const {
-    for (size_t i = 0; i < m_meshes.size(); i++) {
-        m_meshes[i]->Draw(target);
+    RenderStates custom_states;
+    custom_states.transform = m_transform;
+
+    for (auto& mesh : m_meshes) {
+        mesh->Draw(target, custom_states);
     }
 }
 
@@ -118,6 +156,39 @@ void Model::LoadModel(const String& path) {
 
     FileSystem& fs = FileSystem::GetInstance();
     String filename = fs.Join(sRootModelFolder, path);
+
+    LogDebug(sTag, "Loading model: " + filename);
+
+    String path_noext = path.SubString(0, path.FindLastOf("."));
+    String json_filename = fs.Join(sRootModelFolder, path_noext + ".json");
+    if (fs.FileExists(json_filename)) {
+        std::vector<byte> json_data;
+
+        fs.LoadFileData(json_filename, &json_data);
+        if (json::accept(json_data.begin(), json_data.end())) {
+            m_descriptor = json::parse(json_data.begin(), json_data.end());
+            LogDebug(sTag, "Loading descriptor: " + json_filename);
+        }
+    }
+
+    const json& properties = m_descriptor["properties"];
+    if (!m_descriptor.is_null() && !properties.is_null()) {
+        Transform model_matrix;
+        const json& scale = properties["scale"];
+        const json& rotation = properties["rotation"];
+        if (!scale.is_null()) {
+            model_matrix.Scale(math::vec3(float(scale)));
+        }
+        if (!rotation.is_null()) {
+            float rotation_x = math::Radians(float(rotation[0]));
+            float rotation_y = math::Radians(float(rotation[1]));
+            float rotation_z = math::Radians(float(rotation[2]));
+            model_matrix.Rotate(rotation_x, {1.0f, 0.0f, 0.0f});
+            model_matrix.Rotate(rotation_y, {0.0f, 1.0f, 0.0f});
+            model_matrix.Rotate(rotation_z, {0.0f, 0.0f, 1.0f});
+        }
+        m_transform = model_matrix;
+    }
 
     importer.SetIOHandler(new CustomAssimpIOSystem());
 
@@ -154,6 +225,7 @@ Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
     std::vector<std::pair<Texture2D*, TextureType>> textures;
 
     // Process vertices
+    vertices.reserve(mesh->mNumVertices);
     for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
         Vertex vertex;
         math::vec3 vector;
@@ -183,50 +255,85 @@ Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
     }
 
     // Process indices
+    indices.reserve(mesh->mNumFaces * 3);
     for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
-        aiFace face = mesh->mFaces[i];
-        for (unsigned int j = 0; j < face.mNumIndices; j++) {
-            indices.push_back(static_cast<uint32>(face.mIndices[j]));
-        }
+        const aiFace& face = mesh->mFaces[i];
+        if (face.mNumIndices != 3) continue;
+        indices.push_back(face.mIndices[0]);
+        indices.push_back(face.mIndices[1]);
+        indices.push_back(face.mIndices[2]);
     }
 
     // Process material
     aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
     std::array<aiTextureType, 2> enabled_texture_types = {
-        {aiTextureType_DIFFUSE, aiTextureType_SPECULAR},
+        {
+            aiTextureType_DIFFUSE,
+            aiTextureType_SPECULAR,
+        },
     };
 
-    TextureManager& texture_manager = TextureManager::GetInstance();
     FileSystem& fs = FileSystem::GetInstance();
-    for (aiTextureType type : enabled_texture_types) {
-        unsigned int texture_count = material->GetTextureCount(type);
-        for (unsigned int i = 0; i < texture_count; i++) {
-            aiString str;
-            material->GetTexture(type, i, &str);
 
-            String name = fs.Join(m_relative_directory, str.C_Str());
+    std::vector<std::pair<TextureType, String>> texture_filenames;
 
-            Texture2D* texture = texture_manager.LoadFromFile(name);
-            TextureType texture_type = TextureType::eNone;
-
-            switch (type) {
-                case aiTextureType_DIFFUSE:
-                    texture_type = TextureType::eDiffuse;
-                    break;
-                case aiTextureType_SPECULAR:
-                    texture_type = TextureType::eSpecular;
-                    break;
-                case aiTextureType_NORMALS:
-                    texture_type = TextureType::eNormals;
-                    break;
-                default:
-                    texture_type = TextureType::eUnknown;
-                    break;
+    auto load_textures_from_material = [&texture_filenames, &fs,
+                                        this](const json& json_material) {
+        const json& json_textures = json_material["textures"];
+        for (const json& json_texture : json_textures) {
+            const json& type = json_texture["type"];
+            const json& name = json_texture["name"];
+            if (type.is_string() && name.is_string()) {
+                texture_filenames.emplace_back(
+                    GetTextureTypeFromString(type),
+                    fs.Join(m_relative_directory, name));
             }
-
-            textures.push_back(std::make_pair(texture, texture_type));
         }
+    };
+
+    const json& json_materials = m_descriptor["materials"];
+    size_t materials_count = json_materials.size();
+    if (!m_descriptor.is_null() && !json_materials.is_null()) {
+        int32 material_id = -1;
+
+        for (const json& json_mesh : m_descriptor["meshes"]) {
+            const json& name = json_mesh["name"];
+            if (name.is_string() && name == mesh->mName.C_Str()) {
+                material_id = json_mesh["material_id"];
+                break;
+            }
+        }
+
+        if (materials_count == 1 && material_id < 0) {
+            load_textures_from_material(json_materials[0]);
+        } else {
+            for (const json& json_material : json_materials) {
+                if (json_material["id"] == material_id) {
+                    load_textures_from_material(json_material);
+                }
+            }
+        }
+    } else {
+        for (aiTextureType type : enabled_texture_types) {
+            unsigned int texture_count = material->GetTextureCount(type);
+            for (unsigned int i = 0; i < texture_count; i++) {
+                aiString str;
+                material->GetTexture(type, i, &str);
+
+                texture_filenames.emplace_back(
+                    std::make_pair(GetTextureTypeFromAiTextureType(type),
+                                   fs.Join(m_relative_directory, str.C_Str())));
+            }
+        }
+    }
+
+    TextureManager& texture_manager = TextureManager::GetInstance();
+    for (auto& pair : texture_filenames) {
+        TextureType type = pair.first;
+        const String& filename = pair.second;
+        Texture2D* texture = texture_manager.LoadFromFile(filename);
+        textures.push_back(std::make_pair(texture, type));
     }
 
     RendererFactory& factory = Main::GetInstance().GetActiveRendererFactory();

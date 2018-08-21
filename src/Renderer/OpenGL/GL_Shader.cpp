@@ -10,8 +10,23 @@ namespace {
 const String sTag("GL_Shader");
 
 const std::array<GLenum, 3> sGlShaderTypes = {{
-    GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_GEOMETRY_SHADER,
+    GL_VERTEX_SHADER,
+    GL_FRAGMENT_SHADER,
+    GL_GEOMETRY_SHADER,
 }};
+
+#ifdef OPENGL_USE_GL
+const String sShaderVersion("#version 450 core");
+#else
+const String sShaderVersion("#version 320 es");
+const String sFragmentPrecision("precision highp float;");
+#endif
+
+std::vector<const char*> sRequiredExtensions = {
+#ifdef OPENGL_USE_GL
+    {"GL_ARB_separate_shader_objects", "GL_ARB_shading_language_420pack"}
+#endif
+};
 
 }  // namespace
 
@@ -37,13 +52,7 @@ GL_Shader::~GL_Shader() {
 }
 
 GL_Shader& GL_Shader::operator=(GL_Shader&& other) {
-    m_program = other.m_program;
-    m_shaders = std::move(other.m_shaders);
-    m_uniforms = std::move(other.m_uniforms);
-    other.m_program = 0;
-    for (size_t i = 0; i < other.m_shaders.size(); i++) {
-        other.m_shaders[i] = 0;
-    }
+    new (this) GL_Shader(std::move(other));
     return *this;
 }
 
@@ -53,7 +62,21 @@ bool GL_Shader::LoadFromMemory(const byte* source, std::size_t source_size,
         return false;
     }
 
-    GLuint shader = Compile(source, source_size, type);
+    String source_complete = sShaderVersion + '\n';
+#ifdef OPENGL_USE_GLES
+    if (type == ShaderType::Fragment) {
+        source_complete += sFragmentPrecision + '\n';
+    }
+#endif
+    for (auto& extension : sRequiredExtensions) {
+        source_complete += String("#extension ") + extension + " : enable\n";
+    }
+    source_complete +=
+        String::FromUtf8(reinterpret_cast<const char8*>(source),
+                         reinterpret_cast<const char8*>(source) + source_size);
+
+    GLuint shader =
+        Compile(source_complete.GetData(), source_complete.GetSize(), type);
     if (!shader) {
         return false;
     }
@@ -112,7 +135,7 @@ void GL_Shader::Use() {
     }
 }
 
-void GL_Shader::SetUniformBufferObject(const UniformBufferObject& ubo) {
+void GL_Shader::UpdateUniformBuffer() {
     GLuint binding_point = 0;
     GLuint block_index =
         glGetUniformBlockIndex(m_program, "UniformBufferObject");
@@ -125,7 +148,7 @@ void GL_Shader::SetUniformBufferObject(const UniformBufferObject& ubo) {
     GL_CALL(glGenBuffers(1, &m_uniform_buffer));
     GL_CALL(glBindBuffer(GL_UNIFORM_BUFFER, m_uniform_buffer));
 
-    GL_CALL(glBufferData(GL_UNIFORM_BUFFER, sizeof(UniformBufferObject), &ubo,
+    GL_CALL(glBufferData(GL_UNIFORM_BUFFER, m_ubo.GetDataSize(), m_ubo.GetData(),
                          GL_DYNAMIC_DRAW));
     GL_CALL(
         glBindBufferBase(GL_UNIFORM_BUFFER, binding_point, m_uniform_buffer));
@@ -178,6 +201,15 @@ void GL_Shader::SetUniform(const String& name, const math::vec3& val) {
 void GL_Shader::SetUniform(const String& name, const math::vec2& val) {
     GLint location = GetUniformLocation(name);
     if (location != -1) GL_CALL(glUniform2f(location, val[0], val[1]));
+}
+
+const std::vector<const char*>& GL_Shader::GetRequiredExtensions() {
+    return sRequiredExtensions;
+}
+
+GLuint GL_Shader::Compile(const char8* source, size_t source_size,
+                          ShaderType type) {
+    return Compile(reinterpret_cast<const byte*>(source), source_size, type);
 }
 
 GLuint GL_Shader::Compile(const byte* source, size_t source_size,

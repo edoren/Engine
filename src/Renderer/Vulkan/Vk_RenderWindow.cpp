@@ -1,5 +1,5 @@
-#include <Graphics/3D/Camera.hpp>
 #include <Renderer/Drawable.hpp>
+#include <Renderer/RenderStates.hpp>
 #include <Renderer/UniformBufferObject.hpp>
 #include <Renderer/Vertex.hpp>
 #include <System/FileSystem.hpp>
@@ -22,10 +22,15 @@ const size_t sResourceCount(3);
 
 const uint32 sVertexBufferBindId(0);
 
-// TODO: JSON SHADER
-const uint32 sUBODescriptorSetBinding(0);
-
 const char* sShaderEntryPoint("main");
+
+// Vulkan clip space has inverted Y and half Z.
+const math::mat4 sClipMatrix = {
+    {1.0f, 0.0f, 0.0f, 0.0f},
+    {0.0f, -1.0f, 0.0f, 0.0f},
+    {0.0f, 0.0f, 0.5f, 0.0f},
+    {0.0f, 0.0f, 0.5f, 1.0f},
+};
 
 }  // namespace
 
@@ -38,9 +43,6 @@ Vk_RenderWindow::Vk_RenderWindow()
         m_graphics_pipeline(VK_NULL_HANDLE),
         m_pipeline_layout(VK_NULL_HANDLE),
         m_render_pass(VK_NULL_HANDLE),
-        m_ubo_descriptor_pool(VK_NULL_HANDLE),
-        m_ubo_descriptor_set_layout(VK_NULL_HANDLE),
-        m_ubo_descriptor_set(VK_NULL_HANDLE),
         m_render_resources(sResourceCount) {}
 
 Vk_RenderWindow::~Vk_RenderWindow() {
@@ -66,8 +68,8 @@ bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
     m_present_queue = m_graphics_queue;
 
     // Update the base class attributes
-    SDL_GetWindowSize(m_window, &m_size.x, &m_size.y);
     m_name = name;
+    OnWindowResized(m_size);  // This update m_size and the projection matrix
 
     if (!m_surface.Create(m_window)) {
         LogFatal(sTag, "Could not create the Surface");
@@ -78,31 +80,6 @@ bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
         LogError(sTag,
                  "Physical device {} doesn't include WSI "
                  "support"_format(physical_device.properties.deviceName));
-        return false;
-    }
-
-    if (!CreateUniformBuffer()) {
-        LogError(sTag, "Could not create the UBO buffer");
-        return false;
-    }
-
-    if (!CreateUBODescriptorSetLayout()) {
-        LogError(sTag, "Could not create the UBO descriptor set layout");
-        return false;
-    }
-
-    if (!CreateUBODescriptorPool()) {
-        LogError(sTag, "Could not create the UBO descriptor pool");
-        return false;
-    }
-
-    if (!AllocateUBODescriptorSet()) {
-        LogError(sTag, "Could not create the UBO descriptor set");
-        return false;
-    }
-
-    if (!UpdateUBODescriptorSet()) {
-        LogError(sTag, "Could not update the UBO descriptor set");
         return false;
     }
 
@@ -181,20 +158,6 @@ void Vk_RenderWindow::Destroy() {
 
         m_swapchain.Destroy();
     }
-
-    if (m_ubo_descriptor_set_layout) {
-        vkDestroyDescriptorSetLayout(device, m_ubo_descriptor_set_layout,
-                                     nullptr);
-        m_ubo_descriptor_set_layout = VK_NULL_HANDLE;
-    }
-
-    if (m_ubo_descriptor_pool) {
-        vkDestroyDescriptorPool(device, m_ubo_descriptor_pool, nullptr);
-        m_ubo_descriptor_pool = VK_NULL_HANDLE;
-        m_ubo_descriptor_set = VK_NULL_HANDLE;
-    }
-
-    m_uniform_buffer.Destroy();
 
     m_present_queue = nullptr;
     m_graphics_queue = nullptr;
@@ -357,62 +320,9 @@ bool Vk_RenderWindow::IsVisible() {
     return (mask & flags) == 0;
 }
 
-void Vk_RenderWindow::Draw(Drawable& drawable) {
-    Vk_Shader* shader = Vk_ShaderManager::GetInstance().GetActiveShader();
-
-    // Create all the MVP matrices as Identity matrices
-    math::mat4 model_matrix = math::mat4();
-    math::mat4 view_matrix = math::mat4();
-    math::mat4 projection_matrix = math::mat4();
-    math::vec3 front_vector;
-
-    // TMP: Move this to other part
-    math::vec3 light_position(3.0f, 3.0f, 3.0f);
-
-    // TODO: Set Model position
-    model_matrix *= math::Translate(math::vec3(0.0f, 0.0f, 0.0f));
-    // TODO: Normalize model sizes
-    model_matrix *= math::Scale(math::vec3(0.05f));
-
-    if (m_active_camera != nullptr) {
-        view_matrix = m_active_camera->GetViewMatrix();
-        front_vector = m_active_camera->GetFrontVector();
-    }
-
-    float fov = math::Radians(45.f);
-    float aspect_ratio = m_size.x / static_cast<float>(m_size.y);
-    float z_near = 0.1f;
-    float z_far = 100.0f;
-    projection_matrix = math::Perspective(fov, aspect_ratio, z_near, z_far);
-
-    // Vulkan clip space has inverted Y and half Z.
-    const math::mat4 clip(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-                          0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 0.5f, 1.0f);
-
-    if (shader != nullptr) {
-        math::mat4 mvp_matrix =
-            clip * projection_matrix * view_matrix * model_matrix;
-        math::mat4 normal_matrix = model_matrix.Inverse().Transpose();
-
-        UniformBufferObject ubo;
-        ubo.model = model_matrix;
-        ubo.normalMatrix = normal_matrix;
-        ubo.mvp = mvp_matrix;
-        ubo.cameraFront = front_vector;
-        ubo.lightPosition = light_position;
-        SetUniformBufferObject(ubo);
-    }
-
-    RenderWindow::Draw(drawable);  // This calls drawable.Draw(*this);
-}
-
-void Vk_RenderWindow::SetUniformBufferObject(const UniformBufferObject& ubo) {
-    UpdateUniformBuffer(ubo);
-}
-
 void Vk_RenderWindow::AddCommandExecution(
-    Function<void(VkCommandBuffer&)>&& func) {
-    m_command_queue.Push(std::move(func));
+    Function<void(VkCommandBuffer&, VkPipelineLayout&)>&& func) {
+    m_command_work_queue.Push(std::move(func));
 }
 
 void Vk_RenderWindow::SubmitGraphicsCommand(
@@ -475,6 +385,11 @@ void Vk_RenderWindow::SubmitGraphicsCommand(
     }
 
     vkQueueWaitIdle(context.GetGraphicsQueue().GetHandle());
+}
+
+void Vk_RenderWindow::UpdateProjectionMatrix() {
+    RenderWindow::UpdateProjectionMatrix();
+    m_projection = sClipMatrix * m_projection;
 }
 
 bool Vk_RenderWindow::CheckWSISupport() {
@@ -673,8 +588,8 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         return false;
     }
 
-    if (!shader->GetModule(ShaderType::eVertex) ||
-        !shader->GetModule(ShaderType::eFragment)) {
+    if (!shader->GetModule(ShaderType::VERTEX) ||
+        !shader->GetModule(ShaderType::FRAGMENT)) {
         LogError(sTag, "Coud not get Vertex and/or Fragment shader module");
         return false;
     }
@@ -736,7 +651,7 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
                 nullptr,                                              // pNext
                 VkPipelineShaderStageCreateFlags(),                   // flags
                 VK_SHADER_STAGE_VERTEX_BIT,                           // stage
-                shader->GetModule(ShaderType::eVertex),               // module
+                shader->GetModule(ShaderType::VERTEX),                // module
                 sShaderEntryPoint,                                    // pName
                 nullptr  // pSpecializationInfo
             },
@@ -746,7 +661,7 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
                 nullptr,                                              // pNext
                 VkPipelineShaderStageCreateFlags(),                   // flags
                 VK_SHADER_STAGE_FRAGMENT_BIT,                         // stage
-                shader->GetModule(ShaderType::eFragment),             // module
+                shader->GetModule(ShaderType::FRAGMENT),              // module
                 sShaderEntryPoint,                                    // pName
                 nullptr  // pSpecializationInfo
             },
@@ -756,8 +671,8 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,  // sType
         nullptr,                                                      // pNext
         VkPipelineInputAssemblyStateCreateFlags(),                    // flags
-        VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP,  // topology
-        VK_FALSE                               // primitiveRestartEnable
+        VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,  // topology
+        VK_FALSE                              // primitiveRestartEnable
     };
 
     VkPipelineViewportStateCreateInfo viewport_state_create_info = {
@@ -799,13 +714,13 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
     };
 
     VkPipelineColorBlendAttachmentState color_blend_attachment_state = {
-        VK_FALSE,              // blendEnable
-        VK_BLEND_FACTOR_ONE,   // srcColorBlendFactor
-        VK_BLEND_FACTOR_ZERO,  // dstColorBlendFactor
-        VK_BLEND_OP_ADD,       // colorBlendOp
-        VK_BLEND_FACTOR_ONE,   // srcAlphaBlendFactor
-        VK_BLEND_FACTOR_ZERO,  // dstAlphaBlendFactor
-        VK_BLEND_OP_ADD,       // alphaBlendOp
+        VK_FALSE,                             // blendEnable
+        VK_BLEND_FACTOR_SRC_ALPHA,            // srcColorBlendFactor
+        VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,  // dstColorBlendFactor
+        VK_BLEND_OP_ADD,                      // colorBlendOp
+        VK_BLEND_FACTOR_SRC_ALPHA,            // srcAlphaBlendFactor
+        VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,  // dstAlphaBlendFactor
+        VK_BLEND_OP_ADD,                      // alphaBlendOp
         (VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
          VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT)  // colorWriteMask
     };
@@ -853,9 +768,10 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
 
     // Create the PipelineLayout
 
-    std::array<VkDescriptorSetLayout, 2> descriptor_set_layouts = {
-        {m_ubo_descriptor_set_layout,
-         texture_manager.GetDescriptorSetLayout()}};
+    std::array<VkDescriptorSetLayout, 2> descriptor_set_layouts = {{
+        shader->GetUBODescriptorSetLayout(),
+        texture_manager.GetDescriptorSetLayout(),
+    }};
 
     VkPipelineLayoutCreateInfo layout_create_info = {
         VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,         // sType
@@ -1068,22 +984,10 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer,
     vkCmdSetViewport(command_buffer, 0, 1, &viewport);
     vkCmdSetScissor(command_buffer, 0, 1, &scissor);
 
-    std::vector<VkDescriptorSet> descriptor_sets = {m_ubo_descriptor_set};
+    while (m_command_work_queue.GetSize() > 0) {
+        auto task = m_command_work_queue.Pop();
 
-    Vk_TextureManager& texture_manager = Vk_TextureManager::GetInstance();
-    Vk_Texture2D* current_texture = texture_manager.GetActiveTexture2D();
-    if (current_texture) {
-        descriptor_sets.push_back(current_texture->GetDescriptorSet());
-    }
-
-    vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                            m_pipeline_layout, 0,
-                            static_cast<uint32>(descriptor_sets.size()),
-                            descriptor_sets.data(), 0, nullptr);
-
-    while (m_command_queue.GetSize() > 0) {
-        auto task = m_command_queue.Pop();
-        task(command_buffer);
+        task(command_buffer, m_pipeline_layout);
     }
 
     vkCmdEndRenderPass(command_buffer);
@@ -1148,20 +1052,18 @@ bool Vk_RenderWindow::CreateDepthResources() {
         return VK_FORMAT_UNDEFINED;
     };
 
-    auto lFindDepthFormat = [&lFindSupportedFormat]() -> VkFormat {
-        return lFindSupportedFormat(
-            {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT,
-             VK_FORMAT_D24_UNORM_S8_UINT},
-            VK_IMAGE_TILING_OPTIMAL,
-            VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
-    };
-
-    m_depth_format = lFindDepthFormat();
+    m_depth_format = lFindSupportedFormat(
+        {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT,
+         VK_FORMAT_D24_UNORM_S8_UINT},
+        VK_IMAGE_TILING_OPTIMAL,
+        VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 
     if (m_depth_format == VK_FORMAT_UNDEFINED) {
         LogError(sTag, "Supported Depth format not found");
         return false;
     }
+
+    m_depth_image.Destroy();
 
     if (!m_depth_image.CreateImage(
             math::uvec2(m_size), m_depth_format, VK_IMAGE_TILING_OPTIMAL,
@@ -1220,11 +1122,19 @@ bool Vk_RenderWindow::CreateDepthResources() {
 }
 
 void Vk_RenderWindow::OnWindowResized(const math::ivec2& size) {
-    // Update the base class attributes
-    m_size = size;
+    ENGINE_UNUSED(size);
 
-    // Recreate the Vulkan Swapchain
-    m_swapchain.Create(m_surface, m_size.x, m_size.y);
+    // Get the new window size from the active window
+    SDL_GetWindowSize(m_window, &m_size.x, &m_size.y);
+    // Update the base class
+    RenderWindow::OnWindowResized(m_size);
+
+    if (m_surface.GetHandle() != VK_NULL_HANDLE) {
+        // Recreate the depth image
+        CreateDepthResources();
+        // Recreate the Vulkan Swapchain
+        m_swapchain.Create(m_surface, m_size.x, m_size.y);
+    }
 }
 
 void Vk_RenderWindow::OnAppWillEnterBackground() {
@@ -1262,141 +1172,6 @@ void Vk_RenderWindow::OnAppDidEnterForeground() {
             return;
         }
     }
-}
-
-bool Vk_RenderWindow::CreateUniformBuffer() {
-    return m_uniform_buffer.Create(sizeof(UniformBufferObject),
-                                   VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                                   (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                                    VK_MEMORY_PROPERTY_HOST_COHERENT_BIT));
-}
-
-bool Vk_RenderWindow::UpdateUniformBuffer(const UniformBufferObject& ubo) {
-    if (m_uniform_buffer.GetHandle() == VK_NULL_HANDLE) return false;
-    Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
-    void* data;
-    vkMapMemory(device, m_uniform_buffer.GetMemory(), 0, sizeof(ubo), 0, &data);
-    std::memcpy(data, &ubo, sizeof(ubo));
-    vkUnmapMemory(device, m_uniform_buffer.GetMemory());
-    return true;
-}
-
-bool Vk_RenderWindow::CreateUBODescriptorPool() {
-    Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
-
-    VkResult result = VK_SUCCESS;
-
-    uint32 sMaxUBODescriptorSets = 1;
-
-    VkDescriptorPoolSize pool_size = {
-        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,  // type
-        sMaxUBODescriptorSets               // descriptorCount
-    };
-
-    VkDescriptorPoolCreateInfo descriptor_pool_create_info = {
-        VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,  // sType
-        nullptr,                                        // pNext
-        0,                                              // flags
-        sMaxUBODescriptorSets,                          // maxSets
-        1,                                              // poolSizeCount
-        &pool_size                                      // pPoolSizes
-    };
-
-    result = vkCreateDescriptorPool(device, &descriptor_pool_create_info,
-                                    nullptr, &m_ubo_descriptor_pool);
-    if (result != VK_SUCCESS) {
-        LogError(sTag, "Could not create descriptor pool");
-        return false;
-    }
-
-    return true;
-}
-
-bool Vk_RenderWindow::CreateUBODescriptorSetLayout() {
-    Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
-
-    VkResult result = VK_SUCCESS;
-
-    VkDescriptorSetLayoutBinding layout_binding = {
-        sUBODescriptorSetBinding,           // binding
-        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,  // descriptorType
-        1,                                  // descriptorCount
-        VK_SHADER_STAGE_VERTEX_BIT,         // stageFlags
-        nullptr                             // pImmutableSamplers
-    };
-
-    VkDescriptorSetLayoutCreateInfo descriptor_set_layout_create_info = {
-        VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,  // sType
-        nullptr,                                              // pNext
-        0,                                                    // flags
-        1,                                                    // bindingCount
-        &layout_binding                                       // pBindings
-    };
-
-    result =
-        vkCreateDescriptorSetLayout(device, &descriptor_set_layout_create_info,
-                                    nullptr, &m_ubo_descriptor_set_layout);
-    if (result != VK_SUCCESS) {
-        LogError(sTag, "Could not create descriptor set layout");
-        return false;
-    }
-
-    return true;
-}
-
-bool Vk_RenderWindow::AllocateUBODescriptorSet() {
-    Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
-
-    VkResult result = VK_SUCCESS;
-
-    VkDescriptorSetAllocateInfo descriptor_set_allocate_info = {
-        VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,  // sType
-        nullptr,                                         // pNext
-        m_ubo_descriptor_pool,                           // descriptorPool
-        1,                                               // descriptorSetCount
-        &m_ubo_descriptor_set_layout                     // pSetLayouts
-    };
-
-    result = vkAllocateDescriptorSets(device, &descriptor_set_allocate_info,
-                                      &m_ubo_descriptor_set);
-    if (result != VK_SUCCESS) {
-        LogError(sTag, "Could not allocate descriptor set");
-        return false;
-    }
-
-    return true;
-}
-
-bool Vk_RenderWindow::UpdateUBODescriptorSet() {
-    Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
-
-    VkDescriptorBufferInfo bufferInfo = {
-        m_uniform_buffer.GetHandle(),  // buffer
-        0,                             // offset
-        sizeof(UniformBufferObject)    // range
-    };
-
-    VkWriteDescriptorSet descriptor_writes = {
-        VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,  // sType
-        nullptr,                                 // pNext
-        m_ubo_descriptor_set,                    // dstSet
-        0,                                       // dstBinding
-        0,                                       // dstArrayElement
-        1,                                       // descriptorCount
-        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,       // descriptorType
-        nullptr,                                 // pImageInfo
-        &bufferInfo,                             // pBufferInfo
-        nullptr                                  // pTexelBufferView
-    };
-
-    vkUpdateDescriptorSets(device, 1, &descriptor_writes, 0, nullptr);
-
-    return true;
 }
 
 }  // namespace engine

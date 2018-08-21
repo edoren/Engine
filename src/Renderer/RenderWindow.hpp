@@ -3,6 +3,7 @@
 #include <Util/Prerequisites.hpp>
 
 #include <Graphics/Color.hpp>
+#include <Renderer/RenderStates.hpp>
 #include <System/SignalConnection.hpp>
 #include <System/String.hpp>
 
@@ -10,7 +11,7 @@ namespace engine {
 
 class Camera;
 class Drawable;
-struct UniformBufferObject;
+class Mesh;
 
 class ENGINE_API RenderWindow {
 public:
@@ -39,13 +40,12 @@ public:
     virtual bool IsVisible() = 0;
 
     // RenderTarget
-    virtual void Draw(Drawable& drawable);
-
-    // RenderTarget?
-    virtual void SetUniformBufferObject(const UniformBufferObject& ubo);
+    virtual void Draw(const Drawable& drawable);
+    virtual void Draw(const Mesh& mesh, const RenderStates& states);
 
     // RenderTarget
     void SetActiveCamera(const Camera* camera);
+    const Camera* GetActiveCamera() const;
 
     // RenderTarget?
     void AdvanceFrame(bool minimized);
@@ -58,7 +58,12 @@ public:
 
     bool IsFullScreen() const;
 
-private:
+    const math::mat4& GetProjectionMatrix() const;
+
+protected:
+    // RenderTarget
+    virtual void UpdateProjectionMatrix();
+
     virtual void OnWindowResized(const math::ivec2& size);
 
     virtual void OnAppWillEnterBackground();
@@ -68,9 +73,11 @@ private:
 
 protected:
     String m_name;
-    math::ivec2 m_size;
+    math::ivec2 m_size;  // If updated UpdateProjectionMatrix should be called
     bool m_is_fullscreen;
     bool m_is_vsync_enable;
+
+    math::mat4 m_projection;  // RenderTarget
 
     const Camera* m_active_camera;
 

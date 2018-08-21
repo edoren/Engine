@@ -23,6 +23,8 @@ public:
 
     bool AllocateMemory(const VkMemoryPropertyFlags& memory_properties);
 
+    void Destroy();
+
     VkImage& GetHandle();
 
     VkImageView& GetView();

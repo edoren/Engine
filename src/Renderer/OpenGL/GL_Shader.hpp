@@ -27,7 +27,7 @@ public:
 
     void Use();
 
-    void SetUniformBufferObject(const UniformBufferObject& ubo);
+    void UpdateUniformBuffer();
 
     void SetUniform(const String& name, float val);
     void SetUniform(const String& name, int32 val);
@@ -39,7 +39,11 @@ public:
     void SetUniform(const String& name, const math::vec3& val);
     void SetUniform(const String& name, const math::vec2& val);
 
+    static const std::vector<const char*>& GetRequiredExtensions();
+
 private:
+    GLuint Compile(const char8* source, std::size_t source_size,
+                   ShaderType type);
     GLuint Compile(const byte* source, std::size_t source_size,
                    ShaderType type);
 

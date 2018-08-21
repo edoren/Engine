@@ -4,8 +4,8 @@
 #include <Renderer/Shader.hpp>
 #include <System/String.hpp>
 
-#include "Vk_Config.hpp"
 #include "Vk_Buffer.hpp"
+#include "Vk_Config.hpp"
 #include "Vk_Dependencies.hpp"
 
 namespace engine {
@@ -23,12 +23,28 @@ public:
 
     VkShaderModule& GetModule(ShaderType type);
 
-    VkShaderStageFlagBits GetShaderType();
+    VkDescriptorSet& GetUBODescriptorSet();
+
+    VkDescriptorSetLayout& GetUBODescriptorSetLayout();
+
+    bool UpdateUniformBuffer();
+
+protected:
+    void SetDescriptor(json&& descriptor) override;
 
 private:
+    bool CreateUBODescriptorSetLayout();
+    bool AllocateUBODescriptorSet();
+    bool UpdateUBODescriptorSet();
+
+    bool CreateUniformBuffer();
+
     std::array<VkShaderModule, sShaderTypeCount> m_modules;
 
     Vk_Buffer m_uniform_buffer;
+
+    VkDescriptorSetLayout m_ubo_descriptor_set_layout;
+    VkDescriptorSet m_ubo_descriptor_set;
 };
 
 }  // namespace engine
