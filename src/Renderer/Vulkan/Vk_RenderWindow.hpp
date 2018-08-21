@@ -13,10 +13,10 @@
 #include "Vk_Config.hpp"
 #include "Vk_Context.hpp"
 #include "Vk_Dependencies.hpp"
+#include "Vk_Image.hpp"
 #include "Vk_Surface.hpp"
 #include "Vk_SwapChain.hpp"
 #include "Vk_VulkanParameters.hpp"
-#include "Vk_Image.hpp"
 
 namespace engine {
 
@@ -63,16 +63,13 @@ public:
 
     bool IsVisible() override;
 
-    void Draw(Drawable& drawable) override;  // RenderTarget
-
-    void SetUniformBufferObject(const UniformBufferObject& ubo) override;
-
-    void SetBuffers(const Vk_Buffer* vertex_buffer,
-                    const Vk_Buffer* index_buffer);
-
-    void AddCommandExecution(Function<void(VkCommandBuffer&)>&& func);
+    void AddCommandExecution(
+        Function<void(VkCommandBuffer&, VkPipelineLayout&)>&& func);
 
     void SubmitGraphicsCommand(Function<void(VkCommandBuffer&)>&& func);
+
+protected:
+    void UpdateProjectionMatrix() override;
 
 private:
     bool CheckWSISupport();
@@ -88,19 +85,10 @@ private:
 
     bool CreateVulkanFrameBuffer(VkFramebuffer& framebuffer,
                                  VkImageView& image_view);
-    bool PrepareFrame(VkCommandBuffer command_buffer,
-                      Vk_Image& image,
+    bool PrepareFrame(VkCommandBuffer command_buffer, Vk_Image& image,
                       VkFramebuffer& framebuffer);
 
     bool CreateDepthResources();
-
-    bool CreateUniformBuffer();
-    bool UpdateUniformBuffer(const UniformBufferObject& ubo);
-
-    bool CreateUBODescriptorPool();
-    bool CreateUBODescriptorSetLayout();
-    bool AllocateUBODescriptorSet();
-    bool UpdateUBODescriptorSet();
 
     virtual void OnWindowResized(const math::ivec2& size) override;
 
@@ -124,15 +112,11 @@ private:
 
     VkRenderPass m_render_pass;
 
-    SafeQueue<Function<void(VkCommandBuffer&)>> m_command_queue;
+    SafeQueue<Function<void(VkCommandBuffer&, VkPipelineLayout&)>>
+        m_command_work_queue;
 
     Vk_Image m_depth_image;
     VkFormat m_depth_format;
-
-    Vk_Buffer m_uniform_buffer;
-    VkDescriptorPool m_ubo_descriptor_pool;
-    VkDescriptorSetLayout m_ubo_descriptor_set_layout;
-    VkDescriptorSet m_ubo_descriptor_set;
 
     std::vector<RenderingResourcesData> m_render_resources;
 };

@@ -17,7 +17,7 @@ public:
         std::vector<Vertex> vertices, std::vector<uint32> indices,
         std::vector<std::pair<Texture2D*, TextureType>> textures) override;
 
-    void Draw(RenderWindow& target) const override;
+    void Draw(RenderWindow& target, const RenderStates& states) const override;
 
 private:
     void SetupMesh();

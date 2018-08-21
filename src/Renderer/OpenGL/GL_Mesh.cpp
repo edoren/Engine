@@ -1,9 +1,11 @@
 #include "GL_Mesh.hpp"
 
+#include <Graphics/3D/Camera.hpp>
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
 
 #include "GL_Dependencies.hpp"
+#include "GL_RenderWindow.hpp"
 #include "GL_Shader.hpp"
 #include "GL_ShaderManager.hpp"
 #include "GL_Texture2D.hpp"
@@ -78,38 +80,75 @@ void GL_Mesh::SetupMesh() {
     GL_CALL(glBindVertexArray(0));
 }
 
-void GL_Mesh::Draw(RenderWindow& target) const {
-    ENGINE_UNUSED(target);
+void GL_Mesh::Draw(RenderWindow& target, const RenderStates& states) const {
+    ENGINE_UNUSED(states);
 
+    GL_RenderWindow& window = static_cast<GL_RenderWindow&>(target);
     GL_Shader* shader = GL_ShaderManager::GetInstance().GetActiveShader();
 
     uint32 diffuse_num = 1;
     uint32 specular_num = 1;
     for (size_t i = 0; i < m_textures.size(); i++) {
-        GL_CALL(glActiveTexture(static_cast<GLenum>(GL_TEXTURE0 + i)));
+        auto& pair = m_textures[i];
+        GL_Texture2D* current_texture = static_cast<GL_Texture2D*>(pair.first);
+        TextureType current_texture_type = pair.second;
 
-        String uniform_name = "";
-        switch (m_textures[i].second) {
-            case TextureType::eDiffuse:
-                uniform_name += "tex_diffuse" + String::FromValue(diffuse_num++);
+        String uniform_name;
+        switch (current_texture_type) {
+            case TextureType::DIFFUSE:
+                uniform_name +=
+                    "tex_diffuse" + String::FromValue(diffuse_num++);
                 break;
-            case TextureType::eSpecular:
-                uniform_name += "tex_specular" + String::FromValue(specular_num++);
+            case TextureType::SPECULAR:
+                uniform_name +=
+                    "tex_specular" + String::FromValue(specular_num++);
                 break;
             default:
-                break;
+                continue;
         }
+
+        GL_CALL(glActiveTexture(static_cast<GLenum>(GL_TEXTURE0 + i)));
 
         if (shader != nullptr) {
             shader->SetUniform(uniform_name, static_cast<GLint>(i));
         }
 
-        GL_Texture2D* curr_texture =
-            reinterpret_cast<GL_Texture2D*>(m_textures[i].first);
-        if (curr_texture) {
-            curr_texture->Use();
+        if (current_texture) {
+            current_texture->Use();
         }
     }
+
+    if (shader) {
+        const Camera* active_camera = window.GetActiveCamera();
+
+        // const math::mat4& model_matrix = m_transform.GetMatrix();
+        const math::mat4 model_matrix = math::mat4();
+
+        math::mat4 view_matrix = (active_camera != nullptr)
+                                     ? active_camera->GetViewMatrix()
+                                     : math::mat4();
+        const math::mat4& projection_matrix = window.GetProjectionMatrix();
+
+        math::mat4 mvp_matrix = projection_matrix * view_matrix * model_matrix;
+        math::mat4 normal_matrix = model_matrix.Inverse().Transpose();
+
+        math::vec3 front_vector;
+        math::vec3 light_position;  // TMP: Get this from other
+                                    //      part a LightManager maybe?
+        if (active_camera != nullptr) {
+            front_vector = active_camera->GetFrontVector();
+            light_position = active_camera->GetPosition();
+        }
+
+        UniformBufferObject& ubo = shader->GetUBO();
+        ubo.SetAttributeValue("model", model_matrix);
+        ubo.SetAttributeValue("normalMatrix", normal_matrix);
+        ubo.SetAttributeValue("mvp", mvp_matrix);
+        ubo.SetAttributeValue("cameraFront", front_vector);
+        ubo.SetAttributeValue("lightPosition", light_position);
+        shader->UpdateUniformBuffer();
+    }
+
     GL_CALL(glActiveTexture(GL_TEXTURE0));
 
     GL_CALL(glBindVertexArray(m_VAO));

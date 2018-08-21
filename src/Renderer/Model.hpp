@@ -4,6 +4,8 @@
 
 #include <Renderer/Drawable.hpp>
 #include <Renderer/Mesh.hpp>
+#include <Renderer/Transform.hpp>
+#include <System/JSON.hpp>
 #include <System/String.hpp>
 
 struct aiMaterial;
@@ -19,7 +21,7 @@ class ENGINE_API Model : public Drawable {
 public:
     Model(const String& path);
 
-    ~Model();
+    virtual ~Model();
 
 protected:
     void Draw(RenderWindow& target) const override;
@@ -34,7 +36,9 @@ private:
     std::vector<Mesh*> m_meshes;
     String m_relative_directory;
 
-    math::mat4 m_model_matrix;
+    Transform m_transform;
+
+    json m_descriptor;
 };
 
 }  // namespace engine

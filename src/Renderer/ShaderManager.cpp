@@ -11,6 +11,14 @@ const String sTag("ShaderManager");
 
 const String sRootShaderFolder("shaders");
 
+const String sShaderDescriptorFolder("descriptor");
+
+const std::array<ShaderType, 3> sAvailableShaderTypes = {{
+    ShaderType::VERTEX,
+    ShaderType::FRAGMENT,
+    ShaderType::GEOMETRY,
+}};
+
 }  // namespace
 
 template <>
@@ -33,43 +41,43 @@ ShaderManager::~ShaderManager() {
 }
 
 Shader* ShaderManager::LoadFromFile(const String& basename) {
-    if (GetShader(basename) != nullptr) {
-        LogError(sTag, "Shader '{}' already loaded");
-        return nullptr;
+    Shader* new_shader = GetShader(basename);
+    if (new_shader != nullptr) {
+        return new_shader;
     }
 
-    Shader* new_shader = CreateShader();
+    new_shader = CreateShader();
 
     FileSystem& fs = FileSystem::GetInstance();
 
-    String folder = fs.Join(sRootShaderFolder, GetShaderFolder());
+    String shader_folder = fs.Join(sRootShaderFolder, GetShaderFolder());
+    String shader_descriptor_folder =
+        fs.Join(sRootShaderFolder, sShaderDescriptorFolder);
 
-    auto shader_types = {ShaderType::eVertex, ShaderType::eFragment,
-                         ShaderType::eGeometry};
-    for (auto shader_type : shader_types) {
+    for (auto shader_type : sAvailableShaderTypes) {
         bool ok = true;
 
         const char* shader_extension = "";
         switch (shader_type) {
-            case ShaderType::eVertex:
+            case ShaderType::VERTEX:
                 shader_extension = ".vert";
                 break;
-            case ShaderType::eFragment:
+            case ShaderType::FRAGMENT:
                 shader_extension = ".frag";
                 break;
-            case ShaderType::eGeometry:
+            case ShaderType::GEOMETRY:
                 shader_extension = ".geom";
                 break;
         }
 
-        String filename = fs.Join(folder, basename + shader_extension);
+        String filename = fs.Join(shader_folder, basename + shader_extension);
 
         bool filename_exist = fs.FileExists(filename);
 
         // Vertex and Fragment shaders are completly required
-        if (!filename_exist && (shader_type == ShaderType::eVertex ||
-                                shader_type == ShaderType::eFragment)) {
-            LogDebug(sTag, "Could not find file: {}"_format(filename.ToUtf8()));
+        if (!filename_exist && (shader_type == ShaderType::VERTEX ||
+                                shader_type == ShaderType::FRAGMENT)) {
+            LogError(sTag, "Could not find file: {}"_format(filename));
             ok = false;
         }
 
@@ -78,8 +86,7 @@ Shader* ShaderManager::LoadFromFile(const String& basename) {
             fs.LoadFileData(filename, &filename_data);
             if (!new_shader->LoadFromMemory(
                     filename_data.data(), filename_data.size(), shader_type)) {
-                LogDebug(sTag,
-                         "Could not load shader: {}"_format(basename.ToUtf8()));
+                LogError(sTag, "Could not load shader: {}"_format(basename));
                 ok = false;
             }
         }
@@ -88,6 +95,19 @@ Shader* ShaderManager::LoadFromFile(const String& basename) {
             DeleteShader(new_shader);
             return nullptr;
         }
+    }
+
+    String filename = fs.Join(shader_descriptor_folder, basename + ".json");
+    std::vector<byte> json_data;
+    fs.LoadFileData(filename, &json_data);
+    bool is_valid_descriptor = json::accept(json_data.begin(), json_data.end());
+    if (is_valid_descriptor) {
+        json j = json::parse(json_data.begin(), json_data.end());
+        new_shader->SetDescriptor(std::move(j));
+    } else {
+        LogError(sTag, "Could not load shader descriptor: {}"_format(basename));
+        DeleteShader(new_shader);
+        return nullptr;
     }
 
     if (new_shader != nullptr) {
@@ -109,8 +129,8 @@ Shader* ShaderManager::LoadFromMemory(
     }
 
     // Vertex and Fragment shaders are completly required
-    auto it_vertex = shader_data.find(ShaderType::eVertex);
-    auto it_fragment = shader_data.find(ShaderType::eFragment);
+    auto it_vertex = shader_data.find(ShaderType::VERTEX);
+    auto it_fragment = shader_data.find(ShaderType::FRAGMENT);
     if (it_vertex == shader_data.end() || it_fragment == shader_data.end()) {
         LogDebug(sTag, "Vertex or Fragment shader not provided");
         return nullptr;
@@ -154,8 +174,7 @@ void ShaderManager::SetActiveShader(const String& name) {
         m_active_shader = found_shader;
         UseShader(m_active_shader);
     } else {
-        LogError(sTag,
-                 "Could not find a Shader named: {}"_format(name.ToUtf8()));
+        LogError(sTag, "Could not find a Shader named: {}"_format(name));
     }
 }
 

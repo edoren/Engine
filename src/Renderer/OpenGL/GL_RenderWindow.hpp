@@ -26,13 +26,14 @@ public:
 
     void SetVSyncEnabled(bool vsync) override;
 
-    void SwapBuffers() override;  // RenderTarget
+    void SwapBuffers() override;
 
     void Clear(const Color& color) override;  // Render Target
 
     bool IsVisible() override;
 
-    void Draw(Drawable& drawable) override;  // RenderTarget
+protected:
+    virtual void OnWindowResized(const math::ivec2& size) override;
 
 private:
     SDL_Window* m_window;

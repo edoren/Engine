@@ -30,26 +30,7 @@ Vk_Image::Vk_Image(Vk_Image&& other)
 }
 
 Vk_Image::~Vk_Image() {
-    Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
-    QueueParameters& graphics_queue = context.GetGraphicsQueue();
-
-    vkQueueWaitIdle(graphics_queue.handle);
-
-    if (m_view != VK_NULL_HANDLE) {
-        vkDestroyImageView(device, m_view, nullptr);
-        m_view = VK_NULL_HANDLE;
-    }
-
-    if (m_handle != VK_NULL_HANDLE) {
-        vkDestroyImage(device, m_handle, nullptr);
-        m_handle = VK_NULL_HANDLE;
-    }
-
-    if (m_memory != VK_NULL_HANDLE) {
-        vkFreeMemory(device, m_memory, nullptr);
-        m_memory = VK_NULL_HANDLE;
-    }
+    Destroy();
 }
 
 bool Vk_Image::CreateImage(const math::uvec2& size, VkFormat format,
@@ -136,6 +117,32 @@ bool Vk_Image::AllocateMemory(const VkMemoryPropertyFlags& memory_properties) {
     }
 
     return true;
+}
+
+void Vk_Image::Destroy() {
+    Vk_Context& context = Vk_Context::GetInstance();
+    VkDevice& device = context.GetVulkanDevice();
+
+    if (m_view != VK_NULL_HANDLE || m_handle != VK_NULL_HANDLE ||
+        m_memory != VK_NULL_HANDLE) {
+        QueueParameters& graphics_queue = context.GetGraphicsQueue();
+        vkQueueWaitIdle(graphics_queue.handle);
+
+        if (m_view != VK_NULL_HANDLE) {
+            vkDestroyImageView(device, m_view, nullptr);
+            m_view = VK_NULL_HANDLE;
+        }
+
+        if (m_handle != VK_NULL_HANDLE) {
+            vkDestroyImage(device, m_handle, nullptr);
+            m_handle = VK_NULL_HANDLE;
+        }
+
+        if (m_memory != VK_NULL_HANDLE) {
+            vkFreeMemory(device, m_memory, nullptr);
+            m_memory = VK_NULL_HANDLE;
+        }
+    }
 }
 
 VkImage& Vk_Image::GetHandle() {

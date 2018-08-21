@@ -27,6 +27,8 @@ public:
 
     VkCommandPool& GetGraphicsQueueCmdPool();
 
+    VkDescriptorPool& GetUBODescriptorPool();
+
     ////////////////////////////////////////////////////////////
     /// @brief Override standard Singleton retrieval.
     ///
@@ -75,6 +77,8 @@ private:
     bool CreateVulkanCommandPool(QueueParameters& queue,
                                  VkCommandPool* cmd_pool);
 
+    bool CreateUBODescriptorPool();
+
 private:
     VkInstance m_instance;
     VkDevice m_device;
@@ -83,6 +87,8 @@ private:
     QueueParameters m_graphics_queue;
 
     VkCommandPool m_graphics_queue_cmd_pool;
+
+    VkDescriptorPool m_ubo_descriptor_pool;
 
     VkDebugReportCallbackEXT m_debug_report_callback;
 

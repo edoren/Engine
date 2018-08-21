@@ -1,5 +1,6 @@
 #include <Input/InputManager.hpp>
 #include <Renderer/Drawable.hpp>
+#include <Renderer/Mesh.hpp>
 #include <Renderer/RenderWindow.hpp>
 
 namespace engine {
@@ -49,16 +50,20 @@ RenderWindow::~RenderWindow() {
         on_app_did_enter_foreground_connection);
 }
 
-void RenderWindow::Draw(Drawable& drawable) {
+void RenderWindow::Draw(const Drawable& drawable) {
     drawable.Draw(*this);
+}
+
+void RenderWindow::Draw(const Mesh& mesh, const RenderStates& states) {
+    mesh.Draw(*this, states);
 }
 
 void RenderWindow::SetActiveCamera(const Camera* camera) {
     m_active_camera = camera;
 }
 
-void RenderWindow::SetUniformBufferObject(const UniformBufferObject& ubo) {
-    ENGINE_UNUSED(ubo);
+const Camera* RenderWindow::GetActiveCamera() const {
+    return m_active_camera;
 }
 
 void RenderWindow::AdvanceFrame(bool minimized) {
@@ -81,8 +86,21 @@ bool RenderWindow::IsFullScreen() const {
     return m_is_fullscreen;
 }
 
+const math::mat4& RenderWindow::GetProjectionMatrix() const {
+    return m_projection;
+}
+
+void RenderWindow::UpdateProjectionMatrix() {
+    float fov = math::Radians(45.f);
+    float aspect_ratio = m_size.x / static_cast<float>(m_size.y);
+    float z_near = 0.1f;
+    float z_far = 100.0f;
+    m_projection = math::Perspective(fov, aspect_ratio, z_near, z_far);
+}
+
 void RenderWindow::OnWindowResized(const math::ivec2& size) {
-    ENGINE_UNUSED(size);
+    m_size = size;
+    UpdateProjectionMatrix();
 }
 
 void RenderWindow::OnAppWillEnterBackground() {}

@@ -1,5 +1,6 @@
 #include <Graphics/3D/Camera.hpp>
 #include <Renderer/Drawable.hpp>
+#include <Renderer/RenderStates.hpp>
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
 
@@ -13,12 +14,6 @@ namespace engine {
 namespace {
 
 const String sTag("GL_RenderWindow");
-
-std::vector<const char*> sRequiredExtensions = {
-#ifdef OPENGL_USE_GL
-    {"GL_ARB_separate_shader_objects", "GL_ARB_shading_language_420pack"}
-#endif
-};
 
 }  // namespace
 
@@ -54,8 +49,8 @@ bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
     }
 
     // Update the base class attributes
-    SDL_GetWindowSize(m_window, &m_size.x, &m_size.y);
     m_name = name;
+    OnWindowResized(m_size);  // This update m_size and the projection matrix
 
     m_context = SDL_GL_CreateContext(m_window);
     if (!m_context) {
@@ -101,10 +96,9 @@ bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
 
     // Check that all the required extensions are available
     bool all_extensions_found = true;
-    for (auto it = std::begin(sRequiredExtensions);
-         it != std::end(sRequiredExtensions); it++) {
+    auto& required_extensions = GL_Shader::GetRequiredExtensions();
+    for (auto required_extension : required_extensions) {
         bool found = false;
-        const char* required_extension = *it;
         for (const char* extension : opengl_available_extensions) {
             if (std::strcmp(required_extension, extension) == 0) {
                 found = true;
@@ -151,13 +145,11 @@ void GL_RenderWindow::Destroy() {
 
 void GL_RenderWindow::Reposition(int left, int top) {
     if (m_window) {
-        // TODO check errors
         SDL_SetWindowPosition(m_window, left, top);
     }
 }
 
 void GL_RenderWindow::Resize(int width, int height) {
-    // TODO check errors
     if (m_window && !IsFullScreen()) {
         SDL_SetWindowSize(m_window, width, height);
 
@@ -169,7 +161,6 @@ void GL_RenderWindow::Resize(int width, int height) {
 }
 
 void GL_RenderWindow::SetFullScreen(bool fullscreen, bool is_fake) {
-    // TODO check errors
     if (m_window) {
         m_is_fullscreen = fullscreen;
         Uint32 flag = 0;
@@ -199,6 +190,16 @@ void GL_RenderWindow::SwapBuffers() {
     // RenderWindow::SwapBuffers();
 }
 
+void GL_RenderWindow::OnWindowResized(const math::ivec2& size) {
+    ENGINE_UNUSED(size);
+
+    // Get the new window size from the active window
+    SDL_GetWindowSize(m_window, &m_size.x, &m_size.y);
+
+    // Update the base class
+    RenderWindow::OnWindowResized(m_size);
+}
+
 void GL_RenderWindow::Clear(const Color& color) {  // RenderTarget
     GL_CALL(glClearColor(color.r, color.g, color.b, color.a));
     GL_CALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
@@ -208,50 +209,6 @@ bool GL_RenderWindow::IsVisible() {
     Uint32 flags = SDL_WINDOW_HIDDEN | SDL_WINDOW_MINIMIZED;
     Uint32 mask = SDL_GetWindowFlags(m_window);
     return (mask & flags) == 0;
-}
-
-void GL_RenderWindow::Draw(Drawable& drawable) {
-    GL_Shader* shader = GL_ShaderManager::GetInstance().GetActiveShader();
-
-    // Create all the MVP matrices as Identity matrices
-    math::mat4 model_matrix = math::mat4();
-    math::mat4 view_matrix = math::mat4();
-    math::mat4 projection_matrix = math::mat4();
-    math::vec3 front_vector;
-
-    // TMP: Move this to other part
-    math::vec3 light_position(3.0f, 3.0f, 3.0f);
-
-    // TODO: Set Model position
-    model_matrix *= math::Translate(math::vec3(0.0f, 0.0f, 0.0f));
-    // TODO: Normalize model sizes
-    model_matrix *= math::Scale(math::vec3(0.05f));
-
-    if (m_active_camera != nullptr) {
-        view_matrix = m_active_camera->GetViewMatrix();
-        front_vector = m_active_camera->GetFrontVector();
-    }
-
-    float fov = math::Radians(45.f);
-    float aspect_ratio = m_size.x / static_cast<float>(m_size.y);
-    float z_near = 0.1f;
-    float z_far = 100.0f;
-    projection_matrix = math::Perspective(fov, aspect_ratio, z_near, z_far);
-
-    if (shader != nullptr) {
-        math::mat4 mvp_matrix = projection_matrix * view_matrix * model_matrix;
-        math::mat4 normal_matrix = model_matrix.Inverse().Transpose();
-
-        UniformBufferObject ubo;
-        ubo.model = model_matrix;
-        ubo.normalMatrix = normal_matrix;
-        ubo.mvp = mvp_matrix;
-        ubo.cameraFront = front_vector;
-        ubo.lightPosition = light_position;
-        shader->SetUniformBufferObject(ubo);
-    }
-
-    RenderWindow::Draw(drawable);  // This calls drawable.Draw(*this);
 }
 
 }  // namespace engine

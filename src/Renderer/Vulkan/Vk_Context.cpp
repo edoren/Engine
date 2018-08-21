@@ -10,6 +10,8 @@ namespace {
 const String sTag("Vk_Context");
 const String sTagVkDebug("Vk_ValidationLayers");
 
+const uint32 sMaxUBODescriptorSets(10);
+
 VKAPI_ATTR VkBool32 VKAPI_CALL DebugReportCallback(
     VkDebugReportFlagsEXT msgFlags, VkDebugReportObjectTypeEXT objType,
     uint64_t srcObject, size_t location, int32_t msgCode,
@@ -76,6 +78,7 @@ Vk_Context::Vk_Context()
         m_device(VK_NULL_HANDLE),
         m_graphics_queue(),
         m_graphics_queue_cmd_pool(VK_NULL_HANDLE),
+        m_ubo_descriptor_pool(VK_NULL_HANDLE),
         m_debug_report_callback(VK_NULL_HANDLE),
         m_validation_layers_enabled(true),
         m_validation_layers(),
@@ -109,13 +112,8 @@ bool Vk_Context::Initialize() {
     m_instance_extensions.push_back("VK_KHR_win32_surface");
 #endif
 #if defined(SDL_VIDEO_DRIVER_X11)
-    void* x11_xcb_lib = SDL_LoadObject("libX11-xcb.so");
-    if (x11_xcb_lib) {
-        m_instance_extensions.push_back("VK_KHR_xcb_surface");
-        SDL_UnloadObject(x11_xcb_lib);
-    } else {
-        m_instance_extensions.push_back("VK_KHR_xlib_surface");
-    }
+    m_instance_extensions.push_back("VK_KHR_xcb_surface");
+    m_instance_extensions.push_back("VK_KHR_xlib_surface");
 #endif
 #if defined(SDL_VIDEO_DRIVER_WAYLAND)
     m_instance_extensions.push_back("VK_KHR_wayland_surface");
@@ -181,6 +179,11 @@ bool Vk_Context::Initialize() {
         return false;
     }
 
+    if (!CreateUBODescriptorPool()) {
+        LogError(sTag, "Could not create the UBO descriptor pool");
+        return false;
+    }
+
     return true;
 }
 
@@ -189,6 +192,11 @@ void Vk_Context::Shutdown() {
         if (m_graphics_queue_cmd_pool) {
             vkDestroyCommandPool(m_device, m_graphics_queue_cmd_pool, nullptr);
             m_graphics_queue_cmd_pool = VK_NULL_HANDLE;
+        }
+
+        if (m_ubo_descriptor_pool) {
+            vkDestroyDescriptorPool(m_device, m_ubo_descriptor_pool, nullptr);
+            m_ubo_descriptor_pool = VK_NULL_HANDLE;
         }
 
         vkDestroyDevice(m_device, nullptr);
@@ -232,6 +240,10 @@ QueueParameters& Vk_Context::GetGraphicsQueue() {
 
 VkCommandPool& Vk_Context::GetGraphicsQueueCmdPool() {
     return m_graphics_queue_cmd_pool;
+}
+
+VkDescriptorPool& Vk_Context::GetUBODescriptorPool() {
+    return m_ubo_descriptor_pool;
 }
 
 bool Vk_Context::CreateInstance() {
@@ -345,32 +357,6 @@ bool Vk_Context::CreateDevice() {
     // Get the Queue handles
     vkGetDeviceQueue(m_device, m_graphics_queue.family_index, 0,
                      &m_graphics_queue.handle);
-
-    return true;
-}
-
-bool Vk_Context::CreateVulkanCommandPool(QueueParameters& queue,
-                                         VkCommandPool* cmd_pool) {
-    VkResult result = VK_SUCCESS;
-
-    Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
-
-    // Create the pool for the command buffers
-    VkCommandPoolCreateInfo cmd_pool_create_info = {
-        VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,  // sType
-        nullptr,                                     // pNext
-        (VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT |
-         VK_COMMAND_POOL_CREATE_TRANSIENT_BIT),  // flags
-        queue.family_index                       // queueFamilyIndex
-    };
-
-    result =
-        vkCreateCommandPool(device, &cmd_pool_create_info, nullptr, cmd_pool);
-    if (result != VK_SUCCESS) {
-        LogError(sTag, "Could not create a command pool");
-        return false;
-    }
 
     return true;
 }
@@ -527,19 +513,91 @@ bool Vk_Context::CheckInstanceExtensionsSupport() const {
         return false;
     }
 
+#if defined(SDL_VIDEO_DRIVER_X11)
+    const char* x11_extension_to_ignore = nullptr;
+    if (CheckExtensionAvailability("VK_KHR_xlib_surface",
+                                   available_extensions)) {
+        x11_extension_to_ignore = "VK_KHR_xcb_surface";
+    } else if (CheckExtensionAvailability("VK_KHR_xcb_surface",
+                                          available_extensions)) {
+        x11_extension_to_ignore = "VK_KHR_xlib_surface";
+    } else {
+        LogError(sTag,
+                 "Neither the 'VK_KHR_xlib_surface' extension nor the "
+                 "'VK_KHR_xcb_surface' extension are supported by the "
+                 "current system.");
+        return false;
+    }
+#endif
+
     // Check that all the required instance extensions exists
     bool all_extensions_found = true;
-    for (size_t i = 0; i < m_instance_extensions.size(); i++) {
-        if (!CheckExtensionAvailability(m_instance_extensions[i],
+    for (const char* instance_extension : m_instance_extensions) {
+#if defined(SDL_VIDEO_DRIVER_X11)
+        if (!strcmp(x11_extension_to_ignore, instance_extension)) {
+            continue;
+        }
+#endif
+        if (!CheckExtensionAvailability(instance_extension,
                                         available_extensions)) {
             LogError(sTag,
                      "Could not find instance extension "
-                     "named: {}"_format(m_instance_extensions[i]));
+                     "named: {}"_format(instance_extension));
             all_extensions_found = false;
         }
     }
 
     return all_extensions_found;
+}
+
+bool Vk_Context::CreateVulkanCommandPool(QueueParameters& queue,
+                                         VkCommandPool* cmd_pool) {
+    VkResult result = VK_SUCCESS;
+
+    // Create the pool for the command buffers
+    VkCommandPoolCreateInfo cmd_pool_create_info = {
+        VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,  // sType
+        nullptr,                                     // pNext
+        (VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT |
+         VK_COMMAND_POOL_CREATE_TRANSIENT_BIT),  // flags
+        queue.family_index                       // queueFamilyIndex
+    };
+
+    result =
+        vkCreateCommandPool(m_device, &cmd_pool_create_info, nullptr, cmd_pool);
+    if (result != VK_SUCCESS) {
+        LogError(sTag, "Could not create a command pool");
+        return false;
+    }
+
+    return true;
+}
+
+bool Vk_Context::CreateUBODescriptorPool() {
+    VkResult result = VK_SUCCESS;
+
+    VkDescriptorPoolSize pool_size = {
+        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,  // type
+        sMaxUBODescriptorSets               // descriptorCount
+    };
+
+    VkDescriptorPoolCreateInfo descriptor_pool_create_info = {
+        VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,  // sType
+        nullptr,                                        // pNext
+        0,                                              // flags
+        sMaxUBODescriptorSets,                          // maxSets
+        1,                                              // poolSizeCount
+        &pool_size                                      // pPoolSizes
+    };
+
+    result = vkCreateDescriptorPool(m_device, &descriptor_pool_create_info,
+                                    nullptr, &m_ubo_descriptor_pool);
+    if (result != VK_SUCCESS) {
+        LogError(sTag, "Could not create descriptor pool");
+        return false;
+    }
+
+    return true;
 }
 
 }  // namespace engine
