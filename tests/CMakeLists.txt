@@ -69,4 +69,6 @@ endforeach()
 set_property(TARGET ${TESTS} PROPERTY FOLDER "Tests")
 
 # add_subdirectory("${TEST_DIR}/SharedLibrary")
-# add_subdirectory("${TEST_DIR}/Unitary")
+if(OS_WINDOWS OR OS_LINUX OR OS_MACOS)
+    add_subdirectory("${TEST_DIR}/Unitary")
+endif()

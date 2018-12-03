@@ -5,6 +5,7 @@
 namespace engine {
 
 class RenderWindow;
+class RenderStates;
 
 class ENGINE_API Drawable {
 public:
@@ -25,7 +26,8 @@ protected:
     ///
     /// @param target RenderWindow to draw to
     ////////////////////////////////////////////////////////////
-    virtual void Draw(RenderWindow& target) const = 0;
+    virtual void Draw(RenderWindow& target,
+                      const RenderStates& states) const = 0;
 };
 
 }  // namespace engine

@@ -21,10 +21,7 @@ IOStream::~IOStream() {
 }
 
 IOStream& IOStream::operator=(IOStream&& other) {
-    m_file = other.m_file;
-    m_last_error = std::move(other.m_last_error);
-    other.m_file = nullptr;
-    other.m_last_error.Clear();
+    new (this) IOStream(std::move(other));
     return *this;
 }
 

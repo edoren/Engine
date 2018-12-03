@@ -217,8 +217,6 @@ void Vk_Mesh::Draw(RenderWindow& target, const RenderStates& states) const {
 
     Vk_RenderWindow& window = static_cast<Vk_RenderWindow&>(target);
 
-    LogInfo(sTag, "Vk_Mesh::Draw");
-
     auto lambda = [this, &window](VkCommandBuffer& command_buffer,
                                   VkPipelineLayout& pipeline_layout) {
         Vk_Texture2D* texture =
@@ -238,7 +236,7 @@ void Vk_Mesh::Draw(RenderWindow& target, const RenderStates& states) const {
         if (shader) {
             const Camera* active_camera = window.GetActiveCamera();
 
-            const math::mat4& model_matrix = m_transform.GetMatrix();
+            math::mat4 model_matrix = m_transform.GetMatrix();
             math::mat4 view_matrix = (active_camera != nullptr)
                                          ? active_camera->GetViewMatrix()
                                          : math::mat4();

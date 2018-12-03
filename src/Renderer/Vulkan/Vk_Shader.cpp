@@ -124,7 +124,7 @@ bool Vk_Shader::CreateUBODescriptorSetLayout() {
     VkResult result = VK_SUCCESS;
 
     const json& bindings = GetDescriptor()["renderer"]["vulkan"]
-                                          ["descriptor_set_layout"]["bindings"];
+                                          ["descriptor_set_layouts"]["bindings"];
 
     uint32 ubo_binding_position = 0;
     for (const auto& binding : bindings) {

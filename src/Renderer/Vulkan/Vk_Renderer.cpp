@@ -27,6 +27,7 @@ bool Vk_Renderer::Initialize() {
         m_shader_manager = new Vk_ShaderManager();
         m_texture_manager = new Vk_TextureManager();
 
+        // TODO: Remove this
         m_shader_manager->LoadFromFile("model");
     }
     return ok;

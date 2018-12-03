@@ -4,7 +4,7 @@
 namespace engine {
 
 GL_Texture2D::GL_Texture2D() : m_texture(0) {
-    glGenTextures(1, &m_texture);
+    GL_CALL(glGenTextures(1, &m_texture));
 }
 
 GL_Texture2D::GL_Texture2D(GL_Texture2D&& other) : m_texture(other.m_texture) {
@@ -13,13 +13,12 @@ GL_Texture2D::GL_Texture2D(GL_Texture2D&& other) : m_texture(other.m_texture) {
 
 GL_Texture2D::~GL_Texture2D() {
     if (m_texture) {
-        glDeleteTextures(1, &m_texture);
+        GL_CALL(glDeleteTextures(1, &m_texture));
     }
 }
 
 GL_Texture2D& GL_Texture2D::operator=(GL_Texture2D&& other) {
-    m_texture = other.m_texture;
-    other.m_texture = 0;
+    new (this) GL_Texture2D(std::move(other));
     return *this;
 }
 

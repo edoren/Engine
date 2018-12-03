@@ -68,6 +68,10 @@ LogManager::LogManager(const String& app_name, const String& log_file)
 
 LogManager::~LogManager() {}
 
+void LogManager::Initialize() {}
+
+void LogManager::Shutdown() {}
+
 void LogManager::Verbose(const String& tag, const String& message) {
     LogMessage(LogPriority::VERBOSE, tag, message);
 }
@@ -103,12 +107,12 @@ void LogManager::LogMessage(LogPriority priority, const String& tag,
 
     // Write the log to the file
     if (m_file_logging_enable) {
-        SDL_RWops* pfile = nullptr;
-        pfile = SDL_RWFromFile(m_log_file.GetData(), "ab");
-        const std::string& str = log_message.ToUtf8();
-        SDL_RWwrite(pfile, str.data(), 1, str.size());
-        SDL_RWwrite(pfile, sLineEnding, 1, strlen(sLineEnding));
-        SDL_RWclose(pfile);
+        if (SDL_RWops* pfile = SDL_RWFromFile(m_log_file.GetData(), "ab")) {
+            const std::string& str = log_message.ToUtf8();
+            SDL_RWwrite(pfile, str.data(), 1, str.size());
+            SDL_RWwrite(pfile, sLineEnding, 1, strlen(sLineEnding));
+            SDL_RWclose(pfile);
+        }
     }
 
     // Write the log to console

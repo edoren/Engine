@@ -1,0 +1,155 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema",
+    "type": "object",
+    "additionalProperties": false,
+    "description": "Engine shaders description",
+    "definitions": {},
+    "required": [
+        "name",
+        "modules",
+        "renderer"
+    ],
+    "properties": {
+        "name": {
+            "type": "string",
+            "description": "The shader name"
+        },
+        "modules": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+                "type": "string",
+                "enum": [
+                    "vertex",
+                    "tessellation_control",
+                    "tessellation_evaluation",
+                    "geometry",
+                    "fragment",
+                    "compute"
+                ]
+            }
+        },
+        "vertex_input": {
+            "type": "array",
+            "description": "The vertex input description",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                    "type",
+                    "attribute"
+                ],
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "int",
+                            "uint",
+                            "float",
+                            "double"
+                        ]
+                    },
+                    "count": {
+                        "type": "integer",
+                        "default": 1,
+                        "minimum": 1,
+                        "maximum": 4
+                    },
+                    "attribute": {
+                        "type": "string",
+                        "enum": [
+                            "position",
+                            "color",
+                            "normal",
+                            "uv"
+                        ]
+                    }
+                }
+            }
+        },
+        "renderer": {
+            "type": "object",
+            "description": "Configuration for each renderer. If the renderer does not exist it means that is not available",
+            "minProperties": 1,
+            "additionalProperties": false,
+            "properties": {
+                "opengl": {
+                    "type": "object",
+                    "description": "OpenGL shader configuration",
+                    "additionalProperties": false
+                },
+                "vulkan": {
+                    "type": "object",
+                    "description": "Vulkan shader configuration",
+                    "additionalProperties": false,
+                    "properties": {
+                        "descriptor_set_layout": {
+                            "type": "object",
+                            "required": [
+                                "bindings"
+                            ],
+                            "additionalProperties": false,
+                            "properties": {
+                                "bindings": {
+                                    "type": "array",
+                                    "minItems": 1,
+                                    "items": {
+                                        "type": "object",
+                                        "additionalProperties": false,
+                                        "required": [
+                                            "pos",
+                                            "type"
+                                        ],
+                                        "properties": {
+                                            "pos": {
+                                                "type": "integer"
+                                            },
+                                            "type": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "sampler",
+                                                    "combined_image_sampler",
+                                                    "sampled_image",
+                                                    "storage_image",
+                                                    "uniform_texel_buffer",
+                                                    "storage_texel_buffer",
+                                                    "uniform_buffer",
+                                                    "storage_buffer",
+                                                    "uniform_buffer_dynamic",
+                                                    "storage_buffer_dynamic",
+                                                    "input_attachment"
+                                                ]
+                                            },
+                                            "count": {
+                                                "type": "integer",
+                                                "default": 1
+                                            },
+                                            "stage": {
+                                                "type": "array",
+                                                "minItems": 1,
+                                                "items": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "vertex",
+                                                        "tessellation_control",
+                                                        "tessellation_evaluation",
+                                                        "geometry",
+                                                        "fragment",
+                                                        "compute",
+                                                        "all_graphics",
+                                                        "all"
+                                                    ]
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

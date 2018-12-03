@@ -22,7 +22,7 @@ void Camera::Move(const math::vec3& direction) {
 }
 
 void Camera::Rotate(float yaw, float pitch, bool limit_pitch) {
-    // Apply euler angles to rotate the pitch_
+    // Apply euler angles to rotate the pitch
     m_yaw += yaw;
     m_pitch -= pitch;
 

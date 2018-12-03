@@ -4,13 +4,18 @@
 
 namespace engine {
 
-Transform::Transform() : m_matrix() {}
+Transform::Transform()
+      : m_scale(1, 1, 1), m_rotate(0, 0, 0), m_translate(0, 0, 0) {}
 
-Transform::Transform(const Transform& other) : m_matrix(other.m_matrix) {}
+Transform::Transform(const Transform& other)
+      : m_scale(other.m_scale),
+        m_rotate(other.m_rotate),
+        m_translate(other.m_translate) {}
 
-Transform::Transform(Transform&& other) : m_matrix(std::move(other.m_matrix)) {}
-
-Transform::Transform(const math::Matrix4x4<float>& matrix) : m_matrix(matrix) {}
+Transform::Transform(Transform&& other)
+      : m_scale(std::move(other.m_scale)),
+        m_rotate(std::move(other.m_rotate)),
+        m_translate(std::move(other.m_translate)) {}
 
 Transform::~Transform() {}
 
@@ -25,20 +30,21 @@ Transform& Transform::operator=(Transform&& other) {
     return *this;
 }
 
-const math::Matrix4x4<float>& Transform::GetMatrix() const {
-    return m_matrix;
+math::Matrix4x4<float> Transform::GetMatrix() const {
+    return math::Translate(m_translate) * math::Scale(m_scale) *
+           math::Rotate(m_rotate);
 }
 
-void Transform::Rotate(float angle, const math::Vector3<float>& v) {
-    m_matrix *= math::Rotate(angle, v);
+void Transform::Rotate(const math::Vector3<float>& euler_angles) {
+    m_rotate += euler_angles;
 }
 
-void Transform::Scale(const math::Vector3<float>& v) {
-    m_matrix *= math::Scale(v);
+void Transform::Scale(const math::Vector3<float>& scale) {
+    m_scale *= scale;
 }
 
-void Transform::Translate(const math::Vector3<float>& v) {
-    m_matrix *= math::Translate(v);
+void Transform::Translate(const math::Vector3<float>& translate) {
+    m_translate += translate;
 }
 
 }  // namespace engine

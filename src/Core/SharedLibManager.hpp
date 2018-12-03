@@ -13,6 +13,10 @@ public:
 
     ~SharedLibManager();
 
+    void Initialize();
+
+    void Shutdown();
+
     SharedLibrary* Load(const String& name);
 
     void Unload(SharedLibrary* lib);

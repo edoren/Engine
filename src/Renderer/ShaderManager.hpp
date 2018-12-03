@@ -10,7 +10,12 @@ namespace engine {
 class ENGINE_API ShaderManager : public Singleton<ShaderManager> {
 public:
     ShaderManager();
+
     virtual ~ShaderManager();
+
+    virtual void Initialize();
+
+    virtual void Shutdown();
 
     ////////////////////////////////////////////////////////////
     /// @brief Load a shader from the filesystem

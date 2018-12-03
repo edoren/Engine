@@ -15,6 +15,8 @@ const String sRootTextureFolder("textures");
 
 }  // namespace
 
+const String TextureManager::DEFAULT_TEXTURE_ID("DEFAULT");
+
 template <>
 TextureManager* Singleton<TextureManager>::sInstance = nullptr;
 
@@ -28,7 +30,22 @@ TextureManager* TextureManager::GetInstancePtr() {
 
 TextureManager::TextureManager() : m_active_texture(nullptr), m_textures() {}
 
-TextureManager::~TextureManager() {
+TextureManager::~TextureManager() {}
+
+void TextureManager::Initialize() {
+    math::uvec2 defaultTextureSize(300, 300);
+
+    std::vector<Color32> defaultTextureData(
+        defaultTextureSize.x * defaultTextureSize.y, Color32::GRAY);
+
+    Image defaultImage;
+    defaultImage.LoadFromMemory(defaultTextureData.data(), defaultTextureSize.x,
+                                defaultTextureSize.y);
+
+    LoadFromImage(DEFAULT_TEXTURE_ID, defaultImage);
+}
+
+void TextureManager::Shutdown() {
     if (m_textures.size() > 0) {
         LogDebug(sTag, "Textures2D not deleted");
     }

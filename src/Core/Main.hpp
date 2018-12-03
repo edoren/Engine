@@ -5,7 +5,9 @@
 #include <Core/Plugin.hpp>
 #include <Core/SharedLibManager.hpp>
 #include <Input/InputManager.hpp>
+#include <Renderer/ModelManager.hpp>
 #include <Renderer/Renderer.hpp>
+#include <Renderer/SceneManager.hpp>
 #include <System/FileSystem.hpp>
 #include <System/LogManager.hpp>
 #include <System/String.hpp>
@@ -25,6 +27,8 @@ public:
     void Run();
 
     void Shutdown();
+
+    void SetActiveScene(const String& scene_name);
 
     void LoadPlugin(const String& pluginName);
 
@@ -106,8 +110,6 @@ private:
     void SetActiveRenderer();
 
 private:
-    bool m_is_initialized;
-
     std::vector<SharedLibrary*> m_plugin_libs;
     std::vector<Plugin*> m_plugins;
 
@@ -117,10 +119,12 @@ private:
     App* m_app;
 
     // Singletons
-    LogManager* m_logger;
+    LogManager* m_log_manager;
     FileSystem* m_file_system;
-    SharedLibManager* m_sharedlibs;
-    InputManager* m_input;
+    SharedLibManager* m_shared_lib_manager;
+    InputManager* m_input_manager;
+    ModelManager* m_model_manager;
+    SceneManager* m_scene_manager;
 };
 
 }  // namespace engine

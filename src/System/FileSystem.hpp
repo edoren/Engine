@@ -12,6 +12,10 @@ public:
 
     ~FileSystem();
 
+    void Initialize();
+
+    void Shutdown();
+
     ////////////////////////////////////////////////////////////
     /// @brief Checks if a file exist
     ///
