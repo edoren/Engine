@@ -1,3 +1,7 @@
+############################################################
+## Environment Variables
+############################################################
+
 variables:
   GIT_STRATEGY: fetch
   GIT_SUBMODULE_STRATEGY: recursive
@@ -5,7 +9,12 @@ variables:
   # https://gitlab.com/gitlab-org/gitlab-ci-multi-runner/issues/2148
   GIT_SSL_NO_VERIFY: "true"
 
-.linux_config: &linux_image
+
+############################################################
+## Platform Configuration
+############################################################
+
+.linux_config:
   image: ubuntu:16.04
   tags:
     - docker
@@ -27,8 +36,13 @@ variables:
     - export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$VULKAN_SDK/lib"
     - export VK_LAYER_PATH="$VULKAN_SDK/etc/explicit_layer.d"
     - export PATH="$PATH:$VULKAN_SDK/bin"
+  only:
+    - master
+    - web
+  except:
+    - gh-pages
 
-.android_config: &android_image
+.android_config:
   image: lakoo/android-ndk:25-26.0.2-r15c
   tags:
     - docker
@@ -45,20 +59,28 @@ variables:
     - cmake .. -DCMAKE_BUILD_TYPE=Release
     - cmake --build . --config Release --target install
     - cd -
+  only:
+    - master
+    - web
+  except:
+    - gh-pages
 
 stages:
   - build
   - test
 
+
+############################################################
+## Build Tasks
+############################################################
+
 build:linux_gcc:
-  <<: *linux_image
+  extends: .linux_config
   stage: build
-  except:
-    - gh-pages
-    - tmp
+  variables:
+    CC: gcc-6
+    CXX: g++-6
   script:
-    - export CC=gcc-6
-    - export CXX=g++-6
     - ./generate.py --name Engine --platform linux --package me.edoren.engine --build-type Release
     - cd build/linux
     - ./build.py
@@ -68,14 +90,12 @@ build:linux_gcc:
       - build/linux/
 
 build:linux_clang:
-  <<: *linux_image
+  extends: .linux_config
   stage: build
-  except:
-    - gh-pages
-    - tmp
+  variables:
+    CC: clang
+    CXX: clang++
   script:
-    - export CC=clang
-    - export CXX=clang++
     - ./generate.py --name Engine --platform linux --package me.edoren.engine --build-type Release
     - cd build/linux
     - ./build.py
@@ -85,11 +105,8 @@ build:linux_clang:
       - build/linux/
 
 build:android:
-  <<: *android_image
+  extends: .android_config
   stage: build
-  except:
-    - gh-pages
-    - tmp
   script:
     - ./generate.py --name Engine --platform android --package me.edoren.engine --build-type Release
     - cd build/android
@@ -99,12 +116,14 @@ build:android:
     paths:
       - build/android/
 
+
+############################################################
+## Test Tasks
+############################################################
+
 test:linux_gcc:
-  <<: *linux_image
+  extends: .linux_config
   stage: test
-  except:
-    - gh-pages
-    - tmp
   script:
     - cd build/linux/tests/
     - ctest -V
@@ -112,11 +131,8 @@ test:linux_gcc:
     - build:linux_gcc
 
 test:linux_clang:
-  <<: *linux_image
+  extends: .linux_config
   stage: test
-  except:
-    - gh-pages
-    - tmp
   script:
     - cd build/linux/tests/
     - ctest -V
