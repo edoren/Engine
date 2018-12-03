@@ -12,20 +12,21 @@ public:
     Transform();
     Transform(const Transform& other);
     Transform(Transform&& other);
-    Transform(const math::Matrix4x4<float>& matrix);
     ~Transform();
 
     Transform& operator=(const Transform& other);
     Transform& operator=(Transform&& other);
 
-    void Rotate(float angle, const math::Vector3<float>& v);
-    void Scale(const math::Vector3<float>& v);
-    void Translate(const math::Vector3<float>& v);
+    void Rotate(const math::Vector3<float>& euler_angles);
+    void Scale(const math::Vector3<float>& scale);
+    void Translate(const math::Vector3<float>& translate);
 
-    const math::Matrix4x4<float>& GetMatrix() const;
+    math::Matrix4x4<float> GetMatrix() const;
 
 private:
-    math::Matrix4x4<float> m_matrix;
+    math::Vector3<float> m_scale;
+    math::Vector3<float> m_rotate;
+    math::Vector3<float> m_translate;
 };
 
 }  // namespace engine

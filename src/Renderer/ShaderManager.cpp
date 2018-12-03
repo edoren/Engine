@@ -35,6 +35,12 @@ ShaderManager* ShaderManager::GetInstancePtr() {
 ShaderManager::ShaderManager() : m_active_shader(nullptr), m_shaders() {}
 
 ShaderManager::~ShaderManager() {
+    Shutdown();
+}
+
+void ShaderManager::Initialize() {}
+
+void ShaderManager::Shutdown() {
     if (m_shaders.size() > 0) {
         LogDebug(sTag, "Shaders not deleted");
     }

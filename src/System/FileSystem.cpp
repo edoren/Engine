@@ -44,6 +44,10 @@ FileSystem::FileSystem() {
 
 FileSystem::~FileSystem() {}
 
+void FileSystem::Initialize() {}
+
+void FileSystem::Shutdown() {}
+
 bool FileSystem::FileExists(const String& filename) const {
     IOStream file;
     for (const String& path : m_search_paths) {

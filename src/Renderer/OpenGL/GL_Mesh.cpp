@@ -37,9 +37,9 @@ GL_Mesh::~GL_Mesh() {
 void GL_Mesh::LoadFromData(
     std::vector<Vertex> vertices, std::vector<uint32> indices,
     std::vector<std::pair<Texture2D*, TextureType>> textures) {
-    m_vertices = vertices;
-    m_indices = indices;
-    m_textures = textures;
+    m_vertices = std::move(vertices);
+    m_indices = std::move(indices);
+    m_textures = std::move(textures);
     SetupMesh();
 }
 
@@ -121,8 +121,7 @@ void GL_Mesh::Draw(RenderWindow& target, const RenderStates& states) const {
     if (shader) {
         const Camera* active_camera = window.GetActiveCamera();
 
-        // const math::mat4& model_matrix = m_transform.GetMatrix();
-        const math::mat4 model_matrix = math::mat4();
+        math::mat4 model_matrix = states.transform.GetMatrix();
 
         math::mat4 view_matrix = (active_camera != nullptr)
                                      ? active_camera->GetViewMatrix()

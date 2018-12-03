@@ -142,12 +142,13 @@ Model::~Model() {
     }
 }
 
-void Model::Draw(RenderWindow& target) const {
-    RenderStates custom_states;
-    custom_states.transform = m_transform;
+void Model::SetTransform(const Transform& transform) {
+    m_transform = transform;
+}
 
+void Model::Draw(RenderWindow& target, const RenderStates& states) const {
     for (auto& mesh : m_meshes) {
-        mesh->Draw(target, custom_states);
+        mesh->Draw(target, states);
     }
 }
 
@@ -180,12 +181,8 @@ void Model::LoadModel(const String& path) {
             model_matrix.Scale(math::vec3(float(scale)));
         }
         if (!rotation.is_null()) {
-            float rotation_x = math::Radians(float(rotation[0]));
-            float rotation_y = math::Radians(float(rotation[1]));
-            float rotation_z = math::Radians(float(rotation[2]));
-            model_matrix.Rotate(rotation_x, {1.0f, 0.0f, 0.0f});
-            model_matrix.Rotate(rotation_y, {0.0f, 1.0f, 0.0f});
-            model_matrix.Rotate(rotation_z, {0.0f, 0.0f, 1.0f});
+            model_matrix.Rotate(
+                {float(rotation[0]), float(rotation[1]), float(rotation[2])});
         }
         m_transform = model_matrix;
     }
@@ -230,16 +227,21 @@ Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
         Vertex vertex;
         math::vec3 vector;
 
+        // Swap X and Z axis by rotating the model matrix 90 degrees on Y
+        math::mat4 rotationMatrix = math::RotateAxisY(math::Radians(90.0f));
+
         vector.x = mesh->mVertices[i].x;
         vector.y = mesh->mVertices[i].y;
         vector.z = mesh->mVertices[i].z;
-        vertex.position = vector;
+        math::vec4 resultPosition = rotationMatrix * math::vec4(vector, 1);
+        vertex.position = resultPosition.xyz();
 
         if (mesh->HasNormals()) {
             vector.x = mesh->mNormals[i].x;
             vector.y = mesh->mNormals[i].y;
             vector.z = mesh->mNormals[i].z;
-            vertex.normal = vector;
+            math::vec4 resultNormal = rotationMatrix * math::vec4(vector, 0.0);
+            vertex.normal = resultNormal.xyz();
         }
 
         // Does the mesh contain texture coordinates
@@ -334,6 +336,12 @@ Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
         const String& filename = pair.second;
         Texture2D* texture = texture_manager.LoadFromFile(filename);
         textures.push_back(std::make_pair(texture, type));
+    }
+
+    if (textures.empty()) {
+        Texture2D* texture =
+            texture_manager.GetTexture2D(TextureManager::DEFAULT_TEXTURE_ID);
+        textures.push_back(std::make_pair(texture, TextureType::DIFFUSE));
     }
 
     RendererFactory& factory = Main::GetInstance().GetActiveRendererFactory();

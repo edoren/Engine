@@ -19,7 +19,7 @@ public:
 
     virtual ~RenderWindow();
 
-    virtual bool Create(const String& name, const math::ivec2& size) = 0;
+    virtual bool Create(const String& name, const math::ivec2& size);
 
     virtual void Destroy() = 0;
 
@@ -40,7 +40,6 @@ public:
     virtual bool IsVisible() = 0;
 
     // RenderTarget
-    virtual void Draw(const Drawable& drawable);
     virtual void Draw(const Mesh& mesh, const RenderStates& states);
 
     // RenderTarget

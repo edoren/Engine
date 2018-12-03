@@ -22,6 +22,10 @@ public:
 
     ~LogManager();
 
+    void Initialize();
+
+    void Shutdown();
+
     void Verbose(const String& tag, const String& message);
     void Debug(const String& tag, const String& message);
     void Info(const String& tag, const String& message);

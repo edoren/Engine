@@ -50,8 +50,12 @@ RenderWindow::~RenderWindow() {
         on_app_did_enter_foreground_connection);
 }
 
-void RenderWindow::Draw(const Drawable& drawable) {
-    drawable.Draw(*this);
+bool RenderWindow::Create(const String& name, const math::ivec2& size) {
+    // Update the base class attributes
+    m_name = name;
+    OnWindowResized(m_size);  // This update m_size and the projection matrix
+
+    return true;
 }
 
 void RenderWindow::Draw(const Mesh& mesh, const RenderStates& states) {

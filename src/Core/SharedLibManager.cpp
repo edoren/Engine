@@ -30,6 +30,10 @@ SharedLibManager::~SharedLibManager() {
     m_libraries.clear();
 }
 
+void SharedLibManager::Initialize() {}
+
+void SharedLibManager::Shutdown() {}
+
 SharedLibrary* SharedLibManager::Load(const String& name) {
     auto it = m_libraries.find(name);
     if (it != m_libraries.end()) {

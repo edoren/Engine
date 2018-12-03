@@ -12,22 +12,30 @@ class String;
 
 class ENGINE_API TextureManager : public Singleton<TextureManager> {
 public:
+    static const String DEFAULT_TEXTURE_ID;
+
+public:
     TextureManager();
+
     virtual ~TextureManager();
+
+    virtual void Initialize();
+
+    virtual void Shutdown();
 
     ////////////////////////////////////////////////////////////
     /// @brief Load a texture from the filesystem
     ///
     /// @return On success returns the Texture2D handler or nullptr on failure
     ////////////////////////////////////////////////////////////
-    Texture2D* LoadFromFile(const String& basename);
+    virtual Texture2D* LoadFromFile(const String& basename);
 
     ////////////////////////////////////////////////////////////
     /// @brief Load a texture from a Image
     ///
     /// @return On success returns the Texture2D handler or nullptr on failure
     ////////////////////////////////////////////////////////////
-    Texture2D* LoadFromImage(const String& name, const Image& image);
+    virtual Texture2D* LoadFromImage(const String& name, const Image& image);
 
     Texture2D* GetTexture2D(const String& name);
 

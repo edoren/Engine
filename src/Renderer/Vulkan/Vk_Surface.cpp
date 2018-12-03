@@ -23,7 +23,11 @@ bool Vk_Surface::Create(SDL_Window* window) {
     Vk_Context& context = Vk_Context::GetInstance();
     VkInstance& instance = context.GetVulkanInstance();
 
-    SDL_Vulkan_CreateSurface(window, instance, &m_handle);
+    SDL_bool result = SDL_Vulkan_CreateSurface(window, instance, &m_handle);
+    if (!result) {
+        LogError(sTag, SDL_GetError());
+        return false;
+    }
 
     return m_handle != VK_NULL_HANDLE;
 }

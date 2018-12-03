@@ -10,9 +10,7 @@ namespace {
 
 const String sTag("Vk_TextureManager");
 
-const uint32 sDescriptorSetBinding(0);
-
-const uint32 sMaxDescriptorSets(16);
+const uint32 sMaxDescriptorSets(256);
 
 Vk_TextureManager* sDerivedInstance = nullptr;
 
@@ -113,20 +111,23 @@ bool Vk_TextureManager::CreateDescriptorSetLayout() {
 
     VkResult result = VK_SUCCESS;
 
-    VkDescriptorSetLayoutBinding layout_binding = {
-        sDescriptorSetBinding,                      // binding
-        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,  // descriptorType
-        1,                                          // descriptorCount
-        VK_SHADER_STAGE_FRAGMENT_BIT,               // stageFlags
-        nullptr                                     // pImmutableSamplers
+    std::vector<VkDescriptorSetLayoutBinding> layout_bindings = {
+        // Diffuse texture
+        {
+            0,                                          // binding
+            VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,  // descriptorType
+            1,                                          // descriptorCount
+            VK_SHADER_STAGE_FRAGMENT_BIT,               // stageFlags
+            nullptr                                     // pImmutableSamplers
+        },
     };
 
     VkDescriptorSetLayoutCreateInfo descriptor_set_layout_create_info = {
         VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,  // sType
         nullptr,                                              // pNext
         0,                                                    // flags
-        1,                                                    // bindingCount
-        &layout_binding                                       // pBindings
+        static_cast<uint32>(layout_bindings.size()),          // bindingCount
+        layout_bindings.data()                                // pBindings
     };
 
     result =

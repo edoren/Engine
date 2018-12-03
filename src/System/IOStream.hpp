@@ -10,7 +10,7 @@ namespace engine {
 
 class ENGINE_API IOStream : NonCopyable {
 public:
-    enum Origin : int { eSet = 0, eCur = 1, eEnd = 2 };
+    enum class Origin : int { SET = 0, CUR = 1, END = 2 };
 
     IOStream();
     IOStream(IOStream&& other);

@@ -47,11 +47,7 @@ bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
         LogError(sTag, SDL_GetError());
         return false;
     }
-
-    // Update the base class attributes
-    m_name = name;
-    OnWindowResized(m_size);  // This update m_size and the projection matrix
-
+    
     m_context = SDL_GL_CreateContext(m_window);
     if (!m_context) {
         LogError(sTag, SDL_GetError());
@@ -117,6 +113,8 @@ bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
 
     // TODO: User enable depth test
     GL_CALL(glEnable(GL_DEPTH_TEST));
+
+    RenderWindow::Create(name, size);
 
     return true;
 }

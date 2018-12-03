@@ -103,13 +103,14 @@ inline Matrix4x4<T> Perspective(T fovy, T aspect, T zNear, T zFar) {
 
 template <typename T>
 inline Matrix4x4<T> Ortho(T left, T right, T bottom, T top, T zNear, T zFar) {
+    T one = static_cast<T>(1);
     T two = static_cast<T>(2);
     // clang-format off
     return Matrix4x4<T>(
-        two / (right - left), 0.f, 0.f, 0.f,
-        0.f, two / (top - bottom), 0.f, 0.f,
-        0.f, 0.f, -two / (zFar - zNear), 0.f,
-        -(right + left) / (right - left), -(top + bottom) / (top - bottom), -(zFar + zNear) / (zFar - zNear)
+                    two / (right - left),                              0.f,                              0.f, 0.f,
+                                     0.f,             two / (top - bottom),                              0.f, 0.f,
+                                     0.f,                              0.f,            -two / (zFar - zNear), 0.f,
+        -(right + left) / (right - left), -(top + bottom) / (top - bottom), -(zFar + zNear) / (zFar - zNear), one
     );
     // clang-format on
 }
@@ -140,9 +141,9 @@ inline Matrix4x4<T> LookAtRH(const Vector3<T>& position,
 
     // clang-format off
     return Matrix4x4<T>(
-        s.x, u.x, -f.x, 0.f,
-        s.y, u.y, -f.y, 0.f,
-        s.z, u.z, -f.z, 0.f,
+                      s.x,               u.x,             -f.x, 0.f,
+                      s.y,               u.y,             -f.y, 0.f,
+                      s.z,               u.z,             -f.z, 0.f,
         -Dot(s, position), -Dot(u, position), Dot(f, position), 1.f
     );
     // clang-format on
@@ -171,10 +172,74 @@ inline Matrix4x4<T> Rotate(T angle, const Vector3<T>& v) {
 
     // clang-format off
     return Matrix4x4<T>(
-        c + axis.x * temp.x, axis.y * temp.x + axis.z * s, axis.z * temp.x - axis.y * s, 0.f,
-        axis.x * temp.y - axis.z * s, c + axis.y * temp.y, axis.z * temp.y + axis.x * s, 0.f,
-        axis.x * temp.z + axis.y * s, axis.y * temp.z - axis.x * s, c + axis.z * temp.z, 0.f,
-        0.f, 0.f, 0.f, 1.f
+                 c + axis.x * temp.x, axis.y * temp.x + axis.z * s, axis.z * temp.x - axis.y * s, 0.f,
+        axis.x * temp.y - axis.z * s,          c + axis.y * temp.y, axis.z * temp.y + axis.x * s, 0.f,
+        axis.x * temp.z + axis.y * s, axis.y * temp.z - axis.x * s,          c + axis.z * temp.z, 0.f,
+                                 0.f,                          0.f,                          0.f, 1.f
+    );
+    // clang-format on
+}
+
+template <typename T>
+inline Matrix4x4<T> Rotate(const Vector3<T>& euler_angles) {
+    static_assert(std::numeric_limits<T>::is_iec559,
+                  "'Rotate' only accept floating-point inputs");
+    Matrix4x4<T> Rx = RotateAxisX(euler_angles.x);
+    Matrix4x4<T> Ry = RotateAxisX(euler_angles.y);
+    Matrix4x4<T> Rz = RotateAxisX(euler_angles.z);
+    return Rz * Ry * Rx;
+}
+
+template <typename T>
+inline Matrix4x4<T> RotateAxisX(const T euler_angle) {
+    static_assert(std::numeric_limits<T>::is_iec559,
+                  "'Rotate' only accept floating-point inputs");
+
+    T c = static_cast<T>(cos(euler_angle));
+    T s = static_cast<T>(sin(euler_angle));
+
+    // clang-format off
+    return Matrix4x4<T>(
+        1,  0, 0, 0,
+        0,  c, s, 0,
+        0, -s, c, 0,
+        0,  0, 0, 1
+    );
+    // clang-format on
+}
+
+template <typename T>
+inline Matrix4x4<T> RotateAxisY(const T euler_angle) {
+    static_assert(std::numeric_limits<T>::is_iec559,
+                  "'Rotate' only accept floating-point inputs");
+
+    T c = static_cast<T>(cos(euler_angle));
+    T s = static_cast<T>(sin(euler_angle));
+
+    // clang-format off
+    return Matrix4x4<T>(
+        c, 0, -s, 0,
+        0, 1,  0, 0,
+        s, 0,  c, 0,
+        0, 0,  0, 1
+    );
+    // clang-format on
+}
+
+template <typename T>
+inline Matrix4x4<T> RotateAxisZ(const T euler_angle) {
+    static_assert(std::numeric_limits<T>::is_iec559,
+                  "'Rotate' only accept floating-point inputs");
+
+    T c = static_cast<T>(cos(euler_angle));
+    T s = static_cast<T>(sin(euler_angle));
+
+    // clang-format off
+    return Matrix4x4<T>(
+         c, s, 0, 0,
+        -s, c, 0, 0,
+         0, 0, 1, 0,
+         0, 0, 0, 1
     );
     // clang-format on
 }
@@ -183,9 +248,9 @@ template <typename T>
 inline Matrix4x4<T> Scale(T x, T y, T z) {
     // clang-format off
     return Matrix4x4<T>(
-        x, 0.f, 0.f, 0.f,
-        0.f, y, 0.f, 0.f,
-        0.f, 0.f, z, 0.f,
+          x, 0.f, 0.f, 0.f,
+        0.f,   y, 0.f, 0.f,
+        0.f, 0.f,   z, 0.f,
         0.f, 0.f, 0.f, 1.f
     );
     // clang-format on
@@ -203,7 +268,7 @@ inline Matrix4x4<T> Translate(T x, T y, T z) {
         1.f, 0.f, 0.f, 0.f,
         0.f, 1.f, 0.f, 0.f,
         0.f, 0.f, 1.f, 0.f,
-        x, y, z, 1.f
+          x,   y,   z, 1.f
     );
     // clang-format on
 }

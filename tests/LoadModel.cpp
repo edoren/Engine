@@ -1,11 +1,10 @@
 #include <Core/App.hpp>
 #include <Core/Main.hpp>
 #include <Graphics/3D/Camera.hpp>
-#include <Input/InputManager.hpp>
 #include <Renderer/Model.hpp>
 #include <Renderer/RenderWindow.hpp>
-#include <Renderer/Renderer.hpp>
 #include <Renderer/ShaderManager.hpp>
+#include <Renderer/SceneManager.hpp>
 
 // TODO: Remove this later - Required for calling main and Input enums
 #include <SDL2/SDL.h>
@@ -44,18 +43,22 @@ protected:
 
         m_shader_manager->LoadFromFile("model");
 
-        m_character = new Model("LinkOcarina/YoungLinkEquipped.obj");
+        SceneManager* scene_manager = SceneManager::GetInstancePtr();
+        if (scene_manager) {
+            scene_manager->ChangeActiveScene("test1");
+        }
 
         Mouse& mouse = m_input->GetMouse();
         mouse.SetRelativeMouseMode(true);
         mouse.HideCursor();
 
-        m_camera = Camera({10, 10, 10});
+        m_camera = Camera({10, 0, 0});
         m_camera.LookAt({0, 0, 0});
         m_camera_speed = 2.5f;
         m_mouse_sensivity = 0.1f;
 
         m_window->SetActiveCamera(&m_camera);
+        // m_window->SetFullScreen(true, true);
 
         return true;
     }
@@ -91,11 +94,9 @@ protected:
         m_window_size = m_window->GetSize();
 
         m_shader_manager->SetActiveShader("model");
-        m_window->Draw(*m_character);
     }
 
     void Shutdown() override {
-        delete m_character;
     }
 
     String GetName() override {
@@ -113,7 +114,7 @@ private:
     float m_camera_speed;
     float m_mouse_sensivity;
 
-    Model* m_character;
+    Scene* m_scene;
 
     InputManager* m_input;
     ShaderManager* m_shader_manager;

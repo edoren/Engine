@@ -18,13 +18,17 @@ namespace engine {
 class Texture2D;
 
 class ENGINE_API Model : public Drawable {
-public:
-    Model(const String& path);
+    friend class ModelManager;
 
+public:
     virtual ~Model();
 
+    void SetTransform(const Transform& transform);
+
+    void Draw(RenderWindow& target, const RenderStates& states) const override;
+
 protected:
-    void Draw(RenderWindow& target) const override;
+    explicit Model(const String& path);
 
 private:
     void LoadModel(const String& path);
