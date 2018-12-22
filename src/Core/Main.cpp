@@ -169,7 +169,9 @@ void Main::Shutdown() {
     }
 }
 
-void Main::SetActiveScene(const String& scene_name) {}
+void Main::SetActiveScene(const String& scene_name) {
+    ENGINE_UNUSED(scene_name);
+}
 
 void Main::LoadPlugin(const String& name) {
     // Load plugin library

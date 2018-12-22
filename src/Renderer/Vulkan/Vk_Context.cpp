@@ -11,6 +11,7 @@ const String sTag("Vk_Context");
 const String sTagVkDebug("Vk_ValidationLayers");
 
 const uint32 sMaxUBODescriptorSets(10);
+const uint32 sMaxUBODynamicDescriptorSets(10);
 
 VKAPI_ATTR VkBool32 VKAPI_CALL DebugReportCallback(
     VkDebugReportFlagsEXT msgFlags, VkDebugReportObjectTypeEXT objType,
@@ -576,18 +577,29 @@ bool Vk_Context::CreateVulkanCommandPool(QueueParameters& queue,
 bool Vk_Context::CreateUBODescriptorPool() {
     VkResult result = VK_SUCCESS;
 
-    VkDescriptorPoolSize pool_size = {
-        VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,  // type
-        sMaxUBODescriptorSets               // descriptorCount
-    };
+    std::array<VkDescriptorPoolSize, 2> pool_sizes = {{
+        {
+            VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,  // type
+            sMaxUBODescriptorSets               // descriptorCount
+        },
+        {
+            VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,  // type
+            sMaxUBODynamicDescriptorSets                // descriptorCount
+        },
+    }};
+
+    uint32 max_sets = 0;
+    for (VkDescriptorPoolSize& pool_size : pool_sizes) {
+        max_sets += pool_size.descriptorCount;
+    }
 
     VkDescriptorPoolCreateInfo descriptor_pool_create_info = {
         VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,  // sType
         nullptr,                                        // pNext
         0,                                              // flags
-        sMaxUBODescriptorSets,                          // maxSets
-        1,                                              // poolSizeCount
-        &pool_size                                      // pPoolSizes
+        max_sets,                                       // maxSets
+        static_cast<uint32>(pool_sizes.size()),         // poolSizeCount
+        pool_sizes.data()                               // pPoolSizes
     };
 
     result = vkCreateDescriptorPool(m_device, &descriptor_pool_create_info,

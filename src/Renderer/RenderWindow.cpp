@@ -51,6 +51,8 @@ RenderWindow::~RenderWindow() {
 }
 
 bool RenderWindow::Create(const String& name, const math::ivec2& size) {
+    ENGINE_UNUSED(size);
+
     // Update the base class attributes
     m_name = name;
     OnWindowResized(m_size);  // This update m_size and the projection matrix

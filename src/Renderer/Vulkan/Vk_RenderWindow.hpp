@@ -40,6 +40,10 @@ class String;
 class Vk_TextureManager;
 
 class VULKAN_PLUGIN_API Vk_RenderWindow : public RenderWindow {
+    using CommandType =
+        Function<void(uint32, VkCommandBuffer&, VkPipelineLayout&),
+                 LAMBDA_FUNCTION_SIZE(16)>;
+
 public:
     Vk_RenderWindow();
 
@@ -63,8 +67,7 @@ public:
 
     bool IsVisible() override;
 
-    void AddCommandExecution(
-        Function<void(VkCommandBuffer&, VkPipelineLayout&)>&& func);
+    void AddCommandExecution(CommandType&& func);
 
     void SubmitGraphicsCommand(Function<void(VkCommandBuffer&)>&& func);
 
@@ -112,8 +115,7 @@ private:
 
     VkRenderPass m_render_pass;
 
-    SafeQueue<Function<void(VkCommandBuffer&, VkPipelineLayout&)>>
-        m_command_work_queue;
+    SafeQueue<CommandType> m_command_work_queue;
 
     Vk_Image m_depth_image;
     VkFormat m_depth_format;

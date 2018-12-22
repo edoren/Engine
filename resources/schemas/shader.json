@@ -3,10 +3,25 @@
     "type": "object",
     "additionalProperties": false,
     "description": "Engine shaders description",
-    "definitions": {},
+    "definitions": {
+        "primitives": {
+            "type": "string",
+            "description": "The type of the primitive to use",
+            "enum": [
+                "mat4x4",
+                "mat3x3",
+                "mat2x2",
+                "vec4",
+                "vec3",
+                "vec2"
+            ]
+        }
+    },
     "required": [
         "name",
         "modules",
+        "uniform_buffer",
+        "uniform_buffer_dynamic",
         "renderer"
     ],
     "properties": {
@@ -68,6 +83,80 @@
                 }
             }
         },
+        "uniform_buffer": {
+            "type": "object",
+            "description": "",
+            "additionalProperties": false,
+            "required": [
+                "name",
+                "attributes"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "The name of uniform that handles the UBO"
+                },
+                "attributes": {
+                    "type": "array",
+                    "description": "The attributes that the uniform contains in order",
+                    "minItems": 0,
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                            "name",
+                            "type"
+                        ],
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "description": "The name of the property"
+                            },
+                            "type": {
+                                "$ref": "#/definitions/primitives"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "uniform_buffer_dynamic": {
+            "type": "object",
+            "description": "",
+            "additionalProperties": false,
+            "required": [
+                "name",
+                "attributes"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "The name of uniform that handles the UBO"
+                },
+                "attributes": {
+                    "type": "array",
+                    "description": "The attributes that the uniform contains in order",
+                    "minItems": 0,
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "required": [
+                            "name",
+                            "type"
+                        ],
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "description": "The name of the property"
+                            },
+                            "type": {
+                                "$ref": "#/definitions/primitives"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "renderer": {
             "type": "object",
             "description": "Configuration for each renderer. If the renderer does not exist it means that is not available",
@@ -84,7 +173,7 @@
                     "description": "Vulkan shader configuration",
                     "additionalProperties": false,
                     "properties": {
-                        "descriptor_set_layout": {
+                        "descriptor_set_layouts": {
                             "type": "object",
                             "required": [
                                 "bindings"

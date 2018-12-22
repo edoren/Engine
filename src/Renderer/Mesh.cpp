@@ -12,10 +12,6 @@ Mesh::Mesh() {}
 
 Mesh::~Mesh() {}
 
-const Transform& Mesh::GetTransform() {
-    return m_transform;
-}
-
 const std::vector<Vertex>& Mesh::GetVertices() {
     return m_vertices;
 }

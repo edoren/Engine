@@ -95,6 +95,14 @@ bool GL_Shader::LoadFromMemory(const byte* source, std::size_t source_size,
     return true;
 }
 
+UniformBufferObject& GL_Shader::GetUBO() {
+    return m_ubo;
+}
+
+UniformBufferObject& GL_Shader::GetUBODynamic() {
+    return m_ubo_dynamic;
+}
+
 bool GL_Shader::IsLinked() {
     GLint success = GL_TRUE;
     GL_CALL(glGetProgramiv(m_program, GL_LINK_STATUS, &success));
@@ -130,28 +138,55 @@ void GL_Shader::Use() {
     if (Link()) {
         GL_CALL(glUseProgram(m_program));
     }
-    if (m_uniform_buffer) {
-        GL_CALL(glDeleteBuffers(1, &m_uniform_buffer));
+    if (m_uniform_buffers._static) {
+        GL_CALL(glDeleteBuffers(1, &m_uniform_buffers._static));
+    }
+    if (m_uniform_buffers._dynamic) {
+        GL_CALL(glDeleteBuffers(1, &m_uniform_buffers._dynamic));
     }
 }
 
-void GL_Shader::UpdateUniformBuffer() {
-    GLuint binding_point = 0;
-    GLuint block_index =
-        glGetUniformBlockIndex(m_program, "UniformBufferObject");
+void GL_Shader::UploadUniformBuffers() {
+    GLuint binding_point;
+    GLuint block_index;
+
+    // TODO: Automatically detect this using the descriptor
+    binding_point = 0;
+    block_index = glGetUniformBlockIndex(m_program, "UniformBufferObject");
     if (block_index == GL_INVALID_INDEX) {
-        LogError(sTag, "Error finding the UniformBufferObject");
+        LogError(sTag, "Error finding the UniformBufferObject with binding 0");
         return;
     }
 
+    // Load the static UBO
     GL_CALL(glUniformBlockBinding(m_program, block_index, binding_point));
-    GL_CALL(glGenBuffers(1, &m_uniform_buffer));
-    GL_CALL(glBindBuffer(GL_UNIFORM_BUFFER, m_uniform_buffer));
+    GL_CALL(glGenBuffers(1, &m_uniform_buffers._static));
+    GL_CALL(glBindBuffer(GL_UNIFORM_BUFFER, m_uniform_buffers._static));
 
-    GL_CALL(glBufferData(GL_UNIFORM_BUFFER, m_ubo.GetDataSize(), m_ubo.GetData(),
-                         GL_DYNAMIC_DRAW));
-    GL_CALL(
-        glBindBufferBase(GL_UNIFORM_BUFFER, binding_point, m_uniform_buffer));
+    GL_CALL(glBufferData(GL_UNIFORM_BUFFER, m_ubo.GetDataSize(),
+                         m_ubo.GetData(), GL_DYNAMIC_DRAW));
+    GL_CALL(glBindBufferBase(GL_UNIFORM_BUFFER, binding_point,
+                             m_uniform_buffers._static));
+
+    // TODO: Automatically detect this using the descriptor
+    binding_point = 1;
+    block_index =
+        glGetUniformBlockIndex(m_program, "UniformBufferObjectDynamic");
+    if (block_index == GL_INVALID_INDEX) {
+        LogError(sTag,
+                 "Error finding the UniformBufferObjectDynamic with binding 1");
+        return;
+    }
+
+    // Load the dynamic UBO
+    GL_CALL(glUniformBlockBinding(m_program, block_index, binding_point));
+    GL_CALL(glGenBuffers(1, &m_uniform_buffers._dynamic));
+    GL_CALL(glBindBuffer(GL_UNIFORM_BUFFER, m_uniform_buffers._dynamic));
+
+    GL_CALL(glBufferData(GL_UNIFORM_BUFFER, m_ubo_dynamic.GetDataSize(),
+                         m_ubo_dynamic.GetData(), GL_DYNAMIC_DRAW));
+    GL_CALL(glBindBufferBase(GL_UNIFORM_BUFFER, binding_point,
+                             m_uniform_buffers._dynamic));
 }
 
 void GL_Shader::SetUniform(const String& name, float val) {
@@ -205,6 +240,27 @@ void GL_Shader::SetUniform(const String& name, const math::vec2& val) {
 
 const std::vector<const char*>& GL_Shader::GetRequiredExtensions() {
     return sRequiredExtensions;
+}
+
+void GL_Shader::SetDescriptor(json&& descriptor) {
+    m_descriptor = std::move(descriptor);
+
+    std::vector<UniformBufferObject::Item> attributes;
+    for (auto& attribute : m_descriptor["uniform_buffer"]["attributes"]) {
+        String name = attribute["name"];
+        String type = attribute["type"];
+        attributes.push_back({name, GetUBODataTypeFromString(type)});
+    }
+    m_ubo.SetAttributes(attributes);
+
+    attributes.clear();
+    for (auto& attribute :
+         m_descriptor["uniform_buffer_dynamic"]["attributes"]) {
+        String name = attribute["name"];
+        String type = attribute["type"];
+        attributes.push_back({name, GetUBODataTypeFromString(type)});
+    }
+    m_ubo_dynamic.SetAttributes(attributes);
 }
 
 GLuint GL_Shader::Compile(const char8* source, size_t source_size,
@@ -264,8 +320,6 @@ GLint GL_Shader::GetUniformLocation(const String& name) {
 
         return location;
     }
-
-    return -1;
 }
 
 }  // namespace engine

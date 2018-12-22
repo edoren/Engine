@@ -1,3 +1,4 @@
+#include <Graphics/3D/Camera.hpp>
 #include <Renderer/Drawable.hpp>
 #include <Renderer/RenderStates.hpp>
 #include <Renderer/UniformBufferObject.hpp>
@@ -320,8 +321,7 @@ bool Vk_RenderWindow::IsVisible() {
     return (mask & flags) == 0;
 }
 
-void Vk_RenderWindow::AddCommandExecution(
-    Function<void(VkCommandBuffer&, VkPipelineLayout&)>&& func) {
+void Vk_RenderWindow::AddCommandExecution(CommandType&& func) {
     m_command_work_queue.Push(std::move(func));
 }
 
@@ -582,6 +582,7 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
     VkResult result = VK_SUCCESS;
 
     Vk_Shader* shader = Vk_ShaderManager::GetInstance().GetActiveShader();
+    Vk_TextureManager& texture_manager = Vk_TextureManager::GetInstance();
 
     if (shader == nullptr) {
         LogError(sTag, "Active shader not set");
@@ -692,7 +693,7 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         VK_FALSE,                         // depthClampEnable
         VK_FALSE,                         // rasterizerDiscardEnable
         VK_POLYGON_MODE_FILL,             // polygonMode
-        VK_CULL_MODE_BACK_BIT,            // cullMode
+        VK_CULL_MODE_NONE,                // cullMode
         VK_FRONT_FACE_COUNTER_CLOCKWISE,  // frontFace
         VK_FALSE,                         // depthBiasEnable
         0.0f,                             // depthBiasConstantFactor
@@ -729,15 +730,15 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,  // sType
         nullptr,                                                     // pNext
         VkPipelineDepthStencilStateCreateFlags(),                    // flags
-        VK_TRUE,             // depthTestEnable
-        VK_TRUE,             // depthWriteEnable
-        VK_COMPARE_OP_LESS,  // depthCompareOp
-        VK_FALSE,            // depthBoundsTestEnable
-        VK_FALSE,            // stencilTestEnable
-        {},                  // front
-        {},                  // back
-        0.0f,                // minDepthBounds
-        1.0f,                // maxDepthBounds
+        VK_TRUE,                      // depthTestEnable
+        VK_TRUE,                      // depthWriteEnable
+        VK_COMPARE_OP_LESS_OR_EQUAL,  // depthCompareOp
+        VK_FALSE,                     // depthBoundsTestEnable
+        VK_FALSE,                     // stencilTestEnable
+        {},                           // front
+        {},                           // back
+        0.0f,                         // minDepthBounds
+        1.0f,                         // maxDepthBounds
     };
 
     VkPipelineColorBlendStateCreateInfo color_blend_state_create_info = {
@@ -764,10 +765,7 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         dynamic_states.data()                          // pDynamicStates
     };
 
-    Vk_TextureManager& texture_manager = Vk_TextureManager::GetInstance();
-
     // Create the PipelineLayout
-
     std::array<VkDescriptorSetLayout, 2> descriptor_set_layouts = {{
         shader->GetUBODescriptorSetLayout(),
         texture_manager.GetDescriptorSetLayout(),
@@ -956,9 +954,6 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer,
     vkCmdBeginRenderPass(command_buffer, &render_pass_begin_info,
                          VK_SUBPASS_CONTENTS_INLINE);
 
-    vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                      m_graphics_pipeline);
-
     VkViewport viewport = {
         0.0f,                          // x
         0.0f,                          // y
@@ -984,11 +979,34 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer,
     vkCmdSetViewport(command_buffer, 0, 1, &viewport);
     vkCmdSetScissor(command_buffer, 0, 1, &scissor);
 
+    vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                      m_graphics_pipeline);
+
+    Vk_Shader* shader = Vk_ShaderManager::GetInstance().GetActiveShader();
+
+    // Update static uniform buffer
+    const Camera* active_camera = GetActiveCamera();
+
+    math::vec3 front_vector;
+    math::vec3 light_position;  // TMP: Get this from other
+                                //      part a LightManager maybe?
+    if (active_camera != nullptr) {
+        front_vector = active_camera->GetFrontVector();
+        light_position = active_camera->GetPosition();
+    }
+
+    UniformBufferObject& ubo = shader->GetUBO();
+    ubo.SetAttributeValue("cameraFront", front_vector);
+    ubo.SetAttributeValue("lightPosition", light_position);
+    ///
+
+    uint32 index = 0;
     while (m_command_work_queue.GetSize() > 0) {
         auto task = m_command_work_queue.Pop();
-
-        task(command_buffer, m_pipeline_layout);
+        task(index++, command_buffer, m_pipeline_layout);
     }
+
+    shader->UploadUniformBuffers();
 
     vkCmdEndRenderPass(command_buffer);
 

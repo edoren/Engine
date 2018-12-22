@@ -20,7 +20,6 @@ Transform::Transform(Transform&& other)
 Transform::~Transform() {}
 
 Transform& Transform::operator=(const Transform& other) {
-    this->~Transform();
     new (this) Transform(other);
     return *this;
 }

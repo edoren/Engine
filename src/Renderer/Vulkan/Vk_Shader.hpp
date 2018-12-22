@@ -21,13 +21,16 @@ public:
     bool LoadFromMemory(const byte* source, std::size_t source_size,
                         ShaderType type) override;
 
+    UniformBufferObject& GetUBO();
+    UniformBufferObject& GetUBODynamic();
+
     VkShaderModule& GetModule(ShaderType type);
 
     VkDescriptorSet& GetUBODescriptorSet();
 
     VkDescriptorSetLayout& GetUBODescriptorSetLayout();
 
-    bool UpdateUniformBuffer();
+    bool UploadUniformBuffers();
 
 protected:
     void SetDescriptor(json&& descriptor) override;
@@ -37,11 +40,19 @@ private:
     bool AllocateUBODescriptorSet();
     bool UpdateUBODescriptorSet();
 
-    bool CreateUniformBuffer();
+    bool CreateUniformBuffers();
+
+    json m_descriptor;
+
+    UniformBufferObject m_ubo;
+    UniformBufferObject m_ubo_dynamic;
 
     std::array<VkShaderModule, sShaderTypeCount> m_modules;
 
-    Vk_Buffer m_uniform_buffer;
+    struct {
+        Vk_Buffer _static;
+        Vk_Buffer _dynamic;
+    } m_uniform_buffers;
 
     VkDescriptorSetLayout m_ubo_descriptor_set_layout;
     VkDescriptorSet m_ubo_descriptor_set;

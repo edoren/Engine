@@ -20,7 +20,6 @@ RenderStates::RenderStates(RenderStates&& other)
 }
 
 RenderStates& RenderStates::operator=(const RenderStates& other) {
-    this->~RenderStates();
     new (this) RenderStates(other);
     return *this;
 }

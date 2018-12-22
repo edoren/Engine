@@ -181,16 +181,6 @@ inline Matrix4x4<T> Rotate(T angle, const Vector3<T>& v) {
 }
 
 template <typename T>
-inline Matrix4x4<T> Rotate(const Vector3<T>& euler_angles) {
-    static_assert(std::numeric_limits<T>::is_iec559,
-                  "'Rotate' only accept floating-point inputs");
-    Matrix4x4<T> Rx = RotateAxisX(euler_angles.x);
-    Matrix4x4<T> Ry = RotateAxisX(euler_angles.y);
-    Matrix4x4<T> Rz = RotateAxisX(euler_angles.z);
-    return Rz * Ry * Rx;
-}
-
-template <typename T>
 inline Matrix4x4<T> RotateAxisX(const T euler_angle) {
     static_assert(std::numeric_limits<T>::is_iec559,
                   "'Rotate' only accept floating-point inputs");
@@ -242,6 +232,16 @@ inline Matrix4x4<T> RotateAxisZ(const T euler_angle) {
          0, 0, 0, 1
     );
     // clang-format on
+}
+
+template <typename T>
+inline Matrix4x4<T> Rotate(const Vector3<T>& euler_angles) {
+    static_assert(std::numeric_limits<T>::is_iec559,
+                  "'Rotate' only accept floating-point inputs");
+    Matrix4x4<T> Rx = RotateAxisX(euler_angles.x);
+    Matrix4x4<T> Ry = RotateAxisX(euler_angles.y);
+    Matrix4x4<T> Rz = RotateAxisX(euler_angles.z);
+    return Rz * Ry * Rx;
 }
 
 template <typename T>

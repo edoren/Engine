@@ -25,16 +25,10 @@ public:
     virtual bool LoadFromMemory(const byte* source, std::size_t source_size,
                                 ShaderType type) = 0;
 
-    UniformBufferObject& GetUBO();
-
 protected:
-    virtual void SetDescriptor(json&& descriptor);
-    const json& GetDescriptor();
+    virtual void SetDescriptor(json&& descriptor) = 0;
 
-    UniformBufferObject m_ubo;
-
-private:
-    json m_descriptor;
+    UniformBufferObject::DataType GetUBODataTypeFromString(const String& str);
 };
 
 }  // namespace engine

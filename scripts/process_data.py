@@ -69,8 +69,13 @@ def generate_spirv_shaders(data_folder):
         print("Error: glslc not found")
         exit(1)
 
+    print("Using glslc compiler: " + glslc_exe)
+
     glsl_shaders_folder = os.path.join(data_folder, "shaders", "glsl")
     spirv_shaders_folder = os.path.join(data_folder, "shaders", "spirv")
+
+    FileUtils.mkdir_p(glsl_shaders_folder)
+    FileUtils.mkdir_p(spirv_shaders_folder)
 
     glsl_shaders = [f for f in os.listdir(glsl_shaders_folder)
                     if os.path.isfile(os.path.join(glsl_shaders_folder, f))]
