@@ -47,7 +47,7 @@ bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
         LogError(sTag, SDL_GetError());
         return false;
     }
-    
+
     m_context = SDL_GL_CreateContext(m_window);
     if (!m_context) {
         LogError(sTag, SDL_GetError());
@@ -184,8 +184,26 @@ void GL_RenderWindow::SetVSyncEnabled(bool vsync) {
 }
 
 void GL_RenderWindow::SwapBuffers() {
-    SDL_GL_SwapWindow(m_window);
     // RenderWindow::SwapBuffers();
+
+    // Update static uniform buffer
+    GL_Shader* shader = GL_ShaderManager::GetInstance().GetActiveShader();
+    const Camera* active_camera = GetActiveCamera();
+
+    math::vec3 front_vector;
+    math::vec3 light_position;  // TMP: Get this from other
+                                //      part a LightManager maybe?
+    if (active_camera != nullptr) {
+        front_vector = active_camera->GetFrontVector();
+        light_position = active_camera->GetPosition();
+    }
+
+    UniformBufferObject& ubo = shader->GetUBO();
+    ubo.SetAttributeValue("cameraFront", front_vector);
+    ubo.SetAttributeValue("lightPosition", light_position);
+    ///
+
+    SDL_GL_SwapWindow(m_window);
 }
 
 void GL_RenderWindow::OnWindowResized(const math::ivec2& size) {

@@ -56,7 +56,7 @@ def download_for_linux(output_path):
     FileUtils.mv(vulkan_sdk_folder, extract_folder)
     FileUtils.rm(output_file)
 
-    # Move the internal folder
+    # Move the internal folder
     extract_folder_contents = os.listdir(extract_folder)
     if len(extract_folder_contents) == 1:
         vulkan_version = extract_folder_contents[0]

@@ -52,7 +52,7 @@ protected:
         mouse.SetRelativeMouseMode(true);
         mouse.HideCursor();
 
-        m_camera = Camera({10, 0, 0});
+        m_camera = Camera({10, 10, 10});
         m_camera.LookAt({0, 0, 0});
         m_camera_speed = 2.5f;
         m_mouse_sensivity = 0.1f;
@@ -113,8 +113,6 @@ private:
     Camera m_camera;
     float m_camera_speed;
     float m_mouse_sensivity;
-
-    Scene* m_scene;
 
     InputManager* m_input;
     ShaderManager* m_shader_manager;

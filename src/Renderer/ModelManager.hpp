@@ -22,6 +22,9 @@ public:
 
     Model* GetModel(const String& name);
 
+    static ModelManager& GetInstance();
+    static ModelManager* GetInstancePtr();
+
 protected:
     std::map<String, Model*> m_name_map;
     std::map<uint32, Model*> m_index_map;

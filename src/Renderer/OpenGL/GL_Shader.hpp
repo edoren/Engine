@@ -21,13 +21,16 @@ public:
     bool LoadFromMemory(const byte* source, std::size_t source_size,
                         ShaderType type) override;
 
+    UniformBufferObject& GetUBO();
+    UniformBufferObject& GetUBODynamic();
+
     bool IsLinked();
 
     bool Link();
 
     void Use();
 
-    void UpdateUniformBuffer();
+    void UploadUniformBuffers();
 
     void SetUniform(const String& name, float val);
     void SetUniform(const String& name, int32 val);
@@ -41,6 +44,9 @@ public:
 
     static const std::vector<const char*>& GetRequiredExtensions();
 
+protected:
+    void SetDescriptor(json&& descriptor) override;
+
 private:
     GLuint Compile(const char8* source, std::size_t source_size,
                    ShaderType type);
@@ -52,10 +58,18 @@ private:
     GLint GetUniformLocation(const String& name);
 
 private:
+    json m_descriptor;
+
+    UniformBufferObject m_ubo;
+    UniformBufferObject m_ubo_dynamic;
+
     GLuint m_program;
     std::array<GLuint, sShaderTypeCount> m_shaders;
 
-    GLuint m_uniform_buffer;
+    struct {
+        GLuint _static;
+        GLuint _dynamic;
+    } m_uniform_buffers;
 
     std::map<String, GLint> m_uniforms;
 };

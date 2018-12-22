@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Util/Prerequisites.hpp>
+
 #ifdef ENGINE_NOEXCEPTION
 #define JSON_NOEXCEPTION
 #endif
@@ -11,8 +13,8 @@ using json = ::nlohmann::json;
 
 class String;
 
-void to_json(json& j, const String& str);
+ENGINE_API void to_json(json& j, const String& str);
 
-void from_json(const json& j, String& str);
+ENGINE_API void from_json(const json& j, String& str);
 
 }  // namespace engine

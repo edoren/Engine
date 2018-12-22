@@ -8,9 +8,10 @@
 namespace engine {
 
 class ENGINE_API UniformBufferObject {
-    friend class Shader;
-
 public:
+    UniformBufferObject();
+    ~UniformBufferObject();
+
     enum class DataType {
         MATRIX4X4,
         MATRIX3X3,
@@ -31,34 +32,46 @@ public:
         DataType type;
     };
 
+    void SetBufferSize(size_t num_ubo_instances, size_t min_ubo_alignment);
+
     void SetAttributes(const std::vector<Item>& attributes);
 
-    void SetAttributeValue(const String& name, const math::mat4& value);
-    void SetAttributeValue(const String& name, const math::mat3& value);
-    void SetAttributeValue(const String& name, const math::mat2& value);
-    void SetAttributeValue(const String& name, const math::vec4& value);
-    void SetAttributeValue(const String& name, const math::vec3& value);
-    void SetAttributeValue(const String& name, const math::vec2& value);
+    void SetAttributeValue(const String& name, const math::mat4& value,
+                           size_t offset = 0);
+    void SetAttributeValue(const String& name, const math::mat3& value,
+                           size_t offset = 0);
+    void SetAttributeValue(const String& name, const math::mat2& value,
+                           size_t offset = 0);
+    void SetAttributeValue(const String& name, const math::vec4& value,
+                           size_t offset = 0);
+    void SetAttributeValue(const String& name, const math::vec3& value,
+                           size_t offset = 0);
+    void SetAttributeValue(const String& name, const math::vec2& value,
+                           size_t offset = 0);
+
+    size_t GetSize() const;
+    size_t GetDynamicAlignment() const;
 
     byte* GetData();
-
     const byte* GetData() const;
-
     size_t GetDataSize() const;
 
 private:
-    UniformBufferObject();
-
     explicit UniformBufferObject(const std::vector<Item>& attributes);
 
-    void SetAttributeValue(const String& name, const void* value);
+    void SetAttributeValue(const String& name, const void* value,
+                           size_t offset = 0);
 
     size_t GetTypeSize(UniformBufferObject::DataType type);
     size_t GetTypeAllignment(UniformBufferObject::DataType type);
 
 private:
+    size_t m_size;
+    size_t m_dynamic_alignment;
+
     LayoutType m_layout_type;
-    std::vector<byte> m_buffer;
+    byte* m_buffer;
+    size_t m_buffer_size;
     std::vector<Item> m_attributes;
     std::vector<size_t> m_attributes_alligned_offset;
 };

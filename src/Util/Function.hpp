@@ -145,7 +145,8 @@ private:
 
     using Invoker = Ret (*)(const void*, Args&&...);
     using Manager = void (*)(void*, const void*, Operation);
-    using Storage = typename std::aligned_storage<MaxSize, sizeof(void*)>::type;
+    using Storage =
+        typename std::aligned_storage<MaxSize, alignof(std::max_align_t)>::type;
 
     Storage m_data;     ///< Stores a copy of the Functor
     Invoker m_invoker;  ///< Pointer to the caller function for m_data

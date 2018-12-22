@@ -27,14 +27,10 @@ public:
 
     void SetTexture(TextureType type, Texture2D* texture);
 
-    const Transform& GetTransform();
-
     const std::vector<Vertex>& GetVertices();
     const std::vector<uint32>& GetIndices();
 
 protected:
-    mutable Transform m_transform;
-
     std::vector<Vertex> m_vertices;
     std::vector<uint32> m_indices;
     std::vector<std::pair<Texture2D*, TextureType>> m_textures;

@@ -213,17 +213,17 @@ void Vk_Mesh::SetupMesh() {
 }
 
 void Vk_Mesh::Draw(RenderWindow& target, const RenderStates& states) const {
-    m_transform = states.transform;
-
     Vk_RenderWindow& window = static_cast<Vk_RenderWindow&>(target);
 
-    auto lambda = [this, &window](VkCommandBuffer& command_buffer,
-                                  VkPipelineLayout& pipeline_layout) {
+    auto lambda = [this, &window, states](uint32 index,
+                                          VkCommandBuffer& command_buffer,
+                                          VkPipelineLayout& pipeline_layout) {
+        uint32 dynamic_offset = 0;
+
         Vk_Texture2D* texture =
             Vk_TextureManager::GetInstance().GetActiveTexture2D();
         Vk_Shader* shader = Vk_ShaderManager::GetInstance().GetActiveShader();
 
-        // texture = m_textures[TextureType::DIFFUSE];
         for (auto& pair : m_textures) {
             if (pair.second == TextureType::DIFFUSE) {
                 texture = static_cast<Vk_Texture2D*>(pair.first);
@@ -236,7 +236,7 @@ void Vk_Mesh::Draw(RenderWindow& target, const RenderStates& states) const {
         if (shader) {
             const Camera* active_camera = window.GetActiveCamera();
 
-            math::mat4 model_matrix = m_transform.GetMatrix();
+            math::mat4 model_matrix = states.transform.GetMatrix();
             math::mat4 view_matrix = (active_camera != nullptr)
                                          ? active_camera->GetViewMatrix()
                                          : math::mat4();
@@ -246,21 +246,15 @@ void Vk_Mesh::Draw(RenderWindow& target, const RenderStates& states) const {
                 projection_matrix * view_matrix * model_matrix;
             math::mat4 normal_matrix = model_matrix.Inverse().Transpose();
 
-            math::vec3 front_vector;
-            math::vec3 light_position;  // TMP: Get this from other
-                                        //      part a LightManager maybe?
-            if (active_camera != nullptr) {
-                front_vector = active_camera->GetFrontVector();
-                light_position = active_camera->GetPosition();
-            }
+            UniformBufferObject& ubo = shader->GetUBODynamic();
 
-            UniformBufferObject& ubo = shader->GetUBO();
-            ubo.SetAttributeValue("model", model_matrix);
-            ubo.SetAttributeValue("normalMatrix", normal_matrix);
-            ubo.SetAttributeValue("mvp", mvp_matrix);
-            ubo.SetAttributeValue("cameraFront", front_vector);
-            ubo.SetAttributeValue("lightPosition", light_position);
-            shader->UpdateUniformBuffer();
+            dynamic_offset =
+                index * static_cast<uint32>(ubo.GetDynamicAlignment());
+
+            ubo.SetAttributeValue("model", model_matrix, dynamic_offset);
+            ubo.SetAttributeValue("normalMatrix", normal_matrix,
+                                  dynamic_offset);
+            ubo.SetAttributeValue("mvp", mvp_matrix, dynamic_offset);
 
             descriptor_sets[array_pos++] = shader->GetUBODescriptorSet();
         }
@@ -271,19 +265,21 @@ void Vk_Mesh::Draw(RenderWindow& target, const RenderStates& states) const {
             LogFatal(sTag, "Texture not found for Mesh");
         }
 
-        vkCmdBindDescriptorSets(
-            command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_layout, 0,
-            static_cast<uint32>(array_pos), &descriptor_sets[0], 0, nullptr);
-
+        uint32 sVertexBufferBindId = 0;  // TODO: Change where this comes from
         if (m_vertex_buffer.GetHandle() != VK_NULL_HANDLE) {
             VkDeviceSize offset = 0;
-            vkCmdBindVertexBuffers(command_buffer, 0, 1,
+            vkCmdBindVertexBuffers(command_buffer, sVertexBufferBindId, 1,
                                    &m_vertex_buffer.GetHandle(), &offset);
         }
         if (m_index_buffer.GetHandle() != VK_NULL_HANDLE) {
             vkCmdBindIndexBuffer(command_buffer, m_index_buffer.GetHandle(), 0,
                                  VK_INDEX_TYPE_UINT32);
         }
+
+        vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                pipeline_layout, 0,
+                                static_cast<uint32>(array_pos),
+                                descriptor_sets.data(), 1, &dynamic_offset);
 
         uint32 indices_size = static_cast<uint32>(m_indices.size());
         vkCmdDrawIndexed(command_buffer, indices_size, 1, 0, 0, 0);

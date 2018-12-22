@@ -81,8 +81,6 @@ void GL_Mesh::SetupMesh() {
 }
 
 void GL_Mesh::Draw(RenderWindow& target, const RenderStates& states) const {
-    ENGINE_UNUSED(states);
-
     GL_RenderWindow& window = static_cast<GL_RenderWindow&>(target);
     GL_Shader* shader = GL_ShaderManager::GetInstance().GetActiveShader();
 
@@ -131,21 +129,11 @@ void GL_Mesh::Draw(RenderWindow& target, const RenderStates& states) const {
         math::mat4 mvp_matrix = projection_matrix * view_matrix * model_matrix;
         math::mat4 normal_matrix = model_matrix.Inverse().Transpose();
 
-        math::vec3 front_vector;
-        math::vec3 light_position;  // TMP: Get this from other
-                                    //      part a LightManager maybe?
-        if (active_camera != nullptr) {
-            front_vector = active_camera->GetFrontVector();
-            light_position = active_camera->GetPosition();
-        }
-
-        UniformBufferObject& ubo = shader->GetUBO();
-        ubo.SetAttributeValue("model", model_matrix);
-        ubo.SetAttributeValue("normalMatrix", normal_matrix);
-        ubo.SetAttributeValue("mvp", mvp_matrix);
-        ubo.SetAttributeValue("cameraFront", front_vector);
-        ubo.SetAttributeValue("lightPosition", light_position);
-        shader->UpdateUniformBuffer();
+        UniformBufferObject& ubo_dynamic = shader->GetUBODynamic();
+        ubo_dynamic.SetAttributeValue("model", model_matrix);
+        ubo_dynamic.SetAttributeValue("normalMatrix", normal_matrix);
+        ubo_dynamic.SetAttributeValue("mvp", mvp_matrix);
+        shader->UploadUniformBuffers();
     }
 
     GL_CALL(glActiveTexture(GL_TEXTURE0));
