@@ -82,9 +82,13 @@ class CMakeBuildGenerator:
         cmake_args_dict = self.file_config.copy()
         cmake_args_dict.update([arg.split("=") for arg in args.cmake_args])
 
-        if "CMAKE_GENERATOR_PLATFORM" not in cmake_args_dict and \
-                self.app_platform == "windows" and \
-                platform.machine().endswith("64"):
+        if ("CMAKE_GENERATOR" not in cmake_args_dict and
+                self.app_platform == "windows"):
+            cmake_args_dict["CMAKE_GENERATOR"] = "Visual Studio 14 2015"
+
+        if ("CMAKE_GENERATOR_PLATFORM" not in cmake_args_dict and
+                self.app_platform == "windows" and
+                platform.machine().endswith("64")):
             cmake_args_dict["CMAKE_GENERATOR_PLATFORM"] = "x64"
 
         self.cmake_args = [
