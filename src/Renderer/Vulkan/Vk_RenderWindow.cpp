@@ -158,6 +158,7 @@ void Vk_RenderWindow::Destroy() {
         }
 
         m_swapchain.Destroy();
+        m_command_work_queue.Clear();
     }
 
     m_present_queue = nullptr;
@@ -302,6 +303,7 @@ void Vk_RenderWindow::SwapBuffers() {
             break;
         case VK_ERROR_OUT_OF_DATE_KHR:
         case VK_SUBOPTIMAL_KHR:
+            LogDebug(sTag, "Recreating SwapChain");
             OnWindowResized(m_size);
             return;
         default:
@@ -322,7 +324,9 @@ bool Vk_RenderWindow::IsVisible() {
 }
 
 void Vk_RenderWindow::AddCommandExecution(CommandType&& func) {
-    m_command_work_queue.Push(std::move(func));
+    if (IsVisible()) {
+        m_command_work_queue.Push(std::move(func));
+    }
 }
 
 void Vk_RenderWindow::SubmitGraphicsCommand(
@@ -1152,19 +1156,27 @@ void Vk_RenderWindow::OnWindowResized(const math::ivec2& size) {
         CreateDepthResources();
         // Recreate the Vulkan Swapchain
         m_swapchain.Create(m_surface, m_size.x, m_size.y);
+        m_command_work_queue.Clear();
     }
 }
 
 void Vk_RenderWindow::OnAppWillEnterBackground() {
+    RenderWindow::OnAppWillEnterBackground();
     m_swapchain.Destroy();
     m_surface.Destroy();
+    m_command_work_queue.Clear();
 }
 
-void Vk_RenderWindow::OnAppDidEnterBackground() {}
+void Vk_RenderWindow::OnAppDidEnterBackground() {
+    RenderWindow::OnAppDidEnterBackground();
+}
 
-void Vk_RenderWindow::OnAppWillEnterForeground() {}
+void Vk_RenderWindow::OnAppWillEnterForeground() {
+    RenderWindow::OnAppWillEnterForeground();
+}
 
 void Vk_RenderWindow::OnAppDidEnterForeground() {
+    RenderWindow::OnAppDidEnterForeground();
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.GetVulkanDevice();
 

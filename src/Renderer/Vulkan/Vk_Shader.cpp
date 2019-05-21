@@ -215,6 +215,9 @@ bool Vk_Shader::UpdateUBODescriptorSet() {
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.GetVulkanDevice();
 
+    LogDebug(sTag, "Buffer UBO Dynamic Size: {}"_format(
+                       m_uniform_buffers._dynamic.GetSize()));
+
     std::array<VkDescriptorBufferInfo, 2> bufferInfos = {{
         {
             m_uniform_buffers._static.GetHandle(),  // buffer
@@ -283,9 +286,9 @@ bool Vk_Shader::CreateUniformBuffers() {
     PhysicalDeviceParameters& physical_device =
         Vk_Context::GetInstance().GetPhysicalDevice();
     size_t minUboAlignment =
-        physical_device.properties.limits.minUniformBufferOffsetAlignment;
+            static_cast<size_t>(physical_device.properties.limits.minUniformBufferOffsetAlignment);
 
-    m_ubo_dynamic.SetBufferSize(100, minUboAlignment);  // TODO: CHANGE THIS
+    m_ubo_dynamic.SetBufferSize(30 * 30, minUboAlignment);  // TODO: CHANGE THIS
 
     result &= m_uniform_buffers._dynamic.Create(
         m_ubo_dynamic.GetDataSize(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,

@@ -2,8 +2,15 @@
 #include <Renderer/Drawable.hpp>
 #include <Renderer/Mesh.hpp>
 #include <Renderer/RenderWindow.hpp>
+#include <System/LogManager.hpp>
 
 namespace engine {
+
+namespace {
+
+const String sTag("RenderWindow");
+
+}  // namespace
 
 RenderWindow::RenderWindow()
       : m_name(),
@@ -109,9 +116,20 @@ void RenderWindow::OnWindowResized(const math::ivec2& size) {
     UpdateProjectionMatrix();
 }
 
-void RenderWindow::OnAppWillEnterBackground() {}
-void RenderWindow::OnAppDidEnterBackground() {}
-void RenderWindow::OnAppWillEnterForeground() {}
-void RenderWindow::OnAppDidEnterForeground() {}
+void RenderWindow::OnAppWillEnterBackground() {
+    LogDebug(sTag, "OnAppWillEnterBackground");
+}
+
+void RenderWindow::OnAppDidEnterBackground() {
+    LogDebug(sTag, "OnAppDidEnterBackground");
+}
+
+void RenderWindow::OnAppWillEnterForeground() {
+    LogDebug(sTag, "OnAppWillEnterForeground");
+}
+
+void RenderWindow::OnAppDidEnterForeground() {
+    LogDebug(sTag, "OnAppDidEnterForeground");
+}
 
 }  // namespace engine

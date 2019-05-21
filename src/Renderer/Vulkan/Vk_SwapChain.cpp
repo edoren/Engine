@@ -1,5 +1,6 @@
 #include <Math/Math.hpp>
 #include <System/LogManager.hpp>
+#include <System/StringFormat.hpp>
 
 #include "Vk_Context.hpp"
 #include "Vk_SwapChain.hpp"
@@ -139,6 +140,10 @@ bool Vk_SwapChain::Create(Vk_Surface& surface, uint32 width, uint32 height) {
         LogFatal(sTag, "Could not create swap chain");
         return false;
     }
+
+    LogInfo(sTag, "SwapChain created with presentation mode: {}"_format(
+                      desired_present_mode));
+
     if (old_swap_chain) {
         vkDestroySwapchainKHR(device, old_swap_chain, nullptr);
     }

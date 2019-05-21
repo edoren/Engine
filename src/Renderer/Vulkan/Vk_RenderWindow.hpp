@@ -42,7 +42,7 @@ class Vk_TextureManager;
 class VULKAN_PLUGIN_API Vk_RenderWindow : public RenderWindow {
     using CommandType =
         Function<void(uint32, VkCommandBuffer&, VkPipelineLayout&),
-                 LAMBDA_FUNCTION_SIZE(16)>;
+                 LAMBDA_FUNCTION_SIZE(20)>;
 
 public:
     Vk_RenderWindow();
