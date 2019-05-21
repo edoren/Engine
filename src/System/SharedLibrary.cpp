@@ -1,5 +1,7 @@
 #include <System/SharedLibrary.hpp>
 
+#include <System/FileSystem.hpp>
+
 #if PLATFORM_IS(PLATFORM_WINDOWS)
 #include <windows.h>
 #define LIBRARY_PREFIX ""
@@ -40,6 +42,11 @@ bool SharedLibrary::Load() {
     m_handle = LoadLibraryW(wide_string.data());
 #elif PLATFORM_IS(PLATFORM_LINUX | PLATFORM_MACOS | PLATFORM_ANDROID)
     auto utf8string = lib_name.ToUtf8();
+    FileSystem& fs = FileSystem::GetInstance();
+    String lib_exe_dir = fs.Join(fs.ExecutableDirectory(), lib_name);
+    if (fs.FileExists(lib_exe_dir)) {
+        utf8string = lib_exe_dir.ToUtf8();
+    }
     m_handle = dlopen(utf8string.data(), RTLD_LAZY | RTLD_LOCAL);
 #endif
     return (m_handle != nullptr);
