@@ -94,16 +94,15 @@ bool Vk_Context::Initialize() {
     // Add the required validation layers
     if (m_validation_layers_enabled) {
 #if PLATFORM_IS(PLATFORM_ANDROID)
-        // NDK r15 uses Vulkan API 1.0.13
-        m_validation_layers.push_back("VK_LAYER_GOOGLE_threading");
-        m_validation_layers.push_back("VK_LAYER_LUNARG_parameter_validation");
-        m_validation_layers.push_back("VK_LAYER_LUNARG_object_tracker");
-        m_validation_layers.push_back("VK_LAYER_LUNARG_core_validation");
-        m_validation_layers.push_back("VK_LAYER_LUNARG_image");
-        m_validation_layers.push_back("VK_LAYER_LUNARG_swapchain");
-        m_validation_layers.push_back("VK_LAYER_GOOGLE_unique_objects");
+        m_validation_layers = {
+            "VK_LAYER_GOOGLE_threading",
+            "VK_LAYER_LUNARG_parameter_validation",
+            "VK_LAYER_LUNARG_object_tracker",
+            "VK_LAYER_LUNARG_core_validation",
+            "VK_LAYER_GOOGLE_unique_objects"
+        };
 #else
-        m_validation_layers.push_back("VK_LAYER_LUNARG_standard_validation");
+        m_validation_layers = {"VK_LAYER_LUNARG_standard_validation"};
 #endif
     }
 
