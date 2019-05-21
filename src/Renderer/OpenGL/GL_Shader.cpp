@@ -64,7 +64,7 @@ bool GL_Shader::LoadFromMemory(const byte* source, std::size_t source_size,
 
     String source_complete = sShaderVersion + '\n';
 #ifdef OPENGL_USE_GLES
-    if (type == ShaderType::Fragment) {
+    if (type == ShaderType::FRAGMENT) {
         source_complete += sFragmentPrecision + '\n';
     }
 #endif
