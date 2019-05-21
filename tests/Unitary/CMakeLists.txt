@@ -8,7 +8,33 @@ set(TESTS_SOURCES
 )
 
 add_executable(UnitaryTests ${TESTS_SOURCES})
-target_link_libraries(UnitaryTests ${ENGINE_LIBRARY})
+if(OS_WINDOWS)
+    target_link_libraries(UnitaryTests
+        ${SDL2MAIN_LIBRARY}
+        ${ENGINE_LIBRARY}
+        ${SDL2_LIBRARY}
+        ${ASSIMP_LIBRARY}
+    )
+elseif(OS_LINUX)
+    target_link_libraries(UnitaryTests
+        ${SDL2MAIN_LIBRARY}
+        "-Wl,--whole-archive"
+        ${ENGINE_LIBRARY}
+        "-Wl,--no-whole-archive"
+        ${SDL2_LIBRARY}
+        ${ASSIMP_LIBRARY}
+    )
+elseif(OS_ANDROID)
+    target_link_libraries(UnitaryTests
+        # ${SDL2MAIN_LIBRARY}
+        ${ENGINE_LIBRARY}
+    )
+elseif(OS_MACOS)
+    target_link_libraries(UnitaryTests
+        # ${SDL2MAIN_LIBRARY}
+        ${ENGINE_LIBRARY}
+    )
+endif()
 
 set_property(TARGET UnitaryTests PROPERTY FOLDER "Tests")
 

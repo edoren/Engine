@@ -14,6 +14,8 @@ void LogGLError(const char* file, int line, const char* call);
 #ifdef LOG_GL_ERRORS
 #define GL_CALL(call)                          \
     {                                          \
+        /* Clear any old error */              \
+        glGetError();                          \
         call;                                  \
         LogGLError(__FILE__, __LINE__, #call); \
     }

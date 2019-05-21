@@ -142,6 +142,17 @@ class CMakeBuildGenerator:
                       "have set the ANDROID_NDK_HOME environment variable and "
                       "that your have NDK r12 or later.")
 
+        # Copy the thirdparty .so Release libraries
+        prebuilt_dir = FileUtils.join(thirdparty_dir, "prebuilt", "android")
+        prebuilt_archs_dir = [o for o in os.listdir(prebuilt_dir)
+                              if os.path.isdir(FileUtils.join(prebuilt_dir, o))]
+        for arch_dir in prebuilt_archs_dir:
+            jni_arch_dir = FileUtils.join(jniLibs_dir, arch_dir)
+            prebuilt_arch_dir = FileUtils.join(prebuilt_dir, arch_dir, "Release")
+            soLibs = FileUtils.glob(FileUtils.join(prebuilt_arch_dir, "*.so"))
+            for soLib in soLibs:
+                FileUtils.cp(soLib, jni_arch_dir)
+
     def configure_desktop(self):
         pass
 
