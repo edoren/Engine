@@ -62,6 +62,8 @@ private:
     void SetAttributeValue(const String& name, const void* value,
                            size_t offset = 0);
 
+    void SetDataAtOffset(const void* data, size_t size, size_t offset);
+
     size_t GetTypeSize(UniformBufferObject::DataType type);
     size_t GetTypeAllignment(UniformBufferObject::DataType type);
 
@@ -70,8 +72,11 @@ private:
     size_t m_dynamic_alignment;
 
     LayoutType m_layout_type;
+
     byte* m_buffer;
     size_t m_buffer_size;
+    bool m_buffer_changed;
+
     std::vector<Item> m_attributes;
     std::vector<size_t> m_attributes_alligned_offset;
 };

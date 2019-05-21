@@ -45,7 +45,9 @@ void GL_Renderer::Shutdown() {
 void GL_Renderer::AdvanceFrame() {
     Renderer::AdvanceFrame();
     // TODO: User enable depth test
-    GL_CALL(glEnable(GL_DEPTH_TEST));
+    if (!glIsEnabled(GL_DEPTH_TEST)) {
+        GL_CALL(glEnable(GL_DEPTH_TEST));
+    }
 }
 
 const String& GL_Renderer::GetName() const {
