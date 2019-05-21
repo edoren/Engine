@@ -14,6 +14,22 @@
 
 namespace engine {
 
+namespace {
+
+template <typename A, typename B, size_t SizeA = sizeof(A),
+          size_t SizeB = sizeof(B)>
+void check_size() {
+    static_assert(SizeA <= SizeB, "Size is off!");
+}
+
+template <typename A, typename B, size_t AlignA = alignof(A),
+          size_t AlignB = alignof(B)>
+void check_align() {
+    static_assert(AlignA <= AlignB, "Align is off!");
+}
+
+}  // namespace
+
 template <typename, size_t MaxSize = LAMBDA_FUNCTION_SIZE(LAMBDA_DEFAULT_SIZE)>
 class Function {
     static_assert(sizeof(MaxSize) > 0, "MaxSize must be at least 1");
@@ -51,8 +67,8 @@ public:
                               Function<Ret(Args...), MaxSize>>::value>::type>
     Function(T&& f) : m_data(), m_invoker(nullptr), m_manager(nullptr) {
         using lambda_type = typename std::decay<T>::type;
-        static_assert(alignof(lambda_type) <= alignof(Storage), "");
-        static_assert(sizeof(lambda_type) <= sizeof(Storage), "");
+        check_align<lambda_type, Storage>();
+        check_size<lambda_type, Storage>();
         new (&m_data) lambda_type(std::forward<T>(f));
         m_invoker = &CallFunction<lambda_type>;
         m_manager = &ManageFunction<lambda_type>;
@@ -146,7 +162,11 @@ private:
     using Invoker = Ret (*)(const void*, Args&&...);
     using Manager = void (*)(void*, const void*, Operation);
     using Storage =
+#if PLATFORM_IS(PLATFORM_ANDROID)
+        typename std::aligned_storage<MaxSize, 16>::type;
+#else
         typename std::aligned_storage<MaxSize, alignof(std::max_align_t)>::type;
+#endif
 
     Storage m_data;     ///< Stores a copy of the Functor
     Invoker m_invoker;  ///< Pointer to the caller function for m_data
