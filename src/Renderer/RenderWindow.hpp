@@ -21,13 +21,13 @@ public:
 
     virtual bool Create(const String& name, const math::ivec2& size);
 
-    virtual void Destroy() = 0;
+    virtual void Destroy();
 
-    virtual void Reposition(int left, int top) = 0;
+    void Reposition(int left, int top);
 
-    virtual void Resize(int width, int height) = 0;
+    virtual void Resize(int width, int height);
 
-    virtual void SetFullScreen(bool fullscreen, bool is_fake = false) = 0;
+    virtual void SetFullScreen(bool fullscreen, bool is_fake = false);
 
     virtual void SetVSyncEnabled(bool vsync) = 0;
 
@@ -37,7 +37,7 @@ public:
     // RenderTarget
     virtual void Clear(const Color& color) = 0;
 
-    virtual bool IsVisible() = 0;
+    bool IsVisible();
 
     // RenderTarget
     virtual void Draw(const Mesh& mesh, const RenderStates& states);
@@ -71,6 +71,8 @@ protected:
     virtual void OnAppDidEnterForeground();
 
 protected:
+    void* m_window;
+
     String m_name;
     math::ivec2 m_size;  // If updated UpdateProjectionMatrix should be called
     bool m_is_fullscreen;
@@ -81,6 +83,13 @@ protected:
     const Camera* m_active_camera;
 
 private:
+    void _OnWindowResized(const math::ivec2& size);
+
+    void _OnAppWillEnterBackground();
+    void _OnAppDidEnterBackground();
+    void _OnAppWillEnterForeground();
+    void _OnAppDidEnterForeground();
+
     SignalConnection on_window_resize_connection;
     SignalConnection on_app_will_enter_background_connection;
     SignalConnection on_app_did_enter_background_connection;

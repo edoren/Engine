@@ -160,6 +160,14 @@ public:
         return *this;
     }
 
+    inline bool operator==(const Vector2<T>& v) {
+        return (x == v.x) && (y == v.y);
+    }
+
+    inline bool operator!=(const Vector2<T>& v) {
+        return !(*this == v);
+    }
+
     inline void Pack(Vector2Packed<T>* vector) const {
         vector->x = x;
         vector->y = y;

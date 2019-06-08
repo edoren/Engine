@@ -36,8 +36,7 @@ const math::mat4 sClipMatrix = {
 }  // namespace
 
 Vk_RenderWindow::Vk_RenderWindow()
-      : m_window(nullptr),
-        m_surface(),
+      : m_surface(),
         m_graphics_queue(nullptr),
         m_present_queue(nullptr),
         m_swapchain(),
@@ -53,8 +52,8 @@ Vk_RenderWindow::~Vk_RenderWindow() {
 bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
     // Create the window
     math::ivec2 initial_pos(SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-    uint32 window_flags(SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE |
-                        SDL_WINDOW_VULKAN);
+    uint32 window_flags(SDL_WINDOW_VULKAN | SDL_WINDOW_SHOWN |
+                        SDL_WINDOW_RESIZABLE);
 
     m_window = SDL_CreateWindow(name.GetData(), initial_pos.x, initial_pos.y,
                                 size.x, size.y, window_flags);
@@ -69,10 +68,9 @@ bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
     m_present_queue = m_graphics_queue;
 
     // Update the base class attributes
-    m_name = name;
-    OnWindowResized(m_size);  // This update m_size and the projection matrix
+    RenderWindow::Create(name, size);
 
-    if (!m_surface.Create(m_window)) {
+    if (!m_surface.Create(reinterpret_cast<SDL_Window*>(m_window))) {
         LogFatal(sTag, "Could not create the Surface");
         return false;
     }
@@ -166,39 +164,15 @@ void Vk_RenderWindow::Destroy() {
 
     m_surface.Destroy();
 
-    if (m_window) {
-        SDL_DestroyWindow(m_window);
-        m_window = VK_NULL_HANDLE;
-    }
-}
-
-void Vk_RenderWindow::Reposition(int left, int top) {
-    if (m_window) {
-        // TODO check errors
-        SDL_SetWindowPosition(m_window, left, top);
-    }
+    RenderWindow::Destroy();
 }
 
 void Vk_RenderWindow::Resize(int width, int height) {
-    // TODO check errors
-    if (m_window && !IsFullScreen()) {
-        SDL_SetWindowSize(m_window, width, height);
-        OnWindowResized(m_size);
-    }
+    RenderWindow::Resize(width, height);
 }
 
 void Vk_RenderWindow::SetFullScreen(bool fullscreen, bool is_fake) {
-    // TODO check errors
-    if (m_window) {
-        m_is_fullscreen = fullscreen;
-        uint32 flag = 0;
-        if (fullscreen) {
-            flag = (is_fake) ? SDL_WINDOW_FULLSCREEN_DESKTOP
-                             : SDL_WINDOW_FULLSCREEN;
-        }
-        SDL_SetWindowFullscreen(m_window, flag);
-        OnWindowResized(m_size);
-    }
+    RenderWindow::SetFullScreen(fullscreen, is_fake);
 }
 
 void Vk_RenderWindow::SetVSyncEnabled(bool /*vsync*/) {
@@ -315,12 +289,6 @@ void Vk_RenderWindow::SwapBuffers() {
 void Vk_RenderWindow::Clear(const Color& /*color*/) {  // RenderTarget
     // GL_CALL(glClearColor(color.r, color.g, color.b, color.a));
     // GL_CALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
-}
-
-bool Vk_RenderWindow::IsVisible() {
-    uint32 flags = SDL_WINDOW_HIDDEN | SDL_WINDOW_MINIMIZED;
-    uint32 mask = SDL_GetWindowFlags(m_window);
-    return (mask & flags) == 0;
 }
 
 void Vk_RenderWindow::AddCommandExecution(CommandType&& func) {
@@ -1144,18 +1112,11 @@ bool Vk_RenderWindow::CreateDepthResources() {
 }
 
 void Vk_RenderWindow::OnWindowResized(const math::ivec2& size) {
-    ENGINE_UNUSED(size);
-
-    // Get the new window size from the active window
-    SDL_GetWindowSize(m_window, &m_size.x, &m_size.y);
-    // Update the base class
-    RenderWindow::OnWindowResized(m_size);
-
     if (m_surface.GetHandle() != VK_NULL_HANDLE) {
         // Recreate the depth image
         CreateDepthResources();
         // Recreate the Vulkan Swapchain
-        m_swapchain.Create(m_surface, m_size.x, m_size.y);
+        m_swapchain.Create(m_surface, size.x, size.y);
         m_command_work_queue.Clear();
     }
 }
@@ -1183,7 +1144,7 @@ void Vk_RenderWindow::OnAppDidEnterForeground() {
     if (device) {
         vkDeviceWaitIdle(device);
 
-        if (!m_surface.Create(m_window)) {
+        if (!m_surface.Create(reinterpret_cast<SDL_Window*>(m_window))) {
             LogFatal(sTag, "Could not create the Surface");
             return;
         }

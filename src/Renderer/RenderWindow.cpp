@@ -3,6 +3,9 @@
 #include <Renderer/Mesh.hpp>
 #include <Renderer/RenderWindow.hpp>
 #include <System/LogManager.hpp>
+#include <System/StringFormat.hpp>
+
+#include <SDL2.h>
 
 namespace engine {
 
@@ -13,7 +16,8 @@ const String sTag("RenderWindow");
 }  // namespace
 
 RenderWindow::RenderWindow()
-      : m_name(),
+      : m_window(nullptr),
+        m_name(),
         m_size(),
         m_is_fullscreen(false),
         m_is_vsync_enable(false),
@@ -26,20 +30,20 @@ RenderWindow::RenderWindow()
     auto& input = InputManager::GetInstance();
 
     on_window_resize_connection =
-        input.OnWindowResized.Connect(*this, &RenderWindow::OnWindowResized);
+        input.OnWindowResized.Connect(*this, &RenderWindow::_OnWindowResized);
 
     on_app_will_enter_background_connection =
         input.OnAppWillEnterBackground.Connect(
-            *this, &RenderWindow::OnAppWillEnterBackground);
+            *this, &RenderWindow::_OnAppWillEnterBackground);
     on_app_did_enter_background_connection =
         input.OnAppDidEnterBackground.Connect(
-            *this, &RenderWindow::OnAppDidEnterBackground);
+            *this, &RenderWindow::_OnAppDidEnterBackground);
     on_app_will_enter_foreground_connection =
         input.OnAppWillEnterForeground.Connect(
-            *this, &RenderWindow::OnAppWillEnterForeground);
+            *this, &RenderWindow::_OnAppWillEnterForeground);
     on_app_did_enter_foreground_connection =
         input.OnAppDidEnterForeground.Connect(
-            *this, &RenderWindow::OnAppDidEnterForeground);
+            *this, &RenderWindow::_OnAppDidEnterForeground);
 }
 
 RenderWindow::~RenderWindow() {
@@ -60,11 +64,56 @@ RenderWindow::~RenderWindow() {
 bool RenderWindow::Create(const String& name, const math::ivec2& size) {
     ENGINE_UNUSED(size);
 
+    LogInfo(sTag, "Creating Window '{}' with size: {}x{}"_format(name, size.x,
+                                                                 size.y));
+
     // Update the base class attributes
     m_name = name;
-    OnWindowResized(m_size);  // This update m_size and the projection matrix
+    m_size = size;
+    UpdateProjectionMatrix();
 
     return true;
+}
+
+void RenderWindow::Destroy() {
+    if (SDL_Window* window = reinterpret_cast<SDL_Window*>(m_window)) {
+        SDL_DestroyWindow(window);
+        m_window = nullptr;
+    }
+}
+
+void RenderWindow::Reposition(int left, int top) {
+    if (SDL_Window* window = reinterpret_cast<SDL_Window*>(m_window)) {
+        SDL_SetWindowPosition(window, left, top);
+    }
+}
+
+void RenderWindow::Resize(int width, int height) {
+    // TODO check errors
+    SDL_Window* window = reinterpret_cast<SDL_Window*>(m_window);
+    if (window && !IsFullScreen()) {
+        SDL_SetWindowSize(window, width, height);
+
+        // Update the base class attributes
+        _OnWindowResized(m_size);
+    }
+}
+
+void RenderWindow::SetFullScreen(bool fullscreen, bool is_fake) {
+    // TODO: check errors
+    if (SDL_Window* window = reinterpret_cast<SDL_Window*>(m_window)) {
+        Uint32 flag = 0;
+        if (fullscreen) {
+            flag = (is_fake) ? SDL_WINDOW_FULLSCREEN_DESKTOP
+                             : SDL_WINDOW_FULLSCREEN;
+        }
+        SDL_SetWindowFullscreen(window, flag);
+
+        // Update the base class attributes
+        _OnWindowResized(m_size);
+        SDL_SetWindowSize(window, m_size.x, m_size.y);
+        m_is_fullscreen = fullscreen;
+    }
 }
 
 void RenderWindow::Draw(const Mesh& mesh, const RenderStates& states) {
@@ -111,25 +160,59 @@ void RenderWindow::UpdateProjectionMatrix() {
     m_projection = math::Perspective(fov, aspect_ratio, z_near, z_far);
 }
 
-void RenderWindow::OnWindowResized(const math::ivec2& size) {
-    m_size = size;
-    UpdateProjectionMatrix();
+void RenderWindow::OnWindowResized(const math::ivec2&) {}
+
+void RenderWindow::OnAppWillEnterBackground() {}
+
+void RenderWindow::OnAppDidEnterBackground() {}
+
+void RenderWindow::OnAppWillEnterForeground() {}
+
+void RenderWindow::OnAppDidEnterForeground() {}
+
+bool RenderWindow::IsVisible() {
+    Uint32 flags = SDL_WINDOW_HIDDEN | SDL_WINDOW_MINIMIZED;
+    Uint32 mask = SDL_GetWindowFlags(reinterpret_cast<SDL_Window*>(m_window));
+    return (mask & flags) == 0;
 }
 
-void RenderWindow::OnAppWillEnterBackground() {
+void RenderWindow::_OnWindowResized(const math::ivec2& size) {
+    ENGINE_UNUSED(size);
+
+    if (IsFullScreen()) {
+        return;
+    }
+
+    // Get the new window size from the active window
+    math::ivec2 new_size;
+    SDL_GetWindowSize(reinterpret_cast<SDL_Window*>(m_window), &new_size.x,
+                      &new_size.y);
+    if (new_size != m_size) {
+        m_size = new_size;
+        LogDebug(sTag, "OnWindowResized {}x{}"_format(m_size.x, m_size.y));
+        UpdateProjectionMatrix();
+        OnWindowResized(m_size);
+    }
+}
+
+void RenderWindow::_OnAppWillEnterBackground() {
     LogDebug(sTag, "OnAppWillEnterBackground");
+    OnAppWillEnterBackground();
 }
 
-void RenderWindow::OnAppDidEnterBackground() {
+void RenderWindow::_OnAppDidEnterBackground() {
     LogDebug(sTag, "OnAppDidEnterBackground");
+    OnAppDidEnterBackground();
 }
 
-void RenderWindow::OnAppWillEnterForeground() {
+void RenderWindow::_OnAppWillEnterForeground() {
     LogDebug(sTag, "OnAppWillEnterForeground");
+    OnAppWillEnterForeground();
 }
 
-void RenderWindow::OnAppDidEnterForeground() {
+void RenderWindow::_OnAppDidEnterForeground() {
     LogDebug(sTag, "OnAppDidEnterForeground");
+    OnAppDidEnterForeground();
 }
 
 }  // namespace engine

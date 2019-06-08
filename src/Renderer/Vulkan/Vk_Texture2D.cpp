@@ -74,7 +74,8 @@ bool Vk_Texture2D::CreateSampler() {
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.GetVulkanDevice();
 
-    VkResult result = VK_SUCCESS;
+    VkBool32 anisotropyEnable = context.GetEnabledFeatures().samplerAnisotropy;
+    float maxAnisotropy = 16.0f;
 
     // TODO: This should be configurable from the Renderer instance
     VkSamplerCreateInfo sampler_create_info = {
@@ -88,8 +89,8 @@ bool Vk_Texture2D::CreateSampler() {
         VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,    // addressModeV
         VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,    // addressModeW
         0.0f,                                     // mipLodBias
-        VK_FALSE,                                 // anisotropyEnable
-        1.0f,                                     // maxAnisotropy
+        anisotropyEnable,                         // anisotropyEnable
+        maxAnisotropy,                            // maxAnisotropy
         VK_FALSE,                                 // compareEnable
         VK_COMPARE_OP_ALWAYS,                     // compareOp
         0.0f,                                     // minLod
@@ -98,7 +99,8 @@ bool Vk_Texture2D::CreateSampler() {
         VK_FALSE                                  // unnormalizedCoordinates
     };
 
-    result = vkCreateSampler(device, &sampler_create_info, nullptr, &m_sampler);
+    VkResult result =
+        vkCreateSampler(device, &sampler_create_info, nullptr, &m_sampler);
 
     return result == VK_SUCCESS;
 }

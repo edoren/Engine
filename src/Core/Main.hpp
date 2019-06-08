@@ -15,6 +15,7 @@
 namespace engine {
 
 class App;
+class AsyncTaskRunner;
 
 class ENGINE_API Main : public Singleton<Main> {
 public:
@@ -48,11 +49,7 @@ public:
 
     RendererFactory* GetActiveRendererFactoryPtr();
 
-    ////////////////////////////////////////////////////////////
-    /// @brief Unload all the loaded plugins
-    ///
-    ////////////////////////////////////////////////////////////
-    void UnloadPlugins();
+    void ExecuteAsync(Function<void()>&& task);
 
     ////////////////////////////////////////////////////////////
     /// @brief Override standard Singleton retrieval.
@@ -125,6 +122,7 @@ private:
     InputManager* m_input_manager;
     ModelManager* m_model_manager;
     SceneManager* m_scene_manager;
+    AsyncTaskRunner* m_async_task_runner;
 };
 
 }  // namespace engine

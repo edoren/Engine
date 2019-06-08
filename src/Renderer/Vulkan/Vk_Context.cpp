@@ -81,10 +81,15 @@ Vk_Context::Vk_Context()
         m_graphics_queue_cmd_pool(VK_NULL_HANDLE),
         m_ubo_descriptor_pool(VK_NULL_HANDLE),
         m_debug_report_callback(VK_NULL_HANDLE),
-        m_validation_layers_enabled(true),
+#ifdef ENGINE_DEBUG
+        m_validation_layers_enabled(false),
+#else
+        m_validation_layers_enabled(false),
+#endif
         m_validation_layers(),
         m_instance_extensions(),
-        m_device_extensions() {}
+        m_device_extensions() {
+}
 
 Vk_Context::~Vk_Context() {
     Shutdown();
@@ -95,12 +100,9 @@ bool Vk_Context::Initialize() {
     if (m_validation_layers_enabled) {
 #if PLATFORM_IS(PLATFORM_ANDROID)
         m_validation_layers = {
-            "VK_LAYER_GOOGLE_threading",
-            "VK_LAYER_LUNARG_parameter_validation",
-            "VK_LAYER_LUNARG_object_tracker",
-            "VK_LAYER_LUNARG_core_validation",
-            "VK_LAYER_GOOGLE_unique_objects"
-        };
+            "VK_LAYER_GOOGLE_threading", "VK_LAYER_LUNARG_parameter_validation",
+            "VK_LAYER_LUNARG_object_tracker", "VK_LAYER_LUNARG_core_validation",
+            "VK_LAYER_GOOGLE_unique_objects"};
 #else
         m_validation_layers = {"VK_LAYER_LUNARG_standard_validation"};
 #endif
@@ -246,6 +248,10 @@ VkDescriptorPool& Vk_Context::GetUBODescriptorPool() {
     return m_ubo_descriptor_pool;
 }
 
+const VkPhysicalDeviceFeatures& Vk_Context::GetEnabledFeatures() {
+    return m_enabled_features;
+}
+
 bool Vk_Context::CreateInstance() {
     // Define the application information
     VkApplicationInfo appInfo = {
@@ -331,6 +337,11 @@ bool Vk_Context::CreateDevice() {
         queue_priorities.data()                        // pQueuePriorities
     });
 
+    // TODO: Configure this in runtime
+    m_enabled_features = {};
+    m_enabled_features.samplerAnisotropy =
+        m_physical_device.features.samplerAnisotropy;
+
     // Define all the information for the logical device
     VkDeviceCreateInfo device_create_info = {
         VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,            // sType
@@ -343,7 +354,7 @@ bool Vk_Context::CreateDevice() {
         static_cast<uint32>(
             m_device_extensions.size()),  // enabledExtensionCount
         m_device_extensions.data(),       // ppEnabledExtensionNames
-        nullptr                           // pEnabledFeatures
+        &m_enabled_features               // pEnabledFeatures
     };
 
     // Create the logical device based on the retrived info
