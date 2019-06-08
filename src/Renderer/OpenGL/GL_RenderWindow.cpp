@@ -17,7 +17,7 @@ const String sTag("GL_RenderWindow");
 
 }  // namespace
 
-GL_RenderWindow::GL_RenderWindow() : m_window(nullptr), m_context(nullptr) {}
+GL_RenderWindow::GL_RenderWindow() : m_context(nullptr) {}
 
 GL_RenderWindow::~GL_RenderWindow() {
     Destroy();
@@ -39,8 +39,8 @@ bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
 #endif
 
     math::ivec2 initial_pos(SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-    Uint32 window_flags =
-        SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
+    Uint32 window_flags(SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN |
+                        SDL_WINDOW_RESIZABLE);
     m_window = SDL_CreateWindow(name.GetData(), initial_pos.x, initial_pos.y,
                                 size.x, size.y, window_flags);
     if (!m_window) {
@@ -48,7 +48,7 @@ bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
         return false;
     }
 
-    m_context = SDL_GL_CreateContext(m_window);
+    m_context = SDL_GL_CreateContext(reinterpret_cast<SDL_Window*>(m_window));
     if (!m_context) {
         LogError(sTag, SDL_GetError());
         return false;
@@ -114,6 +114,7 @@ bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
     // TODO: User enable depth test
     GL_CALL(glEnable(GL_DEPTH_TEST));
 
+    // Update the base class attributes
     RenderWindow::Create(name, size);
 
     return true;
@@ -135,44 +136,19 @@ void GL_RenderWindow::Destroy() {
         SDL_GL_DeleteContext(m_context);
         m_context = nullptr;
     }
-    if (m_window) {
-        SDL_DestroyWindow(m_window);
-        m_window = nullptr;
-    }
-}
-
-void GL_RenderWindow::Reposition(int left, int top) {
-    if (m_window) {
-        SDL_SetWindowPosition(m_window, left, top);
-    }
+    RenderWindow::Destroy();
 }
 
 void GL_RenderWindow::Resize(int width, int height) {
-    if (m_window && !IsFullScreen()) {
-        SDL_SetWindowSize(m_window, width, height);
-
-        // Update the base class attributes
-        // TMP Update the ViewPort
-        SDL_GetWindowSize(m_window, &m_size.x, &m_size.y);
-        GL_CALL(glViewport(0, 0, m_size.x, m_size.y));
-    }
+    RenderWindow::Resize(width, height);
+    // TODO: TMP Update the ViewPort
+    GL_CALL(glViewport(0, 0, m_size.x, m_size.y));
 }
 
 void GL_RenderWindow::SetFullScreen(bool fullscreen, bool is_fake) {
-    if (m_window) {
-        m_is_fullscreen = fullscreen;
-        Uint32 flag = 0;
-        if (fullscreen) {
-            flag = (is_fake) ? SDL_WINDOW_FULLSCREEN_DESKTOP
-                             : SDL_WINDOW_FULLSCREEN;
-        }
-        SDL_SetWindowFullscreen(m_window, flag);
-
-        // Update the base class attributes
-        // TMP Update the ViewPort
-        SDL_GetWindowSize(m_window, &m_size.x, &m_size.y);
-        GL_CALL(glViewport(0, 0, m_size.x, m_size.y));
-    }
+    RenderWindow::SetFullScreen(fullscreen, is_fake);
+    // TODO: TMP Update the ViewPort
+    GL_CALL(glViewport(0, 0, m_size.x, m_size.y));
 }
 
 void GL_RenderWindow::SetVSyncEnabled(bool vsync) {
@@ -184,8 +160,6 @@ void GL_RenderWindow::SetVSyncEnabled(bool vsync) {
 }
 
 void GL_RenderWindow::SwapBuffers() {
-    // RenderWindow::SwapBuffers();
-
     // Update static uniform buffer
     GL_Shader* shader = GL_ShaderManager::GetInstance().GetActiveShader();
     const Camera* active_camera = GetActiveCamera();
@@ -203,28 +177,16 @@ void GL_RenderWindow::SwapBuffers() {
     ubo.SetAttributeValue("lightPosition", light_position);
     ///
 
-    SDL_GL_SwapWindow(m_window);
+    SDL_GL_SwapWindow(reinterpret_cast<SDL_Window*>(m_window));
 }
 
 void GL_RenderWindow::OnWindowResized(const math::ivec2& size) {
     ENGINE_UNUSED(size);
-
-    // Get the new window size from the active window
-    SDL_GetWindowSize(m_window, &m_size.x, &m_size.y);
-
-    // Update the base class
-    RenderWindow::OnWindowResized(m_size);
 }
 
 void GL_RenderWindow::Clear(const Color& color) {  // RenderTarget
     GL_CALL(glClearColor(color.r, color.g, color.b, color.a));
     GL_CALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
-}
-
-bool GL_RenderWindow::IsVisible() {
-    Uint32 flags = SDL_WINDOW_HIDDEN | SDL_WINDOW_MINIMIZED;
-    Uint32 mask = SDL_GetWindowFlags(m_window);
-    return (mask & flags) == 0;
 }
 
 }  // namespace engine

@@ -34,16 +34,8 @@ bool Vk_SwapChain::Create(Vk_Surface& surface, uint32 width, uint32 height) {
         vkDeviceWaitIdle(device);
     }
 
-    // Destroy the old ImageViews
-    for (auto& image : m_images) {
-        // Image handles are managed by the swapchain
-        // and must be destroyed my it
-        image.GetHandle() = VK_NULL_HANDLE;
-    }
-    m_images.clear();
-
     // Get the Surface capabilities
-    VkSurfaceCapabilitiesKHR surface_capabilities;
+    VkSurfaceCapabilitiesKHR surface_capabilities = {};
 
     result = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
         physical_device, surface.GetHandle(), &surface_capabilities);
@@ -51,6 +43,14 @@ bool Vk_SwapChain::Create(Vk_Surface& surface, uint32 width, uint32 height) {
         LogError(sTag, "Could not check presentation surface capabilities");
         return false;
     }
+
+    // Destroy the old ImageViews
+    for (auto& image : m_images) {
+        // Image handles are managed by the swapchain
+        // and must be destroyed my it
+        image.GetHandle() = VK_NULL_HANDLE;
+    }
+    m_images.clear();
 
     // Query all the supported Surface formats
     uint32 formats_count = 0;

@@ -53,8 +53,6 @@ public:
 
     void Destroy(void) override;
 
-    void Reposition(int left, int top) override;
-
     void Resize(int width, int height) override;
 
     void SetFullScreen(bool fullscreen, bool is_fake) override;
@@ -64,8 +62,6 @@ public:
     void SwapBuffers() override;  // RenderTarget
 
     void Clear(const Color& color) override;  // RenderTarget
-
-    bool IsVisible() override;
 
     void AddCommandExecution(CommandType&& func);
 
@@ -101,8 +97,6 @@ private:
     virtual void OnAppDidEnterForeground() override;
 
 private:
-    SDL_Window* m_window;
-
     Vk_Surface m_surface;
 
     QueueParameters* m_graphics_queue;

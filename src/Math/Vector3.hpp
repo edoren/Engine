@@ -162,6 +162,14 @@ public:
         return *this;
     }
 
+    inline bool operator==(const Vector3<T>& v) {
+        return (x == v.x) && (y == v.y) && (z == v.z);
+    }
+
+    inline bool operator!=(const Vector3<T>& v) {
+        return !(*this == v);
+    }
+
     inline Vector2<T> xy() const {
         return Vector2<T>(m_data.xy());
     }

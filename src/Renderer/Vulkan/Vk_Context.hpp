@@ -29,6 +29,8 @@ public:
 
     VkDescriptorPool& GetUBODescriptorPool();
 
+    const VkPhysicalDeviceFeatures& GetEnabledFeatures();
+
     ////////////////////////////////////////////////////////////
     /// @brief Override standard Singleton retrieval.
     ///
@@ -83,6 +85,8 @@ private:
     VkInstance m_instance;
     VkDevice m_device;
     PhysicalDeviceParameters m_physical_device;
+
+    VkPhysicalDeviceFeatures m_enabled_features;
 
     QueueParameters m_graphics_queue;
 

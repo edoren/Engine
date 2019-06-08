@@ -285,10 +285,10 @@ bool Vk_Shader::CreateUniformBuffers() {
     // Dynamic UBO memory buffer
     PhysicalDeviceParameters& physical_device =
         Vk_Context::GetInstance().GetPhysicalDevice();
-    size_t minUboAlignment =
-            static_cast<size_t>(physical_device.properties.limits.minUniformBufferOffsetAlignment);
+    size_t minUboAlignment = static_cast<size_t>(
+        physical_device.properties.limits.minUniformBufferOffsetAlignment);
 
-    m_ubo_dynamic.SetBufferSize(30 * 30, minUboAlignment);  // TODO: CHANGE THIS
+    m_ubo_dynamic.SetBufferSize(10 * 10, minUboAlignment);  // TODO: CHANGE THIS
 
     result &= m_uniform_buffers._dynamic.Create(
         m_ubo_dynamic.GetDataSize(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,

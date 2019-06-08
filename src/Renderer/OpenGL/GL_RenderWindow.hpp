@@ -18,8 +18,6 @@ public:
 
     void Destroy(void) override;
 
-    void Reposition(int left, int top) override;
-
     void Resize(int width, int height) override;
 
     void SetFullScreen(bool fullscreen, bool is_fake) override;
@@ -30,13 +28,10 @@ public:
 
     void Clear(const Color& color) override;  // Render Target
 
-    bool IsVisible() override;
-
 protected:
     virtual void OnWindowResized(const math::ivec2& size) override;
 
 private:
-    SDL_Window* m_window;
     SDL_GLContext m_context;
 };
 

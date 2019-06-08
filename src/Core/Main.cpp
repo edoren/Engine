@@ -3,11 +3,12 @@
 #include <Input/InputManager.hpp>
 #include <Renderer/ModelManager.hpp>
 #include <Renderer/RenderWindow.hpp>
+#include <Renderer/Scene.hpp>
 #include <Renderer/ShaderManager.hpp>
 #include <Renderer/TextureManager.hpp>
 #include <System/Stopwatch.hpp>
 
-#include <Renderer/Scene.hpp>
+#include <Util/AsyncTaskRunner.hpp>
 
 #include <SDL2.h>
 
@@ -52,10 +53,12 @@ Main::Main(int argc, char* argv[])
     m_input_manager = new InputManager();
     m_model_manager = new ModelManager();
     m_scene_manager = new SceneManager();
+    m_async_task_runner = new AsyncTaskRunner();
 }
 
 Main::~Main() {
     Shutdown();
+    delete m_async_task_runner;
     delete m_scene_manager;
     delete m_model_manager;
     delete m_input_manager;
@@ -269,6 +272,11 @@ RendererFactory* Main::GetActiveRendererFactoryPtr() {
     return GetActiveRenderer().GetRendererFactoryPtr();
 }
 
+
+void Main::ExecuteAsync(AsyncTaskRunner::Task&& task) {
+    m_async_task_runner->Execute(std::move(task));
+}
+
 void Main::InitializePlugins() {
     for (auto& plugin : m_plugins) {
         plugin->Initialize();
@@ -295,11 +303,11 @@ void Main::ShutdownPlugins() {
     }
     m_plugin_libs.clear();
 
-    // Now deal with any remaining plugins that were registered through other
-    // means
+    // Now deal with any remaining plugins that were registered through
+    // other means
     for (auto& plugin : m_plugins) {
-        // Note this does NOT call uninstallPlugin - this shutdown is for the
-        // detail objects
+        // Note this does NOT call uninstallPlugin - this shutdown is for
+        // the detail objects
         plugin->Uninstall();
     }
     m_plugins.clear();

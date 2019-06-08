@@ -2,6 +2,8 @@
 
 #include <Util/Prerequisites.hpp>
 
+namespace engine {
+
 template <typename T>
 class SafeQueue {
 public:
@@ -16,23 +18,23 @@ public:
     }
 
     void Clear() {
-        std::lock_guard<std::mutex> lk(mutex_);
+        std::lock_guard<std::mutex> lk(m_mutex);
         m_impl.clear();
     }
 
     void Push(const T& value) {
-        std::lock_guard<std::mutex> lk(mutex_);
+        std::lock_guard<std::mutex> lk(m_mutex);
         return m_impl.push_back(value);
     }
 
     void Push(T&& value) {
-        std::lock_guard<std::mutex> lk(mutex_);
+        std::lock_guard<std::mutex> lk(m_mutex);
         return m_impl.push_back(value);
     }
 
     template <class... Args>
     void Emplace(Args&&... args) {
-        std::lock_guard<std::mutex> lk(mutex_);
+        std::lock_guard<std::mutex> lk(m_mutex);
         return m_impl.emplace_back(std::forward<Args>(args)...);
     }
 
@@ -44,5 +46,7 @@ public:
 
 private:
     std::deque<T> m_impl;
-    std::mutex mutex_;
+    std::mutex m_mutex;
 };
+
+}  // namespace engine
