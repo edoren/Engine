@@ -1,5 +1,3 @@
-#pragma once
-
 #include <Util/Prerequisites.hpp>
 
 #include <Util/AsyncTaskRunner.hpp>
@@ -7,7 +5,11 @@
 namespace engine {
 
 AsyncTaskRunner::AsyncTaskRunner()
-      : m_workers(), m_is_running(true) {
+      : m_is_running(true),
+        m_work_queue(),
+        m_workers(),
+        m_signaler(),
+        m_mutex() {
     auto job = [this]() -> void {
         while (m_is_running) {
             std::unique_lock<std::mutex> lk(m_mutex);
