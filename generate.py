@@ -17,7 +17,7 @@ if platform.system() == "Windows":
 if platform.system() == "Linux":
     platform_choices = ["linux", "android"]
 if platform.system() == "Darwin":
-    platform_choices = ["macosx", "android"]
+    platform_choices = ["macos", "android"]
 
 parser = argparse.ArgumentParser(description="Generate Engine project files "
                                  "for the selected platform.")
@@ -174,7 +174,7 @@ class CMakeBuildGenerator:
             print("Could not create build directory")
             return
 
-        if self.app_platform in ["windows", "linux", "macosx"]:
+        if self.app_platform in ["windows", "linux", "macos"]:
             self.configure_desktop()
         elif self.app_platform == "android":
             self.configure_android()
@@ -192,7 +192,7 @@ class CMakeBuildGenerator:
             print("Error: CMake not installed")
             exit()
 
-        if self.app_platform in ["windows", "linux", "macosx"]:
+        if self.app_platform in ["windows", "linux", "macos"]:
             build_commands = [
                 [cmake_path, self.app_root_dir] + self.cmake_args,
                 [cmake_path, "--build", self.app_build_dir,
