@@ -1,5 +1,7 @@
 apply plugin: "com.android.application"
 
+def supportedArchitectures = ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"]
+
 android {
     compileSdkVersion 26
 
@@ -10,7 +12,7 @@ android {
         versionCode 1
         versionName "1.0"
         ndk {
-            abiFilters "armeabi-v7a"
+            abiFilters = supportedArchitectures
         }
         externalNativeBuild {
             cmake {
@@ -50,37 +52,35 @@ android {
     }
 }
 
-task runProcessAssets(type: Exec) {
-    commandLine "@PYTHON_EXECUTABLE@", "@APP_ROOT_DIRECTORY@/scripts/process_data.py", "@APP_ROOT_DIRECTORY@/data", "@APP_BUILD_DIRECTORY@/assets"
+tasks.register("runProcessAssets", Exec) {
+    commandLine "@PYTHON_EXECUTABLE@",
+                "@APP_ROOT_DIRECTORY@/scripts/process_data.py",
+                "@APP_ROOT_DIRECTORY@/data", "@APP_BUILD_DIRECTORY@/assets"
 }
 
-task copyRelease(type: Copy) {
+tasks.register("copyRelease", Copy) {
     from("build/outputs/apk/release")
     into("../bin")
     include("app-release-unsigned.apk")
     rename("app-release-unsigned.apk", "@APP_NAME@-Release.apk")
 }
 
-task copyDebug(type: Copy) {
+tasks.register("copyDebug", Copy) {
     from("build/outputs/apk/debug")
     into("../bin")
     include("app-debug.apk")
     rename("app-debug.apk", "@APP_NAME@-Debug.apk")
 }
 
-afterEvaluate {
-    if (project.hasProperty("assembleRelease")) {
-        assembleRelease.finalizedBy copyRelease
-        externalNativeBuildRelease.dependsOn runProcessAssets
-    }
-    if (project.hasProperty("assembleDebug")) {
-        assembleDebug.finalizedBy copyDebug
-        externalNativeBuildDebug.dependsOn runProcessAssets
-    }
+project.afterEvaluate {
+    tasks.getByPath("assembleRelease").finalizedBy tasks.getByPath("copyRelease")
+    tasks.getByPath("assembleDebug").finalizedBy tasks.getByPath("copyDebug")
+    tasks.getByPath("externalNativeBuildRelease").finalizedBy tasks.getByPath("runProcessAssets")
+    tasks.getByPath("externalNativeBuildDebug").finalizedBy tasks.getByPath("runProcessAssets")
 }
 
 dependencies {
     implementation fileTree(dir: "@APP_BUILD_DIRECTORY@/libs", include: ["*.jar"])
-    implementation fileTree(dir: "@APP_ROOT_DIRECTORY@/third_party/prebuilt/android/armeabi-v7a/Release", include: ["*.jar"])
+    implementation fileTree(dir: "@APP_ROOT_DIRECTORY@/third_party/prebuilt/android/libs/Release", include: ["*.jar", "*.aar"])
     implementation "com.android.support.constraint:constraint-layout:1.0.2"
 }
