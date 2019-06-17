@@ -6,6 +6,7 @@ import argparse
 import os
 import os.path
 import platform
+import re
 import stat
 import sys
 
@@ -17,7 +18,9 @@ if platform.system() == "Windows":
 if platform.system() == "Linux":
     platform_choices = ["linux", "android"]
 if platform.system() == "Darwin":
-    platform_choices = ["macos", "android"]
+    platform_choices = ["macos", "ios", "android"]
+
+cmake_define_regex = re.compile('^-D([A-Za-z_-]+)=[\'"]?([^\'"]+)[\'"]?$')
 
 parser = argparse.ArgumentParser(description="Generate Engine project files "
                                  "for the selected platform.")
@@ -81,20 +84,39 @@ class CMakeBuildGenerator:
         # Create the CMake commandline arguments
         cmake_args_dict = self.file_config.copy()
         cmake_args_dict.update([arg.split("=") for arg in args.cmake_args])
-
-        if ("CMAKE_GENERATOR" not in cmake_args_dict and
-                self.app_platform == "windows"):
-            cmake_args_dict["CMAKE_GENERATOR"] = "Visual Studio 14 2015"
-
-        if ("CMAKE_GENERATOR_PLATFORM" not in cmake_args_dict and
-                self.app_platform == "windows" and
-                platform.machine().endswith("64")):
-            cmake_args_dict["CMAKE_GENERATOR_PLATFORM"] = "x64"
-
         self.cmake_args = [
             "-D{}='{}'".format(*arg) for arg in cmake_args_dict.items()
         ]
+
+    def configure_platform(self):
+        print("==================================================")
+        if os.path.isdir(self.app_build_dir):
+            print("Cleaning up build directory")
+            FileUtils.rm_rf(self.app_build_dir)
+
+        print("Creating build directory")
+        FileUtils.mkdir_p(self.app_build_dir)
+        if not os.path.isdir(self.app_build_dir):
+            print("Could not create build directory")
+            return
+
         self.cmake_args.append("--no-warn-unused-cli")
+
+        if self.app_platform in ["windows", "linux", "macos"]:
+            self.configure_desktop()
+        elif self.app_platform == "android":
+            self.configure_android()
+        elif self.app_platform == "ios":
+            self.configure_ios()
+
+        print("==================================================")
+        print("CMake Parameters:")
+        for value in self.cmake_args:
+            match = cmake_define_regex.match(value)
+            if match is not None:
+                print("    - {}: {}".format(match.group(1), match.group(2)))
+        print()
+        print("==================================================")
 
     def configure_android(self):
         android_sdk_home = os.environ.get("ANDROID_HOME")
@@ -153,31 +175,33 @@ class CMakeBuildGenerator:
             for soLib in soLibs:
                 FileUtils.cp(soLib, jni_arch_dir)
 
+    def get_cmake_argument(self, argument):
+        for value in self.cmake_args:
+            match = cmake_define_regex.match(value)
+            if match is not None and match.group(1) == argument:
+                return match.group(2)
+        return None
+
+    def configure_ios(self):
+        toolchain_file = os.path.join(self.app_root_dir, "cmake", "Toolchains",
+                                      "ios.toolchain.cmake")
+        cmake_generator = [
+            "-DCMAKE_GENERATOR='Xcode'",
+            "-DCMAKE_TOOLCHAIN_FILE={}".format(toolchain_file),
+            "-DPLATFORM={}".format("OS64COMBINED")
+        ]
+        self.cmake_args = cmake_generator + self.cmake_args
+
     def configure_desktop(self):
-        pass
-
-    def configure_platform(self):
-        print("==================================================")
-        print("Parameters:")
-        for name, value in self.file_config.items():
-            print("    - {}: {}".format(name, value))
-        print()
-        print("==================================================")
-
-        if os.path.isdir(self.app_build_dir):
-            print("Cleaning up build directory")
-            FileUtils.rm_rf(self.app_build_dir)
-
-        print("Creating build directory")
-        FileUtils.mkdir_p(self.app_build_dir)
-        if not os.path.isdir(self.app_build_dir):
-            print("Could not create build directory")
-            return
-
-        if self.app_platform in ["windows", "linux", "macos"]:
-            self.configure_desktop()
-        elif self.app_platform == "android":
-            self.configure_android()
+        gen = self.get_cmake_argument("CMAKE_GENERATOR")
+        gen_plat = self.get_cmake_argument("CMAKE_GENERATOR_PLATFORM")
+        if self.app_platform == "macos" and gen is None:
+            self.cmake_args = ["-DCMAKE_GENERATOR='Xcode'"] + self.cmake_args
+        if self.app_platform == "windows":
+            if gen_plat is None and platform.machine().endswith("64"):
+                self.cmake_args = ["-DCMAKE_GENERATOR_PLATFORM='x64'"] + self.cmake_args
+            if gen is None:
+                self.cmake_args = ["-DCMAKE_GENERATOR='Visual Studio 14 2015'"] + self.cmake_args
 
     def create_build_script(self):
         print("Creating build script")
