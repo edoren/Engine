@@ -39,7 +39,7 @@ public:
 
     void UninstallPlugin(Plugin* plugin);
 
-    void AddRenderer(Renderer* new_renderer);
+    void AddRenderer(std::unique_ptr<Renderer>&& new_renderer);
 
     Renderer& GetActiveRenderer();
 
@@ -47,7 +47,7 @@ public:
 
     RendererFactory& GetActiveRendererFactory();
 
-    RendererFactory* GetActiveRendererFactoryPtr();
+    std::unique_ptr<RendererFactory>& GetActiveRendererFactoryPtr();
 
     void ExecuteAsync(Function<void()>&& task);
 
@@ -111,18 +111,18 @@ private:
     std::vector<Plugin*> m_plugins;
 
     Renderer* m_active_renderer;
-    std::vector<Renderer*> m_renderers;
+    std::vector<std::unique_ptr<Renderer>> m_renderers;
 
     App* m_app;
 
     // Singletons
-    LogManager* m_log_manager;
-    FileSystem* m_file_system;
-    SharedLibManager* m_shared_lib_manager;
-    InputManager* m_input_manager;
-    ModelManager* m_model_manager;
-    SceneManager* m_scene_manager;
-    AsyncTaskRunner* m_async_task_runner;
+    std::unique_ptr<LogManager> m_log_manager;
+    std::unique_ptr<FileSystem> m_file_system;
+    std::unique_ptr<SharedLibManager> m_shared_lib_manager;
+    std::unique_ptr<InputManager> m_input_manager;
+    std::unique_ptr<ModelManager> m_model_manager;
+    std::unique_ptr<SceneManager> m_scene_manager;
+    std::unique_ptr<AsyncTaskRunner> m_async_task_runner;
 };
 
 }  // namespace engine

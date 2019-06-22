@@ -21,8 +21,9 @@ const String& GL_Plugin::GetName() const {
 }
 
 void GL_Plugin::Install() {
-    m_renderer = new GL_Renderer();
-    Main::GetInstance().AddRenderer(m_renderer);
+    auto renderer = std::make_unique<GL_Renderer>();
+    m_renderer = renderer.get();
+    Main::GetInstance().AddRenderer(std::move(renderer));
 }
 
 void GL_Plugin::Initialize() {}
@@ -30,7 +31,6 @@ void GL_Plugin::Initialize() {}
 void GL_Plugin::Shutdown() {}
 
 void GL_Plugin::Uninstall() {
-    delete m_renderer;
     m_renderer = nullptr;
 }
 

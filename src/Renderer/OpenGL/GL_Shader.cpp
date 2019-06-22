@@ -121,10 +121,10 @@ bool GL_Shader::Link() {
     if (success == GL_FALSE) {
         GLint log_size = 0;
         GL_CALL(glGetProgramiv(m_program, GL_INFO_LOG_LENGTH, &log_size));
-        char* error = new char[log_size];
-        GL_CALL(glGetProgramInfoLog(m_program, log_size, &log_size, error));
+        std::string error;
+        error.resize(log_size);
+        GL_CALL(glGetProgramInfoLog(m_program, log_size, &log_size, const_cast<char*>(error.data())));
         LogError(sTag, String("Error linking shader:\n") + error);
-        delete[] error;
         return false;
     }
 
@@ -284,10 +284,10 @@ GLuint GL_Shader::Compile(const byte* source, size_t source_size,
     if (success == GL_FALSE) {
         GLint log_size = 0;
         GL_CALL(glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_size));
-        char* error = new char[log_size];
-        GL_CALL(glGetShaderInfoLog(shader, log_size, &log_size, error));
+        std::string error;
+        error.resize(log_size);
+        GL_CALL(glGetShaderInfoLog(shader, log_size, &log_size, const_cast<char*>(error.data())));
         LogError(sTag, String("Error compiling shader:\n") + error);
-        delete[] error;
         GL_CALL(glDeleteShader(shader));
         return 0;
     }

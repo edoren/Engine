@@ -23,7 +23,7 @@ public:
     const String& GetName() const override;
 
 private:
-    Vk_Context* m_context;
+    std::unique_ptr<Vk_Context> m_context;
 };
 
 }  // namespace engine

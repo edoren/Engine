@@ -47,24 +47,24 @@ Main::Main(int argc, char* argv[])
         m_scene_manager(nullptr) {
     ENGINE_UNUSED(argc);
     ENGINE_UNUSED(argv);
-    m_log_manager = new LogManager();
-    m_file_system = new FileSystem();
-    m_shared_lib_manager = new SharedLibManager();
-    m_input_manager = new InputManager();
-    m_model_manager = new ModelManager();
-    m_scene_manager = new SceneManager();
-    m_async_task_runner = new AsyncTaskRunner();
+    m_log_manager = std::make_unique<LogManager>();
+    m_file_system = std::make_unique<FileSystem>();
+    m_shared_lib_manager = std::make_unique<SharedLibManager>();
+    m_input_manager = std::make_unique<InputManager>();
+    m_model_manager = std::make_unique<ModelManager>();
+    m_scene_manager = std::make_unique<SceneManager>();
+    m_async_task_runner = std::make_unique<AsyncTaskRunner>();
 }
 
 Main::~Main() {
     Shutdown();
-    delete m_async_task_runner;
-    delete m_scene_manager;
-    delete m_model_manager;
-    delete m_input_manager;
-    delete m_shared_lib_manager;
-    delete m_file_system;
-    delete m_log_manager;
+    m_async_task_runner.reset();
+    m_scene_manager.reset();
+    m_model_manager.reset();
+    m_input_manager.reset();
+    m_shared_lib_manager.reset();
+    m_file_system.reset();
+    m_log_manager.reset();
 }
 
 void Main::Initialize(App* app) {
@@ -157,6 +157,9 @@ void Main::Shutdown() {
         // 3. Shutdown the active Renderer
         // 4. Destroy the render window of the the active renderer
         m_active_renderer->Shutdown();
+        m_active_renderer = nullptr;
+        m_renderers.clear();
+
 
         // 5. Shutdown plugins
         ShutdownPlugins();
@@ -251,8 +254,8 @@ void Main::UninstallPlugin(Plugin* plugin) {
 }
 
 // TODO: Remove Renderer from Main
-void Main::AddRenderer(Renderer* new_renderer) {
-    m_renderers.push_back(new_renderer);
+void Main::AddRenderer(std::unique_ptr<Renderer>&& new_renderer) {
+    m_renderers.push_back(std::move(new_renderer));
 }
 
 Renderer& Main::GetActiveRenderer() {
@@ -268,7 +271,7 @@ RendererFactory& Main::GetActiveRendererFactory() {
     return GetActiveRenderer().GetRendererFactory();
 }
 
-RendererFactory* Main::GetActiveRendererFactoryPtr() {
+std::unique_ptr<RendererFactory>& Main::GetActiveRendererFactoryPtr() {
     return GetActiveRenderer().GetRendererFactoryPtr();
 }
 
@@ -315,7 +318,7 @@ void Main::ShutdownPlugins() {
 
 void Main::SetActiveRenderer() {
     // TODO: Add a configurable way to select this
-    m_active_renderer = m_renderers.size() ? m_renderers[0] : nullptr;
+    m_active_renderer = m_renderers.size() ? m_renderers[0].get() : nullptr;
 }
 
 }  // namespace engine

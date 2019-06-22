@@ -25,22 +25,22 @@ public:
     virtual const String& GetName() const = 0;
 
     RenderWindow& GetRenderWindow();
-    RenderWindow* GetRenderWindowPtr();
+    std::unique_ptr<RenderWindow>& GetRenderWindowPtr();
 
     RendererFactory& GetRendererFactory();
-    RendererFactory* GetRendererFactoryPtr();
+    std::unique_ptr<RendererFactory>& GetRendererFactoryPtr();
 
     ShaderManager& GetShaderManager();
-    ShaderManager* GetShaderManagerPtr();
+    std::unique_ptr<ShaderManager>& GetShaderManagerPtr();
 
     TextureManager& GetTextureManager();
-    TextureManager* GetTextureManagerPtr();
+    std::unique_ptr<TextureManager>& GetTextureManagerPtr();
 
 protected:
-    RenderWindow* m_render_window;
-    RendererFactory* m_renderer_factory;
-    ShaderManager* m_shader_manager;
-    TextureManager* m_texture_manager;
+    std::unique_ptr<RenderWindow> m_render_window;
+    std::unique_ptr<RendererFactory> m_renderer_factory;
+    std::unique_ptr<ShaderManager> m_shader_manager;
+    std::unique_ptr<TextureManager> m_texture_manager;
 };
 
 }  // namespace engine

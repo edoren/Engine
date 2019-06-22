@@ -19,8 +19,9 @@ const String& Vk_Plugin::GetName() const {
 }
 
 void Vk_Plugin::Install() {
-    m_renderer = new Vk_Renderer();
-    Main::GetInstance().AddRenderer(m_renderer);
+    auto renderer = std::make_unique<Vk_Renderer>();
+    m_renderer = renderer.get();
+    Main::GetInstance().AddRenderer(std::move(renderer));
 }
 
 void Vk_Plugin::Initialize() {}
@@ -28,7 +29,6 @@ void Vk_Plugin::Initialize() {}
 void Vk_Plugin::Shutdown() {}
 
 void Vk_Plugin::Uninstall() {
-    delete m_renderer;
     m_renderer = nullptr;
 }
 
