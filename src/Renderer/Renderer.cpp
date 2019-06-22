@@ -50,7 +50,7 @@ RenderWindow& Renderer::GetRenderWindow() {
     return *m_render_window;
 }
 
-RenderWindow* Renderer::GetRenderWindowPtr() {
+std::unique_ptr<RenderWindow>& Renderer::GetRenderWindowPtr() {
     return m_render_window;
 }
 
@@ -59,12 +59,8 @@ RendererFactory& Renderer::GetRendererFactory() {
     return *m_renderer_factory;
 }
 
-RendererFactory* Renderer::GetRendererFactoryPtr() {
+std::unique_ptr<RendererFactory>& Renderer::GetRendererFactoryPtr() {
     return m_renderer_factory;
-}
-
-ShaderManager* Renderer::GetShaderManagerPtr() {
-    return m_shader_manager;
 }
 
 ShaderManager& Renderer::GetShaderManager() {
@@ -72,13 +68,17 @@ ShaderManager& Renderer::GetShaderManager() {
     return *m_shader_manager;
 }
 
-TextureManager* Renderer::GetTextureManagerPtr() {
-    return m_texture_manager;
+std::unique_ptr<ShaderManager>& Renderer::GetShaderManagerPtr() {
+    return m_shader_manager;
 }
 
 TextureManager& Renderer::GetTextureManager() {
     assert(m_texture_manager);
     return *m_texture_manager;
+}
+
+std::unique_ptr<TextureManager>& Renderer::GetTextureManagerPtr() {
+    return m_texture_manager;
 }
 
 }  // namespace engine

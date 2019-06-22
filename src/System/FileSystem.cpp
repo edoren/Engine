@@ -116,7 +116,7 @@ String FileSystem::CurrentWorkingDirectory() const {
     DWORD buffer_length = PATH_MAX_LENGTH;
     LPWSTR buffer = nullptr;
     while (true) {
-        buffer = (LPWSTR)malloc(sizeof(WCHAR) * buffer_length + 1);
+        buffer = new std::remove_pointer<LPWSTR>::type[buffer_length + 1];
         DWORD num_characters = GetCurrentDirectoryW(buffer_length, buffer);
         if (num_characters > 0) {
             if (buffer[num_characters - 1] != L'\\') {
@@ -124,17 +124,17 @@ String FileSystem::CurrentWorkingDirectory() const {
                 buffer[num_characters] = L'\0';
             }
             ret = String::FromWide(buffer, buffer + num_characters);
-            free(buffer);
+            delete[] buffer;
             break;
         }
-        free(buffer);
+        delete[] buffer;
         buffer_length *= 2;
     }
 #elif PLATFORM_IS(PLATFORM_LINUX | PLATFORM_MACOS | PLATFORM_ANDROID)
     size_t buffer_length = PATH_MAX_LENGTH;
     char8* buffer = nullptr;
     while (true) {
-        buffer = (char8*)malloc(sizeof(char8) * buffer_length + 1);
+        buffer = new char8[buffer_length + 1];
         char8* result = nullptr;
         result = getcwd(buffer, buffer_length);
         if (result != nullptr) {
@@ -144,10 +144,10 @@ String FileSystem::CurrentWorkingDirectory() const {
                 buffer[num_characters] = '\0';
             }
             ret = String::FromUtf8(buffer, buffer + num_characters);
-            free(buffer);
+            delete[] buffer;
             break;
         }
-        free(buffer);
+        delete[] buffer;
         buffer_length *= 2;
     }
 #endif

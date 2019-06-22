@@ -22,23 +22,19 @@ GL_Renderer::~GL_Renderer() {
 bool GL_Renderer::Initialize() {
     bool ok = Renderer::Initialize();
     if (ok) {
-        m_render_window = new GL_RenderWindow();
-        m_renderer_factory = new GL_RendererFactory();
-        m_shader_manager = new GL_ShaderManager();
-        m_texture_manager = new GL_TextureManager();
+        m_render_window = std::make_unique<GL_RenderWindow>();
+        m_renderer_factory = std::make_unique<GL_RendererFactory>();
+        m_shader_manager = std::make_unique<GL_ShaderManager>();
+        m_texture_manager = std::make_unique<GL_TextureManager>();
     }
     return ok;
 }
 
 void GL_Renderer::Shutdown() {
-    delete m_texture_manager;
-    m_texture_manager = nullptr;
-    delete m_shader_manager;
-    m_shader_manager = nullptr;
-    delete m_renderer_factory;
-    m_renderer_factory = nullptr;
-    delete m_render_window;
-    m_render_window = nullptr;
+    m_texture_manager.reset();
+    m_shader_manager.reset();
+    m_renderer_factory.reset();
+    m_render_window.reset();
     Renderer::Shutdown();
 }
 

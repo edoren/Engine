@@ -3,8 +3,8 @@
 #include <Graphics/3D/Camera.hpp>
 #include <Renderer/Model.hpp>
 #include <Renderer/RenderWindow.hpp>
-#include <Renderer/ShaderManager.hpp>
 #include <Renderer/SceneManager.hpp>
+#include <Renderer/ShaderManager.hpp>
 
 // TODO: Remove this later - Required for calling main and Input enums
 #include <SDL2/SDL.h>
@@ -16,6 +16,8 @@
 #define VULKAN_PLUGIN_NAME "vulkan-plugin"
 #define OPENGL_PLUGIN_NAME "opengl-plugin"
 #endif
+
+#include <iostream>
 
 using namespace engine;
 
@@ -39,18 +41,18 @@ protected:
         m_input = InputManager::GetInstancePtr();
         m_shader_manager = ShaderManager::GetInstancePtr();
         m_render = engine.GetActiveRendererPtr();
-        m_window = m_render->GetRenderWindowPtr();
+        m_window = m_render->GetRenderWindowPtr().get();
 
         m_shader_manager->LoadFromFile("model");
 
         SceneManager* scene_manager = SceneManager::GetInstancePtr();
         if (scene_manager) {
-            scene_manager->ChangeActiveScene("test1");
+            scene_manager->ChangeActiveScene("test2");
         }
 
-        Mouse& mouse = m_input->GetMouse();
-        mouse.SetRelativeMouseMode(true);
-        mouse.HideCursor();
+        // Mouse& mouse = m_input->GetMouse();
+        // mouse.SetRelativeMouseMode(true);
+        // mouse.HideCursor();
 
         m_camera = Camera({10, 10, 10});
         m_camera.LookAt({0, 0, 0});
@@ -58,7 +60,6 @@ protected:
         m_mouse_sensivity = 0.1f;
 
         m_window->SetActiveCamera(&m_camera);
-        // m_window->SetFullScreen(true, true);
 
         return true;
     }
@@ -70,9 +71,9 @@ protected:
         camera_forward = math::Normalize(camera_forward);
 
         // Camera mouse movement
-        Mouse& mouse = m_input->GetMouse();
-        math::vec2 mouse_delta(mouse.pointer.mousedelta);
-        m_camera.Rotate(mouse_delta * m_mouse_sensivity);
+        // Mouse& mouse = m_input->GetMouse();
+        // math::vec2 mouse_delta(mouse.pointer.mousedelta);
+        // m_camera.Rotate(mouse_delta * m_mouse_sensivity);
 
         // Camera key movements
         float delta_time = GetDeltaTime().AsSeconds();
@@ -91,13 +92,28 @@ protected:
         if (m_input->GetButton(SDLK_LSHIFT).IsDown())
             m_camera.Move(speed * -Camera::WORLD_UP);
 
+        if (m_input->GetButton(SDLK_f).WentDown() ||
+            m_input->GetButton(SDLK_F11).WentDown()) {
+            if (m_window->IsFullScreen()) {
+                m_window->SetFullScreen(false, false);
+                m_window->Resize(800, 600);
+            } else {
+                m_window->SetFullScreen(true, true);
+            }
+        }
+
+        if (m_input->GetButton(SDLK_t).WentDown()) {
+            Main::GetInstance().ExecuteAsync([] {
+                LogInfo("LoadModel", "Hello Thread {}"_format(std::this_thread::get_id()));
+            });
+        }
+
         m_window_size = m_window->GetSize();
 
         m_shader_manager->SetActiveShader("model");
     }
 
-    void Shutdown() override {
-    }
+    void Shutdown() override {}
 
     String GetName() override {
         return "LoadModel";
@@ -118,6 +134,7 @@ private:
     ShaderManager* m_shader_manager;
     Renderer* m_render;
     RenderWindow* m_window;
+    std::mutex m_mutex;
 };
 
 int main(int argc, char* argv[]) {

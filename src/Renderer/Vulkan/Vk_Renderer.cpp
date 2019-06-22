@@ -20,12 +20,12 @@ Vk_Renderer::~Vk_Renderer() {
 bool Vk_Renderer::Initialize() {
     bool ok = Renderer::Initialize();
     if (ok) {
-        m_context = new Vk_Context();
+        m_context = std::make_unique<Vk_Context>();
         ok = ok && m_context->Initialize();
-        m_render_window = new Vk_RenderWindow();
-        m_renderer_factory = new Vk_RendererFactory();
-        m_shader_manager = new Vk_ShaderManager();
-        m_texture_manager = new Vk_TextureManager();
+        m_render_window = std::make_unique<Vk_RenderWindow>();
+        m_renderer_factory = std::make_unique<Vk_RendererFactory>();
+        m_shader_manager = std::make_unique<Vk_ShaderManager>();
+        m_texture_manager = std::make_unique<Vk_TextureManager>();
 
         // TODO: Remove this
         m_shader_manager->LoadFromFile("model");
@@ -34,16 +34,11 @@ bool Vk_Renderer::Initialize() {
 }
 
 void Vk_Renderer::Shutdown() {
-    delete m_texture_manager;
-    m_texture_manager = nullptr;
-    delete m_shader_manager;
-    m_shader_manager = nullptr;
-    delete m_renderer_factory;
-    m_renderer_factory = nullptr;
-    delete m_render_window;
-    m_render_window = nullptr;
-    delete m_context;
-    m_context = nullptr;
+    m_texture_manager.reset();
+    m_shader_manager.reset();
+    m_renderer_factory.reset();
+    m_render_window.reset();
+    m_context.reset();
     Renderer::Shutdown();
 }
 
