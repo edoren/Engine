@@ -188,7 +188,8 @@ class CMakeBuildGenerator:
         cmake_generator = [
             "-DCMAKE_GENERATOR='Xcode'",
             "-DCMAKE_TOOLCHAIN_FILE={}".format(toolchain_file),
-            "-DPLATFORM={}".format("OS64COMBINED")
+            "-DPLATFORM={}".format("OS64COMBINED"),
+            "-DDEPLOYMENT_TARGET=13.0"
         ]
         self.cmake_args = cmake_generator + self.cmake_args
 
@@ -216,7 +217,7 @@ class CMakeBuildGenerator:
             print("Error: CMake not installed")
             exit()
 
-        if self.app_platform in ["windows", "linux", "macos"]:
+        if self.app_platform in ["windows", "linux", "macos", "ios"]:
             build_commands = [
                 [cmake_path, self.app_root_dir] + self.cmake_args,
                 [cmake_path, "--build", self.app_build_dir,

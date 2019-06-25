@@ -19,14 +19,14 @@
 #
 ###############################################################################
 
-if (WIN32)
-    if (CYGWIN)
+if(WIN32)
+    if(CYGWIN)
 
         find_path(OPENGLES3_INCLUDE_DIR GLES3/gl3.h)
 
         find_library(OPENGLES3_GL_LIBRARY libGLESv3)
 
-    else (CYGWIN)
+    else(CYGWIN)
 
         if(BORLAND)
             set (OPENGLES3_GL_LIBRARY import32 CACHE STRING "OpenGL ES 3.x library for win32")
@@ -61,15 +61,18 @@ if (WIN32)
             )
         endif(BORLAND)
 
-  endif (CYGWIN)
+  endif(CYGWIN)
 
-else (WIN32)
+else(WIN32)
 
-    if (APPLE)
+    if(APPLE)
 
-        create_search_paths(/Developer/Platforms)
-        findpkg_framework(OpenGLES3)
-        set(OPENGLES3_GL_LIBRARY "-framework OpenGLES")
+        # create_search_paths(/Developer/Platforms)
+        find_library(OPENGLES3_GL_LIBRARY_FRAMEWORK NAMES OpenGLES3 OpenGLES)
+        if(OPENGLES3_GL_LIBRARY MATCHES "\.framework$")
+            set(OPENGLES3_INCLUDE_DIR ${OPENGLES3_GL_LIBRARY_FRAMEWORK}/Headers)
+            set(OPENGLES3_GL_LIBRARY ${OPENGLES3_GL_LIBRARY_FRAMEWORK})
+        endif()
 
     else(APPLE)
         find_path(OPENGLES3_INCLUDE_DIR
@@ -119,19 +122,19 @@ else (WIN32)
         # think this is always true.
         # It's not true on OSX.
 
-        if (OPENGLES3_GL_LIBRARY)
+        if(OPENGLES3_GL_LIBRARY)
             if(NOT X11_FOUND)
                 INCLUDE(FindX11)
             endif(NOT X11_FOUND)
-            if (X11_FOUND)
-                if (NOT APPLE)
+            if(X11_FOUND)
+                if(NOT APPLE)
                 set (OPENGLES3_LIBRARIES ${X11_LIBRARIES})
-                endif (NOT APPLE)
-            endif (X11_FOUND)
-        endif (OPENGLES3_GL_LIBRARY)
+                endif(NOT APPLE)
+            endif(X11_FOUND)
+        endif(OPENGLES3_GL_LIBRARY)
 
     endif(APPLE)
-endif (WIN32)
+endif(WIN32)
 
 set( OPENGLES3_FOUND "YES" )
 if(OPENGLES3_GL_LIBRARY)

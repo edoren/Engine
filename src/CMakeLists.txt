@@ -79,6 +79,11 @@ elseif(OS_ANDROID)
         android
         log
     )
+elseif(OS_IOS)
+    target_link_libraries(${ENGINE_LIBRARY}
+        ${SDL2_LIBRARY}
+        ${ASSIMP_LIBRARY}
+    )
 elseif(OS_MACOS)
     target_link_libraries(${ENGINE_LIBRARY}
         ${SDL2_LIBRARY}
