@@ -1,7 +1,5 @@
 include(CMakeParseArguments)
 
-include("${CMAKE_CURRENT_LIST_DIR}/Config.cmake")
-
 # Macro to create the filters for Visual Studio and other IDEs
 macro(engine_create_filters SOURCES)
     foreach(FILE ${SOURCES})

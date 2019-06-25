@@ -32,8 +32,8 @@ endif()
 set(CMAKE_MODULE_PATH "${ENGINE_DIR}/cmake/Modules")
 
 # Include the config and macros file
-include("${ENGINE_DIR}/cmake/Config.cmake")
-include("${ENGINE_DIR}/cmake/Macros.cmake")
+include("Config")
+include("Macros")
 
 ###############################################################################
 ## Compiler configuration
@@ -109,9 +109,20 @@ elseif(OS_LINUX)
     set(SDL2_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/linux/Release/libSDL2.a)
     set(ASSIMP_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/linux/Release/libassimp.a)
 elseif(OS_ANDROID)
-    set(SDL2MAIN_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/android/${ANDROID_ABI}/Release/libSDL2main.a)
-    set(SDL2_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/android/${ANDROID_ABI}/Release/libSDL2.a)
-    set(ASSIMP_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/android/${ANDROID_ABI}/Release/libassimp.a z)
+    set(SDL2MAIN_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/ios/Release/libSDL2main.a)
+    set(SDL2_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/ios/Release/libSDL2.a)
+    set(ASSIMP_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/ios/Release/libassimp.a z)
+elseif(OS_IOS)
+    set(SDL2MAIN_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/ios/Release/libSDL2main.a)
+    set(SDL2_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/ios/Release/libSDL2.a
+                    "-framework Foundation"
+                    "-framework CoreVideo"
+                    "-framework CoreMotion"
+                    "-framework GameController"
+                    iconv)
+    set(ASSIMP_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/ios/Release/libassimp.a
+                       z
+                       ${THIRD_PARTY_DIR}/prebuilt/ios/Release/libIrrXML.a)
 elseif(OS_MACOS)
     set(SDL2MAIN_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/macos/Release/libSDL2main.a)
     set(SDL2_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/macos/Release/libSDL2.a
@@ -121,7 +132,9 @@ elseif(OS_MACOS)
                     "-framework CoreVideo"
                     "-framework Carbon"
                     iconv)
-    set(ASSIMP_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/macos/Release/libassimp.a z)
+    set(ASSIMP_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/macos/Release/libassimp.a
+                       z
+                       ${THIRD_PARTY_DIR}/prebuilt/macos/Release/libIrrXML.a)
 endif()
 
 if(OS_WINDOWS)
@@ -130,6 +143,8 @@ elseif(OS_LINUX)
     include_directories(SYSTEM "${THIRD_PARTY_DIR}/include/linux")
 elseif(OS_ANDROID)
     include_directories(SYSTEM "${THIRD_PARTY_DIR}/include/android/${ANDROID_ABI}")
+elseif(OS_IOS)
+    include_directories(SYSTEM "${THIRD_PARTY_DIR}/include/ios")
 elseif(OS_MACOS)
     include_directories(SYSTEM "${THIRD_PARTY_DIR}/include/macos")
 endif()
@@ -144,7 +159,7 @@ add_subdirectory(${ENGINE_SOURCE_DIR})
 
 # Build the renderers
 add_subdirectory("${ENGINE_SOURCE_DIR}/Renderer/OpenGL")
-add_subdirectory("${ENGINE_SOURCE_DIR}/Renderer/Vulkan")
+# add_subdirectory("${ENGINE_SOURCE_DIR}/Renderer/Vulkan")
 
 # Add the test folder
 if(ENGINE_BUILD_TESTS)

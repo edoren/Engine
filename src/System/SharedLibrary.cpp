@@ -10,7 +10,7 @@
 #include <dlfcn.h>
 #define LIBRARY_PREFIX "lib"
 #define LIBRARY_EXTENSION ".so"
-#elif PLATFORM_IS(PLATFORM_MACOS)
+#elif PLATFORM_IS(PLATFORM_MACOS | PLATFORM_IOS)
 #include <dlfcn.h>
 #define LIBRARY_PREFIX "lib"
 #define LIBRARY_EXTENSION ".dylib"
@@ -40,7 +40,7 @@ bool SharedLibrary::Load() {
 #if PLATFORM_IS(PLATFORM_WINDOWS)
     auto wide_string = lib_name.ToWide();
     m_handle = LoadLibraryW(wide_string.data());
-#elif PLATFORM_IS(PLATFORM_LINUX | PLATFORM_MACOS | PLATFORM_ANDROID)
+#elif PLATFORM_IS(PLATFORM_LINUX | PLATFORM_MACOS | PLATFORM_IOS | PLATFORM_ANDROID)
     auto utf8string = lib_name.ToUtf8();
     FileSystem& fs = FileSystem::GetInstance();
     String lib_exe_dir = fs.Join(fs.ExecutableDirectory(), lib_name);
@@ -56,7 +56,7 @@ void SharedLibrary::Unload() {
     if (m_handle == nullptr) return;
 #if PLATFORM_IS(PLATFORM_WINDOWS)
     FreeLibrary(reinterpret_cast<HMODULE>(m_handle));
-#elif PLATFORM_IS(PLATFORM_LINUX | PLATFORM_MACOS | PLATFORM_ANDROID)
+#elif PLATFORM_IS(PLATFORM_LINUX | PLATFORM_MACOS | PLATFORM_IOS | PLATFORM_ANDROID)
     dlclose(m_handle);
 #endif
     m_handle = nullptr;
@@ -76,7 +76,7 @@ String SharedLibrary::GetErrorString() {
     String ret = String::FromWide(lpMsgBuf, lpMsgBuf + msg_len);
     LocalFree(lpMsgBuf);
     return ret;
-#elif PLATFORM_IS(PLATFORM_LINUX | PLATFORM_MACOS | PLATFORM_ANDROID)
+#elif PLATFORM_IS(PLATFORM_LINUX | PLATFORM_MACOS | PLATFORM_IOS | PLATFORM_ANDROID)
     return String(dlerror());
 #else
     return String("");
@@ -92,7 +92,7 @@ void* SharedLibrary::GetSymbol(const char* name) {
     void* address = nullptr;
 #if PLATFORM_IS(PLATFORM_WINDOWS)
     address = GetProcAddress(reinterpret_cast<HMODULE>(m_handle), name);
-#elif PLATFORM_IS(PLATFORM_LINUX | PLATFORM_MACOS | PLATFORM_ANDROID)
+#elif PLATFORM_IS(PLATFORM_LINUX | PLATFORM_MACOS | PLATFORM_IOS | PLATFORM_ANDROID)
     address = dlsym(m_handle, name);
 #endif
     return address;
