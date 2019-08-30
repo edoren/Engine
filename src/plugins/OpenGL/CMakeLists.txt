@@ -42,7 +42,7 @@ else()
 endif()
 
 engine_add_sources(TARGET PLUGIN_SOURCES
-                   BASE_FOLDER "${ENGINE_SOURCE_DIR}/Renderer/OpenGL")
+                   BASE_FOLDER "${ENGINE_PLUGINS_DIR}/OpenGL")
 
 engine_add_library(TARGET OpenGL_Plugin
                    TYPE ${BUILD_TYPE_NAME}

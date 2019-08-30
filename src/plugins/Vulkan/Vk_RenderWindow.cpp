@@ -19,8 +19,6 @@ namespace {
 
 const String sTag("Vk_RenderWindow");
 
-const size_t sResourceCount(3);
-
 const uint32 sVertexBufferBindId(0);
 
 const char* sShaderEntryPoint("main");
@@ -43,7 +41,7 @@ Vk_RenderWindow::Vk_RenderWindow()
         m_graphics_pipeline(VK_NULL_HANDLE),
         m_pipeline_layout(VK_NULL_HANDLE),
         m_render_pass(VK_NULL_HANDLE),
-        m_render_resources(sResourceCount) {}
+        m_render_resources() {}
 
 Vk_RenderWindow::~Vk_RenderWindow() {
     Destroy();
@@ -200,7 +198,7 @@ void Vk_RenderWindow::SwapBuffers() {
         m_render_resources[resource_index];
     uint32_t image_index;
 
-    resource_index = (resource_index + 1) % sResourceCount;
+    resource_index = (resource_index + 1) % m_swapchain.GetImages().size();
 
     result = vkWaitForFences(device, 1, &current_rendering_resource.fence,
                              VK_FALSE, 1000000000);
@@ -798,6 +796,7 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
 bool Vk_RenderWindow::CreateRenderingResources() {
     Vk_Context& context = Vk_Context::GetInstance();
 
+    m_render_resources.resize(m_swapchain.GetImages().size());
     for (size_t i = 0; i < m_render_resources.size(); ++i) {
         if (!AllocateVulkanCommandBuffers(
                 context.GetGraphicsQueueCmdPool(), 1,

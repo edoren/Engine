@@ -39,10 +39,7 @@ set(TESTS
 foreach(TEST ${TESTS})
     if(OS_WINDOWS)
         target_link_libraries(${TEST}
-            ${SDL2MAIN_LIBRARY}
             ${ENGINE_LIBRARY}
-            ${SDL2_LIBRARY}
-            ${ASSIMP_LIBRARY}
         )
     elseif(OS_LINUX)
         target_link_libraries(${TEST}
