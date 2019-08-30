@@ -88,8 +88,9 @@ if(NOT ANDROID)
 endif()
 
 set(THIRD_PARTY_DIR "${ENGINE_DIR}/third_party")
-set(ENGINE_SOURCE_DIR "${ENGINE_DIR}/src")
-set(ENGINE_INCLUDE_DIR "${ENGINE_DIR}/src")
+set(ENGINE_SOURCE_DIR "${ENGINE_DIR}/src/engine")
+set(ENGINE_INCLUDE_DIR "${ENGINE_DIR}/src/engine")
+set(ENGINE_PLUGINS_DIR "${ENGINE_DIR}/src/plugins")
 set(TESTS_DIR "${ENGINE_DIR}/tests")
 set(DOCS_DIR "${ENGINE_DIR}/docs")
 
@@ -138,33 +139,40 @@ elseif(OS_MACOS)
 endif()
 
 if(OS_WINDOWS)
-    include_directories(SYSTEM "${THIRD_PARTY_DIR}/include/windows")
+    list(APPEND THIRD_PARTY_INCLUDES "${THIRD_PARTY_DIR}/include/windows")
 elseif(OS_LINUX)
-    include_directories(SYSTEM "${THIRD_PARTY_DIR}/include/linux")
+    list(APPEND THIRD_PARTY_INCLUDES "${THIRD_PARTY_DIR}/include/linux")
 elseif(OS_ANDROID)
-    include_directories(SYSTEM "${THIRD_PARTY_DIR}/include/android/${ANDROID_ABI}")
+    list(APPEND THIRD_PARTY_INCLUDES "${THIRD_PARTY_DIR}/include/android/${ANDROID_ABI}")
 elseif(OS_IOS)
-    include_directories(SYSTEM "${THIRD_PARTY_DIR}/include/ios")
+    list(APPEND THIRD_PARTY_INCLUDES "${THIRD_PARTY_DIR}/include/ios")
 elseif(OS_MACOS)
-    include_directories(SYSTEM "${THIRD_PARTY_DIR}/include/macos")
+    list(APPEND THIRD_PARTY_INCLUDES "${THIRD_PARTY_DIR}/include/macos")
 endif()
-include_directories(SYSTEM "${THIRD_PARTY_DIR}/include/common")
+list(APPEND THIRD_PARTY_INCLUDES "${THIRD_PARTY_DIR}/include/common")
 
 ###############################################################################
+## Engine library
 
-include_directories(${ENGINE_SOURCE_DIR})
+add_subdirectory("${ENGINE_SOURCE_DIR}")
 
-# Add the engine folder
-add_subdirectory(${ENGINE_SOURCE_DIR})
+###############################################################################
+## Build the plugins
 
-# Build the renderers
-add_subdirectory("${ENGINE_SOURCE_DIR}/Renderer/OpenGL")
-# add_subdirectory("${ENGINE_SOURCE_DIR}/Renderer/Vulkan")
+set(ENGINE_PLUGINS OpenGL Vulkan)
+foreach(PLUGIN ${ENGINE_PLUGINS})
+    add_subdirectory("${ENGINE_PLUGINS_DIR}/${PLUGIN}")
+endforeach()
 
-# Add the test folder
+###############################################################################
+## Tests
+
 if(ENGINE_BUILD_TESTS)
     add_subdirectory(${TESTS_DIR})
 endif()
+
+###############################################################################
+## Documentation
 
 if(ENGINE_BUILD_DOCS)
     add_subdirectory(${DOCS_DIR})

@@ -18,7 +18,7 @@ if(NOT VULKAN_FOUND)
 endif()
 
 engine_add_sources(TARGET PLUGIN_SOURCES
-                   BASE_FOLDER "${ENGINE_SOURCE_DIR}/Renderer/Vulkan")
+                   BASE_FOLDER "${ENGINE_PLUGINS_DIR}/Vulkan")
 
 engine_add_library(TARGET Vulkan_Plugin
                    TYPE ${BUILD_TYPE_NAME}
