@@ -34,6 +34,8 @@ GL_Shader::GL_Shader() : m_program(glCreateProgram()) {
     for (size_t i = 0; i < m_shaders.size(); i++) {
         m_shaders[i] = 0;
     }
+    GL_CALL(glGenBuffers(1, &m_uniform_buffers._static));
+    GL_CALL(glGenBuffers(1, &m_uniform_buffers._dynamic));
 }
 
 GL_Shader::GL_Shader(GL_Shader&& other)
@@ -48,6 +50,12 @@ GL_Shader::GL_Shader(GL_Shader&& other)
 
 GL_Shader::~GL_Shader() {
     if (!IsLinked()) CleanUpShaders();
+    if (m_uniform_buffers._static) {
+        GL_CALL(glDeleteBuffers(1, &m_uniform_buffers._static));
+    }
+    if (m_uniform_buffers._dynamic) {
+        GL_CALL(glDeleteBuffers(1, &m_uniform_buffers._dynamic));
+    }
     GL_CALL(glDeleteProgram(m_program));
 }
 
@@ -138,12 +146,6 @@ void GL_Shader::Use() {
     if (Link()) {
         GL_CALL(glUseProgram(m_program));
     }
-    if (m_uniform_buffers._static) {
-        GL_CALL(glDeleteBuffers(1, &m_uniform_buffers._static));
-    }
-    if (m_uniform_buffers._dynamic) {
-        GL_CALL(glDeleteBuffers(1, &m_uniform_buffers._dynamic));
-    }
 }
 
 void GL_Shader::UploadUniformBuffers() {
@@ -160,7 +162,6 @@ void GL_Shader::UploadUniformBuffers() {
 
     // Load the static UBO
     GL_CALL(glUniformBlockBinding(m_program, block_index, binding_point));
-    GL_CALL(glGenBuffers(1, &m_uniform_buffers._static));
     GL_CALL(glBindBuffer(GL_UNIFORM_BUFFER, m_uniform_buffers._static));
 
     GL_CALL(glBufferData(GL_UNIFORM_BUFFER, m_ubo.GetDataSize(),
@@ -180,7 +181,6 @@ void GL_Shader::UploadUniformBuffers() {
 
     // Load the dynamic UBO
     GL_CALL(glUniformBlockBinding(m_program, block_index, binding_point));
-    GL_CALL(glGenBuffers(1, &m_uniform_buffers._dynamic));
     GL_CALL(glBindBuffer(GL_UNIFORM_BUFFER, m_uniform_buffers._dynamic));
 
     GL_CALL(glBufferData(GL_UNIFORM_BUFFER, m_ubo_dynamic.GetDataSize(),

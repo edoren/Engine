@@ -32,7 +32,7 @@ struct Vertex {
 
 class LoadModelApp : public App {
 public:
-    LoadModelApp() : m_window_size(800, 600) {}
+    LoadModelApp(const String& scene_name) : m_scene_name(scene_name), m_window_size(800, 600) {}
 
 protected:
     bool Initialize() override {
@@ -47,7 +47,7 @@ protected:
 
         SceneManager* scene_manager = SceneManager::GetInstancePtr();
         if (scene_manager) {
-            scene_manager->ChangeActiveScene("test2");
+            scene_manager->ChangeActiveScene(m_scene_name);
         }
 
         // Mouse& mouse = m_input->GetMouse();
@@ -124,6 +124,7 @@ protected:
     }
 
 private:
+    String m_scene_name;
     math::ivec2 m_window_size;
 
     Camera m_camera;
@@ -141,8 +142,10 @@ int main(int argc, char* argv[]) {
 #if PLATFORM_TYPE_IS(PLATFORM_TYPE_MOBILE)
     String renderer = "vulkan";
 #else
-    String renderer = (argc == 2) ? argv[1] : "";
+    String renderer = (argc >= 2) ? argv[1] : "";
 #endif
+
+    String scene_name = (argc >= 3) ? argv[2] : "test1";
 
     String plugin;
     if (renderer == "vulkan") {
@@ -153,7 +156,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    LoadModelApp app;
+    LoadModelApp app(scene_name);
 
     Main engine(argc, argv);
     engine.LoadPlugin(plugin);
