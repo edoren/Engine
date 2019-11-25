@@ -171,6 +171,10 @@ String String::FromWide(const wchar* begin, const wchar* end) {
 #endif
 }
 
+String::operator const char*() const {
+    return ToUtf8().data();
+}
+
 String::operator std::basic_string<char8>() const {
     return ToUtf8();
 }
