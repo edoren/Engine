@@ -302,7 +302,15 @@ public:
     }
 
     ////////////////////////////////////////////////////////////
-    /// @brief Implicit conversion operator to std::basic_string<char8>
+    /// @brief Implicit conversion operator to const char* (UTF-8 string)
+    ///
+    /// @return UTF-8 underlying data
+    ///
+    ////////////////////////////////////////////////////////////
+    operator const char*() const;
+
+    ////////////////////////////////////////////////////////////
+    /// @brief Explicit conversion operator to std::basic_string<char8>
     ///        (UTF-8 string)
     ///
     /// @return Converted UTF-8 string
@@ -312,10 +320,10 @@ public:
     /// @see operator std::basic_string<char32>
     /// @see operator std::basic_string<wchar>
     ////////////////////////////////////////////////////////////
-    operator std::basic_string<char8>() const;
+    explicit operator std::basic_string<char8>() const;
 
     ////////////////////////////////////////////////////////////
-    /// @brief Implicit conversion operator to std::basic_string<char16>
+    /// @brief Explicit conversion operator to std::basic_string<char16>
     ///        (UTF-16 string)
     ///
     /// @return Converted UTF-16 string
@@ -325,10 +333,10 @@ public:
     /// @see operator std::basic_string<char32>
     /// @see operator std::basic_string<wchar>
     ////////////////////////////////////////////////////////////
-    operator std::basic_string<char16>() const;
+    explicit operator std::basic_string<char16>() const;
 
     ////////////////////////////////////////////////////////////
-    /// @brief Implicit conversion operator to std::basic_string<char32>
+    /// @brief Explicit conversion operator to std::basic_string<char32>
     ///        (UTF-32 string)
     ///
     /// @return Converted UTF-32 string
@@ -338,7 +346,7 @@ public:
     /// @see operator std::basic_string<char16>
     /// @see operator std::basic_string<wchar>
     ////////////////////////////////////////////////////////////
-    operator std::basic_string<char32>() const;
+    explicit operator std::basic_string<char32>() const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Implicit conversion operator to std::basic_string<wchar>
@@ -351,7 +359,7 @@ public:
     /// @see operator std::basic_string<char16>
     /// @see operator std::basic_string<char32>
     ////////////////////////////////////////////////////////////
-    operator std::basic_string<wchar>() const;
+    explicit operator std::basic_string<wchar>() const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Return the internal UTF-8 string
