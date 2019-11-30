@@ -17,23 +17,9 @@
 #include "Vk_Surface.hpp"
 #include "Vk_SwapChain.hpp"
 #include "Vk_VulkanParameters.hpp"
+#include "Vk_RenderResource.hpp"
 
 namespace engine {
-
-struct RenderingResourcesData {
-    VkFramebuffer framebuffer;
-    VkCommandBuffer command_buffer;
-    VkSemaphore image_available_semaphore;
-    VkSemaphore finished_rendering_semaphore;
-    VkFence fence;
-
-    RenderingResourcesData()
-          : framebuffer(VK_NULL_HANDLE),
-            command_buffer(VK_NULL_HANDLE),
-            image_available_semaphore(VK_NULL_HANDLE),
-            finished_rendering_semaphore(VK_NULL_HANDLE),
-            fence(VK_NULL_HANDLE) {}
-};
 
 class String;
 
@@ -76,8 +62,6 @@ private:
     bool CreateVulkanRenderPass();
     bool CreateVulkanPipeline();
 
-    bool AllocateVulkanCommandBuffers(VkCommandPool& cmd_pool, uint32_t count,
-                                      VkCommandBuffer* command_buffer);
     bool CreateVulkanSemaphore(VkSemaphore* semaphore);
     bool CreateVulkanFence(VkFenceCreateFlags flags, VkFence* fence);
     bool CreateRenderingResources();
@@ -114,7 +98,7 @@ private:
     Vk_Image m_depth_image;
     VkFormat m_depth_format;
 
-    std::vector<RenderingResourcesData> m_render_resources;
+    std::vector<Vk_RenderResource> m_render_resources;
 };
 
 }  // namespace engine

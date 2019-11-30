@@ -1,7 +1,7 @@
 #pragma once
 
-#include <stdint.h>
-#include <wchar.h>
+#include <cstdint>
+#include <cwchar>
 
 namespace engine {
 

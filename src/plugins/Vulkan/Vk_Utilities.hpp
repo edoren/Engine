@@ -13,6 +13,11 @@ public:
     static bool AllocateMemory(VkDeviceMemory* memory,
                                const VkMemoryPropertyFlags& memory_properties,
                                const VkMemoryRequirements& memory_requirements);
+    static bool AllocateCommandBuffers(VkCommandPool& cmd_pool, uint32_t count,
+                                       VkCommandBuffer* command_buffer);
+
+    static bool CreateVulkanSemaphore(VkSemaphore* semaphore);
+    static bool CreateVulkanFence(VkFenceCreateFlags flags, VkFence* fence);
 };
 
 }  // namespace engine

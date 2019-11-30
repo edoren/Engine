@@ -64,12 +64,24 @@ RenderWindow::~RenderWindow() {
 bool RenderWindow::Create(const String& name, const math::ivec2& size) {
     ENGINE_UNUSED(size);
 
-    LogInfo(sTag, "Creating Window '{}' with size: {}x{}"_format(name, size.x,
-                                                                 size.y));
+    m_name = name;
+
+    math::ivec2 actual_size;
+    if (m_window) {
+        SDL_GetWindowSize(reinterpret_cast<SDL_Window*>(m_window),
+                          &actual_size.x, &actual_size.y);
+        m_size = actual_size;
+    } else {
+        LogDebug(
+            sTag,
+            "m_window should be created before calling RenderWindow::Create");
+        return false;
+    }
+
+    LogInfo(sTag, "Created Window '{}' with size: [{}, {}]"_format(
+                      name, m_size.x, m_size.y));
 
     // Update the base class attributes
-    m_name = name;
-    m_size = size;
     UpdateProjectionMatrix();
 
     return true;
@@ -162,13 +174,21 @@ void RenderWindow::UpdateProjectionMatrix() {
 
 void RenderWindow::OnWindowResized(const math::ivec2&) {}
 
-void RenderWindow::OnAppWillEnterBackground() {}
+void RenderWindow::OnAppWillEnterBackground() {
+    LogInfo(sTag, "OnAppWillEnterBackground");
+}
 
-void RenderWindow::OnAppDidEnterBackground() {}
+void RenderWindow::OnAppDidEnterBackground() {
+    LogInfo(sTag, "OnAppDidEnterBackground");
+}
 
-void RenderWindow::OnAppWillEnterForeground() {}
+void RenderWindow::OnAppWillEnterForeground() {
+    LogInfo(sTag, "OnAppWillEnterForeground");
+}
 
-void RenderWindow::OnAppDidEnterForeground() {}
+void RenderWindow::OnAppDidEnterForeground() {
+    LogInfo(sTag, "OnAppDidEnterForeground");
+}
 
 bool RenderWindow::IsVisible() {
     Uint32 flags = SDL_WINDOW_HIDDEN | SDL_WINDOW_MINIMIZED;

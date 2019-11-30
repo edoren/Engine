@@ -65,6 +65,8 @@ protected:
     }
 
     void Update() override {
+        m_window_size = m_window->GetSize();
+
         // Camera movement
         const math::vec3& camera_front = m_camera.GetFrontVector();
         math::vec3 camera_forward(camera_front.x, 0, camera_front.z);
@@ -108,8 +110,6 @@ protected:
             });
         }
 
-        m_window_size = m_window->GetSize();
-
         m_shader_manager->SetActiveShader("model");
     }
 
@@ -145,7 +145,7 @@ int main(int argc, char* argv[]) {
     String renderer = (argc >= 2) ? argv[1] : "";
 #endif
 
-    String scene_name = (argc >= 3) ? argv[2] : "test1";
+    String scene_name = (argc >= 3) ? argv[2] : "test2";
 
     String plugin;
     if (renderer == "vulkan") {
