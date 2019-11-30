@@ -4,16 +4,11 @@ namespace engine {
 
 math::vec3 Camera::WORLD_UP(0.0f, 1.0f, 0.0f);
 
-Camera::Camera()
-      : m_position(0.0f, 0.0f, 0.0f),
-        m_yaw(0.0f),
-        m_pitch(0.0f),
-        m_zoom(45.0f) {
+Camera::Camera() : m_position(0.0f, 0.0f, 0.0f), m_yaw(0.0f), m_pitch(0.0f), m_zoom(45.0f) {
     UpdateCameraVectors();
 }
 
-Camera::Camera(const math::vec3& position)
-      : m_position(position), m_yaw(0.0f), m_pitch(0.0f), m_zoom(45.0f) {
+Camera::Camera(const math::vec3& position) : m_position(position), m_yaw(0.0f), m_pitch(0.0f), m_zoom(45.0f) {
     UpdateCameraVectors();
 }
 
@@ -78,8 +73,7 @@ void Camera::UpdateCameraVectors() {
     float sin_pitch = std::sin(math::Radians(m_pitch));
     float cos_pitch = std::cos(math::Radians(m_pitch));
 
-    m_front = math::Normalize(
-        math::vec3(cos_pitch * cos_yaw, sin_pitch, cos_pitch * sin_yaw));
+    m_front = math::Normalize(math::vec3(cos_pitch * cos_yaw, sin_pitch, cos_pitch * sin_yaw));
     m_right = math::Normalize(math::Cross(m_front, WORLD_UP));
     m_up = math::Normalize(math::Cross(m_right, m_front));
 }

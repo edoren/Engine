@@ -4,8 +4,7 @@
 
 namespace engine {
 
-Transform::Transform()
-      : m_scale(1, 1, 1), m_rotate(0, 0, 0), m_translate(0, 0, 0) {}
+Transform::Transform() : m_scale(1, 1, 1), m_rotate(0, 0, 0), m_translate(0, 0, 0) {}
 
 Transform::Transform(const Transform& other)
       : m_scale(other.m_scale),
@@ -30,8 +29,7 @@ Transform& Transform::operator=(Transform&& other) {
 }
 
 math::Matrix4x4<float> Transform::GetMatrix() const {
-    return math::Translate(m_translate) * math::Scale(m_scale) *
-           math::Rotate(m_rotate);
+    return math::Translate(m_translate) * math::Scale(m_scale) * math::Rotate(m_rotate);
 }
 
 void Transform::Rotate(const math::Vector3<float>& euler_angles) {

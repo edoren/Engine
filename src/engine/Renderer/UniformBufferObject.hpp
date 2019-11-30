@@ -12,15 +12,7 @@ public:
     UniformBufferObject();
     ~UniformBufferObject();
 
-    enum class DataType {
-        MATRIX4X4,
-        MATRIX3X3,
-        MATRIX2X2,
-        VECTOR4,
-        VECTOR3,
-        VECTOR2,
-        UNKNOWN
-    };
+    enum class DataType { MATRIX4X4, MATRIX3X3, MATRIX2X2, VECTOR4, VECTOR3, VECTOR2, UNKNOWN };
 
     enum class LayoutType {
         STD140,
@@ -36,18 +28,12 @@ public:
 
     void SetAttributes(const std::vector<Item>& attributes);
 
-    void SetAttributeValue(const String& name, const math::mat4& value,
-                           size_t offset = 0);
-    void SetAttributeValue(const String& name, const math::mat3& value,
-                           size_t offset = 0);
-    void SetAttributeValue(const String& name, const math::mat2& value,
-                           size_t offset = 0);
-    void SetAttributeValue(const String& name, const math::vec4& value,
-                           size_t offset = 0);
-    void SetAttributeValue(const String& name, const math::vec3& value,
-                           size_t offset = 0);
-    void SetAttributeValue(const String& name, const math::vec2& value,
-                           size_t offset = 0);
+    void SetAttributeValue(const String& name, const math::mat4& value, size_t offset = 0);
+    void SetAttributeValue(const String& name, const math::mat3& value, size_t offset = 0);
+    void SetAttributeValue(const String& name, const math::mat2& value, size_t offset = 0);
+    void SetAttributeValue(const String& name, const math::vec4& value, size_t offset = 0);
+    void SetAttributeValue(const String& name, const math::vec3& value, size_t offset = 0);
+    void SetAttributeValue(const String& name, const math::vec2& value, size_t offset = 0);
 
     size_t GetSize() const;
     size_t GetDynamicAlignment() const;
@@ -59,8 +45,7 @@ public:
 private:
     explicit UniformBufferObject(const std::vector<Item>& attributes);
 
-    void SetAttributeValue(const String& name, const void* value,
-                           size_t offset = 0);
+    void SetAttributeValue(const String& name, const void* value, size_t offset = 0);
 
     void SetDataAtOffset(const void* data, size_t size, size_t offset);
 

@@ -19,8 +19,7 @@ public:
 
     Vk_Shader* LoadFromFile(const String& basename);
 
-    Vk_Shader* LoadFromMemory(const String& name,
-                              std::map<ShaderType, String*> shader_data_map);
+    Vk_Shader* LoadFromMemory(const String& name, std::map<ShaderType, String*> shader_data_map);
 
     Vk_Shader* GetShader(const String& name);
 

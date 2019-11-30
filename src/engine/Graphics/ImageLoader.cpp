@@ -15,26 +15,21 @@ const String sTag("ImageLoader");
 
 namespace io {
 
-bool ImageLoader::LoadFromFile(const String& filename,
-                               std::vector<byte>& pixels, math::uvec2& size) {
+bool ImageLoader::LoadFromFile(const String& filename, std::vector<byte>& pixels, math::uvec2& size) {
     std::vector<byte> out;
     FileSystem& fs = FileSystem::GetInstance();
     if (fs.LoadFileData(filename, &out)) {
-        return LoadFromFileInMemory(out.data(), static_cast<uint32>(out.size()),
-                                    pixels, size);
+        return LoadFromFileInMemory(out.data(), static_cast<uint32>(out.size()), pixels, size);
     }
     return false;
 }
 
-bool ImageLoader::LoadFromFileInMemory(const byte* buffer, uint32 len,
-                                       std::vector<byte>& pixels,
-                                       math::uvec2& size) {
+bool ImageLoader::LoadFromFileInMemory(const byte* buffer, uint32 len, std::vector<byte>& pixels, math::uvec2& size) {
     int width;
     int height;
     int comp;
 
-    byte* data = stbi_load_from_memory(buffer, len, &width, &height, &comp,
-                                       STBI_rgb_alpha);
+    byte* data = stbi_load_from_memory(buffer, len, &width, &height, &comp, STBI_rgb_alpha);
 
     if (data != nullptr) {
         size_t num_pixels = width * height;

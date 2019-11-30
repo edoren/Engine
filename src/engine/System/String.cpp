@@ -68,8 +68,7 @@ String::String(const char16* utf16String) {
         while (*(++it) != 0)
             ;
         std::size_t length = it - utf16String;
-        utf8::utf16to8(utf16String, utf16String + length,
-                       std::back_inserter(m_string));
+        utf8::utf16to8(utf16String, utf16String + length, std::back_inserter(m_string));
     }
 }
 
@@ -80,8 +79,7 @@ String::String(const char32* utf32String) {
         while (*(++it) != 0)
             ;
         std::size_t length = it - utf32String;
-        utf8::utf32to8(utf32String, utf32String + length,
-                       std::back_inserter(m_string));
+        utf8::utf32to8(utf32String, utf32String + length, std::back_inserter(m_string));
     }
 }
 
@@ -89,11 +87,9 @@ String::String(const wchar* wideString) {
     if (wideString && wideString[0] != 0) {
         std::size_t length = std::wcslen(wideString);
 #if PLATFORM_IS(PLATFORM_WINDOWS)
-        utf8::utf16to8(wideString, wideString + length,
-                       std::back_inserter(m_string));
+        utf8::utf16to8(wideString, wideString + length, std::back_inserter(m_string));
 #else
-        utf8::utf32to8(wideString, wideString + length,
-                       std::back_inserter(m_string));
+        utf8::utf32to8(wideString, wideString + length, std::back_inserter(m_string));
 #endif
     }
 }
@@ -119,18 +115,15 @@ String::String(std::basic_string<char8>&& utf8String) {
 }
 
 String::String(const std::basic_string<char16>& utf16String) {
-    utf8::utf16to8(utf16String.cbegin(), utf16String.cend(),
-                   std::back_inserter(m_string));
+    utf8::utf16to8(utf16String.cbegin(), utf16String.cend(), std::back_inserter(m_string));
 }
 
 String::String(const std::basic_string<char32>& utf32String) {
-    utf8::utf32to8(utf32String.cbegin(), utf32String.cend(),
-                   std::back_inserter(m_string));
+    utf8::utf32to8(utf32String.cbegin(), utf32String.cend(), std::back_inserter(m_string));
 }
 
 String::String(const std::basic_string<wchar>& wideString) {
-    utf8::utf32to8(wideString.cbegin(), wideString.cend(),
-                   std::back_inserter(m_string));
+    utf8::utf32to8(wideString.cbegin(), wideString.cend(), std::back_inserter(m_string));
 }
 
 String::String(const String& other) : m_string(other.m_string) {}
@@ -163,11 +156,9 @@ String String::FromUtf32(const char32* begin, const char32* end) {
 
 String String::FromWide(const wchar* begin, const wchar* end) {
 #if PLATFORM_IS(PLATFORM_WINDOWS)
-    return FromUtf16(reinterpret_cast<const char16*>(begin),
-                     reinterpret_cast<const char16*>(end));
+    return FromUtf16(reinterpret_cast<const char16*>(begin), reinterpret_cast<const char16*>(end));
 #else
-    return FromUtf32(reinterpret_cast<const char32*>(begin),
-                     reinterpret_cast<const char32*>(end));
+    return FromUtf32(reinterpret_cast<const char32*>(begin), reinterpret_cast<const char32*>(end));
 #endif
 }
 
@@ -197,26 +188,22 @@ const std::basic_string<char8>& String::ToUtf8() const {
 
 std::basic_string<char16> String::ToUtf16() const {
     std::basic_string<char16> output;
-    utf8::utf8to16(m_string.cbegin(), m_string.cend(),
-                   std::back_inserter(output));
+    utf8::utf8to16(m_string.cbegin(), m_string.cend(), std::back_inserter(output));
     return output;
 }
 
 std::basic_string<char32> String::ToUtf32() const {
     std::basic_string<char32> output;
-    utf8::utf8to32(m_string.cbegin(), m_string.cend(),
-                   std::back_inserter(output));
+    utf8::utf8to32(m_string.cbegin(), m_string.cend(), std::back_inserter(output));
     return output;
 }
 
 std::basic_string<wchar> String::ToWide() const {
     std::basic_string<wchar> output;
 #if PLATFORM_IS(PLATFORM_WINDOWS)
-    utf8::utf8to16(m_string.cbegin(), m_string.cend(),
-                   std::back_inserter(output));
+    utf8::utf8to16(m_string.cbegin(), m_string.cend(), std::back_inserter(output));
 #else
-    utf8::utf8to32(m_string.cbegin(), m_string.cend(),
-                   std::back_inserter(output));
+    utf8::utf8to32(m_string.cbegin(), m_string.cend(), std::back_inserter(output));
 #endif
     return output;
 }
@@ -281,8 +268,7 @@ void String::Erase(std::size_t position, std::size_t count) {
             utf8::next(start_it, m_string.end());
         }
         ENGINE_CATCH(utf8::not_enough_room) {
-            ENGINE_THROW(std::out_of_range(
-                "the specified position is out of the string range"));
+            ENGINE_THROW(std::out_of_range("the specified position is out of the string range"));
         }
     }
     // Iterate to the end codepoint
@@ -302,8 +288,7 @@ void String::Insert(std::size_t position, const String& str) {
             utf8::next(start_it, m_string.end());
         }
         ENGINE_CATCH(utf8::not_enough_room) {
-            ENGINE_THROW(std::out_of_range(
-                "the specified position is out of the string range"));
+            ENGINE_THROW(std::out_of_range("the specified position is out of the string range"));
         }
     }
     m_string.insert(start_it, str.m_string.cbegin(), str.m_string.cend());
@@ -317,11 +302,8 @@ std::size_t String::Find(const String& str, std::size_t start) const {
         if (start_it == m_string.cend()) return InvalidPos;
     }
     // Find the string
-    auto find_it(std::search(start_it, m_string.cend(), str.m_string.cbegin(),
-                             str.m_string.cend()));
-    return (find_it == m_string.cend())
-               ? InvalidPos
-               : utf8::distance(m_string.cbegin(), find_it);
+    auto find_it(std::search(start_it, m_string.cend(), str.m_string.cbegin(), str.m_string.cend()));
+    return (find_it == m_string.cend()) ? InvalidPos : utf8::distance(m_string.cbegin(), find_it);
 }
 
 std::size_t String::FindFirstOf(const String& str, std::size_t pos) const {
@@ -343,10 +325,8 @@ std::size_t String::FindFirstOf(const String& str, std::size_t pos) const {
     while (true) {
         if (start_it == m_string.cend()) return InvalidPos;
         utf8::next(end_it, m_string.cend());
-        auto find_it(std::search(str.m_string.cbegin(), str.m_string.cend(),
-                                 start_it, end_it));
-        if (find_it != str.m_string.cend())
-            return utf8::distance(m_string.cbegin(), start_it);
+        auto find_it(std::search(str.m_string.cbegin(), str.m_string.cend(), start_it, end_it));
+        if (find_it != str.m_string.cend()) return utf8::distance(m_string.cbegin(), start_it);
         start_it = end_it;
     }
 }
@@ -368,18 +348,15 @@ std::size_t String::FindLastOf(const String& str, std::size_t pos) const {
     while (true) {
         if (start_it == m_string.cbegin()) return InvalidPos;
         utf8::prior(end_it, m_string.cbegin());
-        auto find_it(std::search(str.m_string.cbegin(), str.m_string.cend(),
-                                 end_it, start_it));
-        if (find_it != str.m_string.cend())
-            return utf8::distance(m_string.cbegin(), end_it);
+        auto find_it(std::search(str.m_string.cbegin(), str.m_string.cend(), end_it, start_it));
+        if (find_it != str.m_string.cend()) return utf8::distance(m_string.cbegin(), end_it);
         start_it = end_it;
     }
 
     return InvalidPos;
 }
 
-void String::Replace(std::size_t position, std::size_t length,
-                     const String& replaceWith) {
+void String::Replace(std::size_t position, std::size_t length, const String& replaceWith) {
     // Iterate to the start codepoint
     auto start_it(m_string.begin());
     for (std::size_t i = 0; i < position; i++) {
@@ -387,8 +364,7 @@ void String::Replace(std::size_t position, std::size_t length,
             utf8::next(start_it, m_string.end());
         }
         ENGINE_CATCH(utf8::not_enough_room) {
-            ENGINE_THROW(std::out_of_range(
-                "the specified position is out of the string range"));
+            ENGINE_THROW(std::out_of_range("the specified position is out of the string range"));
         }
     }
     // Iterate to the end codepoint
@@ -425,8 +401,7 @@ void String::Replace(const String& searchFor, const String& replaceWith) {
     while (true) {
         // Search the existence of the string searchFor in the range
         // [m_string.begin() + find_it_pos, m_string.end())
-        auto find_it(std::search(m_string.begin() + find_it_pos, m_string.end(),
-                                 searchFor.m_string.cbegin(),
+        auto find_it(std::search(m_string.begin() + find_it_pos, m_string.end(), searchFor.m_string.cbegin(),
                                  searchFor.m_string.cend()));
         // Check if we reach the end of the string
         if (find_it == m_string.end()) return;
@@ -448,8 +423,7 @@ String String::SubString(std::size_t position, std::size_t length) const {
             utf8::next(start_it, m_string.end());
         }
         ENGINE_CATCH(utf8::not_enough_room) {
-            ENGINE_THROW(std::out_of_range(
-                "the specified position is out of the string range"));
+            ENGINE_THROW(std::out_of_range("the specified position is out of the string range"));
         }
     }
     // Iterate to the end codepoint

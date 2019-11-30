@@ -60,8 +60,7 @@ UniformBufferObject::UniformBufferObject()
         m_attributes(),
         m_attributes_alligned_offset() {}
 
-UniformBufferObject::UniformBufferObject(const std::vector<Item>& attributes)
-      : UniformBufferObject() {
+UniformBufferObject::UniformBufferObject(const std::vector<Item>& attributes) : UniformBufferObject() {
     SetAttributes(attributes);
 }
 
@@ -83,8 +82,7 @@ void UniformBufferObject::SetAttributes(const std::vector<Item>& attributes) {
         size_t attr_req_allignment = GetTypeAllignment(item.type);
 
         // Find the next alligned block
-        size_t padding = attr_req_allignment -
-                         (current_allignment & (attr_req_allignment - 1));
+        size_t padding = attr_req_allignment - (current_allignment & (attr_req_allignment - 1));
         if (padding != attr_req_allignment) {
             current_allignment += padding;
         }
@@ -99,8 +97,7 @@ void UniformBufferObject::SetAttributes(const std::vector<Item>& attributes) {
     m_attributes = attributes;
 }
 
-void UniformBufferObject::SetBufferSize(size_t num_ubo_instances,
-                                        size_t min_ubo_alignment) {
+void UniformBufferObject::SetBufferSize(size_t num_ubo_instances, size_t min_ubo_alignment) {
     if (m_buffer != nullptr) {
         if (m_dynamic_alignment > 0) {
             aligned_free(m_buffer);
@@ -119,16 +116,13 @@ void UniformBufferObject::SetBufferSize(size_t num_ubo_instances,
 
     LogDebug(sTag, "UBO size: {} bytes"_format(GetSize()));
     LogDebug(sTag, "Minimum UBO alignment: {} bytes"_format(min_ubo_alignment));
-    LogDebug(sTag,
-             "Dynamic UBO alignment: {} bytes"_format(m_dynamic_alignment));
+    LogDebug(sTag, "Dynamic UBO alignment: {} bytes"_format(m_dynamic_alignment));
 
     m_buffer = (byte*)aligned_malloc(buffer_size, m_dynamic_alignment);
     m_buffer_size = buffer_size;
 }
 
-void UniformBufferObject::SetAttributeValue(const String& name,
-                                            const math::mat4& value,
-                                            size_t offset) {
+void UniformBufferObject::SetAttributeValue(const String& name, const math::mat4& value, size_t offset) {
     auto it = std::find(m_attributes.begin(), m_attributes.end(), name);
     if (it != m_attributes.end() && it->type == DataType::MATRIX4X4) {
         size_t pos = it - m_attributes.begin();
@@ -138,8 +132,7 @@ void UniformBufferObject::SetAttributeValue(const String& name,
             for (size_t col = 0; col < 4; col++) {
                 for (size_t row = 0; row < 4; row++) {
                     math::mat4::value_type val = value(row, col);
-                    SetDataAtOffset(&val, sizeof(val),
-                                    offset + attribute_offset);
+                    SetDataAtOffset(&val, sizeof(val), offset + attribute_offset);
                     attribute_offset += sizeof(val);
                 }
             }
@@ -149,9 +142,7 @@ void UniformBufferObject::SetAttributeValue(const String& name,
     }
 }
 
-void UniformBufferObject::SetAttributeValue(const String& name,
-                                            const math::mat3& value,
-                                            size_t offset) {
+void UniformBufferObject::SetAttributeValue(const String& name, const math::mat3& value, size_t offset) {
     auto it = std::find(m_attributes.begin(), m_attributes.end(), name);
     if (it != m_attributes.end() && it->type == DataType::MATRIX3X3) {
         size_t pos = it - m_attributes.begin();
@@ -161,8 +152,7 @@ void UniformBufferObject::SetAttributeValue(const String& name,
             for (size_t col = 0; col < 3; col++) {
                 for (size_t row = 0; row < 3; row++) {
                     math::mat3::value_type val = value(row, col);
-                    SetDataAtOffset(&val, sizeof(math::mat3::value_type),
-                                    offset + attribute_offset);
+                    SetDataAtOffset(&val, sizeof(math::mat3::value_type), offset + attribute_offset);
                     attribute_offset += sizeof(math::mat3::value_type);
                 }
             }
@@ -172,9 +162,7 @@ void UniformBufferObject::SetAttributeValue(const String& name,
     }
 }
 
-void UniformBufferObject::SetAttributeValue(const String& name,
-                                            const math::mat2& value,
-                                            size_t offset) {
+void UniformBufferObject::SetAttributeValue(const String& name, const math::mat2& value, size_t offset) {
     auto it = std::find(m_attributes.begin(), m_attributes.end(), name);
     if (it != m_attributes.end() && it->type == DataType::MATRIX2X2) {
         size_t pos = it - m_attributes.begin();
@@ -184,8 +172,7 @@ void UniformBufferObject::SetAttributeValue(const String& name,
             for (size_t col = 0; col < 2; col++) {
                 for (size_t row = 0; row < 2; row++) {
                     math::mat2::value_type val = value(row, col);
-                    SetDataAtOffset(&val, sizeof(math::mat2::value_type),
-                                    offset + attribute_offset);
+                    SetDataAtOffset(&val, sizeof(math::mat2::value_type), offset + attribute_offset);
                     attribute_offset += sizeof(math::mat2::value_type);
                 }
             }
@@ -195,60 +182,49 @@ void UniformBufferObject::SetAttributeValue(const String& name,
     }
 }
 
-void UniformBufferObject::SetAttributeValue(const String& name,
-                                            const math::vec4& value,
-                                            size_t offset) {
+void UniformBufferObject::SetAttributeValue(const String& name, const math::vec4& value, size_t offset) {
     auto it = std::find(m_attributes.begin(), m_attributes.end(), name);
     if (it != m_attributes.end() && it->type == DataType::VECTOR4) {
         size_t pos = it - m_attributes.begin();
         size_t attribute_offset = m_attributes_alligned_offset[pos];
         math::Vector4Packed<float> packed_vector(value);
-        SetDataAtOffset(&packed_vector, sizeof(packed_vector),
-                        offset + attribute_offset);
+        SetDataAtOffset(&packed_vector, sizeof(packed_vector), offset + attribute_offset);
     } else {
         LogError(sTag, "Not a valid UBO attribute name: {}"_format(name));
     }
 }
 
-void UniformBufferObject::SetAttributeValue(const String& name,
-                                            const math::vec3& value,
-                                            size_t offset) {
+void UniformBufferObject::SetAttributeValue(const String& name, const math::vec3& value, size_t offset) {
     auto it = std::find(m_attributes.begin(), m_attributes.end(), name);
     if (it != m_attributes.end() && it->type == DataType::VECTOR3) {
         size_t pos = it - m_attributes.begin();
         size_t attribute_offset = m_attributes_alligned_offset[pos];
         math::Vector3Packed<float> packed_vector(value);
-        SetDataAtOffset(&packed_vector, sizeof(packed_vector),
-                        offset + attribute_offset);
+        SetDataAtOffset(&packed_vector, sizeof(packed_vector), offset + attribute_offset);
     } else {
         LogError(sTag, "Not a valid UBO attribute name: {}"_format(name));
     }
 }
 
-void UniformBufferObject::SetAttributeValue(const String& name,
-                                            const math::vec2& value,
-                                            size_t offset) {
+void UniformBufferObject::SetAttributeValue(const String& name, const math::vec2& value, size_t offset) {
     auto it = std::find(m_attributes.begin(), m_attributes.end(), name);
     if (it != m_attributes.end() && it->type == DataType::VECTOR2) {
         size_t pos = it - m_attributes.begin();
         size_t attribute_offset = m_attributes_alligned_offset[pos];
         math::Vector2Packed<float> packed_vector(value);
-        SetDataAtOffset(&packed_vector, sizeof(packed_vector),
-                        offset + attribute_offset);
+        SetDataAtOffset(&packed_vector, sizeof(packed_vector), offset + attribute_offset);
     } else {
         LogError(sTag, "Not a valid UBO attribute name: {}"_format(name));
     }
 }
 
-void UniformBufferObject::SetAttributeValue(const String& name,
-                                            const void* value, size_t offset) {
+void UniformBufferObject::SetAttributeValue(const String& name, const void* value, size_t offset) {
     size_t buffer_offset = 0;
-    auto it = std::find_if(m_attributes.begin(), m_attributes.end(),
-                           [this, &name, &buffer_offset](Item& item) {
-                               if (item.name == name) return true;
-                               buffer_offset += GetTypeSize(item.type);
-                               return false;
-                           });
+    auto it = std::find_if(m_attributes.begin(), m_attributes.end(), [this, &name, &buffer_offset](Item& item) {
+        if (item.name == name) return true;
+        buffer_offset += GetTypeSize(item.type);
+        return false;
+    });
 
     if (it != m_attributes.end()) {
         size_t value_size = GetTypeSize(it->type);
@@ -263,8 +239,7 @@ void UniformBufferObject::SetAttributeValue(const String& name,
     }
 }
 
-void UniformBufferObject::SetDataAtOffset(const void* data, size_t size,
-                                          size_t offset) {
+void UniformBufferObject::SetDataAtOffset(const void* data, size_t size, size_t offset) {
     if (offset + size <= m_buffer_size) {
         std::memcpy(m_buffer + offset, data, size);
         m_buffer_changed = true;

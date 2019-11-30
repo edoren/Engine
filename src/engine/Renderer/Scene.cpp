@@ -43,14 +43,10 @@ bool Scene::Load() {
                 model_matrix.Scale(math::vec3(float(scale_json)));
             }
             if (!rotation_json.is_null()) {
-                model_matrix.Rotate({float(rotation_json[0]),
-                                     float(rotation_json[1]),
-                                     float(rotation_json[2])});
+                model_matrix.Rotate({float(rotation_json[0]), float(rotation_json[1]), float(rotation_json[2])});
             }
             if (!position_json.is_null()) {
-                model_matrix.Translate({float(position_json[0]),
-                                        float(position_json[1]),
-                                        float(position_json[2])});
+                model_matrix.Translate({float(position_json[0]), float(position_json[1]), float(position_json[2])});
             }
 
             Model* model = ModelManager::GetInstance().LoadFromFile(model_json);

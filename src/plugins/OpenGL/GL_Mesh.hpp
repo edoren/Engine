@@ -13,9 +13,9 @@ public:
 
     ~GL_Mesh();
 
-    void LoadFromData(
-        std::vector<Vertex> vertices, std::vector<uint32> indices,
-        std::vector<std::pair<Texture2D*, TextureType>> textures) override;
+    void LoadFromData(std::vector<Vertex> vertices,
+                      std::vector<uint32> indices,
+                      std::vector<std::pair<Texture2D*, TextureType>> textures) override;
 
     void Draw(RenderWindow& target, const RenderStates& states) const override;
 

@@ -29,21 +29,16 @@ RenderWindow::RenderWindow()
         on_app_did_enter_foreground_connection() {
     auto& input = InputManager::GetInstance();
 
-    on_window_resize_connection =
-        input.OnWindowResized.Connect(*this, &RenderWindow::_OnWindowResized);
+    on_window_resize_connection = input.OnWindowResized.Connect(*this, &RenderWindow::_OnWindowResized);
 
     on_app_will_enter_background_connection =
-        input.OnAppWillEnterBackground.Connect(
-            *this, &RenderWindow::_OnAppWillEnterBackground);
+        input.OnAppWillEnterBackground.Connect(*this, &RenderWindow::_OnAppWillEnterBackground);
     on_app_did_enter_background_connection =
-        input.OnAppDidEnterBackground.Connect(
-            *this, &RenderWindow::_OnAppDidEnterBackground);
+        input.OnAppDidEnterBackground.Connect(*this, &RenderWindow::_OnAppDidEnterBackground);
     on_app_will_enter_foreground_connection =
-        input.OnAppWillEnterForeground.Connect(
-            *this, &RenderWindow::_OnAppWillEnterForeground);
+        input.OnAppWillEnterForeground.Connect(*this, &RenderWindow::_OnAppWillEnterForeground);
     on_app_did_enter_foreground_connection =
-        input.OnAppDidEnterForeground.Connect(
-            *this, &RenderWindow::_OnAppDidEnterForeground);
+        input.OnAppDidEnterForeground.Connect(*this, &RenderWindow::_OnAppDidEnterForeground);
 }
 
 RenderWindow::~RenderWindow() {
@@ -51,14 +46,10 @@ RenderWindow::~RenderWindow() {
 
     input.OnWindowResized.Disconnect(on_window_resize_connection);
 
-    input.OnAppWillEnterBackground.Disconnect(
-        on_app_will_enter_background_connection);
-    input.OnAppDidEnterBackground.Disconnect(
-        on_app_did_enter_background_connection);
-    input.OnAppWillEnterForeground.Disconnect(
-        on_app_will_enter_foreground_connection);
-    input.OnAppDidEnterForeground.Disconnect(
-        on_app_did_enter_foreground_connection);
+    input.OnAppWillEnterBackground.Disconnect(on_app_will_enter_background_connection);
+    input.OnAppDidEnterBackground.Disconnect(on_app_did_enter_background_connection);
+    input.OnAppWillEnterForeground.Disconnect(on_app_will_enter_foreground_connection);
+    input.OnAppDidEnterForeground.Disconnect(on_app_did_enter_foreground_connection);
 }
 
 bool RenderWindow::Create(const String& name, const math::ivec2& size) {
@@ -68,18 +59,14 @@ bool RenderWindow::Create(const String& name, const math::ivec2& size) {
 
     math::ivec2 actual_size;
     if (m_window) {
-        SDL_GetWindowSize(reinterpret_cast<SDL_Window*>(m_window),
-                          &actual_size.x, &actual_size.y);
+        SDL_GetWindowSize(reinterpret_cast<SDL_Window*>(m_window), &actual_size.x, &actual_size.y);
         m_size = actual_size;
     } else {
-        LogDebug(
-            sTag,
-            "m_window should be created before calling RenderWindow::Create");
+        LogDebug(sTag, "m_window should be created before calling RenderWindow::Create");
         return false;
     }
 
-    LogInfo(sTag, "Created Window '{}' with size: [{}, {}]"_format(
-                      name, m_size.x, m_size.y));
+    LogInfo(sTag, "Created Window '{}' with size: [{}, {}]"_format(name, m_size.x, m_size.y));
 
     // Update the base class attributes
     UpdateProjectionMatrix();
@@ -116,8 +103,7 @@ void RenderWindow::SetFullScreen(bool fullscreen, bool is_fake) {
     if (SDL_Window* window = reinterpret_cast<SDL_Window*>(m_window)) {
         Uint32 flag = 0;
         if (fullscreen) {
-            flag = (is_fake) ? SDL_WINDOW_FULLSCREEN_DESKTOP
-                             : SDL_WINDOW_FULLSCREEN;
+            flag = (is_fake) ? SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_FULLSCREEN;
         }
         SDL_SetWindowFullscreen(window, flag);
 
@@ -205,8 +191,7 @@ void RenderWindow::_OnWindowResized(const math::ivec2& size) {
 
     // Get the new window size from the active window
     math::ivec2 new_size;
-    SDL_GetWindowSize(reinterpret_cast<SDL_Window*>(m_window), &new_size.x,
-                      &new_size.y);
+    SDL_GetWindowSize(reinterpret_cast<SDL_Window*>(m_window), &new_size.x, &new_size.y);
     if (new_size != m_size) {
         m_size = new_size;
         LogDebug(sTag, "OnWindowResized {}x{}"_format(m_size.x, m_size.y));

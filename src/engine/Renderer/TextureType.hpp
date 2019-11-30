@@ -2,14 +2,6 @@
 
 namespace engine {
 
-enum class TextureType {
-    NONE,
-    DIFFUSE,
-    SPECULAR,
-    NORMALS,
-    LIGHTMAP,
-    EMISSIVE,
-    UNKNOWN
-};
+enum class TextureType { NONE, DIFFUSE, SPECULAR, NORMALS, LIGHTMAP, EMISSIVE, UNKNOWN };
 
 }  // namespace engine

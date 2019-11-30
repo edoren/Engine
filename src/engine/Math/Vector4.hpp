@@ -45,14 +45,11 @@ public:
 
     explicit inline Vector4(const T& s) : m_data(s) {}
 
-    inline Vector4(const T& x, const T& y, const T& z, const T& w)
-          : m_data(x, y, z, w) {}
+    inline Vector4(const T& x, const T& y, const T& z, const T& w) : m_data(x, y, z, w) {}
 
-    inline Vector4(const Vector3<T>& v, const T& w)
-          : m_data(v.x, v.y, v.z, w) {}
+    inline Vector4(const Vector3<T>& v, const T& w) : m_data(v.x, v.y, v.z, w) {}
 
-    inline Vector4(const Vector2<T>& v, const T& z, const T& w)
-          : m_data(v.x, v.y, z, w) {}
+    inline Vector4(const Vector2<T>& v, const T& z, const T& w) : m_data(v.x, v.y, z, w) {}
 
     inline Vector4(const Vector4<T>& v) : m_data(v.m_data) {}
 
@@ -185,8 +182,7 @@ public:
         vector->w = w;
     }
 
-    static inline Vector4<T> Lerp(const Vector4<T>& v1, const Vector4<T>& v2,
-                                  const T percent) {
+    static inline Vector4<T> Lerp(const Vector4<T>& v1, const Vector4<T>& v2, const T percent) {
         return Vector4<T>(data_type::Lerp(v1.m_data, v2.m_data, percent));
     }
 

@@ -34,15 +34,12 @@ bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
 #if PLATFORM_TYPE_IS(PLATFORM_TYPE_DESKTOP)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
-                        SDL_GL_CONTEXT_PROFILE_CORE);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 #endif
 
     math::ivec2 initial_pos(SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-    Uint32 window_flags(SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN |
-                        SDL_WINDOW_RESIZABLE);
-    m_window = SDL_CreateWindow(name.GetData(), initial_pos.x, initial_pos.y,
-                                size.x, size.y, window_flags);
+    Uint32 window_flags(SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+    m_window = SDL_CreateWindow(name.GetData(), initial_pos.x, initial_pos.y, size.x, size.y, window_flags);
     if (!m_window) {
         LogError(sTag, SDL_GetError());
         return false;
@@ -63,14 +60,10 @@ bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
     }
 #endif
 
-    const char* opengl_vendor =
-        reinterpret_cast<const char*>(glGetString(GL_VENDOR));
-    const char* opengl_renderer =
-        reinterpret_cast<const char*>(glGetString(GL_RENDERER));
-    const char* opengl_version =
-        reinterpret_cast<const char*>(glGetString(GL_VERSION));
-    const char* glsl_version =
-        reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION));
+    const char* opengl_vendor = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
+    const char* opengl_renderer = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
+    const char* opengl_version = reinterpret_cast<const char*>(glGetString(GL_VERSION));
+    const char* glsl_version = reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION));
 
     LogInfo(sTag, String("OpenGL Vendor: ") + opengl_vendor);
     LogInfo(sTag, String("OpenGL Renderer: ") + opengl_renderer);
@@ -84,8 +77,7 @@ bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
     std::vector<const char*> opengl_available_extensions;
     opengl_available_extensions.reserve(num_extensions);
     for (GLint i = 0; i < num_extensions; i++) {
-        const char* extension =
-            reinterpret_cast<const char*>(glGetStringi(GL_EXTENSIONS, i));
+        const char* extension = reinterpret_cast<const char*>(glGetStringi(GL_EXTENSIONS, i));
         opengl_available_extensions.push_back(extension);
         LogInfo(sTag, String("\t") + extension);
     }
@@ -102,8 +94,7 @@ bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
             }
         }
         if (!found) {
-            LogError(sTag,
-                     "Extension '{}' not available"_format(required_extension));
+            LogError(sTag, "Extension '{}' not available"_format(required_extension));
             all_extensions_found = false;
         }
     }

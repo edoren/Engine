@@ -39,16 +39,14 @@ private:
 
 const SignalConnection::IdType SignalConnection::InvalidId(0);
 
-SignalConnection::SignalConnection(uint64_t id,
-                                   DisconnectCallbackType disconnect_callback)
+SignalConnection::SignalConnection(uint64_t id, DisconnectCallbackType disconnect_callback)
       : m_id(id),
         m_reference(new Reference(0)),
         m_disconnect_callback(disconnect_callback) {
     m_reference->Increase();
 }
 
-SignalConnection::SignalConnection()
-      : m_id(0), m_reference(nullptr), m_disconnect_callback(nullptr) {}
+SignalConnection::SignalConnection() : m_id(0), m_reference(nullptr), m_disconnect_callback(nullptr) {}
 
 SignalConnection::SignalConnection(const SignalConnection& other)
       : m_id(other.m_id),
@@ -119,5 +117,4 @@ void SignalConnection::DisconnectWithoutCallback() {
     }
 }
 
-}
-
+}  // namespace engine

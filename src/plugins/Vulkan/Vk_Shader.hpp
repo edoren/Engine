@@ -18,8 +18,7 @@ public:
 
     Vk_Shader& operator=(Vk_Shader&& other);
 
-    bool LoadFromMemory(const byte* source, std::size_t source_size,
-                        ShaderType type) override;
+    bool LoadFromMemory(const byte* source, std::size_t source_size, ShaderType type) override;
 
     UniformBufferObject& GetUBO();
     UniformBufferObject& GetUBODynamic();

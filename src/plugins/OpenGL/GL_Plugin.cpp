@@ -11,10 +11,7 @@ const String sPluginName("OpenGL");
 
 }  // namespace
 
-GL_Plugin::GL_Plugin()
-      : m_renderer(nullptr),
-        m_shader_manager_delegate(nullptr),
-        m_texture_manager_delegate(nullptr) {}
+GL_Plugin::GL_Plugin() : m_renderer(nullptr), m_shader_manager_delegate(nullptr), m_texture_manager_delegate(nullptr) {}
 
 const String& GL_Plugin::GetName() const {
     return sPluginName;

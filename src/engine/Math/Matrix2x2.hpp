@@ -26,8 +26,7 @@ public:
 
     explicit inline Matrix2x2(const data_type& m) : m_data(m) {}
 
-    inline Matrix2x2(const value_type& x0, const value_type& x1,
-                     const value_type& y0, const value_type& y1)
+    inline Matrix2x2(const value_type& x0, const value_type& x1, const value_type& y0, const value_type& y1)
           : m_data(x0, x1, y0, y1) {}
 
     inline Matrix2x2(const col_type& column0, const col_type& column1)
@@ -39,8 +38,7 @@ public:
         return m_data(static_cast<int>(row), static_cast<int>(column));
     }
 
-    inline const value_type& operator()(const size_t row,
-                                        const size_t column) const {
+    inline const value_type& operator()(const size_t row, const size_t column) const {
         return m_data(static_cast<int>(row), static_cast<int>(column));
     }
 
@@ -148,22 +146,21 @@ public:
     // Vector multiplications
 
     template <typename D>
-    friend inline typename Matrix2x2<D>::col_type operator*(
-        const typename Matrix2x2<D>::row_type& v, const Matrix2x2<D>& m) {
+    friend inline typename Matrix2x2<D>::col_type operator*(const typename Matrix2x2<D>::row_type& v,
+                                                            const Matrix2x2<D>& m) {
         return typename Matrix2x2<D>::col_type(v.m_data * m.m_data);
     }
 
     template <typename D>
-    friend inline typename Matrix2x2<D>::row_type operator*(
-        const Matrix2x2<D>& m, const typename Matrix2x2<D>::col_type& v) {
+    friend inline typename Matrix2x2<D>::row_type operator*(const Matrix2x2<D>& m,
+                                                            const typename Matrix2x2<D>::col_type& v) {
         return typename Matrix2x2<D>::row_type(m.m_data * v.m_data);
     }
 
     // Matrix multiplications
 
     template <typename D>
-    friend inline Matrix2x2<D> operator*(const Matrix2x2<D>& m1,
-                                         const Matrix2x2<D>& m2) {
+    friend inline Matrix2x2<D> operator*(const Matrix2x2<D>& m1, const Matrix2x2<D>& m2) {
         return Matrix2x2<D>(m1.m_data * m2.m_data);
     }
 

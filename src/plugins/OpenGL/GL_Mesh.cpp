@@ -34,9 +34,9 @@ GL_Mesh::~GL_Mesh() {
     }
 }
 
-void GL_Mesh::LoadFromData(
-    std::vector<Vertex> vertices, std::vector<uint32> indices,
-    std::vector<std::pair<Texture2D*, TextureType>> textures) {
+void GL_Mesh::LoadFromData(std::vector<Vertex> vertices,
+                           std::vector<uint32> indices,
+                           std::vector<std::pair<Texture2D*, TextureType>> textures) {
     m_vertices = std::move(vertices);
     m_indices = std::move(indices);
     m_textures = std::move(textures);
@@ -52,30 +52,23 @@ void GL_Mesh::SetupMesh() {
     GL_CALL(glBindVertexArray(m_VAO));
 
     GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, m_VBO));
-    GL_CALL(glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex),
-                         m_vertices.data(), GL_STATIC_DRAW));
+    GL_CALL(glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex), m_vertices.data(), GL_STATIC_DRAW));
 
     GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO));
-    GL_CALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                         m_indices.size() * sizeof(uint32), m_indices.data(),
-                         GL_STATIC_DRAW));
+    GL_CALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(uint32), m_indices.data(), GL_STATIC_DRAW));
 
     // Vertex positions
     GL_CALL(glEnableVertexAttribArray(0));
-    GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                                  (void*)offsetof(Vertex, position)));
+    GL_CALL(glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position)));
     // Vertex normals
     GL_CALL(glEnableVertexAttribArray(1));
-    GL_CALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                                  (void*)offsetof(Vertex, normal)));
+    GL_CALL(glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal)));
     // Vertex texture coordinates
     GL_CALL(glEnableVertexAttribArray(2));
-    GL_CALL(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                                  (void*)offsetof(Vertex, tex_coords)));
+    GL_CALL(glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, tex_coords)));
     // Vertex color coordinates
     GL_CALL(glEnableVertexAttribArray(3));
-    GL_CALL(glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                                  (void*)offsetof(Vertex, color)));
+    GL_CALL(glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color)));
 
     GL_CALL(glBindVertexArray(0));
 }
@@ -94,12 +87,10 @@ void GL_Mesh::Draw(RenderWindow& target, const RenderStates& states) const {
         String uniform_name;
         switch (current_texture_type) {
             case TextureType::DIFFUSE:
-                uniform_name +=
-                    "tex_diffuse" + String::FromValue(diffuse_num++);
+                uniform_name += "tex_diffuse" + String::FromValue(diffuse_num++);
                 break;
             case TextureType::SPECULAR:
-                uniform_name +=
-                    "tex_specular" + String::FromValue(specular_num++);
+                uniform_name += "tex_specular" + String::FromValue(specular_num++);
                 break;
             default:
                 continue;
@@ -121,9 +112,7 @@ void GL_Mesh::Draw(RenderWindow& target, const RenderStates& states) const {
 
         math::mat4 model_matrix = states.transform.GetMatrix();
 
-        math::mat4 view_matrix = (active_camera != nullptr)
-                                     ? active_camera->GetViewMatrix()
-                                     : math::mat4();
+        math::mat4 view_matrix = (active_camera != nullptr) ? active_camera->GetViewMatrix() : math::mat4();
         const math::mat4& projection_matrix = window.GetProjectionMatrix();
 
         math::mat4 mvp_matrix = projection_matrix * view_matrix * model_matrix;
@@ -139,8 +128,7 @@ void GL_Mesh::Draw(RenderWindow& target, const RenderStates& states) const {
     GL_CALL(glActiveTexture(GL_TEXTURE0));
 
     GL_CALL(glBindVertexArray(m_VAO));
-    GL_CALL(glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_indices.size()),
-                           GL_UNSIGNED_INT, 0));
+    GL_CALL(glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_indices.size()), GL_UNSIGNED_INT, 0));
     GL_CALL(glBindVertexArray(0));
 }
 

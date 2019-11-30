@@ -16,8 +16,7 @@ public:
 
     virtual ~Vk_Image();
 
-    bool CreateImage(const math::uvec2& size, VkFormat format,
-                     VkImageTiling tiling, VkImageUsageFlags usage);
+    bool CreateImage(const math::uvec2& size, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage);
 
     bool CreateImageView(VkFormat format, VkImageAspectFlags aspectMask);
 

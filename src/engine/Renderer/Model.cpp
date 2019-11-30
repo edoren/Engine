@@ -36,8 +36,7 @@ protected:
             if (m_file.Open(file_path.GetData(), pMode)) break;
         }
         if (!m_file.IsOpen()) {
-            LogError("CustomAssimpIOStream",
-                     String("Could not open file") + pFile);
+            LogError("CustomAssimpIOStream", String("Could not open file") + pFile);
         }
     }
 
@@ -55,8 +54,7 @@ public:
     }
 
     aiReturn Seek(size_t pOffset, aiOrigin pOrigin) override {
-        int64 ret = m_file.Seek(pOffset,
-                                static_cast<engine::IOStream::Origin>(pOrigin));
+        int64 ret = m_file.Seek(pOffset, static_cast<engine::IOStream::Origin>(pOrigin));
         return static_cast<aiReturn>(ret);
     }
 
@@ -181,21 +179,17 @@ void Model::LoadModel(const String& path) {
             model_matrix.Scale(math::vec3(float(scale)));
         }
         if (!rotation.is_null()) {
-            model_matrix.Rotate(
-                {float(rotation[0]), float(rotation[1]), float(rotation[2])});
+            model_matrix.Rotate({float(rotation[0]), float(rotation[1]), float(rotation[2])});
         }
         m_transform = model_matrix;
     }
 
     importer.SetIOHandler(new CustomAssimpIOSystem());
 
-    const aiScene* scene =
-        importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_FlipUVs);
+    const aiScene* scene = importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_FlipUVs);
 
-    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE ||
-        !scene->mRootNode) {
-        LogError("Model",
-                 String("ERROR::ASSIMP::") + importer.GetErrorString());
+    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
+        LogError("Model", String("ERROR::ASSIMP::") + importer.GetErrorString());
         return;
     }
 
@@ -280,16 +274,13 @@ Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
 
     std::vector<std::pair<TextureType, String>> texture_filenames;
 
-    auto load_textures_from_material = [&texture_filenames, &fs,
-                                        this](const json& json_material) {
+    auto load_textures_from_material = [&texture_filenames, &fs, this](const json& json_material) {
         const json& json_textures = json_material["textures"];
         for (const json& json_texture : json_textures) {
             const json& type = json_texture["type"];
             const json& name = json_texture["name"];
             if (type.is_string() && name.is_string()) {
-                texture_filenames.emplace_back(
-                    GetTextureTypeFromString(type),
-                    fs.Join(m_relative_directory, name));
+                texture_filenames.emplace_back(GetTextureTypeFromString(type), fs.Join(m_relative_directory, name));
             }
         }
     };
@@ -324,8 +315,7 @@ Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
                 material->GetTexture(type, i, &str);
 
                 texture_filenames.emplace_back(
-                    std::make_pair(GetTextureTypeFromAiTextureType(type),
-                                   fs.Join(m_relative_directory, str.C_Str())));
+                    std::make_pair(GetTextureTypeFromAiTextureType(type), fs.Join(m_relative_directory, str.C_Str())));
             }
         }
     }
@@ -339,8 +329,7 @@ Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
     }
 
     if (textures.empty()) {
-        Texture2D* texture =
-            texture_manager.GetTexture2D(TextureManager::DEFAULT_TEXTURE_ID);
+        Texture2D* texture = texture_manager.GetTexture2D(TextureManager::DEFAULT_TEXTURE_ID);
         textures.push_back(std::make_pair(texture, TextureType::DIFFUSE));
     }
 

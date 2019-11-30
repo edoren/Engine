@@ -6,9 +6,9 @@
 #include <SDL2.h>
 
 #if PLATFORM_IS(PLATFORM_WINDOWS)
-#include <windows.h>
+    #include <windows.h>
 #elif PLATFORM_IS(PLATFORM_LINUX | PLATFORM_MACOS | PLATFORM_IOS | PLATFORM_ANDROID)
-#include <unistd.h>
+    #include <unistd.h>
 #endif
 
 #define PATH_MAX_LENGTH 256
@@ -69,8 +69,7 @@ bool FileSystem::LoadFileData(const String& filename, String* dest) const {
     return success;
 }
 
-bool FileSystem::LoadFileData(const String& filename,
-                              std::vector<byte>* dest) const {
+bool FileSystem::LoadFileData(const String& filename, std::vector<byte>* dest) const {
     IOStream file;
 
     auto filename_cpy = filename;
@@ -164,8 +163,7 @@ String FileSystem::NormalizePath(const String& path) const {
     bool is_absolute = IsAbsolutePath(path);
     std::vector<std::pair<const char8*, const char8*>> path_comps;
 
-    auto AddPathComponent = [&path_comps, is_absolute](const char8* begin,
-                                                       const char8* end) {
+    auto AddPathComponent = [&path_comps, is_absolute](const char8* begin, const char8* end) {
         size_t seq_size = end - begin;
 
         // Ignore the component if the . directories
@@ -180,8 +178,7 @@ String FileSystem::NormalizePath(const String& path) const {
                 // If the last element is a .. directory, append another one
                 // if not just pop_back the last component
                 auto& last = path_comps.back();
-                if (!is_absolute && (last.second - last.first) == 2 &&
-                    std::memcmp(last.first, "..", 2) == 0) {
+                if (!is_absolute && (last.second - last.first) == 2 && std::memcmp(last.first, "..", 2) == 0) {
                     path_comps.emplace_back(begin, end);
                 } else {
                     path_comps.pop_back();

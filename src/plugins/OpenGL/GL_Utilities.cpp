@@ -34,8 +34,7 @@ void LogGLError(const char* file, int line, const char* call) {
     }
 
     char buffer[512];
-    sprintf(buffer, "%s(%d): OpenGL Error: %s from %s", file, line, err_str,
-            call);
+    sprintf(buffer, "%s(%d): OpenGL Error: %s from %s", file, line, err_str, call);
 
     LogError(sTag, buffer);
     assert(0);

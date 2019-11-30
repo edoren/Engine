@@ -22,8 +22,7 @@ public:
     Shader();
     virtual ~Shader();
 
-    virtual bool LoadFromMemory(const byte* source, std::size_t source_size,
-                                ShaderType type) = 0;
+    virtual bool LoadFromMemory(const byte* source, std::size_t source_size, ShaderType type) = 0;
 
 protected:
     virtual void SetDescriptor(json&& descriptor) = 0;

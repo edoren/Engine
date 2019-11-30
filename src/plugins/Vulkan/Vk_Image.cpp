@@ -15,15 +15,9 @@ const String sTag("Vk_Image");
 
 }  // namespace
 
-Vk_Image::Vk_Image()
-      : m_handle(VK_NULL_HANDLE),
-        m_view(VK_NULL_HANDLE),
-        m_memory(VK_NULL_HANDLE) {}
+Vk_Image::Vk_Image() : m_handle(VK_NULL_HANDLE), m_view(VK_NULL_HANDLE), m_memory(VK_NULL_HANDLE) {}
 
-Vk_Image::Vk_Image(Vk_Image&& other)
-      : m_handle(other.m_handle),
-        m_view(other.m_view),
-        m_memory(other.m_memory) {
+Vk_Image::Vk_Image(Vk_Image&& other) : m_handle(other.m_handle), m_view(other.m_view), m_memory(other.m_memory) {
     other.m_handle = VK_NULL_HANDLE;
     other.m_view = VK_NULL_HANDLE;
     other.m_memory = VK_NULL_HANDLE;
@@ -33,8 +27,7 @@ Vk_Image::~Vk_Image() {
     Destroy();
 }
 
-bool Vk_Image::CreateImage(const math::uvec2& size, VkFormat format,
-                           VkImageTiling tiling, VkImageUsageFlags usage) {
+bool Vk_Image::CreateImage(const math::uvec2& size, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage) {
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.GetVulkanDevice();
 
@@ -96,8 +89,7 @@ bool Vk_Image::CreateImageView(VkFormat format, VkImageAspectFlags aspectMask) {
         },
     };
 
-    return vkCreateImageView(device, &image_view_create_info, nullptr,
-                             &m_view) == VK_SUCCESS;
+    return vkCreateImageView(device, &image_view_create_info, nullptr, &m_view) == VK_SUCCESS;
 }
 
 bool Vk_Image::AllocateMemory(const VkMemoryPropertyFlags& memory_properties) {
@@ -107,8 +99,7 @@ bool Vk_Image::AllocateMemory(const VkMemoryPropertyFlags& memory_properties) {
     VkMemoryRequirements image_memory_requirements;
     vkGetImageMemoryRequirements(device, m_handle, &image_memory_requirements);
 
-    if (!Vk_Utilities::AllocateMemory(&m_memory, memory_properties,
-                                      image_memory_requirements)) {
+    if (!Vk_Utilities::AllocateMemory(&m_memory, memory_properties, image_memory_requirements)) {
         return false;
     }
 
@@ -123,8 +114,7 @@ void Vk_Image::Destroy() {
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.GetVulkanDevice();
 
-    if (m_view != VK_NULL_HANDLE || m_handle != VK_NULL_HANDLE ||
-        m_memory != VK_NULL_HANDLE) {
+    if (m_view != VK_NULL_HANDLE || m_handle != VK_NULL_HANDLE || m_memory != VK_NULL_HANDLE) {
         QueueParameters& graphics_queue = context.GetGraphicsQueue();
         vkQueueWaitIdle(graphics_queue.handle);
 

@@ -4,7 +4,7 @@
 #include <SDL2.h>
 
 #if PLATFORM_IS(PLATFORM_ANDROID)
-#include <android/log.h>
+    #include <android/log.h>
 #endif
 
 namespace engine {
@@ -18,17 +18,14 @@ const char* const sLineEnding = "\n";
 #endif
 
 #if PLATFORM_IS(PLATFORM_ANDROID)
-android_LogPriority sAndroidLogPriorities[] = {
-    ANDROID_LOG_UNKNOWN, ANDROID_LOG_VERBOSE, ANDROID_LOG_DEBUG,
-    ANDROID_LOG_INFO,    ANDROID_LOG_WARN,    ANDROID_LOG_ERROR,
-    ANDROID_LOG_FATAL};
+android_LogPriority sAndroidLogPriorities[] = {ANDROID_LOG_UNKNOWN, ANDROID_LOG_VERBOSE, ANDROID_LOG_DEBUG,
+                                               ANDROID_LOG_INFO,    ANDROID_LOG_WARN,    ANDROID_LOG_ERROR,
+                                               ANDROID_LOG_FATAL};
 #endif
 
-const char* sLogPriorityNames[] = {NULL,   "VERBOSE", "DEBUG", "INFO",
-                                   "WARN", "ERROR",   "FATAL"};
+const char* sLogPriorityNames[] = {NULL, "VERBOSE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"};
 
-String DefaultLogCallback(LogPriority priority, const String& tag,
-                          const String& message) {
+String DefaultLogCallback(LogPriority priority, const String& tag, const String& message) {
     const char* priority_name = sLogPriorityNames[static_cast<int>(priority)];
 
     // Get the current system hour
@@ -36,9 +33,8 @@ String DefaultLogCallback(LogPriority priority, const String& tag,
     std::tm* tm = std::localtime(&t);
 
     // Format the log message
-    return "[{:02d}:{:02d}:{:02d}] [{}/{}] : {}"_format(
-        tm->tm_hour, tm->tm_min, tm->tm_sec, tag.GetData(), priority_name,
-        message.GetData());
+    return "[{:02d}:{:02d}:{:02d}] [{}/{}] : {}"_format(tm->tm_hour, tm->tm_min, tm->tm_sec, tag.GetData(),
+                                                        priority_name, message.GetData());
 }
 
 }  // namespace
@@ -97,8 +93,7 @@ void LogManager::Fatal(const String& tag, const String& message) {
     std::exit(1);  // TMP
 }
 
-void LogManager::LogMessage(LogPriority priority, const String& tag,
-                            const String& message) {
+void LogManager::LogMessage(LogPriority priority, const String& tag, const String& message) {
 #ifndef ENGINE_DEBUG
     if (priority == LogPriority::DEBUG) return;
 #endif
@@ -118,8 +113,8 @@ void LogManager::LogMessage(LogPriority priority, const String& tag,
     // Write the log to console
     if (m_console_logging_enable) {
 #if PLATFORM_IS(PLATFORM_ANDROID)
-        __android_log_write(sAndroidLogPriorities[static_cast<int>(priority)],
-                            m_app_name.GetData(), log_message.GetData());
+        __android_log_write(sAndroidLogPriorities[static_cast<int>(priority)], m_app_name.GetData(),
+                            log_message.GetData());
 #else
         fputs(log_message.GetData(), stdout);
         fputs("\n", stdout);

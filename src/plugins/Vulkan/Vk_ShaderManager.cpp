@@ -40,8 +40,7 @@ Vk_Shader* Vk_ShaderManager::LoadFromFile(const String& basename) {
     return reinterpret_cast<Vk_Shader*>(base_shader);
 }
 
-Vk_Shader* Vk_ShaderManager::LoadFromMemory(
-    const String& name, std::map<ShaderType, String*> shader_data_map) {
+Vk_Shader* Vk_ShaderManager::LoadFromMemory(const String& name, std::map<ShaderType, String*> shader_data_map) {
     Shader* base_shader = ShaderManager::LoadFromMemory(name, shader_data_map);
     return reinterpret_cast<Vk_Shader*>(base_shader);
 }

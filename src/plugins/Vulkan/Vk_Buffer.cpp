@@ -12,8 +12,7 @@ const String sTag("Vk_Buffer");
 
 }  // namespace
 
-Vk_Buffer::Vk_Buffer()
-      : m_handle(VK_NULL_HANDLE), m_memory(VK_NULL_HANDLE), m_size(0) {}
+Vk_Buffer::Vk_Buffer() : m_handle(VK_NULL_HANDLE), m_memory(VK_NULL_HANDLE), m_size(0) {}
 
 Vk_Buffer::~Vk_Buffer() {
     if (m_handle != VK_NULL_HANDLE) {
@@ -21,8 +20,7 @@ Vk_Buffer::~Vk_Buffer() {
     }
 }
 
-bool Vk_Buffer::Create(VkDeviceSize size, VkBufferUsageFlags usage,
-                       VkMemoryPropertyFlags memory_properties) {
+bool Vk_Buffer::Create(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags memory_properties) {
     if (m_handle != VK_NULL_HANDLE) {
         Destroy();
     }
@@ -49,8 +47,7 @@ bool Vk_Buffer::Create(VkDeviceSize size, VkBufferUsageFlags usage,
         return false;
     }
 
-    if (!Vk_Utilities::AllocateBufferMemory(m_handle, &m_memory,
-                                            memory_properties)) {
+    if (!Vk_Utilities::AllocateBufferMemory(m_handle, &m_memory, memory_properties)) {
         LogError(sTag, "Could not allocate memory for a buffer");
         return false;
     }

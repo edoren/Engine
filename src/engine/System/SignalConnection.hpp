@@ -16,8 +16,7 @@ public:
 private:
     class Reference;
 
-    using DisconnectCallbackType =
-        Function<void(SignalConnection&), LAMBDA_FUNCTION_SIZE(1)>;
+    using DisconnectCallbackType = Function<void(SignalConnection&), LAMBDA_FUNCTION_SIZE(1)>;
 
     SignalConnection(uint64_t id, DisconnectCallbackType disconnect_callback);
 

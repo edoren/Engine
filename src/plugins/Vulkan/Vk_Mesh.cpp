@@ -33,9 +33,9 @@ Vk_Mesh::~Vk_Mesh() {
     m_index_buffer.Destroy();
 }
 
-void Vk_Mesh::LoadFromData(
-    std::vector<Vertex> vertices, std::vector<uint32> indices,
-    std::vector<std::pair<Texture2D*, TextureType>> textures) {
+void Vk_Mesh::LoadFromData(std::vector<Vertex> vertices,
+                           std::vector<uint32> indices,
+                           std::vector<std::pair<Texture2D*, TextureType>> textures) {
     m_vertices = vertices;
     m_indices = indices;
     m_textures = textures;
@@ -53,46 +53,38 @@ void Vk_Mesh::SetupMesh() {
     VkDeviceSize index_buffer_data_size = sizeof(uint32) * m_indices.size();
 
     if (!m_vertex_buffer.Create(vertex_buffer_data_size,
-                                (VK_BUFFER_USAGE_VERTEX_BUFFER_BIT |
-                                 VK_BUFFER_USAGE_TRANSFER_DST_BIT),
+                                (VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT),
                                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)) {
         LogError(sTag, "Could not create Vertex Buffer");
         return;
     }
 
     if (!m_index_buffer.Create(index_buffer_data_size,
-                               (VK_BUFFER_USAGE_INDEX_BUFFER_BIT |
-                                VK_BUFFER_USAGE_TRANSFER_DST_BIT),
+                               (VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT),
                                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)) {
         LogError(sTag, "Could not create Index Buffer");
         return;
     }
 
     Vk_Buffer staging_buffer;
-    if (!staging_buffer.Create(vertex_buffer_data_size + index_buffer_data_size,
-                               VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+    if (!staging_buffer.Create(vertex_buffer_data_size + index_buffer_data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) {
         LogError(sTag, "Could not create Staging Buffer");
         return;
     }
 
     void* staging_buffer_memory_pointer;
-    result = vkMapMemory(device, staging_buffer.GetMemory(), 0,
-                         staging_buffer.GetSize(), 0,
-                         &staging_buffer_memory_pointer);
+    result =
+        vkMapMemory(device, staging_buffer.GetMemory(), 0, staging_buffer.GetSize(), 0, &staging_buffer_memory_pointer);
     if (result != VK_SUCCESS) {
-        LogError(sTag,
-                 "Could not map memory and upload data to a vertex buffer");
+        LogError(sTag, "Could not map memory and upload data to a vertex buffer");
         return;
     }
 
-    byte* vertex_start_position =
-        reinterpret_cast<byte*>(staging_buffer_memory_pointer);
-    byte* index_start_position =
-        vertex_start_position + vertex_buffer_data_size;
+    byte* vertex_start_position = reinterpret_cast<byte*>(staging_buffer_memory_pointer);
+    byte* index_start_position = vertex_start_position + vertex_buffer_data_size;
 
-    std::memcpy(vertex_start_position, m_vertices.data(),
-                vertex_buffer_data_size);
+    std::memcpy(vertex_start_position, m_vertices.data(), vertex_buffer_data_size);
 
     std::memcpy(index_start_position, m_indices.data(), index_buffer_data_size);
 
@@ -148,11 +140,9 @@ void Vk_Mesh::SetupMesh() {
         },
     }};
 
-    vkCmdCopyBuffer(command_buffer, staging_buffer.GetHandle(),
-                    m_vertex_buffer.GetHandle(), 1, &buffer_copy_infos[0]);
+    vkCmdCopyBuffer(command_buffer, staging_buffer.GetHandle(), m_vertex_buffer.GetHandle(), 1, &buffer_copy_infos[0]);
 
-    vkCmdCopyBuffer(command_buffer, staging_buffer.GetHandle(),
-                    m_index_buffer.GetHandle(), 1, &buffer_copy_infos[1]);
+    vkCmdCopyBuffer(command_buffer, staging_buffer.GetHandle(), m_index_buffer.GetHandle(), 1, &buffer_copy_infos[1]);
 
     std::array<VkBufferMemoryBarrier, 2> buffer_memory_barriers = {{
         {
@@ -179,10 +169,9 @@ void Vk_Mesh::SetupMesh() {
         },
     }};
 
-    vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_TRANSFER_BIT,
-                         VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, 0, 0, nullptr,
-                         static_cast<uint32_t>(buffer_memory_barriers.size()),
-                         buffer_memory_barriers.data(), 0, nullptr);
+    vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, 0, 0,
+                         nullptr, static_cast<uint32_t>(buffer_memory_barriers.size()), buffer_memory_barriers.data(),
+                         0, nullptr);
 
     vkEndCommandBuffer(command_buffer);
 
@@ -200,8 +189,7 @@ void Vk_Mesh::SetupMesh() {
         nullptr                         // pSignalSemaphores
     };
 
-    result = vkQueueSubmit(graphics_queue.GetHandle(), 1, &submit_info,
-                           VK_NULL_HANDLE);
+    result = vkQueueSubmit(graphics_queue.GetHandle(), 1, &submit_info, VK_NULL_HANDLE);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Error copying the Mesh data to the Device");
         return;
@@ -215,13 +203,11 @@ void Vk_Mesh::SetupMesh() {
 void Vk_Mesh::Draw(RenderWindow& target, const RenderStates& states) const {
     Vk_RenderWindow& window = static_cast<Vk_RenderWindow&>(target);
 
-    auto lambda = [this, &window, states](uint32 index,
-                                          VkCommandBuffer& command_buffer,
+    auto lambda = [this, &window, states](uint32 index, VkCommandBuffer& command_buffer,
                                           VkPipelineLayout& pipeline_layout) {
         uint32 dynamic_offset = 0;
 
-        Vk_Texture2D* texture =
-            Vk_TextureManager::GetInstance().GetActiveTexture2D();
+        Vk_Texture2D* texture = Vk_TextureManager::GetInstance().GetActiveTexture2D();
         Vk_Shader* shader = Vk_ShaderManager::GetInstance().GetActiveShader();
 
         for (auto& pair : m_textures) {
@@ -237,23 +223,18 @@ void Vk_Mesh::Draw(RenderWindow& target, const RenderStates& states) const {
             const Camera* active_camera = window.GetActiveCamera();
 
             math::mat4 model_matrix = states.transform.GetMatrix();
-            math::mat4 view_matrix = (active_camera != nullptr)
-                                         ? active_camera->GetViewMatrix()
-                                         : math::mat4();
+            math::mat4 view_matrix = (active_camera != nullptr) ? active_camera->GetViewMatrix() : math::mat4();
             const math::mat4& projection_matrix = window.GetProjectionMatrix();
 
-            math::mat4 mvp_matrix =
-                projection_matrix * view_matrix * model_matrix;
+            math::mat4 mvp_matrix = projection_matrix * view_matrix * model_matrix;
             math::mat4 normal_matrix = model_matrix.Inverse().Transpose();
 
             UniformBufferObject& ubo = shader->GetUBODynamic();
 
-            dynamic_offset =
-                index * static_cast<uint32>(ubo.GetDynamicAlignment());
+            dynamic_offset = index * static_cast<uint32>(ubo.GetDynamicAlignment());
 
             ubo.SetAttributeValue("model", model_matrix, dynamic_offset);
-            ubo.SetAttributeValue("normalMatrix", normal_matrix,
-                                  dynamic_offset);
+            ubo.SetAttributeValue("normalMatrix", normal_matrix, dynamic_offset);
             ubo.SetAttributeValue("mvp", mvp_matrix, dynamic_offset);
 
             descriptor_sets[array_pos++] = shader->GetUBODescriptorSet();
@@ -268,18 +249,14 @@ void Vk_Mesh::Draw(RenderWindow& target, const RenderStates& states) const {
         uint32 sVertexBufferBindId = 0;  // TODO: Change where this comes from
         if (m_vertex_buffer.GetHandle() != VK_NULL_HANDLE) {
             VkDeviceSize offset = 0;
-            vkCmdBindVertexBuffers(command_buffer, sVertexBufferBindId, 1,
-                                   &m_vertex_buffer.GetHandle(), &offset);
+            vkCmdBindVertexBuffers(command_buffer, sVertexBufferBindId, 1, &m_vertex_buffer.GetHandle(), &offset);
         }
         if (m_index_buffer.GetHandle() != VK_NULL_HANDLE) {
-            vkCmdBindIndexBuffer(command_buffer, m_index_buffer.GetHandle(), 0,
-                                 VK_INDEX_TYPE_UINT32);
+            vkCmdBindIndexBuffer(command_buffer, m_index_buffer.GetHandle(), 0, VK_INDEX_TYPE_UINT32);
         }
 
-        vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                pipeline_layout, 0,
-                                static_cast<uint32>(array_pos),
-                                descriptor_sets.data(), 1, &dynamic_offset);
+        vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_layout, 0,
+                                static_cast<uint32>(array_pos), descriptor_sets.data(), 1, &dynamic_offset);
 
         uint32 indices_size = static_cast<uint32>(m_indices.size());
         vkCmdDrawIndexed(command_buffer, indices_size, 1, 0, 0, 0);
