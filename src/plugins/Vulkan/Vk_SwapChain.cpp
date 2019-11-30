@@ -141,8 +141,11 @@ bool Vk_SwapChain::Create(Vk_Surface& surface, uint32 width, uint32 height) {
         return false;
     }
 
-    LogInfo(sTag, "SwapChain created with presentation mode: {}"_format(
-                      desired_present_mode));
+    LogInfo(
+        sTag,
+        "SwapChain created with presentation mode "
+        "{} and dimensions [{}, {}]"_format(
+            desired_present_mode, desired_extent.width, desired_extent.height));
 
     if (old_swap_chain) {
         vkDestroySwapchainKHR(device, old_swap_chain, nullptr);
@@ -332,13 +335,14 @@ VkSurfaceTransformFlagBitsKHR Vk_SwapChain::GetTransform(
 
 VkPresentModeKHR Vk_SwapChain::GetPresentMode(
     const std::vector<VkPresentModeKHR>& present_modes) {
+    ENGINE_UNUSED(present_modes);
     // MAILBOX is the lowest latency V-Sync enabled mode (something like
     // triple-buffering) so use it if available
-    for (const VkPresentModeKHR& present_mode : present_modes) {
-        if (present_mode == VK_PRESENT_MODE_MAILBOX_KHR) {
-            return present_mode;
-        }
-    }
+    // for (const VkPresentModeKHR& present_mode : present_modes) {
+    //     if (present_mode == VK_PRESENT_MODE_MAILBOX_KHR) {
+    //         return present_mode;
+    //     }
+    // }
     // FIFO is the only present mode that is required to be supported
     // by the VulkanSDK.
     return VK_PRESENT_MODE_FIFO_KHR;
