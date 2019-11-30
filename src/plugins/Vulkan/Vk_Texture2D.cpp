@@ -30,9 +30,8 @@ Vk_Texture2D::~Vk_Texture2D() {
 }
 
 bool Vk_Texture2D::LoadFromImage(const Image& img) {
-    if (!m_image.CreateImage(
-            img.GetSize(), VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL,
-            (VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT))) {
+    if (!m_image.CreateImage(img.GetSize(), VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL,
+                             (VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT))) {
         LogError(sTag, "Could not create image");
         return false;
     }
@@ -42,8 +41,7 @@ bool Vk_Texture2D::LoadFromImage(const Image& img) {
         return false;
     }
 
-    if (!m_image.CreateImageView(VK_FORMAT_R8G8B8A8_UNORM,
-                                 VK_IMAGE_ASPECT_COLOR_BIT)) {
+    if (!m_image.CreateImageView(VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT)) {
         LogError(sTag, "Could not create image view");
         return false;
     }
@@ -99,8 +97,7 @@ bool Vk_Texture2D::CreateSampler() {
         VK_FALSE                                  // unnormalizedCoordinates
     };
 
-    VkResult result =
-        vkCreateSampler(device, &sampler_create_info, nullptr, &m_sampler);
+    VkResult result = vkCreateSampler(device, &sampler_create_info, nullptr, &m_sampler);
 
     return result == VK_SUCCESS;
 }
@@ -112,16 +109,14 @@ bool Vk_Texture2D::CopyTextureData(const Image& img) {
 
     VkResult result = VK_SUCCESS;
 
-    if (!m_staging_buffer.Create(img.GetDataSize(),
-                                 VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+    if (!m_staging_buffer.Create(img.GetDataSize(), VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                                  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) {
         LogFatal(sTag, "Could not create Staging Buffer");
     }
 
     // Prepare data in staging buffer
     void* staging_buffer_memory_pointer;
-    result = vkMapMemory(device, m_staging_buffer.GetMemory(), 0,
-                         img.GetDataSize(), 0, &staging_buffer_memory_pointer);
+    result = vkMapMemory(device, m_staging_buffer.GetMemory(), 0, img.GetDataSize(), 0, &staging_buffer_memory_pointer);
     if (result != VK_SUCCESS) {
         LogError(sTag,
                  "Could not map memory and upload "
@@ -129,8 +124,7 @@ bool Vk_Texture2D::CopyTextureData(const Image& img) {
         return false;
     }
 
-    std::memcpy(staging_buffer_memory_pointer, img.GetData(),
-                img.GetDataSize());
+    std::memcpy(staging_buffer_memory_pointer, img.GetData(), img.GetDataSize());
 
     VkMappedMemoryRange flush_range = {
         VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,  // sType
@@ -189,10 +183,8 @@ bool Vk_Texture2D::CopyTextureData(const Image& img) {
         m_image.GetHandle(),                     // image
         image_subresource_range                  // subresourceRange
     };
-    vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-                         VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0, nullptr, 0,
-                         nullptr, 1,
-                         &image_memory_barrier_from_undefined_to_transfer_dst);
+    vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0,
+                         nullptr, 0, nullptr, 1, &image_memory_barrier_from_undefined_to_transfer_dst);
 
     VkBufferImageCopy buffer_image_copy_info = {
         0,  // bufferOffset
@@ -218,9 +210,8 @@ bool Vk_Texture2D::CopyTextureData(const Image& img) {
             1                 // depth
         },
     };
-    vkCmdCopyBufferToImage(
-        command_buffer, m_staging_buffer.GetHandle(), m_image.GetHandle(),
-        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &buffer_image_copy_info);
+    vkCmdCopyBufferToImage(command_buffer, m_staging_buffer.GetHandle(), m_image.GetHandle(),
+                           VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &buffer_image_copy_info);
 
     VkImageMemoryBarrier image_memory_barrier_from_transfer_to_shader_read = {
         VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,    // sType
@@ -234,10 +225,8 @@ bool Vk_Texture2D::CopyTextureData(const Image& img) {
         m_image.GetHandle(),                       // image
         image_subresource_range                    // subresourceRange
     };
-    vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_TRANSFER_BIT,
-                         VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0, nullptr,
-                         0, nullptr, 1,
-                         &image_memory_barrier_from_transfer_to_shader_read);
+    vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0,
+                         nullptr, 0, nullptr, 1, &image_memory_barrier_from_transfer_to_shader_read);
 
     vkEndCommandBuffer(command_buffer);
 
@@ -255,8 +244,7 @@ bool Vk_Texture2D::CopyTextureData(const Image& img) {
         nullptr                         // pSignalSemaphores
     };
 
-    result =
-        vkQueueSubmit(graphics_queue.handle, 1, &submit_info, VK_NULL_HANDLE);
+    result = vkQueueSubmit(graphics_queue.handle, 1, &submit_info, VK_NULL_HANDLE);
 
     if (result != VK_SUCCESS) {
         return false;
@@ -283,8 +271,7 @@ bool Vk_Texture2D::AllocateDescriptorSet() {
         &texture_manager->GetDescriptorSetLayout()       // pSetLayouts
     };
 
-    result = vkAllocateDescriptorSets(device, &descriptor_set_allocate_info,
-                                      &m_descriptor_set);
+    result = vkAllocateDescriptorSets(device, &descriptor_set_allocate_info, &m_descriptor_set);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Could not allocate descriptor set");
         return false;

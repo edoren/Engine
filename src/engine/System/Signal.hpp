@@ -38,13 +38,11 @@ public:
 
     // Connects a member function to this Signal
     template <typename InstanceType, typename FMInstanceType>
-    SignalConnection& Connect(InstanceType& instance,
-                              void (FMInstanceType::*func)(Args...));
+    SignalConnection& Connect(InstanceType& instance, void (FMInstanceType::*func)(Args...));
 
     // Connects a const member function to this Signal
     template <typename InstanceType, typename FMInstanceType>
-    SignalConnection& Connect(InstanceType& instance,
-                              void (FMInstanceType::*func)(Args...) const);
+    SignalConnection& Connect(InstanceType& instance, void (FMInstanceType::*func)(Args...) const);
 
     // Connects a Slot to this Signal
     SignalConnection& Connect(const SlotType& slot);

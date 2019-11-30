@@ -16,8 +16,7 @@ const Color32 Color32::YELLOW(255, 235, 4, 255);
 
 Color32::Color32() : r(0), g(0), b(0), a(255) {}
 
-Color32::Color32(const Color32& color)
-      : r(color.r), g(color.g), b(color.b), a(color.a) {}
+Color32::Color32(const Color32& color) : r(color.r), g(color.g), b(color.b), a(color.a) {}
 
 Color32::Color32(uint8 r, uint8 g, uint8 b, uint8 a) : r(r), g(g), b(b), a(a) {}
 

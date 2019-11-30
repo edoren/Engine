@@ -27,8 +27,7 @@ Renderer::~Renderer() {}
 
 bool Renderer::Initialize() {
     int code = SDL_InitSubSystem(SDL_INIT_VIDEO);
-    LogInfo(sTag,
-            "Current SDL video driver: {}"_format(SDL_GetCurrentVideoDriver()));
+    LogInfo(sTag, "Current SDL video driver: {}"_format(SDL_GetCurrentVideoDriver()));
     return code == 0;
 }
 

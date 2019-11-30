@@ -64,8 +64,7 @@ GL_Shader& GL_Shader::operator=(GL_Shader&& other) {
     return *this;
 }
 
-bool GL_Shader::LoadFromMemory(const byte* source, std::size_t source_size,
-                               ShaderType type) {
+bool GL_Shader::LoadFromMemory(const byte* source, std::size_t source_size, ShaderType type) {
     if (IsLinked()) {
         return false;
     }
@@ -80,11 +79,9 @@ bool GL_Shader::LoadFromMemory(const byte* source, std::size_t source_size,
         source_complete += String("#extension ") + extension + " : enable\n";
     }
     source_complete +=
-        String::FromUtf8(reinterpret_cast<const char8*>(source),
-                         reinterpret_cast<const char8*>(source) + source_size);
+        String::FromUtf8(reinterpret_cast<const char8*>(source), reinterpret_cast<const char8*>(source) + source_size);
 
-    GLuint shader =
-        Compile(source_complete.GetData(), source_complete.GetSize(), type);
+    GLuint shader = Compile(source_complete.GetData(), source_complete.GetSize(), type);
     if (!shader) {
         return false;
     }
@@ -164,18 +161,14 @@ void GL_Shader::UploadUniformBuffers() {
     GL_CALL(glUniformBlockBinding(m_program, block_index, binding_point));
     GL_CALL(glBindBuffer(GL_UNIFORM_BUFFER, m_uniform_buffers._static));
 
-    GL_CALL(glBufferData(GL_UNIFORM_BUFFER, m_ubo.GetDataSize(),
-                         m_ubo.GetData(), GL_DYNAMIC_DRAW));
-    GL_CALL(glBindBufferBase(GL_UNIFORM_BUFFER, binding_point,
-                             m_uniform_buffers._static));
+    GL_CALL(glBufferData(GL_UNIFORM_BUFFER, m_ubo.GetDataSize(), m_ubo.GetData(), GL_DYNAMIC_DRAW));
+    GL_CALL(glBindBufferBase(GL_UNIFORM_BUFFER, binding_point, m_uniform_buffers._static));
 
     // TODO: Automatically detect this using the descriptor
     binding_point = 1;
-    block_index =
-        glGetUniformBlockIndex(m_program, "UniformBufferObjectDynamic");
+    block_index = glGetUniformBlockIndex(m_program, "UniformBufferObjectDynamic");
     if (block_index == GL_INVALID_INDEX) {
-        LogError(sTag,
-                 "Error finding the UniformBufferObjectDynamic with binding 1");
+        LogError(sTag, "Error finding the UniformBufferObjectDynamic with binding 1");
         return;
     }
 
@@ -183,10 +176,8 @@ void GL_Shader::UploadUniformBuffers() {
     GL_CALL(glUniformBlockBinding(m_program, block_index, binding_point));
     GL_CALL(glBindBuffer(GL_UNIFORM_BUFFER, m_uniform_buffers._dynamic));
 
-    GL_CALL(glBufferData(GL_UNIFORM_BUFFER, m_ubo_dynamic.GetDataSize(),
-                         m_ubo_dynamic.GetData(), GL_DYNAMIC_DRAW));
-    GL_CALL(glBindBufferBase(GL_UNIFORM_BUFFER, binding_point,
-                             m_uniform_buffers._dynamic));
+    GL_CALL(glBufferData(GL_UNIFORM_BUFFER, m_ubo_dynamic.GetDataSize(), m_ubo_dynamic.GetData(), GL_DYNAMIC_DRAW));
+    GL_CALL(glBindBufferBase(GL_UNIFORM_BUFFER, binding_point, m_uniform_buffers._dynamic));
 }
 
 void GL_Shader::SetUniform(const String& name, float val) {
@@ -206,26 +197,22 @@ void GL_Shader::SetUniform(const String& name, uint32 val) {
 
 void GL_Shader::SetUniform(const String& name, const math::mat4& val) {
     GLint location = GetUniformLocation(name);
-    if (location != -1)
-        GL_CALL(glUniformMatrix4fv(location, 1, GL_FALSE, &val[0]));
+    if (location != -1) GL_CALL(glUniformMatrix4fv(location, 1, GL_FALSE, &val[0]));
 }
 
 void GL_Shader::SetUniform(const String& name, const math::mat3& val) {
     GLint location = GetUniformLocation(name);
-    if (location != -1)
-        GL_CALL(glUniformMatrix3fv(location, 1, GL_FALSE, &val[0]));
+    if (location != -1) GL_CALL(glUniformMatrix3fv(location, 1, GL_FALSE, &val[0]));
 }
 
 void GL_Shader::SetUniform(const String& name, const math::mat2& val) {
     GLint location = GetUniformLocation(name);
-    if (location != -1)
-        GL_CALL(glUniformMatrix2fv(location, 1, GL_FALSE, &val[0]));
+    if (location != -1) GL_CALL(glUniformMatrix2fv(location, 1, GL_FALSE, &val[0]));
 }
 
 void GL_Shader::SetUniform(const String& name, const math::vec4& val) {
     GLint location = GetUniformLocation(name);
-    if (location != -1)
-        GL_CALL(glUniform4f(location, val[0], val[1], val[2], val[3]));
+    if (location != -1) GL_CALL(glUniform4f(location, val[0], val[1], val[2], val[3]));
 }
 
 void GL_Shader::SetUniform(const String& name, const math::vec3& val) {
@@ -254,8 +241,7 @@ void GL_Shader::SetDescriptor(json&& descriptor) {
     m_ubo.SetAttributes(attributes);
 
     attributes.clear();
-    for (auto& attribute :
-         m_descriptor["uniform_buffer_dynamic"]["attributes"]) {
+    for (auto& attribute : m_descriptor["uniform_buffer_dynamic"]["attributes"]) {
         String name = attribute["name"];
         String type = attribute["type"];
         attributes.push_back({name, GetUBODataTypeFromString(type)});
@@ -263,13 +249,11 @@ void GL_Shader::SetDescriptor(json&& descriptor) {
     m_ubo_dynamic.SetAttributes(attributes);
 }
 
-GLuint GL_Shader::Compile(const char8* source, size_t source_size,
-                          ShaderType type) {
+GLuint GL_Shader::Compile(const char8* source, size_t source_size, ShaderType type) {
     return Compile(reinterpret_cast<const byte*>(source), source_size, type);
 }
 
-GLuint GL_Shader::Compile(const byte* source, size_t source_size,
-                          ShaderType type) {
+GLuint GL_Shader::Compile(const byte* source, size_t source_size, ShaderType type) {
     if (source == nullptr || source_size == 0) return 0;
 
     GLuint shader = glCreateShader(sGlShaderTypes[static_cast<int>(type)]);

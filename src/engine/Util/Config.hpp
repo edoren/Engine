@@ -18,7 +18,8 @@
     #define ENGINE_SYMBOL_EXPORTS __attribute__((__visibility__("default")))
     #define ENGINE_SYMBOL_IMPORTS __attribute__((__visibility__("default")))
 #else
-    // GCC < 4 has no mechanism to explicitely hide symbols, everything's exported
+    // GCC < 4 has no mechanism to explicitely hide symbols, everything's
+    // exported
     #define ENGINE_SYMBOL_EXPORTS
     #define ENGINE_SYMBOL_IMPORTS
 #endif

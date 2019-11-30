@@ -19,8 +19,7 @@ public:
 
     GL_Shader* LoadFromFile(const String& basename);
 
-    GL_Shader* LoadFromMemory(const String& name,
-                              std::map<ShaderType, String*> shader_data_map);
+    GL_Shader* LoadFromMemory(const String& name, std::map<ShaderType, String*> shader_data_map);
 
     GL_Shader* GetShader(const String& name);
 

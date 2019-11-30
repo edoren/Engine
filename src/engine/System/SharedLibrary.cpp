@@ -3,23 +3,22 @@
 #include <System/FileSystem.hpp>
 
 #if PLATFORM_IS(PLATFORM_WINDOWS)
-#include <windows.h>
-#define LIBRARY_PREFIX ""
-#define LIBRARY_EXTENSION ".dll"
+    #include <windows.h>
+    #define LIBRARY_PREFIX ""
+    #define LIBRARY_EXTENSION ".dll"
 #elif PLATFORM_IS(PLATFORM_LINUX | PLATFORM_ANDROID)
-#include <dlfcn.h>
-#define LIBRARY_PREFIX "lib"
-#define LIBRARY_EXTENSION ".so"
+    #include <dlfcn.h>
+    #define LIBRARY_PREFIX "lib"
+    #define LIBRARY_EXTENSION ".so"
 #elif PLATFORM_IS(PLATFORM_MACOS | PLATFORM_IOS)
-#include <dlfcn.h>
-#define LIBRARY_PREFIX "lib"
-#define LIBRARY_EXTENSION ".dylib"
+    #include <dlfcn.h>
+    #define LIBRARY_PREFIX "lib"
+    #define LIBRARY_EXTENSION ".dylib"
 #endif
 
 namespace engine {
 
-SharedLibrary::SharedLibrary(const String& name)
-      : m_name(name), m_handle(nullptr) {}
+SharedLibrary::SharedLibrary(const String& name) : m_name(name), m_handle(nullptr) {}
 
 SharedLibrary::SharedLibrary(SharedLibrary&& other) {
     m_name = other.m_name;
@@ -66,11 +65,8 @@ String SharedLibrary::GetErrorString() {
     if (m_name.IsEmpty()) return String("the library name must not be empty");
 #if PLATFORM_IS(PLATFORM_WINDOWS)
     LPWSTR lpMsgBuf;
-    FormatMessageW((FORMAT_MESSAGE_ALLOCATE_BUFFER |
-                    FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS),
-                   NULL, GetLastError(),
-                   MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&lpMsgBuf,
-                   0, NULL);
+    FormatMessageW((FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS), NULL,
+                   GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&lpMsgBuf, 0, NULL);
     std::size_t msg_len = std::wcslen(lpMsgBuf);
     if (msg_len >= 2) msg_len -= 2;  // Remove the /r/n characters
     String ret = String::FromWide(lpMsgBuf, lpMsgBuf + msg_len);

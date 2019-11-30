@@ -3,8 +3,7 @@
 
 namespace {
 
-const char sHexdigits[16] = {'0', '1', '2', '3', '4', '5', '6', '7',
-                             '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
+const char sHexdigits[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
 
 }  // namespace
 
@@ -26,8 +25,7 @@ UUID UUID::UUID4() {
         uint64_uuid[i] = dist(rng);
     }
 
-    output.m_uuid.clock_seq_hi_and_reserved =
-        (output.m_uuid.clock_seq_hi_and_reserved & 0x3f) | 0x80;
+    output.m_uuid.clock_seq_hi_and_reserved = (output.m_uuid.clock_seq_hi_and_reserved & 0x3f) | 0x80;
     output.m_uuid.clock_seq_low = (output.m_uuid.clock_seq_low & 0x0f) | 0x40;
 
     return output;

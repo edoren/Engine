@@ -58,8 +58,7 @@ void InputManager::Shutdown() {
 
 Button& InputManager::GetButton(int button) {
     auto it = m_button_map.find(button);
-    return it != m_button_map.end() ? it->second
-                                    : (m_button_map[button] = Button());
+    return it != m_button_map.end() ? it->second : (m_button_map[button] = Button());
 }
 
 Button& InputManager::GetPointerButton(SDL_FingerID pointer) {
@@ -105,8 +104,7 @@ void InputManager::AdvanceFrame() {
             case SDL_WINDOWEVENT: {
                 switch (event.window.event) {
                     case SDL_WINDOWEVENT_RESIZED: {
-                        math::ivec2 window_size(event.window.data1,
-                                                event.window.data2);
+                        math::ivec2 window_size(event.window.data1, event.window.data2);
                         OnWindowResized.Emit(window_size);
                         break;
                     }
@@ -125,8 +123,7 @@ void InputManager::AdvanceFrame() {
                 break;
             case SDL_KEYDOWN:
             case SDL_KEYUP: {
-                GetButton(event.key.keysym.sym)
-                    .Update(event.key.state == SDL_PRESSED);
+                GetButton(event.key.keysym.sym).Update(event.key.state == SDL_PRESSED);
                 break;
             }
             case SDL_TEXTEDITING:
@@ -134,18 +131,14 @@ void InputManager::AdvanceFrame() {
             case SDL_KEYMAPCHANGED:
                 break;
             case SDL_MOUSEMOTION: {
-                m_pointers[0].mousedelta +=
-                    math::ivec2(event.motion.xrel, event.motion.yrel);
-                m_pointers[0].mousepos =
-                    math::ivec2(event.button.x, event.button.y);
+                m_pointers[0].mousedelta += math::ivec2(event.motion.xrel, event.motion.yrel);
+                m_pointers[0].mousepos = math::ivec2(event.button.x, event.button.y);
                 break;
             }
             case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEBUTTONUP: {
-                GetPointerButton(event.button.button - 1)
-                    .Update(event.button.state == SDL_PRESSED);
-                m_pointers[0].mousepos =
-                    math::ivec2(event.button.x, event.button.y);
+                GetPointerButton(event.button.button - 1).Update(event.button.state == SDL_PRESSED);
+                m_pointers[0].mousepos = math::ivec2(event.button.x, event.button.y);
                 m_pointers[0].used = true;
                 break;
             }

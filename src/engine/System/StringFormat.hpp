@@ -7,7 +7,7 @@
 #define FMT_USE_WINDOWS_H 0
 #define FMT_USE_USER_DEFINED_LITERALS 0
 #ifndef ENGINE_EXPORTS
-#define FMT_SHARED 0
+    #define FMT_SHARED 0
 #endif
 #include <fmt/format.h>
 #include <fmt/ostream.h>
@@ -24,13 +24,11 @@ struct UdlStringFormatProxy {
     }
 };
 
-inline UdlStringFormatProxy<char8> operator"" _format(const char8* str,
-                                                      std::size_t) {
+inline UdlStringFormatProxy<char8> operator"" _format(const char8* str, std::size_t) {
     return {str};
 }
 
-inline UdlStringFormatProxy<wchar> operator"" _format(const wchar* str,
-                                                      std::size_t) {
+inline UdlStringFormatProxy<wchar> operator"" _format(const wchar* str, std::size_t) {
     return {str};
 }
 

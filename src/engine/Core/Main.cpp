@@ -160,7 +160,6 @@ void Main::Shutdown() {
         m_active_renderer = nullptr;
         m_renderers.clear();
 
-
         // 5. Shutdown plugins
         ShutdownPlugins();
 
@@ -189,12 +188,11 @@ void Main::LoadPlugin(const String& name) {
         m_plugin_libs.push_back(lib);
 
         // Call startup function
-        PFN_START_PLUGIN pFunc =
-            reinterpret_cast<PFN_START_PLUGIN>(lib->GetSymbol("StartPlugin"));
+        PFN_START_PLUGIN pFunc = reinterpret_cast<PFN_START_PLUGIN>(lib->GetSymbol("StartPlugin"));
 
-        if (!pFunc)
-            LogFatal(sTag,
-                     "Cannot find symbol StartPlugin in library: " + name);
+        if (!pFunc) {
+            LogFatal(sTag, "Cannot find symbol StartPlugin in library: " + name);
+        }
 
         // This must call InstallPlugin
         pFunc();
@@ -206,13 +204,11 @@ void Main::UnloadPlugin(const String& pluginName) {
         SharedLibrary* shared_lib = *it;
         if (shared_lib->GetName() == pluginName) {
             // Call plugin shutdown
-            PFN_STOP_PLUGIN pFunc =
-                (PFN_STOP_PLUGIN)shared_lib->GetSymbol("StopPlugin");
+            PFN_STOP_PLUGIN pFunc = (PFN_STOP_PLUGIN)shared_lib->GetSymbol("StopPlugin");
 
             if (!pFunc) {
                 const String& name = shared_lib->GetName();
-                LogFatal(sTag,
-                         "Cannot find symbol StopPlugin in library: " + name);
+                LogFatal(sTag, "Cannot find symbol StopPlugin in library: " + name);
             }
 
             // This must call UninstallPlugin
@@ -275,7 +271,6 @@ std::unique_ptr<RendererFactory>& Main::GetActiveRendererFactoryPtr() {
     return GetActiveRenderer().GetRendererFactoryPtr();
 }
 
-
 void Main::ExecuteAsync(AsyncTaskRunner::Task&& task) {
     m_async_task_runner->Execute(std::move(task));
 }
@@ -290,8 +285,7 @@ void Main::ShutdownPlugins() {
     // Unload all the Plugins loaded through shared libraries
     for (auto& plugin_lib : m_plugin_libs) {
         // Call plugin shutdown
-        PFN_STOP_PLUGIN pFunc = reinterpret_cast<PFN_STOP_PLUGIN>(
-            plugin_lib->GetSymbol("StopPlugin"));
+        PFN_STOP_PLUGIN pFunc = reinterpret_cast<PFN_STOP_PLUGIN>(plugin_lib->GetSymbol("StopPlugin"));
 
         if (!pFunc) {
             const String& name = plugin_lib->GetName();

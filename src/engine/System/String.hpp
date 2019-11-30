@@ -40,15 +40,13 @@ public:
     ////////////////////////////////////////////////////////////
     // Types
     ////////////////////////////////////////////////////////////
-    typedef std::basic_string<char8>::iterator iterator;  ///< Iterator type
-    typedef std::basic_string<char8>::const_iterator
-        const_iterator;  ///< Read-only iterator type
+    typedef std::basic_string<char8>::iterator iterator;              ///< Iterator type
+    typedef std::basic_string<char8>::const_iterator const_iterator;  ///< Read-only iterator type
 
     ////////////////////////////////////////////////////////////
     // Static member data
     ////////////////////////////////////////////////////////////
-    static const std::size_t
-        InvalidPos;  ///< Represents an invalid position in the string
+    static const std::size_t InvalidPos;  ///< Represents an invalid position in the string
 
     ////////////////////////////////////////////////////////////
     /// @brief Default constructor
@@ -190,8 +188,7 @@ public:
     ////////////////////////////////////////////////////////////
     template <typename Iterator>
     static String FromUtf8(Iterator begin, Iterator end) {
-        return FromUtf8(const_cast<const char8*>(&(*begin)),
-                        const_cast<const char8*>(&(*end)));
+        return FromUtf8(const_cast<const char8*>(&(*begin)), const_cast<const char8*>(&(*end)));
     }
 
     ////////////////////////////////////////////////////////////
@@ -220,8 +217,7 @@ public:
     ////////////////////////////////////////////////////////////
     template <typename Iterator>
     static String FromUtf16(Iterator begin, Iterator end) {
-        return FromUtf16(const_cast<const char16*>(&(*begin)),
-                         const_cast<const char16*>(&(*end)));
+        return FromUtf16(const_cast<const char16*>(&(*begin)), const_cast<const char16*>(&(*end)));
     }
 
     ////////////////////////////////////////////////////////////
@@ -267,8 +263,7 @@ public:
     ////////////////////////////////////////////////////////////
     template <typename Iterator>
     static String FromUtf32(Iterator begin, Iterator end) {
-        return FromUtf32(const_cast<const char32*>(&(*begin)),
-                         const_cast<const char32*>(&(*end)));
+        return FromUtf32(const_cast<const char32*>(&(*begin)), const_cast<const char32*>(&(*end)));
     }
 
     ////////////////////////////////////////////////////////////
@@ -297,8 +292,7 @@ public:
     ////////////////////////////////////////////////////////////
     template <typename Iterator>
     static String FromWide(Iterator begin, Iterator end) {
-        return FromWide(const_cast<const wchar*>(&(*begin)),
-                        const_cast<const wchar*>(&(*end)));
+        return FromWide(const_cast<const wchar*>(&(*begin)), const_cast<const wchar*>(&(*end)));
     }
 
     ////////////////////////////////////////////////////////////
@@ -576,8 +570,7 @@ public:
     ///         in the string, or String::InvalidPos if not found
     ///
     ////////////////////////////////////////////////////////////
-    std::size_t FindLastOf(const String& str,
-                           std::size_t pos = InvalidPos) const;
+    std::size_t FindLastOf(const String& str, std::size_t pos = InvalidPos) const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Replace a SubString with another string
@@ -591,8 +584,7 @@ public:
     ///                    end of the string.
     /// @param replaceWith String that replaces the given SubString.
     ////////////////////////////////////////////////////////////
-    void Replace(std::size_t position, std::size_t length,
-                 const String& replaceWith);
+    void Replace(std::size_t position, std::size_t length, const String& replaceWith);
 
     ////////////////////////////////////////////////////////////
     /// @brief Replace all occurrences of an Unicode code point with other
@@ -633,8 +625,7 @@ public:
     ///
     /// @return String object containing a SubString of this object
     ////////////////////////////////////////////////////////////
-    String SubString(std::size_t position,
-                     std::size_t length = InvalidPos) const;
+    String SubString(std::size_t position, std::size_t length = InvalidPos) const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Get a pointer to the C-style array of characters

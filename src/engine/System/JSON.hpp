@@ -3,7 +3,7 @@
 #include <Util/Prerequisites.hpp>
 
 #ifdef ENGINE_NOEXCEPTION
-#define JSON_NOEXCEPTION
+    #define JSON_NOEXCEPTION
 #endif
 #include <nlohmann/json.hpp>
 

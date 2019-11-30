@@ -33,8 +33,7 @@ public:
     void Error(const String& tag, const String& message);
     void Fatal(const String& tag, const String& message);
 
-    void LogMessage(LogPriority priority, const String& tag,
-                    const String& message);
+    void LogMessage(LogPriority priority, const String& tag, const String& message);
 
     void EnableFileLogging(bool enable);
     void EnableConsoleLogging(bool enable);

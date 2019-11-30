@@ -57,8 +57,7 @@ Shader* ShaderManager::LoadFromFile(const String& basename) {
     FileSystem& fs = FileSystem::GetInstance();
 
     String shader_folder = fs.Join(sRootShaderFolder, GetShaderFolder());
-    String shader_descriptor_folder =
-        fs.Join(sRootShaderFolder, sShaderDescriptorFolder);
+    String shader_descriptor_folder = fs.Join(sRootShaderFolder, sShaderDescriptorFolder);
 
     for (auto shader_type : sAvailableShaderTypes) {
         bool ok = true;
@@ -81,8 +80,7 @@ Shader* ShaderManager::LoadFromFile(const String& basename) {
         bool filename_exist = fs.FileExists(filename);
 
         // Vertex and Fragment shaders are completly required
-        if (!filename_exist && (shader_type == ShaderType::VERTEX ||
-                                shader_type == ShaderType::FRAGMENT)) {
+        if (!filename_exist && (shader_type == ShaderType::VERTEX || shader_type == ShaderType::FRAGMENT)) {
             LogError(sTag, "Could not find file: {}"_format(filename));
             ok = false;
         }
@@ -90,8 +88,7 @@ Shader* ShaderManager::LoadFromFile(const String& basename) {
         if (filename_exist) {
             std::vector<byte> filename_data;
             fs.LoadFileData(filename, &filename_data);
-            if (!new_shader->LoadFromMemory(
-                    filename_data.data(), filename_data.size(), shader_type)) {
+            if (!new_shader->LoadFromMemory(filename_data.data(), filename_data.size(), shader_type)) {
                 LogError(sTag, "Could not load shader: {}"_format(basename));
                 ok = false;
             }
@@ -127,8 +124,7 @@ Shader* ShaderManager::LoadFromFile(const String& basename) {
     return new_shader;
 }
 
-Shader* ShaderManager::LoadFromMemory(
-    const String& name, std::map<ShaderType, String*> shader_data) {
+Shader* ShaderManager::LoadFromMemory(const String& name, std::map<ShaderType, String*> shader_data) {
     if (GetShader(name) != nullptr) {
         LogError(sTag, "Shader '{}' already loaded");
         return nullptr;
@@ -151,11 +147,9 @@ Shader* ShaderManager::LoadFromMemory(
         String* shader_source = shader_data_pair.second;
 
         auto shader_source_data = shader_source->ToUtf8();
-        if (!new_shader->LoadFromMemory(
-                reinterpret_cast<const byte*>(shader_source_data.data()),
-                shader_source_data.size(), shader_type)) {
-            LogDebug(sTag, "Could not load shader: {}"_format(
-                               static_cast<int>(shader_type)));
+        if (!new_shader->LoadFromMemory(reinterpret_cast<const byte*>(shader_source_data.data()),
+                                        shader_source_data.size(), shader_type)) {
+            LogDebug(sTag, "Could not load shader: {}"_format(static_cast<int>(shader_type)));
             ok = false;
         }
 

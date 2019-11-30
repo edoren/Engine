@@ -16,8 +16,7 @@ const Color Color::YELLOW(1.0f, 0.92f, 0.016f, 1.0f);
 
 Color::Color() : r(0), g(0), b(0), a(1) {}
 
-Color::Color(const Color& color)
-      : r(color.r), g(color.g), b(color.b), a(color.a) {}
+Color::Color(const Color& color) : r(color.r), g(color.g), b(color.b), a(color.a) {}
 
 Color::Color(float r, float g, float b, float a) : r(r), g(g), b(b), a(a) {}
 

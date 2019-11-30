@@ -180,8 +180,7 @@ public:
         vector->z = z;
     }
 
-    static inline Vector3<T> Lerp(const Vector3<T>& v1, const Vector3<T>& v2,
-                                  const T percent) {
+    static inline Vector3<T> Lerp(const Vector3<T>& v1, const Vector3<T>& v2, const T percent) {
         return Vector3<T>(data_type::Lerp(v1.m_data, v2.m_data, percent));
     }
 

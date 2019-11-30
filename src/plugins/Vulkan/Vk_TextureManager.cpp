@@ -95,8 +95,7 @@ bool Vk_TextureManager::CreateDescriptorPool() {
         &pool_size                                      // pPoolSizes
     };
 
-    result = vkCreateDescriptorPool(device, &descriptor_pool_create_info,
-                                    nullptr, &m_descriptor_pool);
+    result = vkCreateDescriptorPool(device, &descriptor_pool_create_info, nullptr, &m_descriptor_pool);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Could not create descriptor pool");
         return false;
@@ -130,9 +129,7 @@ bool Vk_TextureManager::CreateDescriptorSetLayout() {
         layout_bindings.data()                                // pBindings
     };
 
-    result =
-        vkCreateDescriptorSetLayout(device, &descriptor_set_layout_create_info,
-                                    nullptr, &m_descriptor_set_layout);
+    result = vkCreateDescriptorSetLayout(device, &descriptor_set_layout_create_info, nullptr, &m_descriptor_set_layout);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Could not create descriptor set layout");
         return false;

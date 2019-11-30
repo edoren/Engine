@@ -79,14 +79,12 @@ public:
 
     template <typename T>
     friend Time operator*(Time left, T right) {
-        return Time::FromNanoseconds(
-            static_cast<int64>(left.AsNanoseconds() * right));
+        return Time::FromNanoseconds(static_cast<int64>(left.AsNanoseconds() * right));
     }
 
     template <typename T>
     friend Time operator*(T left, Time right) {
-        return Time::FromNanoseconds(
-            static_cast<int64>(left * right.AsNanoseconds()));
+        return Time::FromNanoseconds(static_cast<int64>(left * right.AsNanoseconds()));
     }
 
     template <typename T>
@@ -97,8 +95,7 @@ public:
 
     template <typename T>
     friend Time operator/(Time left, T right) {
-        return Time::FromNanoseconds(
-            static_cast<int64>(left.AsNanoseconds() / right));
+        return Time::FromNanoseconds(static_cast<int64>(left.AsNanoseconds() / right));
     }
 
     template <typename T>

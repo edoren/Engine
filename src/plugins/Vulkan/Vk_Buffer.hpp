@@ -12,8 +12,7 @@ public:
     Vk_Buffer();
     ~Vk_Buffer();
 
-    bool Create(VkDeviceSize size, VkBufferUsageFlags usage,
-                VkMemoryPropertyFlags memory_properties);
+    bool Create(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags memory_properties);
 
     void Destroy();
 

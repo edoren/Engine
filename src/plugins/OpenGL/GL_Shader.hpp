@@ -18,8 +18,7 @@ public:
 
     GL_Shader& operator=(GL_Shader&& other);
 
-    bool LoadFromMemory(const byte* source, std::size_t source_size,
-                        ShaderType type) override;
+    bool LoadFromMemory(const byte* source, std::size_t source_size, ShaderType type) override;
 
     UniformBufferObject& GetUBO();
     UniformBufferObject& GetUBODynamic();
@@ -48,10 +47,8 @@ protected:
     void SetDescriptor(json&& descriptor) override;
 
 private:
-    GLuint Compile(const char8* source, std::size_t source_size,
-                   ShaderType type);
-    GLuint Compile(const byte* source, std::size_t source_size,
-                   ShaderType type);
+    GLuint Compile(const char8* source, std::size_t source_size, ShaderType type);
+    GLuint Compile(const byte* source, std::size_t source_size, ShaderType type);
 
     void CleanUpShaders();
 

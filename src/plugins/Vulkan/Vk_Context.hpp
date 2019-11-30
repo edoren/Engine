@@ -76,8 +76,7 @@ private:
     bool CheckValidationLayerSupport() const;
     bool CheckInstanceExtensionsSupport() const;
 
-    bool CreateVulkanCommandPool(QueueParameters& queue,
-                                 VkCommandPool* cmd_pool);
+    bool CreateVulkanCommandPool(QueueParameters& queue, VkCommandPool* cmd_pool);
 
     bool CreateUBODescriptorPool();
 

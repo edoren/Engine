@@ -7,8 +7,7 @@ namespace engine {
 
 IOStream::IOStream() : m_file(nullptr) {}
 
-IOStream::IOStream(IOStream&& other)
-      : m_file(other.m_file), m_last_error(std::move(other.m_last_error)) {
+IOStream::IOStream(IOStream&& other) : m_file(other.m_file), m_last_error(std::move(other.m_last_error)) {
     other.m_file = nullptr;
     other.m_last_error.Clear();
 }

@@ -35,12 +35,10 @@ TextureManager::~TextureManager() {}
 void TextureManager::Initialize() {
     math::uvec2 defaultTextureSize(300, 300);
 
-    std::vector<Color32> defaultTextureData(
-        defaultTextureSize.x * defaultTextureSize.y, Color32::GRAY);
+    std::vector<Color32> defaultTextureData(defaultTextureSize.x * defaultTextureSize.y, Color32::GRAY);
 
     Image defaultImage;
-    defaultImage.LoadFromMemory(defaultTextureData.data(), defaultTextureSize.x,
-                                defaultTextureSize.y);
+    defaultImage.LoadFromMemory(defaultTextureData.data(), defaultTextureSize.x, defaultTextureSize.y);
 
     LoadFromImage(DEFAULT_TEXTURE_ID, defaultImage);
 }
@@ -72,15 +70,13 @@ Texture2D* TextureManager::LoadFromFile(const String& basename) {
     }
 }
 
-Texture2D* TextureManager::LoadFromImage(const String& name,
-                                         const Image& image) {
+Texture2D* TextureManager::LoadFromImage(const String& name, const Image& image) {
     Texture2D* new_texture = GetTexture2D(name);
     if (new_texture != nullptr) {
         return new_texture;
     }
 
-    RendererFactory& factory =
-        Main::GetInstance().GetActiveRenderer().GetRendererFactory();
+    RendererFactory& factory = Main::GetInstance().GetActiveRenderer().GetRendererFactory();
 
     new_texture = factory.CreateTexture2D();
     if (new_texture != nullptr) {
@@ -117,8 +113,7 @@ void TextureManager::SetActiveTexture2D(const String& name) {
         m_active_texture = found_texture;
         UseTexture2D(m_active_texture);
     } else {
-        LogError(sTag,
-                 "Could not find a Texture2D named: {}"_format(name.ToUtf8()));
+        LogError(sTag, "Could not find a Texture2D named: {}"_format(name.ToUtf8()));
     }
 }
 

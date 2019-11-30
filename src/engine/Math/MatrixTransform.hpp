@@ -38,8 +38,7 @@ namespace math {
 
 template <typename T>
 inline Matrix4x4<T> PerspectiveLH(T fovy, T aspect, T zNear, T zFar) {
-    assert(std::abs(aspect - std::numeric_limits<T>::epsilon()) >
-           static_cast<T>(0));
+    assert(std::abs(aspect - std::numeric_limits<T>::epsilon()) > static_cast<T>(0));
 
     T one = static_cast<T>(1);
     T two = static_cast<T>(2);
@@ -66,8 +65,7 @@ inline Matrix4x4<T> PerspectiveLH(T fovy, T aspect, T zNear, T zFar) {
 
 template <typename T>
 inline Matrix4x4<T> PerspectiveRH(T fovy, T aspect, T zNear, T zFar) {
-    assert(std::abs(aspect - std::numeric_limits<T>::epsilon()) >
-           static_cast<T>(0));
+    assert(std::abs(aspect - std::numeric_limits<T>::epsilon()) > static_cast<T>(0));
 
     T one = static_cast<T>(1);
     T two = static_cast<T>(2);
@@ -116,8 +114,7 @@ inline Matrix4x4<T> Ortho(T left, T right, T bottom, T top, T zNear, T zFar) {
 }
 
 template <typename T>
-inline Matrix4x4<T> LookAtLH(const Vector3<T>& position,
-                             const Vector3<T>& target, const Vector3<T>& up) {
+inline Matrix4x4<T> LookAtLH(const Vector3<T>& position, const Vector3<T>& target, const Vector3<T>& up) {
     const Vector3<T> f(Normalize(target - position));
     const Vector3<T> s(Normalize(Cross(up, f)));
     const Vector3<T> u(Cross(f, s));
@@ -133,8 +130,7 @@ inline Matrix4x4<T> LookAtLH(const Vector3<T>& position,
 }
 
 template <typename T>
-inline Matrix4x4<T> LookAtRH(const Vector3<T>& position,
-                             const Vector3<T>& target, const Vector3<T>& up) {
+inline Matrix4x4<T> LookAtRH(const Vector3<T>& position, const Vector3<T>& target, const Vector3<T>& up) {
     const Vector3<T> f(Normalize(target - position));
     const Vector3<T> s(Normalize(Cross(f, up)));
     const Vector3<T> u(Cross(s, f));
@@ -150,8 +146,7 @@ inline Matrix4x4<T> LookAtRH(const Vector3<T>& position,
 }
 
 template <typename T>
-inline Matrix4x4<T> LookAt(const Vector3<T>& position, const Vector3<T>& target,
-                           const Vector3<T>& up) {
+inline Matrix4x4<T> LookAt(const Vector3<T>& position, const Vector3<T>& target, const Vector3<T>& up) {
 #if MATH_COORDINATE_SYSTEM == MATH_LEFT_HANDED
     return LookAtLH(position, target, up);
 #else
@@ -161,8 +156,7 @@ inline Matrix4x4<T> LookAt(const Vector3<T>& position, const Vector3<T>& target,
 
 template <typename T>
 inline Matrix4x4<T> Rotate(T angle, const Vector3<T>& v) {
-    static_assert(std::numeric_limits<T>::is_iec559,
-                  "'Rotate' only accept floating-point inputs");
+    static_assert(std::numeric_limits<T>::is_iec559, "'Rotate' only accept floating-point inputs");
 
     T c = static_cast<T>(cos(angle));
     T s = static_cast<T>(sin(angle));
@@ -182,8 +176,7 @@ inline Matrix4x4<T> Rotate(T angle, const Vector3<T>& v) {
 
 template <typename T>
 inline Matrix4x4<T> RotateAxisX(const T euler_angle) {
-    static_assert(std::numeric_limits<T>::is_iec559,
-                  "'Rotate' only accept floating-point inputs");
+    static_assert(std::numeric_limits<T>::is_iec559, "'Rotate' only accept floating-point inputs");
 
     T c = static_cast<T>(cos(euler_angle));
     T s = static_cast<T>(sin(euler_angle));
@@ -200,8 +193,7 @@ inline Matrix4x4<T> RotateAxisX(const T euler_angle) {
 
 template <typename T>
 inline Matrix4x4<T> RotateAxisY(const T euler_angle) {
-    static_assert(std::numeric_limits<T>::is_iec559,
-                  "'Rotate' only accept floating-point inputs");
+    static_assert(std::numeric_limits<T>::is_iec559, "'Rotate' only accept floating-point inputs");
 
     T c = static_cast<T>(cos(euler_angle));
     T s = static_cast<T>(sin(euler_angle));
@@ -218,8 +210,7 @@ inline Matrix4x4<T> RotateAxisY(const T euler_angle) {
 
 template <typename T>
 inline Matrix4x4<T> RotateAxisZ(const T euler_angle) {
-    static_assert(std::numeric_limits<T>::is_iec559,
-                  "'Rotate' only accept floating-point inputs");
+    static_assert(std::numeric_limits<T>::is_iec559, "'Rotate' only accept floating-point inputs");
 
     T c = static_cast<T>(cos(euler_angle));
     T s = static_cast<T>(sin(euler_angle));
@@ -236,8 +227,7 @@ inline Matrix4x4<T> RotateAxisZ(const T euler_angle) {
 
 template <typename T>
 inline Matrix4x4<T> Rotate(const Vector3<T>& euler_angles) {
-    static_assert(std::numeric_limits<T>::is_iec559,
-                  "'Rotate' only accept floating-point inputs");
+    static_assert(std::numeric_limits<T>::is_iec559, "'Rotate' only accept floating-point inputs");
     Matrix4x4<T> Rx = RotateAxisX(euler_angles.x);
     Matrix4x4<T> Ry = RotateAxisX(euler_angles.y);
     Matrix4x4<T> Rz = RotateAxisX(euler_angles.z);

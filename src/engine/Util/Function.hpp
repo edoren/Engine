@@ -7,7 +7,7 @@
 #include <utility>
 
 #ifndef LAMBDA_DEFAULT_SIZE
-#define LAMBDA_DEFAULT_SIZE 6
+    #define LAMBDA_DEFAULT_SIZE 6
 #endif
 
 #define LAMBDA_FUNCTION_SIZE(x) (sizeof(void*) * x)
@@ -16,14 +16,12 @@ namespace engine {
 
 namespace {
 
-template <typename A, typename B, size_t SizeA = sizeof(A),
-          size_t SizeB = sizeof(B)>
+template <typename A, typename B, size_t SizeA = sizeof(A), size_t SizeB = sizeof(B)>
 void check_size() {
     static_assert(SizeA <= SizeB, "Size is off!");
 }
 
-template <typename A, typename B, size_t AlignA = alignof(A),
-          size_t AlignB = alignof(B)>
+template <typename A, typename B, size_t AlignA = alignof(A), size_t AlignB = alignof(B)>
 void check_align() {
     static_assert(AlignA <= AlignB, "Align is off!");
 }
@@ -40,11 +38,9 @@ class Function<Ret(Args...), MaxSize> {
 public:
     Function() : m_data(), m_invoker(nullptr), m_manager(nullptr) {}
 
-    Function(std::nullptr_t) noexcept
-          : m_data(), m_invoker(nullptr), m_manager(nullptr) {}
+    Function(std::nullptr_t) noexcept : m_data(), m_invoker(nullptr), m_manager(nullptr) {}
 
-    Function(const Function& other)
-          : m_data(), m_invoker(nullptr), m_manager(nullptr) {
+    Function(const Function& other) : m_data(), m_invoker(nullptr), m_manager(nullptr) {
         if (other.m_manager) {
             other.m_manager(&m_data, &other.m_data, Operation::COPY);
             m_invoker = other.m_invoker;
@@ -62,10 +58,12 @@ public:
 
     // SFINAE to avoid being called when T is of type Function<Ret(Args...)>
     // This constructor should be called only when T is a lambda or a function
-    template <typename T, typename = typename std::enable_if<!std::is_same<
-                              typename std::decay<T>::type,
-                              Function<Ret(Args...), MaxSize>>::value>::type>
-    Function(T&& f) : m_data(), m_invoker(nullptr), m_manager(nullptr) {
+    template <typename T,
+              typename = typename std::enable_if<
+                  !std::is_same<typename std::decay<T>::type, Function<Ret(Args...), MaxSize>>::value>::type>
+    Function(T&& f) : m_data(),
+                      m_invoker(nullptr),
+                      m_manager(nullptr) {
         using lambda_type = typename std::decay<T>::type;
         check_align<lambda_type, Storage>();
         check_size<lambda_type, Storage>();
