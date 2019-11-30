@@ -82,7 +82,7 @@ Vk_Context::Vk_Context()
         m_ubo_descriptor_pool(VK_NULL_HANDLE),
         m_debug_report_callback(VK_NULL_HANDLE),
 #ifdef ENGINE_DEBUG
-        m_validation_layers_enabled(false),
+        m_validation_layers_enabled(true),
 #else
         m_validation_layers_enabled(false),
 #endif
