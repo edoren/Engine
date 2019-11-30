@@ -288,7 +288,7 @@ bool Vk_Shader::CreateUniformBuffers() {
     size_t minUboAlignment = static_cast<size_t>(
         physical_device.properties.limits.minUniformBufferOffsetAlignment);
 
-    m_ubo_dynamic.SetBufferSize(1000 * 1000, minUboAlignment);  // TODO: CHANGE THIS
+    m_ubo_dynamic.SetBufferSize(50, minUboAlignment);  // TODO: CHANGE THIS
 
     result &= m_uniform_buffers._dynamic.Create(
         m_ubo_dynamic.GetDataSize(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,

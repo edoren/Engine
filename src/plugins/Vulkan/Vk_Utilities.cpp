@@ -1,7 +1,17 @@
 #include "Vk_Utilities.hpp"
+
+#include <System/LogManager.hpp>
+#include <System/String.hpp>
+
 #include "Vk_Context.hpp"
 
 namespace engine {
+
+namespace {
+
+const String sTag("Vk_Utilities");
+
+}  // namespace
 
 bool Vk_Utilities::AllocateBufferMemory(
     const VkBuffer& buffer, VkDeviceMemory* memory,
@@ -48,6 +58,73 @@ bool Vk_Utilities::AllocateMemory(
     }
 
     return false;
+}
+
+bool Vk_Utilities::AllocateCommandBuffers(VkCommandPool& cmd_pool,
+                                          uint32_t count,
+                                          VkCommandBuffer* command_buffer) {
+    VkResult result = VK_SUCCESS;
+
+    Vk_Context& context = Vk_Context::GetInstance();
+    VkDevice& device = context.GetVulkanDevice();
+
+    // Allocate space in the pool for the buffer
+    VkCommandBufferAllocateInfo cmd_buffer_allocate_info = {
+        VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,  // sType
+        nullptr,                                         // pNext
+        cmd_pool,                                        // commandPool
+        VK_COMMAND_BUFFER_LEVEL_PRIMARY,                 // level
+        count                                            // bufferCount
+    };
+    result = vkAllocateCommandBuffers(device, &cmd_buffer_allocate_info,
+                                      command_buffer);
+    if (result != VK_SUCCESS) {
+        LogError(sTag, "Could not allocate command buffer");
+        return false;
+    }
+
+    return true;
+}
+
+bool Vk_Utilities::CreateVulkanSemaphore(VkSemaphore* semaphore) {
+    Vk_Context& context = Vk_Context::GetInstance();
+    VkDevice& device = context.GetVulkanDevice();
+
+    VkSemaphoreCreateInfo semaphore_create_info = {
+        VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,  // sType
+        nullptr,                                  // pNext
+        VkSemaphoreCreateFlags()                  // flags
+    };
+
+    VkResult result =
+        vkCreateSemaphore(device, &semaphore_create_info, nullptr, semaphore);
+    if (result != VK_SUCCESS) {
+        LogError(sTag, "Could not create semaphore");
+        return false;
+    }
+
+    return true;
+}
+
+bool Vk_Utilities::CreateVulkanFence(VkFenceCreateFlags flags, VkFence* fence) {
+    VkResult result = VK_SUCCESS;
+
+    Vk_Context& context = Vk_Context::GetInstance();
+    VkDevice& device = context.GetVulkanDevice();
+
+    VkFenceCreateInfo fence_create_info = {
+        VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,  // sType
+        nullptr,                              // pNext
+        flags                                 // flags
+    };
+
+    result = vkCreateFence(device, &fence_create_info, nullptr, fence);
+    if (result != VK_SUCCESS) {
+        LogError(sTag, "Could not create fence");
+        return false;
+    }
+
+    return true;
 }
 
 }  // namespace engine

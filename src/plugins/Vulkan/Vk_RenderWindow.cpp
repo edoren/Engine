@@ -98,9 +98,12 @@ bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
         return false;
     }
 
-    if (!CreateRenderingResources()) {
-        LogError(sTag, "Could not create the RenderingResources");
-        return false;
+    m_render_resources.resize(m_swapchain.GetImages().size());
+    for (Vk_RenderResource& render_resource : m_render_resources) {
+        if (!render_resource.Create()) {
+            LogError(sTag, "Could not create the RenderingResources");
+            return false;
+        }
     }
 
     return true;
@@ -113,29 +116,6 @@ void Vk_RenderWindow::Destroy() {
     if (device) {
         vkDeviceWaitIdle(device);
 
-        for (size_t i = 0; i < m_render_resources.size(); i++) {
-            if (m_render_resources[i].framebuffer) {
-                vkDestroyFramebuffer(device, m_render_resources[i].framebuffer,
-                                     nullptr);
-            }
-            if (m_render_resources[i].command_buffer) {
-                vkFreeCommandBuffers(device, context.GetGraphicsQueueCmdPool(),
-                                     1, &m_render_resources[i].command_buffer);
-            }
-            if (m_render_resources[i].image_available_semaphore) {
-                vkDestroySemaphore(
-                    device, m_render_resources[i].image_available_semaphore,
-                    nullptr);
-            }
-            if (m_render_resources[i].finished_rendering_semaphore) {
-                vkDestroySemaphore(
-                    device, m_render_resources[i].finished_rendering_semaphore,
-                    nullptr);
-            }
-            if (m_render_resources[i].fence) {
-                vkDestroyFence(device, m_render_resources[i].fence, nullptr);
-            }
-        }
         m_render_resources.clear();
 
         if (m_graphics_pipeline) {
@@ -194,7 +174,7 @@ void Vk_RenderWindow::SwapBuffers() {
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.GetVulkanDevice();
 
-    RenderingResourcesData& current_rendering_resource =
+    Vk_RenderResource& current_rendering_resource =
         m_render_resources[resource_index];
     uint32_t image_index;
 
@@ -202,7 +182,7 @@ void Vk_RenderWindow::SwapBuffers() {
 
     result = vkWaitForFences(device, 1, &current_rendering_resource.fence,
                              VK_FALSE, 1000000000);
-    if (result != VK_SUCCESS) {
+    if (result == VK_TIMEOUT) {
         LogError(sTag, "Waiting for fence takes too long");
         return;
     }
@@ -222,7 +202,7 @@ void Vk_RenderWindow::SwapBuffers() {
             return;
         default:
             LogError(sTag,
-                     "Problem occurred during swap chain image acquisition");
+                     "Problem occurred during SwapChain image acquisition");
             return;
     }
 
@@ -275,8 +255,10 @@ void Vk_RenderWindow::SwapBuffers() {
             break;
         case VK_ERROR_OUT_OF_DATE_KHR:
         case VK_SUBOPTIMAL_KHR:
-            LogDebug(sTag, "Recreating SwapChain");
+#if !PLATFORM_IS(PLATFORM_ANDROID)
+            LogDebug(sTag, "VK_SUBOPTIMAL_KHR: Recreating SwapChain");
             OnWindowResized(m_size);
+#endif
             return;
         default:
             LogError(sTag, "Problem occurred during image presentation");
@@ -373,73 +355,6 @@ bool Vk_RenderWindow::CheckWSISupport() {
                                          graphics_queue.family_index,
                                          m_surface.GetHandle(), &wsi_support);
     return wsi_support == VK_TRUE;
-}
-
-bool Vk_RenderWindow::CreateVulkanSemaphore(VkSemaphore* semaphore) {
-    Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
-
-    VkSemaphoreCreateInfo semaphore_create_info = {
-        VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,  // sType
-        nullptr,                                  // pNext
-        VkSemaphoreCreateFlags()                  // flags
-    };
-
-    VkResult result =
-        vkCreateSemaphore(device, &semaphore_create_info, nullptr, semaphore);
-    if (result != VK_SUCCESS) {
-        LogError(sTag, "Could not create semaphore");
-        return false;
-    }
-
-    return true;
-}
-
-bool Vk_RenderWindow::CreateVulkanFence(VkFenceCreateFlags flags,
-                                        VkFence* fence) {
-    VkResult result = VK_SUCCESS;
-
-    Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
-
-    VkFenceCreateInfo fence_create_info = {
-        VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,  // sType
-        nullptr,                              // pNext
-        flags                                 // flags
-    };
-
-    result = vkCreateFence(device, &fence_create_info, nullptr, fence);
-    if (result != VK_SUCCESS) {
-        LogError(sTag, "Could not create fence");
-        return false;
-    }
-
-    return true;
-}
-
-bool Vk_RenderWindow::AllocateVulkanCommandBuffers(
-    VkCommandPool& cmd_pool, uint32_t count, VkCommandBuffer* command_buffer) {
-    VkResult result = VK_SUCCESS;
-
-    Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
-
-    // Allocate space in the pool for the buffer
-    VkCommandBufferAllocateInfo cmd_buffer_allocate_info = {
-        VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,  // sType
-        nullptr,                                         // pNext
-        cmd_pool,                                        // commandPool
-        VK_COMMAND_BUFFER_LEVEL_PRIMARY,                 // level
-        count                                            // bufferCount
-    };
-    result = vkAllocateCommandBuffers(device, &cmd_buffer_allocate_info,
-                                      command_buffer);
-    if (result != VK_SUCCESS) {
-        LogError(sTag, "Could not allocate command buffer");
-        return false;
-    }
-
-    return true;
 }
 
 bool Vk_RenderWindow::CreateVulkanRenderPass() {
@@ -793,27 +708,6 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
     return true;
 }
 
-bool Vk_RenderWindow::CreateRenderingResources() {
-    Vk_Context& context = Vk_Context::GetInstance();
-
-    m_render_resources.resize(m_swapchain.GetImages().size());
-    for (size_t i = 0; i < m_render_resources.size(); ++i) {
-        if (!AllocateVulkanCommandBuffers(
-                context.GetGraphicsQueueCmdPool(), 1,
-                &m_render_resources[i].command_buffer) ||
-            !CreateVulkanSemaphore(
-                &m_render_resources[i].image_available_semaphore) ||
-            !CreateVulkanSemaphore(
-                &m_render_resources[i].finished_rendering_semaphore) ||
-            !CreateVulkanFence(VK_FENCE_CREATE_SIGNALED_BIT,
-                               &m_render_resources[i].fence)) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
 bool Vk_RenderWindow::CreateVulkanFrameBuffer(VkFramebuffer& framebuffer,
                                               VkImageView& image_view) {
     VkResult result = VK_SUCCESS;
@@ -1105,6 +999,9 @@ bool Vk_RenderWindow::CreateDepthResources() {
         vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
                              VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT, 0, 0,
                              nullptr, 0, nullptr, 1, &depth_barrier);
+
+        LogInfo(sTag, "Depth resources created with dimensions [{}, {}]"_format(
+                          m_size.x, m_size.y));
     });
 
     return true;
@@ -1122,6 +1019,8 @@ void Vk_RenderWindow::OnWindowResized(const math::ivec2& size) {
 
 void Vk_RenderWindow::OnAppWillEnterBackground() {
     RenderWindow::OnAppWillEnterBackground();
+    vkQueueWaitIdle(m_graphics_queue->GetHandle());
+    m_render_resources.clear();
     m_swapchain.Destroy();
     m_surface.Destroy();
     m_command_work_queue.Clear();
@@ -1157,9 +1056,22 @@ void Vk_RenderWindow::OnAppDidEnterForeground() {
             return;
         }
 
+        if (!CreateDepthResources()) {
+            LogFatal(sTag, "Could not create the DepthResources");
+            return;
+        }
+
         if (!m_swapchain.Create(m_surface, m_size.x, m_size.y)) {
             LogFatal(sTag, "Could not create the SwapChain");
             return;
+        }
+
+        m_render_resources.resize(m_swapchain.GetImages().size());
+        for (Vk_RenderResource& render_resource : m_render_resources) {
+            if (!render_resource.Create()) {
+                LogFatal(sTag, "Could not create the RenderingResources");
+                return;
+            }
         }
     }
 }
