@@ -104,7 +104,7 @@ bool Vk_Context::Initialize() {
                                "VK_LAYER_LUNARG_object_tracker", "VK_LAYER_LUNARG_core_validation",
                                "VK_LAYER_GOOGLE_unique_objects"};
 #else
-        m_validation_layers = {"VK_LAYER_LUNARG_standard_validation"};
+        m_validation_layers = {"VK_LAYER_KHRONOS_validation"};
 #endif
     }
 
@@ -464,12 +464,17 @@ bool Vk_Context::CheckValidationLayerSupport() const {
         return false;
     }
 
+    String available_layer_list;
+    for (size_t i = 0; i < avaliable_layers.size(); i++) {
+        if (i != 0) available_layer_list += ", ";
+        available_layer_list += avaliable_layers[i].layerName;
+    }
+    LogInfo(sTag, "Available Layers: [{}]"_format(available_layer_list));
+
     // Check that all the validation layers exists
-    for (size_t i = 0; i < m_validation_layers.size(); i++) {
-        if (!CheckLayerAvailability(m_validation_layers[i], avaliable_layers)) {
-            LogError(sTag,
-                     "Could not find validation layer "
-                     "named: {}"_format(m_validation_layers[i]));
+    for (auto& requested_layer : m_validation_layers) {
+        if (!CheckLayerAvailability(requested_layer, avaliable_layers)) {
+            LogError(sTag, "Could not find validation layer named: {}"_format(requested_layer));
             return false;
         }
     }
