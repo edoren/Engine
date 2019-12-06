@@ -69,7 +69,7 @@ else(WIN32)
 
         # create_search_paths(/Developer/Platforms)
         find_library(OPENGLES3_GL_LIBRARY_FRAMEWORK NAMES OpenGLES3 OpenGLES)
-        if(OPENGLES3_GL_LIBRARY MATCHES "\.framework$")
+        if(OPENGLES3_GL_LIBRARY_FRAMEWORK MATCHES "\.framework$")
             set(OPENGLES3_INCLUDE_DIR ${OPENGLES3_GL_LIBRARY_FRAMEWORK}/Headers)
             set(OPENGLES3_GL_LIBRARY ${OPENGLES3_GL_LIBRARY_FRAMEWORK})
         endif()

@@ -75,7 +75,7 @@ endif()
 ## Directories configuration
 
 # Output directories
-if(NOT ANDROID)
+if(NOT OS_ANDROID)
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}")
@@ -111,15 +111,21 @@ elseif(OS_LINUX)
     set(ASSIMP_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/linux/Release/libassimp.a)
 elseif(OS_ANDROID)
     set(SDL2MAIN_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/android/${ANDROID_ABI}/Release/libSDL2main.a)
-    set(SDL2_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/android/${ANDROID_ABI}/Release/libSDL2.a)
+    set(SDL2_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/android/${ANDROID_ABI}/Release/libSDL2.a
+                     ${THIRD_PARTY_DIR}/prebuilt/android/${ANDROID_ABI}/Release/libhidapi.so)
     set(ASSIMP_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/android/${ANDROID_ABI}/Release/libassimp.a z)
 elseif(OS_IOS)
     set(SDL2MAIN_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/ios/Release/libSDL2main.a)
     set(SDL2_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/ios/Release/libSDL2.a
-                    "-framework Foundation"
-                    "-framework CoreVideo"
+                    "-framework CoreBluetooth"
+                    "-framework CoreGraphics"
                     "-framework CoreMotion"
+                    "-framework CoreVideo"
+                    "-framework Foundation"
                     "-framework GameController"
+                    "-framework OpenGLES"
+                    "-framework QuartzCore"
+                    "-framework UIKit"
                     iconv)
     set(ASSIMP_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/ios/Release/libassimp.a
                        z
@@ -171,6 +177,14 @@ if(ENGINE_BUILD_TESTS)
     add_subdirectory(${TESTS_DIR})
 endif()
 
+set(CMAKE_XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "${APP_PACKAGE}")
+set(CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "$ENV{DEVELOPMENT_TEAM_ID}")
+set_target_properties(
+    ${APP_NAME}
+    PROPERTIES
+        XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path @executable_path/Frameworks @loader_path/Frameworks"
+)
+
 ###############################################################################
 ## Documentation
 
@@ -190,6 +204,8 @@ set(SCRIPTS_FOLDER "${CMAKE_SOURCE_DIR}/scripts")
 set(DATA_SOURCE_FOLDER "${CMAKE_SOURCE_DIR}/data")
 if(OS_ANDROID)
     set(DATA_OUTPUT_FOLDER "${CMAKE_SOURCE_DIR}/projects/android/app/src/main/assets")
+elseif(OS_IOS)
+    set(DATA_OUTPUT_FOLDER "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${APP_NAME}.app/data")
 else()
     set(DATA_OUTPUT_FOLDER "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/data")
 endif()

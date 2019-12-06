@@ -43,6 +43,15 @@ if(WIN32)
                                  "$ENV{VULKAN_SDK}/Lib32"
                                  "$ENV{VK_SDK_PATH}/Lib32")
     endif()
+elseif(APPLE AND DEFINED ENV{MOLTENVK_SDK})
+    set(VULKAN_SHARED_LIBRARY_NAMES MoltenVK)
+    set(VULKAN_STATIC_LIBRARY_NAMES MoltenVK)
+    set(VULKAN_INCLUDE_PATHS "$ENV{MOLTENVK_SDK}/include")
+    if (IOS)
+        set(VULKAN_LIBRARY_PATHS "$ENV{MOLTENVK_SDK}/iOS/framework")
+    else() # Assume MacOS
+        set(VULKAN_LIBRARY_PATHS "$ENV{MOLTENVK_SDK}/macOS/framework")
+    endif()
 else()
     set(VULKAN_SHARED_LIBRARY_NAMES vulkan)
     set(VULKAN_STATIC_LIBRARY_NAMES vkstatic.1 VKstatic.1)
@@ -55,16 +64,19 @@ endif()
 find_path(VULKAN_INCLUDE_DIR
     NAMES vulkan/vulkan.h
     PATHS ${VULKAN_INCLUDE_PATHS}
+    CMAKE_FIND_ROOT_PATH_BOTH
 )
 
 find_library(VULKAN_SHARED_LIBRARY
     NAMES ${VULKAN_SHARED_LIBRARY_NAMES}
     PATHS ${VULKAN_LIBRARY_PATHS}
+    CMAKE_FIND_ROOT_PATH_BOTH
 )
 
 find_library(VULKAN_STATIC_LIBRARY
     NAMES ${VULKAN_STATIC_LIBRARY_NAMES}
     PATHS ${VULKAN_LIBRARY_PATHS}
+    CMAKE_FIND_ROOT_PATH_BOTH
 )
 
 if(VULKAN_SHARED_LIBRARY)
