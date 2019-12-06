@@ -160,7 +160,7 @@ private:
     using Invoker = Ret (*)(const void*, Args&&...);
     using Manager = void (*)(void*, const void*, Operation);
     using Storage =
-#if PLATFORM_IS(PLATFORM_ANDROID)
+#if PLATFORM_IS(PLATFORM_ANDROID | PLATFORM_IOS)
         typename std::aligned_storage<MaxSize, 16>::type;
 #else
         typename std::aligned_storage<MaxSize, alignof(std::max_align_t)>::type;
