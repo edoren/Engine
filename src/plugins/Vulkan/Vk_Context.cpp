@@ -103,6 +103,8 @@ bool Vk_Context::Initialize() {
         m_validation_layers = {"VK_LAYER_GOOGLE_threading", "VK_LAYER_LUNARG_parameter_validation",
                                "VK_LAYER_LUNARG_object_tracker", "VK_LAYER_LUNARG_core_validation",
                                "VK_LAYER_GOOGLE_unique_objects"};
+#elif PLATFORM_IS(PLATFORM_IOS)
+        m_validation_layers_enabled = false;
 #else
         m_validation_layers = {"VK_LAYER_KHRONOS_validation"};
 #endif
