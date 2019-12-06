@@ -107,11 +107,22 @@ void UniformBufferObject::SetBufferSize(size_t num_ubo_instances, size_t min_ubo
     }
 
     m_dynamic_alignment = GetSize();
-    if (min_ubo_alignment > 0) {
-        size_t var = m_dynamic_alignment + min_ubo_alignment;
-        if (is_power_of_two(var)) var += 1;
-        m_dynamic_alignment = (var - 1) & ~(min_ubo_alignment - 1);
+
+    // Get the next power of 2
+    size_t i;
+    size_t number = m_dynamic_alignment;
+    for(i = 0; number > 1; i++) {
+        number = number >> 1;
     }
+    m_dynamic_alignment = 1 << (i + 1);
+
+    // Calculate the alignment based on the min required alignment
+    if (min_ubo_alignment > GetSize() && is_power_of_two(min_ubo_alignment)) {
+        m_dynamic_alignment = min_ubo_alignment;
+    } else if (min_ubo_alignment > 0) {
+        m_dynamic_alignment = (m_dynamic_alignment + min_ubo_alignment - 1) & ~(min_ubo_alignment - 1);
+    }
+
     size_t buffer_size = num_ubo_instances * m_dynamic_alignment;
 
     LogDebug(sTag, "UBO size: {} bytes"_format(GetSize()));
