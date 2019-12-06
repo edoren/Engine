@@ -29,6 +29,10 @@ target_link_libraries(Vulkan_Plugin
     ${ENGINE_LIBRARY}
 )
 
+if(IOS)
+    target_link_libraries(Vulkan_Plugin "-framework Metal")
+endif()
+
 target_include_directories(Vulkan_Plugin SYSTEM
     PRIVATE ${VULKAN_INCLUDE_DIR}
     PRIVATE ${ENGINE_INCLUDE_DIR}

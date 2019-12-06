@@ -37,7 +37,7 @@ set(TESTS
 )
 
 foreach(TEST ${TESTS})
-    if(OS_WINDOWS)
+    if(OS_WINDOWS OR OS_MACOS OR OS_ANDROID OR OS_IOS)
         target_link_libraries(${TEST}
             ${ENGINE_LIBRARY}
         )
@@ -49,16 +49,6 @@ foreach(TEST ${TESTS})
             "-Wl,--no-whole-archive"
             ${SDL2_LIBRARY}
             ${ASSIMP_LIBRARY}
-        )
-    elseif(OS_ANDROID)
-        target_link_libraries(${TEST}
-            # ${SDL2MAIN_LIBRARY}
-            ${ENGINE_LIBRARY}
-        )
-    elseif(OS_MACOS)
-        target_link_libraries(${TEST}
-            # ${SDL2MAIN_LIBRARY}
-            ${ENGINE_LIBRARY}
         )
     endif()
 endforeach()
