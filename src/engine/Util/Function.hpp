@@ -134,7 +134,10 @@ public:
     }
 
 private:
-    enum class Operation { COPY, DESTROY };
+    enum class Operation {
+        COPY,
+        DESTROY,
+    };
 
     template <typename FunctionType>
     static Ret CallFunction(const void* data, Args&&... args) {
