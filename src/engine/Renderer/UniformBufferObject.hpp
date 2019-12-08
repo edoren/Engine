@@ -12,7 +12,15 @@ public:
     UniformBufferObject();
     ~UniformBufferObject();
 
-    enum class DataType { MATRIX4X4, MATRIX3X3, MATRIX2X2, VECTOR4, VECTOR3, VECTOR2, UNKNOWN };
+    enum class DataType {
+        MATRIX4X4,
+        MATRIX3X3,
+        MATRIX2X2,
+        VECTOR4,
+        VECTOR3,
+        VECTOR2,
+        UNKNOWN,
+    };
 
     enum class LayoutType {
         STD140,
