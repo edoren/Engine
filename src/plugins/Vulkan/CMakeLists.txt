@@ -25,13 +25,9 @@ engine_add_library(TARGET Vulkan_Plugin
                    SOURCES ${PLUGIN_SOURCES})
 
 target_link_libraries(Vulkan_Plugin
-    ${VULKAN_LIBRARY}
+    ${VULKAN_LIBRARIES}
     ${ENGINE_LIBRARY}
 )
-
-if(IOS)
-    target_link_libraries(Vulkan_Plugin "-framework Metal")
-endif()
 
 target_include_directories(Vulkan_Plugin SYSTEM
     PRIVATE ${VULKAN_INCLUDE_DIR}
