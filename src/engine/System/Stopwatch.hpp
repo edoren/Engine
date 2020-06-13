@@ -22,7 +22,6 @@ private:
     // Return actual time since epoch
     Time GetActualTime() const;
 
-private:
     bool m_running;
     Time m_start_time;
     Time m_stop_time;

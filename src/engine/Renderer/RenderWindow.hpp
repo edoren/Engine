@@ -65,7 +65,6 @@ protected:
     virtual void OnAppWillEnterForeground();
     virtual void OnAppDidEnterForeground();
 
-protected:
     void* m_window;
 
     String m_name;

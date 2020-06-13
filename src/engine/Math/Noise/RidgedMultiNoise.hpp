@@ -19,7 +19,6 @@ public:
     static const float DEFAULT_EXPONENT;
     static const int MAX_OCTAVE_COUNT;
 
-public:
     RidgedMultiNoise();
 
     RidgedMultiNoise(int seed);
@@ -53,7 +52,6 @@ public:
 private:
     void CalcSpectralWeights();
 
-private:
     int m_octave_count;
     float m_frequency;
     float m_lacunarity;

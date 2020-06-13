@@ -177,7 +177,6 @@ public:
         return Vector2<T>(data_type::Lerp(v1.m_data, v2.m_data, percent));
     }
 
-public:
     union {
         data_type m_data;
         struct {

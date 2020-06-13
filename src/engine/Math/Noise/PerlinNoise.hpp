@@ -17,7 +17,6 @@ public:
     static const float DEFAULT_PERSISTENCE;
     static const int MAX_OCTAVE_COUNT;
 
-public:
     PerlinNoise();
 
     PerlinNoise(int seed);

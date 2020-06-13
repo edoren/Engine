@@ -76,7 +76,6 @@ private:
     void OnAppWillEnterForeground() override;
     void OnAppDidEnterForeground() override;
 
-private:
     Vk_Surface m_surface;
 
     QueueParameters* m_graphics_queue;

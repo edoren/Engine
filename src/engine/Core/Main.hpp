@@ -102,7 +102,6 @@ private:
     ////////////////////////////////////////////////////////////
     void SetActiveRenderer();
 
-private:
     std::vector<SharedLibrary*> m_plugin_libs;
     std::vector<Plugin*> m_plugins;
 

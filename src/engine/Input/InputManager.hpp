@@ -36,7 +36,7 @@ public:
         return *instance;
     }
 
-    inline bool exit_requested() {
+    inline bool exit_requested() const {
         return m_exit_requested;
     }
 

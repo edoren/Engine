@@ -21,7 +21,6 @@ public:
     static const Color32 WHITE;
     static const Color32 YELLOW;
 
-public:
     Color32();
 
     Color32(const Color32& color32);
@@ -36,7 +35,6 @@ public:
 
     static Color32 Lerp(const Color32& a, const Color32& b, uint8 t);
 
-public:
     union {
         struct {
             uint8 r, g, b, a;

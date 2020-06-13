@@ -31,7 +31,6 @@ private:
 
     float Lerp(float t, float a, float b) const;
 
-private:
     int m_seed;
     std::vector<int> m_perm;
 };
