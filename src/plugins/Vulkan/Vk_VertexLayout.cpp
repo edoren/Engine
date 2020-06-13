@@ -14,7 +14,7 @@ std::vector<VkVertexInputAttributeDescription> GetAttribDescription(const std::v
     std::vector<VkVertexInputAttributeDescription> attribute_descriptions;
     uint32 location = 0;
     uint32 buffer_offset = 0;
-    for (auto& component : input) {
+    for (const auto& component : input) {
         VkFormat format;
         uint32 size;
         switch (component) {
@@ -47,7 +47,7 @@ std::vector<VkVertexInputAttributeDescription> GetAttribDescription(const std::v
 
 }  // namespace
 
-Vk_VertexLayout::Vk_VertexLayout() : VertexLayout() {}
+Vk_VertexLayout::Vk_VertexLayout() {}
 
 Vk_VertexLayout::Vk_VertexLayout(const std::vector<VertexLayout::Component>& components) : VertexLayout(components) {}
 

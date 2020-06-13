@@ -33,7 +33,9 @@ SharedLibrary::~SharedLibrary() {
 
 bool SharedLibrary::Load() {
     // TODO: Add extension only if it does not exist
-    if (m_handle != nullptr || m_name.IsEmpty()) return false;
+    if (m_handle != nullptr || m_name.IsEmpty()) {
+        return false;
+    }
 
     String lib_name = LIBRARY_PREFIX + m_name + LIBRARY_EXTENSION;
 #if PLATFORM_IS(PLATFORM_WINDOWS)
@@ -52,7 +54,9 @@ bool SharedLibrary::Load() {
 }
 
 void SharedLibrary::Unload() {
-    if (m_handle == nullptr) return;
+    if (m_handle == nullptr) {
+        return;
+    }
 #if PLATFORM_IS(PLATFORM_WINDOWS)
     FreeLibrary(reinterpret_cast<HMODULE>(m_handle));
 #elif PLATFORM_IS(PLATFORM_LINUX | PLATFORM_MACOS | PLATFORM_IOS | PLATFORM_ANDROID)
@@ -62,7 +66,9 @@ void SharedLibrary::Unload() {
 }
 
 String SharedLibrary::GetErrorString() {
-    if (m_name.IsEmpty()) return String("the library name must not be empty");
+    if (m_name.IsEmpty()) {
+        return String("the library name must not be empty");
+    }
 #if PLATFORM_IS(PLATFORM_WINDOWS)
     LPWSTR lpMsgBuf;
     FormatMessageW((FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS), NULL,
@@ -84,7 +90,9 @@ const String& SharedLibrary::GetName() const {
 }
 
 void* SharedLibrary::GetSymbol(const char* name) {
-    if (m_handle == nullptr) return nullptr;
+    if (m_handle == nullptr) {
+        return nullptr;
+    }
     void* address = nullptr;
 #if PLATFORM_IS(PLATFORM_WINDOWS)
     address = GetProcAddress(reinterpret_cast<HMODULE>(m_handle), name);

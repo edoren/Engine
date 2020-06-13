@@ -19,9 +19,9 @@ namespace engine {
 
 namespace {
 
-static const String sTag("Model");
+const String sTag("Model");
 
-static const String sRootModelFolder("models");
+const String sRootModelFolder("models");
 
 class CustomAssimpIOStream : public Assimp::IOStream {
     friend class CustomAssimpIOSystem;
@@ -32,7 +32,9 @@ protected:
         FileSystem& fs = FileSystem::GetInstance();
         for (const String& path : fs.GetSearchPaths()) {
             String file_path = fs.Join(path, pFile);
-            if (m_file.Open(file_path.GetData(), pMode)) break;
+            if (m_file.Open(file_path.GetData(), pMode)) {
+                break;
+            }
         }
         if (!m_file.IsOpen()) {
             LogError("CustomAssimpIOStream", String("Could not open file") + pFile);
@@ -97,11 +99,21 @@ public:
 };
 
 TextureType GetTextureTypeFromString(const String& name) {
-    if (name == "diffuse") return TextureType::DIFFUSE;
-    if (name == "specular") return TextureType::SPECULAR;
-    if (name == "normals") return TextureType::NORMALS;
-    if (name == "lightmap") return TextureType::LIGHTMAP;
-    if (name == "emissive") return TextureType::EMISSIVE;
+    if (name == "diffuse") {
+        return TextureType::DIFFUSE;
+    }
+    if (name == "specular") {
+        return TextureType::SPECULAR;
+    }
+    if (name == "normals") {
+        return TextureType::NORMALS;
+    }
+    if (name == "lightmap") {
+        return TextureType::LIGHTMAP;
+    }
+    if (name == "emissive") {
+        return TextureType::EMISSIVE;
+    }
     return TextureType::UNKNOWN;
 }
 
@@ -142,7 +154,7 @@ void Model::SetTransform(const Transform& transform) {
 }
 
 void Model::Draw(RenderWindow& target, const RenderStates& states) const {
-    for (auto& mesh : m_meshes) {
+    for (const auto& mesh : m_meshes) {
         mesh->Draw(target, states);
     }
 }
@@ -217,7 +229,7 @@ std::unique_ptr<Mesh> Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
         math::vec3 vector;
 
         // Swap X and Z axis by rotating the model matrix 90 degrees on Y
-        math::mat4 rotationMatrix = math::RotateAxisY(math::Radians(90.0f));
+        math::mat4 rotationMatrix = math::RotateAxisY(math::Radians(90.0F));
 
         vector.x = mesh->mVertices[i].x;
         vector.y = mesh->mVertices[i].y;
@@ -249,7 +261,9 @@ std::unique_ptr<Mesh> Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
     indices.reserve(mesh->mNumFaces * 3);
     for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
         const aiFace& face = mesh->mFaces[i];
-        if (face.mNumIndices != 3) continue;
+        if (face.mNumIndices != 3) {
+            continue;
+        }
         indices.push_back(face.mIndices[0]);
         indices.push_back(face.mIndices[1]);
         indices.push_back(face.mIndices[2]);

@@ -13,7 +13,7 @@ const String sTag("Vk_SwapChain");
 
 }  // namespace
 
-Vk_SwapChain::Vk_SwapChain() : m_handle(VK_NULL_HANDLE), m_format(), m_images() {}
+Vk_SwapChain::Vk_SwapChain() : m_handle(VK_NULL_HANDLE), m_format() {}
 
 Vk_SwapChain::~Vk_SwapChain() {
     if (m_handle) {
@@ -301,9 +301,8 @@ VkSurfaceTransformFlagBitsKHR Vk_SwapChain::GetTransform(const VkSurfaceCapabili
     // as current transform
     if (surface_capabilities.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR) {
         return VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
-    } else {
-        return surface_capabilities.currentTransform;
     }
+    return surface_capabilities.currentTransform;
 }
 
 VkPresentModeKHR Vk_SwapChain::GetPresentMode(const std::vector<VkPresentModeKHR>& present_modes) {

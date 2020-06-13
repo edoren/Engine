@@ -6,11 +6,11 @@ namespace math {
 
 const int RidgedMultiNoise::DEFAULT_SEED = 0;
 const int RidgedMultiNoise::DEFAULT_OCTAVE_COUNT = 6;
-const float RidgedMultiNoise::DEFAULT_FREQUENCY = 1.0f;
-const float RidgedMultiNoise::DEFAULT_LACUNARITY = 2.0f;
-const float RidgedMultiNoise::DEFAULT_OFFSET = 1.0f;
-const float RidgedMultiNoise::DEFAULT_GAIN = 2.0f;
-const float RidgedMultiNoise::DEFAULT_EXPONENT = 1.0f;
+const float RidgedMultiNoise::DEFAULT_FREQUENCY = 1.0F;
+const float RidgedMultiNoise::DEFAULT_LACUNARITY = 2.0F;
+const float RidgedMultiNoise::DEFAULT_OFFSET = 1.0F;
+const float RidgedMultiNoise::DEFAULT_GAIN = 2.0F;
+const float RidgedMultiNoise::DEFAULT_EXPONENT = 1.0F;
 const int RidgedMultiNoise::MAX_OCTAVE_COUNT = 30;
 
 RidgedMultiNoise::RidgedMultiNoise() : RidgedMultiNoise(DEFAULT_SEED) {}
@@ -51,10 +51,10 @@ float RidgedMultiNoise::GetExponent() const {
 }
 
 float RidgedMultiNoise::GetValue(float x, float y, float z) const {
-    float value = 0.f;
-    float signal = 0.f;
+    float value = 0.F;
+    float signal = 0.F;
     float frequency = m_frequency;
-    float weight = 1.f;
+    float weight = 1.F;
 
     for (int current_octave = 0; current_octave < m_octave_count; current_octave++) {
         signal = CoherentNoise3D(x * frequency, y * frequency, z * frequency);
@@ -64,14 +64,14 @@ float RidgedMultiNoise::GetValue(float x, float y, float z) const {
         signal *= weight;
 
         weight = signal * m_gain;
-        weight = std::max(0.f, std::min(1.f, weight));
+        weight = std::max(0.F, std::min(1.F, weight));
 
         value += signal * m_spectral_weights[current_octave];
 
         frequency *= m_lacunarity;
     }
 
-    return std::min(1.f, std::max(-1.f, (value * 1.25f) - 1.0f));
+    return std::min(1.F, std::max(-1.F, (value * 1.25F) - 1.0F));
 }
 
 void RidgedMultiNoise::SetOctaveCount(int octave_count) {

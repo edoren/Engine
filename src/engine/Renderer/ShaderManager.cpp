@@ -32,7 +32,7 @@ ShaderManager* ShaderManager::GetInstancePtr() {
     return Singleton<ShaderManager>::GetInstancePtr();
 }
 
-ShaderManager::ShaderManager() : m_active_shader(nullptr), m_shaders() {}
+ShaderManager::ShaderManager() : m_active_shader(nullptr) {}
 
 ShaderManager::~ShaderManager() {}
 

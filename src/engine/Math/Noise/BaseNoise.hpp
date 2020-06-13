@@ -29,7 +29,7 @@ private:
 
     int FastFloor(float x) const;
 
-    float Lerp(float a, float b, float t) const;
+    float Lerp(float t, float a, float b) const;
 
 private:
     int m_seed;

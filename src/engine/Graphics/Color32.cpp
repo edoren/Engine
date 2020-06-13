@@ -23,10 +23,10 @@ Color32::Color32(uint8 r, uint8 g, uint8 b, uint8 a) : r(r), g(g), b(b), a(a) {}
 Color32::Color32(const math::Vector4<uint8>& vec) : m_data(vec) {}
 
 Color32::Color32(const Color& color)
-      : r(static_cast<uint8>(color.r * 255.f)),
-        g(static_cast<uint8>(color.g * 255.f)),
-        b(static_cast<uint8>(color.b * 255.f)),
-        a(static_cast<uint8>(color.a * 255.f)) {}
+      : r(static_cast<uint8>(color.r * 255.F)),
+        g(static_cast<uint8>(color.g * 255.F)),
+        b(static_cast<uint8>(color.b * 255.F)),
+        a(static_cast<uint8>(color.a * 255.F)) {}
 
 Color32& Color32::operator=(const Color32& color) {
     m_data = color.m_data;

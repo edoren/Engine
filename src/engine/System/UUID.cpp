@@ -37,7 +37,9 @@ UUID::operator String() {
 
     byte* byte_uuid = reinterpret_cast<byte*>(&m_uuid);
     for (int i = 0; i < 16; i++) {
-        if ((i == 4) | (i == 6) | (i == 8) | (i == 10)) output.push_back('-');
+        if ((i == 4) | (i == 6) | (i == 8) | (i == 10)) {
+            output.push_back('-');
+        }
         output.push_back(sHexdigits[(byte_uuid[i] & 0xf0) >> 4]);
         output.push_back(sHexdigits[byte_uuid[i] & 0x0f]);
     }

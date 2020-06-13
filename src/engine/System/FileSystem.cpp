@@ -78,7 +78,9 @@ bool FileSystem::LoadFileData(const String& filename, std::vector<byte>* dest) c
 
     for (const String& path : m_search_paths) {
         String file_path = Join(path, filename_cpy);
-        if (file.Open(file_path.GetData(), "rb")) break;
+        if (file.Open(file_path.GetData(), "rb")) {
+            break;
+        }
     }
     if (!file.IsOpen()) {
         LogError(sTag, "Error loading file: " + filename);
@@ -214,7 +216,9 @@ String FileSystem::NormalizePath(const String& path) const {
             AddPathComponent(pathc_start, pathc_end);
             pathc_start = pathc_end;
         }
-        if (*pathc_start == GetOsSeparator()) pathc_start++;
+        if (*pathc_start == GetOsSeparator()) {
+            pathc_start++;
+        }
         pathc_end++;
     }
     // Get the last path component
@@ -237,7 +241,9 @@ String FileSystem::NormalizePath(const String& path) const {
         ret += '.';
     } else {
         for (size_t i = 0; i < path_comps.size(); i++) {
-            if (i) ret += GetOsSeparator();
+            if (i) {
+                ret += GetOsSeparator();
+            }
             ret += String::FromUtf8(path_comps[i].first, path_comps[i].second);
         }
     }
@@ -252,7 +258,9 @@ String FileSystem::NormalizePath(const String& path) const {
 
 bool FileSystem::IsAbsolutePath(const String& path) const {
     const auto& internal = path.ToUtf8();
-    if (path.IsEmpty()) return false;
+    if (path.IsEmpty()) {
+        return false;
+    }
 #if PLATFORM_IS(PLATFORM_WINDOWS)
     if (internal.size() > 2 && internal[1] == ':' && internal[2] == '\\') {
         return true;
@@ -266,10 +274,16 @@ bool FileSystem::IsAbsolutePath(const String& path) const {
 }
 
 String FileSystem::Join(const String& left, const String& right) const {
-    if (right.IsEmpty()) return left;
-    if (left.IsEmpty()) return right;
+    if (right.IsEmpty()) {
+        return left;
+    }
+    if (left.IsEmpty()) {
+        return right;
+    }
 
-    if (IsAbsolutePath(right)) return right;
+    if (IsAbsolutePath(right)) {
+        return right;
+    }
 
     String ret;
     const auto& internal = left.ToUtf8();

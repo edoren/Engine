@@ -35,10 +35,8 @@ Main* Main::GetInstancePtr() {
 }
 
 Main::Main(int argc, char* argv[])
-      : m_plugin_libs(),
-        m_plugins(),
-        m_active_renderer(nullptr),
-        m_renderers(),
+      : m_active_renderer(nullptr),
+
         m_app(nullptr),
         m_log_manager(nullptr),
         m_file_system(nullptr),
@@ -239,7 +237,9 @@ void Main::UninstallPlugin(Plugin* plugin) {
 
     auto it = std::find(m_plugins.begin(), m_plugins.end(), plugin);
     if (it != m_plugins.end()) {
-        if (m_app != nullptr) plugin->Shutdown();
+        if (m_app != nullptr) {
+            plugin->Shutdown();
+        }
         plugin->Uninstall();
         m_plugins.erase(it);
     }
@@ -302,7 +302,7 @@ void Main::ShutdownPlugins() {
 
 void Main::SetActiveRenderer() {
     // TODO: Add a configurable way to select this
-    m_active_renderer = m_renderers.size() ? m_renderers[0].get() : nullptr;
+    m_active_renderer = !m_renderers.empty() ? m_renderers[0].get() : nullptr;
 }
 
 }  // namespace engine

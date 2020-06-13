@@ -20,7 +20,7 @@ GL_TextureManager* GL_TextureManager::GetInstancePtr() {
     return sDerivedInstance;
 }
 
-GL_TextureManager::GL_TextureManager() : TextureManager() {
+GL_TextureManager::GL_TextureManager() {
     TextureManager& base_instance = TextureManager::GetInstance();
     sDerivedInstance = reinterpret_cast<GL_TextureManager*>(&base_instance);
 }

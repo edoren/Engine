@@ -16,16 +16,10 @@ const String sTag("RenderWindow");
 
 RenderWindow::RenderWindow()
       : m_window(nullptr),
-        m_name(),
-        m_size(),
+
         m_is_fullscreen(false),
         m_is_vsync_enable(false),
-        m_active_camera(nullptr),
-        on_window_resize_connection(),
-        on_app_will_enter_background_connection(),
-        on_app_did_enter_background_connection(),
-        on_app_will_enter_foreground_connection(),
-        on_app_did_enter_foreground_connection() {
+        m_active_camera(nullptr) {
     auto& input = InputManager::GetInstance();
 
     on_window_resize_connection = input.OnWindowResized.Connect(*this, &RenderWindow::_OnWindowResized);
@@ -146,14 +140,14 @@ const math::mat4& RenderWindow::GetProjectionMatrix() const {
 }
 
 void RenderWindow::UpdateProjectionMatrix() {
-    float fov = math::Radians(45.f);
+    float fov = math::Radians(45.F);
     float aspect_ratio = m_size.x / static_cast<float>(m_size.y);
-    float z_near = 0.1f;
-    float z_far = 100.0f;
+    float z_near = 0.1F;
+    float z_far = 100.0F;
     m_projection = math::Perspective(fov, aspect_ratio, z_near, z_far);
 }
 
-void RenderWindow::OnWindowResized(const math::ivec2&) {}
+void RenderWindow::OnWindowResized(const math::ivec2& /*unused*/) {}
 
 void RenderWindow::OnAppWillEnterBackground() {
     LogInfo(sTag, "OnAppWillEnterBackground");

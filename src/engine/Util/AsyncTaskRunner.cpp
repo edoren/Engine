@@ -4,17 +4,17 @@
 
 namespace engine {
 
-AsyncTaskRunner::AsyncTaskRunner() : m_is_running(true), m_work_queue(), m_workers(), m_signaler(), m_mutex() {
+AsyncTaskRunner::AsyncTaskRunner() : m_is_running(true) {
     auto job = [this]() -> void {
         while (m_is_running) {
             std::unique_lock<std::mutex> lk(m_mutex);
             if (m_work_queue.IsEmpty()) {
                 m_signaler.wait(lk);
                 if (m_work_queue.IsEmpty()) {
-                    if (!m_is_running)
+                    if (!m_is_running) {
                         break;
-                    else
-                        continue;
+                    }
+                    continue;
                 }
             }
             Task task = m_work_queue.Pop();

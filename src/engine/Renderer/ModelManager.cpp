@@ -73,7 +73,9 @@ void ModelManager::Unload(Model* model) {
 
 void ModelManager::UnloadFromFile(const String& basename) {
     auto it = m_name_map.find(basename);
-    if (it == m_name_map.end()) return;
+    if (it == m_name_map.end()) {
+        return;
+    }
     Unload(it->second);
 }
 

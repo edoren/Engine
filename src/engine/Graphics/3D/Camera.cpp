@@ -2,13 +2,13 @@
 
 namespace engine {
 
-math::vec3 Camera::WORLD_UP(0.0f, 1.0f, 0.0f);
+math::vec3 Camera::WORLD_UP(0.0F, 1.0F, 0.0F);
 
-Camera::Camera() : m_position(0.0f, 0.0f, 0.0f), m_yaw(0.0f), m_pitch(0.0f), m_zoom(45.0f) {
+Camera::Camera() : m_position(0.0F, 0.0F, 0.0F), m_yaw(0.0F), m_pitch(0.0F), m_zoom(45.0F) {
     UpdateCameraVectors();
 }
 
-Camera::Camera(const math::vec3& position) : m_position(position), m_yaw(0.0f), m_pitch(0.0f), m_zoom(45.0f) {
+Camera::Camera(const math::vec3& position) : m_position(position), m_yaw(0.0F), m_pitch(0.0F), m_zoom(45.0F) {
     UpdateCameraVectors();
 }
 
@@ -23,11 +23,11 @@ void Camera::Rotate(float yaw, float pitch, bool limit_pitch) {
 
     // Limit the pitch movement to avoid strange behaviors
     if (limit_pitch) {
-        if (m_pitch > 89.9f) {
-            m_pitch = 89.9f;
+        if (m_pitch > 89.9F) {
+            m_pitch = 89.9F;
         }
-        if (m_pitch < -89.9f) {
-            m_pitch = -89.9f;
+        if (m_pitch < -89.9F) {
+            m_pitch = -89.9F;
         }
     }
 

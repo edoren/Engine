@@ -41,7 +41,7 @@ public:
     // Move assignment
     SignalConnection& operator=(SignalConnection&& other);
 
-    IdType GetId();
+    IdType GetId() const;
 
     void Disconnect();
 

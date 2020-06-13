@@ -36,19 +36,19 @@ void SharedLibManager::Shutdown() {}
 
 SharedLibrary* SharedLibManager::Load(const String& name) {
     auto it = m_libraries.find(name);
+
     if (it != m_libraries.end()) {
         return &(it->second);
-    } else {
-        SharedLibrary lib(name);
-        bool loaded = lib.Load();
-        if (loaded) {
-            auto result = m_libraries.emplace(name, std::move(lib));
-            return result.second ? &(result.first->second) : nullptr;
-        } else {
-            LogError(sTag, lib.GetErrorString());
-            LogFatal(sTag, "Could not load SharedLibrary: " + name);
-        }
     }
+
+    SharedLibrary lib(name);
+    bool loaded = lib.Load();
+    if (loaded) {
+        auto result = m_libraries.emplace(name, std::move(lib));
+        return result.second ? &(result.first->second) : nullptr;
+    }
+    LogError(sTag, lib.GetErrorString());
+    LogFatal(sTag, "Could not load SharedLibrary: " + name);
 
     return nullptr;
 }

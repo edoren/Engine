@@ -49,7 +49,9 @@ GL_Shader::GL_Shader(GL_Shader&& other)
 }
 
 GL_Shader::~GL_Shader() {
-    if (!IsLinked()) CleanUpShaders();
+    if (!IsLinked()) {
+        CleanUpShaders();
+    }
     if (m_uniform_buffers._static) {
         GL_CALL(glDeleteBuffers(1, &m_uniform_buffers._static));
     }
@@ -108,7 +110,7 @@ UniformBufferObject& GL_Shader::GetUBODynamic() {
     return m_ubo_dynamic;
 }
 
-bool GL_Shader::IsLinked() {
+bool GL_Shader::IsLinked() const {
     GLint success = GL_TRUE;
     GL_CALL(glGetProgramiv(m_program, GL_LINK_STATUS, &success));
     return success == GL_TRUE;
@@ -254,7 +256,9 @@ GLuint GL_Shader::Compile(const char8* source, size_t source_size, ShaderType ty
 }
 
 GLuint GL_Shader::Compile(const byte* source, size_t source_size, ShaderType type) {
-    if (source == nullptr || source_size == 0) return 0;
+    if (source == nullptr || source_size == 0) {
+        return 0;
+    }
 
     GLuint shader = glCreateShader(sGlShaderTypes[static_cast<int>(type)]);
 
@@ -294,16 +298,16 @@ GLint GL_Shader::GetUniformLocation(const String& name) {
 
     if (it != m_uniforms.end()) {
         return it->second;
-    } else {
-        GLint location = glGetUniformLocation(m_program, name.ToUtf8().c_str());
-        m_uniforms.insert(std::make_pair(name, location));
-
-        if (location == -1) {
-            LogError(sTag, "Parameter \"" + name + "\" not found in shader");
-        }
-
-        return location;
     }
+    GLint location = glGetUniformLocation(m_program, name.ToUtf8().c_str());
+
+    m_uniforms.insert(std::make_pair(name, location));
+
+    if (location == -1) {
+        LogError(sTag, "Parameter \"" + name + "\" not found in shader");
+    }
+
+    return location;
 }
 
 }  // namespace engine

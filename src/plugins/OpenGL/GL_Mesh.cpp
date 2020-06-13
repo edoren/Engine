@@ -81,7 +81,7 @@ void GL_Mesh::Draw(RenderWindow& target, const RenderStates& states) const {
     uint32 diffuse_num = 1;
     uint32 specular_num = 1;
     for (size_t i = 0; i < m_textures.size(); i++) {
-        auto& pair = m_textures[i];
+        const auto& pair = m_textures[i];
         GL_Texture2D* current_texture = static_cast<GL_Texture2D*>(pair.first);
         TextureType current_texture_type = pair.second;
 
