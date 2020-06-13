@@ -31,6 +31,10 @@ endif()
 # Set the custom module path
 set(CMAKE_MODULE_PATH "${ENGINE_DIR}/cmake/Modules")
 
+# Limit the build configurations
+set(CMAKE_CXX_CLANG_TIDY "clang-tidy")
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # Include the config and macros file
 include("Config")
 include("Macros")
