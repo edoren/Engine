@@ -39,7 +39,7 @@ InputManager* InputManager::GetInstancePtr() {
 
 InputManager::InputManager()
       : m_exit_requested(false),
-        m_pointers(kMaxSimultanuousPointers),
+        m_pointers(sMaxSimultanuousPointers),
         m_mousewheel_delta(math::ivec2(0, 0)) {}
 
 InputManager::~InputManager() {

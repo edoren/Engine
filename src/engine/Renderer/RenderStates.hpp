@@ -19,7 +19,7 @@ public:
     RenderStates& operator=(RenderStates&& other);
 
     // Static member data
-    static const RenderStates Default;
+    static const RenderStates sDefault;
 
     // Member data
     Transform transform;

@@ -2,7 +2,7 @@
 
 namespace engine {
 
-const Time Time::ZERO = Time(0);
+const Time Time::sZero = Time(0);
 
 Time::Time() : m_nanoseconds(0) {}
 

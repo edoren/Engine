@@ -3,16 +3,16 @@
 
 namespace engine {
 
-const Color Color::BLACK(0.0F, 0.0F, 0.0F, 1.0F);
-const Color Color::BLUE(0.0F, 0.0F, 1.0F, 1.0F);
-const Color Color::CYAN(0.0F, 1.0F, 1.0F, 1.0F);
-const Color Color::GRAY(0.5F, 0.5F, 0.5F, 1.0F);
-const Color Color::GREEN(0.0F, 1.0F, 0.0F, 1.0F);
-const Color Color::MAGENTA(1.0F, 0.0F, 1.0F, 1.0F);
-const Color Color::RED(1.0F, 0.0F, 0.0F, 1.0F);
-const Color Color::TRANSPARENT(0.0F, 0.0F, 0.0F, 0.0F);
-const Color Color::WHITE(1.0F, 1.0F, 1.0F, 1.0F);
-const Color Color::YELLOW(1.0F, 0.92F, 0.016F, 1.0F);
+const Color Color::sBlack(0.0F, 0.0F, 0.0F, 1.0F);
+const Color Color::sBlue(0.0F, 0.0F, 1.0F, 1.0F);
+const Color Color::sCyan(0.0F, 1.0F, 1.0F, 1.0F);
+const Color Color::sGray(0.5F, 0.5F, 0.5F, 1.0F);
+const Color Color::sGreen(0.0F, 1.0F, 0.0F, 1.0F);
+const Color Color::sMagenta(1.0F, 0.0F, 1.0F, 1.0F);
+const Color Color::sRed(1.0F, 0.0F, 0.0F, 1.0F);
+const Color Color::sTransparent(0.0F, 0.0F, 0.0F, 0.0F);
+const Color Color::sWhite(1.0F, 1.0F, 1.0F, 1.0F);
+const Color Color::sYellow(1.0F, 0.92F, 0.016F, 1.0F);
 
 Color::Color() : r(0), g(0), b(0), a(1) {}
 

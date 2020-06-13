@@ -37,7 +37,7 @@ private:
     std::mutex m_ref_mutex;
 };
 
-const SignalConnection::IdType SignalConnection::InvalidId(0);
+const SignalConnection::IdType SignalConnection::sInvalidId(0);
 
 SignalConnection::SignalConnection(uint64_t id, DisconnectCallbackType disconnect_callback)
       : m_id(id),
@@ -61,7 +61,7 @@ SignalConnection::SignalConnection(SignalConnection&& other)
       : m_id(other.m_id),
         m_reference(other.m_reference),
         m_disconnect_callback(other.m_disconnect_callback) {
-    other.m_id = InvalidId;
+    other.m_id = sInvalidId;
     other.m_reference = nullptr;
     other.m_disconnect_callback = nullptr;
 }

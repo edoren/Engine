@@ -3,16 +3,16 @@
 
 namespace engine {
 
-const Color32 Color32::BLACK(0, 0, 0, 255);
-const Color32 Color32::BLUE(0, 0, 255, 255);
-const Color32 Color32::CYAN(0, 255, 255, 255);
-const Color32 Color32::GRAY(127, 127, 127, 255);
-const Color32 Color32::GREEN(0, 255, 0, 255);
-const Color32 Color32::MAGENTA(255, 0, 255, 255);
-const Color32 Color32::RED(255, 0, 0, 255);
-const Color32 Color32::TRANSPARENT(0, 0, 0, 0);
-const Color32 Color32::WHITE(255, 255, 255, 255);
-const Color32 Color32::YELLOW(255, 235, 4, 255);
+const Color32 Color32::sBlack(0, 0, 0, 255);
+const Color32 Color32::sBlue(0, 0, 255, 255);
+const Color32 Color32::sCyan(0, 255, 255, 255);
+const Color32 Color32::sGray(127, 127, 127, 255);
+const Color32 Color32::sGreen(0, 255, 0, 255);
+const Color32 Color32::sMagenta(255, 0, 255, 255);
+const Color32 Color32::sRed(255, 0, 0, 255);
+const Color32 Color32::sTransparent(0, 0, 0, 0);
+const Color32 Color32::sWhite(255, 255, 255, 255);
+const Color32 Color32::sYellow(255, 235, 4, 255);
 
 Color32::Color32() : r(0), g(0), b(0), a(255) {}
 

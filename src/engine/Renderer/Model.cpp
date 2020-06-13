@@ -339,7 +339,7 @@ std::unique_ptr<Mesh> Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
     }
 
     if (textures.empty()) {
-        Texture2D* texture = texture_manager.GetTexture2D(TextureManager::DEFAULT_TEXTURE_ID);
+        Texture2D* texture = texture_manager.GetTexture2D(TextureManager::sDefaultTextureId);
         textures.push_back(std::make_pair(texture, TextureType::DIFFUSE));
     }
 

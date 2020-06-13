@@ -4,25 +4,25 @@ namespace engine {
 
 namespace math {
 
-const int RidgedMultiNoise::DEFAULT_SEED = 0;
-const int RidgedMultiNoise::DEFAULT_OCTAVE_COUNT = 6;
-const float RidgedMultiNoise::DEFAULT_FREQUENCY = 1.0F;
-const float RidgedMultiNoise::DEFAULT_LACUNARITY = 2.0F;
-const float RidgedMultiNoise::DEFAULT_OFFSET = 1.0F;
-const float RidgedMultiNoise::DEFAULT_GAIN = 2.0F;
-const float RidgedMultiNoise::DEFAULT_EXPONENT = 1.0F;
-const int RidgedMultiNoise::MAX_OCTAVE_COUNT = 30;
+const int RidgedMultiNoise::sDefaultSeed = 0;
+const int RidgedMultiNoise::sDefaultOctaveCount = 6;
+const float RidgedMultiNoise::sDefaultFrequency = 1.0F;
+const float RidgedMultiNoise::sDefaultLacunarity = 2.0F;
+const float RidgedMultiNoise::sDefaultOffset = 1.0F;
+const float RidgedMultiNoise::sDefaultGain = 2.0F;
+const float RidgedMultiNoise::sDefaultExponent = 1.0F;
+const int RidgedMultiNoise::sMaxOctaveCount = 30;
 
-RidgedMultiNoise::RidgedMultiNoise() : RidgedMultiNoise(DEFAULT_SEED) {}
+RidgedMultiNoise::RidgedMultiNoise() : RidgedMultiNoise(sDefaultSeed) {}
 
 RidgedMultiNoise::RidgedMultiNoise(int seed)
       : BaseNoise(seed),
-        m_octave_count(DEFAULT_OCTAVE_COUNT),
-        m_frequency(DEFAULT_FREQUENCY),
-        m_lacunarity(DEFAULT_LACUNARITY),
-        m_offset(DEFAULT_OFFSET),
-        m_gain(DEFAULT_GAIN),
-        m_exponent(DEFAULT_EXPONENT) {
+        m_octave_count(sDefaultOctaveCount),
+        m_frequency(sDefaultFrequency),
+        m_lacunarity(sDefaultLacunarity),
+        m_offset(sDefaultOffset),
+        m_gain(sDefaultGain),
+        m_exponent(sDefaultExponent) {
     CalcSpectralWeights();
 }
 
@@ -103,10 +103,10 @@ void RidgedMultiNoise::SetExponent(float exponent) {
 
 void RidgedMultiNoise::CalcSpectralWeights() {
     m_spectral_weights.clear();
-    m_spectral_weights.reserve(MAX_OCTAVE_COUNT);
+    m_spectral_weights.reserve(sMaxOctaveCount);
 
     float frequency = m_frequency;
-    for (int i = 0; i < MAX_OCTAVE_COUNT; i++) {
+    for (int i = 0; i < sMaxOctaveCount; i++) {
         m_spectral_weights.push_back(std::pow(frequency, -m_exponent));
         frequency *= m_lacunarity;
     }
