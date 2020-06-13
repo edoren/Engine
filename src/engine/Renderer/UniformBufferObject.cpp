@@ -56,9 +56,7 @@ UniformBufferObject::UniformBufferObject()
         m_layout_type(LayoutType::STD140),
         m_buffer(nullptr),
         m_buffer_size(0),
-        m_buffer_changed(false),
-        m_attributes(),
-        m_attributes_alligned_offset() {}
+        m_buffer_changed(false) {}
 
 UniformBufferObject::UniformBufferObject(const std::vector<Item>& attributes) : UniformBufferObject() {
     SetAttributes(attributes);
@@ -77,7 +75,7 @@ void UniformBufferObject::SetAttributes(const std::vector<Item>& attributes) {
 
     size_t current_allignment = 0;
 
-    for (auto& item : attributes) {
+    for (const auto& item : attributes) {
         size_t attr_size = GetTypeSize(item.type);
         size_t attr_req_allignment = GetTypeAllignment(item.type);
 
@@ -232,7 +230,9 @@ void UniformBufferObject::SetAttributeValue(const String& name, const math::vec2
 void UniformBufferObject::SetAttributeValue(const String& name, const void* value, size_t offset) {
     size_t buffer_offset = 0;
     auto it = std::find_if(m_attributes.begin(), m_attributes.end(), [this, &name, &buffer_offset](Item& item) {
-        if (item.name == name) return true;
+        if (item.name == name) {
+            return true;
+        }
         buffer_offset += GetTypeSize(item.type);
         return false;
     });

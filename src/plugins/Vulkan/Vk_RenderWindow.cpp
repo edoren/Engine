@@ -23,23 +23,20 @@ const char* sShaderEntryPoint("main");
 
 // Vulkan clip space has inverted Y and half Z.
 const math::mat4 sClipMatrix = {
-    {1.0f, 0.0f, 0.0f, 0.0f},
-    {0.0f, -1.0f, 0.0f, 0.0f},
-    {0.0f, 0.0f, 0.5f, 0.0f},
-    {0.0f, 0.0f, 0.5f, 1.0f},
+    {1.0F, 0.0F, 0.0F, 0.0F},
+    {0.0F, -1.0F, 0.0F, 0.0F},
+    {0.0F, 0.0F, 0.5F, 0.0F},
+    {0.0F, 0.0F, 0.5F, 1.0F},
 };
 
 }  // namespace
 
 Vk_RenderWindow::Vk_RenderWindow()
-      : m_surface(),
-        m_graphics_queue(nullptr),
+      : m_graphics_queue(nullptr),
         m_present_queue(nullptr),
-        m_swapchain(),
         m_graphics_pipeline(VK_NULL_HANDLE),
         m_pipeline_layout(VK_NULL_HANDLE),
-        m_render_pass(VK_NULL_HANDLE),
-        m_render_resources() {}
+        m_render_pass(VK_NULL_HANDLE) {}
 
 Vk_RenderWindow::~Vk_RenderWindow() {
     Destroy();
@@ -530,10 +527,10 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         VK_CULL_MODE_NONE,                                           // cullMode
         VK_FRONT_FACE_COUNTER_CLOCKWISE,                             // frontFace
         VK_FALSE,                                                    // depthBiasEnable
-        0.0f,                                                        // depthBiasConstantFactor
-        0.0f,                                                        // depthBiasClamp
-        0.0f,                                                        // depthBiasSlopeFactor
-        1.0f                                                         // lineWidth
+        0.0F,                                                        // depthBiasConstantFactor
+        0.0F,                                                        // depthBiasClamp
+        0.0F,                                                        // depthBiasSlopeFactor
+        1.0F                                                         // lineWidth
     };
 
     VkPipelineMultisampleStateCreateInfo multisample_state_create_info = {
@@ -542,7 +539,7 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         VkPipelineMultisampleStateCreateFlags(),                   // flags
         VK_SAMPLE_COUNT_1_BIT,                                     // rasterizationSamples
         VK_FALSE,                                                  // sampleShadingEnable
-        1.0f,                                                      // minSampleShading
+        1.0F,                                                      // minSampleShading
         nullptr,                                                   // pSampleMask
         VK_FALSE,                                                  // alphaToCoverageEnable
         VK_FALSE                                                   // alphaToOneEnable
@@ -571,8 +568,8 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         VK_FALSE,                                                    // stencilTestEnable
         {},                                                          // front
         {},                                                          // back
-        0.0f,                                                        // minDepthBounds
-        1.0f,                                                        // maxDepthBounds
+        0.0F,                                                        // minDepthBounds
+        1.0F,                                                        // maxDepthBounds
     };
 
     VkPipelineColorBlendStateCreateInfo color_blend_state_create_info = {
@@ -583,7 +580,7 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         VK_LOGIC_OP_COPY,                                          // logicOp
         1,                                                         // attachmentCount
         &color_blend_attachment_state,                             // pAttachments
-        {0.0f, 0.0f, 0.0f, 0.0f}                                   // blendConstants[4]
+        {0.0F, 0.0F, 0.0F, 0.0F}                                   // blendConstants[4]
     };
 
     // Define the pipeline dynamic states
@@ -733,8 +730,8 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer, Vk_Image& ima
     }
 
     std::array<VkClearValue, 2> clear_values = {};
-    clear_values[0].color = {{0.0f, 0.0f, 0.0f, 0.0f}};
-    clear_values[1].depthStencil = {1.0f, 0};
+    clear_values[0].color = {{0.0F, 0.0F, 0.0F, 0.0F}};
+    clear_values[1].depthStencil = {1.0F, 0};
 
     VkRenderPassBeginInfo render_pass_begin_info = {
         VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,  // sType
@@ -761,12 +758,12 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer, Vk_Image& ima
     vkCmdBeginRenderPass(command_buffer, &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
 
     VkViewport viewport = {
-        0.0f,                          // x
-        0.0f,                          // y
+        0.0F,                          // x
+        0.0F,                          // y
         static_cast<float>(m_size.x),  // width
         static_cast<float>(m_size.y),  // height
-        0.0f,                          // minDepth
-        1.0f                           // maxDepth
+        0.0F,                          // minDepth
+        1.0F                           // maxDepth
     };
 
     VkRect2D scissor = {

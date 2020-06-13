@@ -82,8 +82,8 @@ bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
 
     // Check that all the required extensions are available
     bool all_extensions_found = true;
-    auto& required_extensions = GL_Shader::GetRequiredExtensions();
-    for (auto required_extension : required_extensions) {
+    const auto& required_extensions = GL_Shader::GetRequiredExtensions();
+    for (const auto* required_extension : required_extensions) {
         bool found = false;
         for (const char* extension : opengl_available_extensions) {
             if (std::strcmp(required_extension, extension) == 0) {

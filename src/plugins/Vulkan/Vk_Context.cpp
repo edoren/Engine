@@ -1,5 +1,6 @@
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
+#include <Util/Function.hpp>
 
 #include "Vk_Context.hpp"
 
@@ -78,19 +79,16 @@ Vk_Context* Vk_Context::GetInstancePtr() {
 Vk_Context::Vk_Context()
       : m_instance(VK_NULL_HANDLE),
         m_device(VK_NULL_HANDLE),
-        m_graphics_queue(),
         m_graphics_queue_cmd_pool(VK_NULL_HANDLE),
         m_ubo_descriptor_pool(VK_NULL_HANDLE),
         m_debug_report_callback(VK_NULL_HANDLE),
 #ifdef ENGINE_DEBUG
-        m_validation_layers_enabled(true),
+        m_validation_layers_enabled(true) {
 #else
-        m_validation_layers_enabled(false),
+        m_validation_layers_enabled(false){
 #endif
-        m_validation_layers(),
-        m_instance_extensions(),
-        m_device_extensions() {
-}
+
+}  // namespace engine
 
 Vk_Context::~Vk_Context() {
     Shutdown();
@@ -306,7 +304,9 @@ bool Vk_Context::CreateDevice() {
     // Check all the queried physical devices for one with the required
     // caracteristics and avaliable queues
     for (size_t i = 0; i < physical_devices.size(); i++) {
-        if (SelectPhysicalDevice(physical_devices[i])) break;
+        if (SelectPhysicalDevice(physical_devices[i])) {
+            break;
+        }
     }
     if (!m_physical_device.handle || m_graphics_queue.family_index == UINT32_MAX) {
         LogFatal("Vk_Core", "No physical device that supports the required caracteristics");
@@ -314,7 +314,7 @@ bool Vk_Context::CreateDevice() {
     }
 
     // Define the queue families information
-    std::vector<float> queue_priorities = {1.0f};
+    std::vector<float> queue_priorities = {1.0F};
     std::vector<VkDeviceQueueCreateInfo> queue_create_infos;
     queue_create_infos.push_back({
         VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,    // sType
@@ -466,15 +466,15 @@ bool Vk_Context::CheckValidationLayerSupport() const {
         return false;
     }
 
-    String available_layer_list;
-    for (size_t i = 0; i < avaliable_layers.size(); i++) {
-        if (i != 0) available_layer_list += ", ";
-        available_layer_list += avaliable_layers[i].layerName;
+    std::vector<const char*> available_layer_list;
+    available_layer_list.reserve(avaliable_layers.size());
+    for (const auto& layer : avaliable_layers) {
+        available_layer_list.push_back(layer.layerName);
     }
-    LogInfo(sTag, "Available Layers: [{}]"_format(available_layer_list));
+    LogInfo(sTag, "Available Layers: {}"_format(available_layer_list));
 
     // Check that all the validation layers exists
-    for (auto& requested_layer : m_validation_layers) {
+    for (const auto& requested_layer : m_validation_layers) {
         if (!CheckLayerAvailability(requested_layer, avaliable_layers)) {
             LogError(sTag, "Could not find validation layer named: {}"_format(requested_layer));
             return false;

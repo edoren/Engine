@@ -86,7 +86,7 @@ SignalConnection& SignalConnection::operator=(SignalConnection&& other) {
     return *this;
 }
 
-SignalConnection::IdType SignalConnection::GetId() {
+SignalConnection::IdType SignalConnection::GetId() const {
     return m_id;
 }
 

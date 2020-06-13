@@ -6,9 +6,9 @@ namespace math {
 
 const int PerlinNoise::DEFAULT_SEED = 0;
 const int PerlinNoise::DEFAULT_OCTAVE_COUNT = 6;
-const float PerlinNoise::DEFAULT_FREQUENCY = 1.0f;
-const float PerlinNoise::DEFAULT_LACUNARITY = 2.0f;
-const float PerlinNoise::DEFAULT_PERSISTENCE = 0.5f;
+const float PerlinNoise::DEFAULT_FREQUENCY = 1.0F;
+const float PerlinNoise::DEFAULT_LACUNARITY = 2.0F;
+const float PerlinNoise::DEFAULT_PERSISTENCE = 0.5F;
 const int PerlinNoise::MAX_OCTAVE_COUNT = 30;
 
 PerlinNoise::PerlinNoise() : PerlinNoise(DEFAULT_SEED) {}
@@ -37,10 +37,10 @@ float PerlinNoise::GetPersistence() const {
 }
 
 float PerlinNoise::GetValue(float x, float y, float z) const {
-    float value = 0.f;
-    float signal = 0.f;
+    float value = 0.F;
+    float signal = 0.F;
     float frequency = m_frequency;
-    float amplitude = 1.f;
+    float amplitude = 1.F;
 
     for (int current_octave = 0; current_octave < m_octave_count; current_octave++) {
         signal = CoherentNoise3D(x * frequency, y * frequency, z * frequency);
@@ -50,7 +50,7 @@ float PerlinNoise::GetValue(float x, float y, float z) const {
         amplitude *= m_persistence;
     }
 
-    return std::min(1.f, std::max(-1.f, value));
+    return std::min(1.F, std::max(-1.F, value));
 }
 
 void PerlinNoise::SetOctaveCount(int octave_count) {

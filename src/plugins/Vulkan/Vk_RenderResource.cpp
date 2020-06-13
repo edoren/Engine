@@ -19,14 +19,10 @@ Vk_RenderResource::~Vk_RenderResource() {
 bool Vk_RenderResource::Create() {
     Vk_Context& context = Vk_Context::GetInstance();
 
-    if (!Vk_Utilities::AllocateCommandBuffers(context.GetGraphicsQueueCmdPool(), 1, &command_buffer) ||
-        !Vk_Utilities::CreateVulkanSemaphore(&image_available_semaphore) ||
-        !Vk_Utilities::CreateVulkanSemaphore(&finished_rendering_semaphore) ||
-        !Vk_Utilities::CreateVulkanFence(VK_FENCE_CREATE_SIGNALED_BIT, &fence)) {
-        return false;
-    }
-
-    return true;
+    return !(!Vk_Utilities::AllocateCommandBuffers(context.GetGraphicsQueueCmdPool(), 1, &command_buffer) ||
+             !Vk_Utilities::CreateVulkanSemaphore(&image_available_semaphore) ||
+             !Vk_Utilities::CreateVulkanSemaphore(&finished_rendering_semaphore) ||
+             !Vk_Utilities::CreateVulkanFence(VK_FENCE_CREATE_SIGNALED_BIT, &fence));
 }
 
 void Vk_RenderResource::Destroy() {

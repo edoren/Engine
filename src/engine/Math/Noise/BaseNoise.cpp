@@ -86,7 +86,7 @@ float BaseNoise::CoherentNoise3D(float x, float y, float z) const {
     // Interpolate the two last results along z
     float nxyz = Lerp(w, nxy0, nxy1);
 
-    return std::min(1.f, std::max(-1.f, nxyz));
+    return std::min(1.F, std::max(-1.F, nxyz));
 }
 
 float BaseNoise::Grad(int hash, float x, float y, float z) const {
@@ -133,7 +133,7 @@ float BaseNoise::Fade(float t) const {
 }
 
 int BaseNoise::FastFloor(float x) const {
-    return x > 0.f ? static_cast<int>(x) : static_cast<int>(x - 1);
+    return x > 0.F ? static_cast<int>(x) : static_cast<int>(x - 1);
 }
 
 float BaseNoise::Lerp(float t, float a, float b) const {

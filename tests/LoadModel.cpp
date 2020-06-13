@@ -56,8 +56,8 @@ protected:
 
         m_camera = Camera({10, 10, 10});
         m_camera.LookAt({0, 0, 0});
-        m_camera_speed = 2.5f;
-        m_mouse_sensivity = 0.1f;
+        m_camera_speed = 2.5F;
+        m_mouse_sensivity = 0.1F;
 
         m_window->SetActiveCamera(&m_camera);
 
@@ -80,19 +80,25 @@ protected:
         // Camera key movements
         float delta_time = GetDeltaTime().AsSeconds();
         float speed = m_camera_speed * delta_time;
-        if (m_input->GetButton(SDLK_w).IsDown())
+        if (m_input->GetButton(SDLK_w).IsDown()) {
             m_camera.Move(speed * camera_forward);
-        if (m_input->GetButton(SDLK_s).IsDown())
+        }
+        if (m_input->GetButton(SDLK_s).IsDown()) {
             m_camera.Move(speed * -camera_forward);
-        if (m_input->GetButton(SDLK_d).IsDown())
+        }
+        if (m_input->GetButton(SDLK_d).IsDown()) {
             m_camera.Move(speed * m_camera.GetRightVector());
-        if (m_input->GetButton(SDLK_a).IsDown())
+        }
+        if (m_input->GetButton(SDLK_a).IsDown()) {
             m_camera.Move(speed * -m_camera.GetRightVector());
+        }
 
-        if (m_input->GetButton(SDLK_SPACE).IsDown())
+        if (m_input->GetButton(SDLK_SPACE).IsDown()) {
             m_camera.Move(speed * Camera::WORLD_UP);
-        if (m_input->GetButton(SDLK_LSHIFT).IsDown())
+        }
+        if (m_input->GetButton(SDLK_LSHIFT).IsDown()) {
             m_camera.Move(speed * -Camera::WORLD_UP);
+        }
 
         if (m_input->GetButton(SDLK_f).WentDown() ||
             m_input->GetButton(SDLK_F11).WentDown()) {

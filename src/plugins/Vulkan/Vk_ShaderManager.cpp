@@ -22,7 +22,7 @@ Vk_ShaderManager* Vk_ShaderManager::GetInstancePtr() {
     return sDerivedInstance;
 }
 
-Vk_ShaderManager::Vk_ShaderManager() : ShaderManager() {
+Vk_ShaderManager::Vk_ShaderManager() {
     ShaderManager& base_instance = ShaderManager::GetInstance();
     sDerivedInstance = reinterpret_cast<Vk_ShaderManager*>(&base_instance);
 }

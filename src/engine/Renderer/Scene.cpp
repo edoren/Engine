@@ -79,7 +79,7 @@ bool Scene::Unload() {
     for (auto& model_pair : m_models) {
         Model* model = model_pair.first;
         std::for_each(model_pair.second.cbegin(), model_pair.second.cend(),
-                      [&model](auto&) { ModelManager::GetInstance().Unload(model); });
+                      [&model](auto& /*unused*/) { ModelManager::GetInstance().Unload(model); });
     }
     return true;
 }

@@ -25,10 +25,7 @@ Vk_TextureManager* Vk_TextureManager::GetInstancePtr() {
     return sDerivedInstance;
 }
 
-Vk_TextureManager::Vk_TextureManager()
-      : TextureManager(),
-        m_descriptor_pool(VK_NULL_HANDLE),
-        m_descriptor_set_layout(VK_NULL_HANDLE) {
+Vk_TextureManager::Vk_TextureManager() : m_descriptor_pool(VK_NULL_HANDLE), m_descriptor_set_layout(VK_NULL_HANDLE) {
     TextureManager& base_instance = TextureManager::GetInstance();
     sDerivedInstance = reinterpret_cast<Vk_TextureManager*>(&base_instance);
 

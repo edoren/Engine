@@ -23,7 +23,7 @@ public:
     UniformBufferObject& GetUBO();
     UniformBufferObject& GetUBODynamic();
 
-    bool IsLinked();
+    bool IsLinked() const;
 
     bool Link();
 

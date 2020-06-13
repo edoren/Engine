@@ -36,7 +36,9 @@ void Renderer::Shutdown() {
 }
 
 void Renderer::AdvanceFrame() {
-    if (!m_render_window) return;
+    if (!m_render_window) {
+        return;
+    }
     if (!m_render_window->IsVisible()) {
         SDL_Delay(10);
     } else {

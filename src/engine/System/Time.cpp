@@ -23,14 +23,14 @@ Time Time::FromMilliseconds(int64 milliseconds) {
 }
 
 Time Time::FromSeconds(float seconds) {
-    return Time(static_cast<int64>(seconds * 1000000000.f));
+    return Time(static_cast<int64>(seconds * 1000000000.F));
 }
 
 Time Time::FromMinutes(float minutes) {
-    return Time(static_cast<int64>(minutes * 60000000000.f));
+    return Time(static_cast<int64>(minutes * 60000000000.F));
 }
 Time Time::FromHours(float hours) {
-    return Time(static_cast<int64>(hours * 3600000000000.f));
+    return Time(static_cast<int64>(hours * 3600000000000.F));
 }
 
 int64 Time::AsNanoseconds() const {
@@ -46,15 +46,15 @@ int64 Time::AsMilliseconds() const {
 }
 
 float Time::AsSeconds() const {
-    return static_cast<float>(m_nanoseconds / 1000000000.f);
+    return static_cast<float>(m_nanoseconds / 1000000000.F);
 }
 
 float Time::AsMinutes() const {
-    return static_cast<float>(m_nanoseconds / 60000000000.f);
+    return static_cast<float>(m_nanoseconds / 60000000000.F);
 }
 
 float Time::AsHours() const {
-    return static_cast<float>(m_nanoseconds / 3600000000000.f);
+    return static_cast<float>(m_nanoseconds / 3600000000000.F);
 }
 
 bool operator==(const Time& left, const Time& right) {

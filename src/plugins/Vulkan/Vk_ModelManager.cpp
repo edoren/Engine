@@ -24,7 +24,7 @@ Vk_ModelManager* Vk_ModelManager::GetInstancePtr() {
     return sDerivedInstance;
 }
 
-Vk_ModelManager::Vk_ModelManager() : ModelManager() {
+Vk_ModelManager::Vk_ModelManager() {
     ModelManager& base_instance = ModelManager::GetInstance();
     sDerivedInstance = reinterpret_cast<Vk_ModelManager*>(&base_instance);
 }

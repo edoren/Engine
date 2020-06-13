@@ -308,8 +308,9 @@ bool Vk_Shader::CreateUniformBuffers() {
 
 bool Vk_Shader::UploadUniformBuffers() {
     if (m_uniform_buffers._static.GetHandle() == VK_NULL_HANDLE ||
-        m_uniform_buffers._dynamic.GetHandle() == VK_NULL_HANDLE)
+        m_uniform_buffers._dynamic.GetHandle() == VK_NULL_HANDLE) {
         return false;
+    }
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.GetVulkanDevice();
 

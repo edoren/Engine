@@ -27,7 +27,7 @@ TextureManager* TextureManager::GetInstancePtr() {
     return Singleton<TextureManager>::GetInstancePtr();
 }
 
-TextureManager::TextureManager() : m_active_texture(nullptr), m_textures() {}
+TextureManager::TextureManager() : m_active_texture(nullptr) {}
 
 TextureManager::~TextureManager() {}
 
@@ -59,12 +59,11 @@ Texture2D* TextureManager::LoadFromFile(const String& basename) {
             return nullptr;
         }
         return LoadFromImage(basename, image);
-    } else {
-        LogError(sTag,
-                 "Texture2D not loaded. File '{}' "
-                 "not found."_format(filename.ToUtf8()));
-        return nullptr;
     }
+    LogError(sTag,
+             "Texture2D not loaded. File '{}' "
+             "not found."_format(filename.ToUtf8()));
+    return nullptr;
 }
 
 Texture2D* TextureManager::LoadFromImage(const String& name, const Image& image) {

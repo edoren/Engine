@@ -21,7 +21,7 @@ public:
 
 protected:
     std::unique_ptr<Texture2D> CreateTexture2D() override;
-    void UseTexture2D(Texture2D* shader) override;
+    void UseTexture2D(Texture2D* texture) override;
 };
 
 }  // namespace engine

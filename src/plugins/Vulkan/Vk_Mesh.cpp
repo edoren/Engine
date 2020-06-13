@@ -23,7 +23,7 @@ const String sTag("Vk_Mesh");
 
 }  // namespace
 
-Vk_Mesh::Vk_Mesh() : m_vertex_buffer(), m_index_buffer() {}
+Vk_Mesh::Vk_Mesh() {}
 
 Vk_Mesh::~Vk_Mesh() {
     Vk_Context& context = Vk_Context::GetInstance();
@@ -211,7 +211,7 @@ void Vk_Mesh::Draw(RenderWindow& target, const RenderStates& states) const {
         Vk_Texture2D* texture = Vk_TextureManager::GetInstance().GetActiveTexture2D();
         Vk_Shader* shader = Vk_ShaderManager::GetInstance().GetActiveShader();
 
-        for (auto& pair : m_textures) {
+        for (const auto& pair : m_textures) {
             if (pair.second == TextureType::DIFFUSE) {
                 texture = static_cast<Vk_Texture2D*>(pair.first);
             }

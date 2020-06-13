@@ -62,7 +62,9 @@ int64 IOStream::Tell() const {
 }
 
 size_t IOStream::GetSize() const {
-    if (!m_file) return 0;
+    if (!m_file) {
+        return 0;
+    }
     int64 current_pos = SDL_RWtell(m_file);
     SDL_RWseek(m_file, 0, RW_SEEK_END);
     int64 file_size = SDL_RWtell(m_file);

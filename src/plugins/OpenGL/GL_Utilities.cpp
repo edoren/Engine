@@ -13,7 +13,9 @@ const String sTag("GL_Utilities");
 
 void LogGLError(const char* file, int line, const char* call) {
     auto err = glGetError();
-    if (err == GL_NO_ERROR) return;
+    if (err == GL_NO_ERROR) {
+        return;
+    }
     const char* err_str = "<unknown error enum>";
     switch (err) {
         case GL_INVALID_ENUM:

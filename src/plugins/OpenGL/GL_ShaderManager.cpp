@@ -22,7 +22,7 @@ GL_ShaderManager* GL_ShaderManager::GetInstancePtr() {
     return sDerivedInstance;
 }
 
-GL_ShaderManager::GL_ShaderManager() : ShaderManager() {
+GL_ShaderManager::GL_ShaderManager() {
     ShaderManager& base_instance = ShaderManager::GetInstance();
     sDerivedInstance = reinterpret_cast<GL_ShaderManager*>(&base_instance);
 }
