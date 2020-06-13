@@ -10,12 +10,12 @@ namespace math {
 
 class ENGINE_API PerlinNoise : public BaseNoise {
 public:
-    static const int DEFAULT_SEED;
-    static const int DEFAULT_OCTAVE_COUNT;
-    static const float DEFAULT_FREQUENCY;
-    static const float DEFAULT_LACUNARITY;
-    static const float DEFAULT_PERSISTENCE;
-    static const int MAX_OCTAVE_COUNT;
+    static const int sDefaultSeed;
+    static const int sDefaultOctaveCount;
+    static const float sDefaultFrequency;
+    static const float sDefaultLacunarity;
+    static const float sDefaultPersistence;
+    static const int sMaxOctaveCount;
 
     PerlinNoise();
 

@@ -89,10 +89,10 @@ TEST_CASE("String::Find", "[String]") {
         REQUIRE(location1 == 4);
         REQUIRE(location1 == location2);
     }
-    SECTION("if the string is not found it returns String::InvalidPos") {
+    SECTION("if the string is not found it returns String::sInvalidPos") {
         size_t location1 = elements.Find("A", 0);
         size_t location2 = elements.Find("火", 5);
-        REQUIRE(location1 == String::InvalidPos);
+        REQUIRE(location1 == String::sInvalidPos);
         REQUIRE(location1 == location2);
     }
 }
@@ -117,10 +117,10 @@ TEST_CASE("String::FindFirstOf", "[String]") {
     }
     SECTION(
         "if the any of the UTF-8 characters are not found "
-        "it returns String::InvalidPos") {
+        "it returns String::sInvalidPos") {
         size_t location1 = elements.FindFirstOf("A", 0);
         size_t location2 = elements.FindFirstOf("#空ñ、風");
-        REQUIRE(location1 == String::InvalidPos);
+        REQUIRE(location1 == String::sInvalidPos);
         REQUIRE(location2 == 1);
     }
 }
@@ -145,10 +145,10 @@ TEST_CASE("String::FindLastOf", "[String]") {
     }
     SECTION(
         "if the any of the UTF-8 characters are not found "
-        "it returns String::InvalidPos") {
+        "it returns String::sInvalidPos") {
         size_t location1 = elements.FindLastOf("A");
         size_t location2 = elements.FindLastOf("#空ñ、風");
-        REQUIRE(location1 == String::InvalidPos);
+        REQUIRE(location1 == String::sInvalidPos);
         REQUIRE(location2 == 8);
     }
 }

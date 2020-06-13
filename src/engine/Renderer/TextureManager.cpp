@@ -14,7 +14,7 @@ const String sRootTextureFolder("textures");
 
 }  // namespace
 
-const String TextureManager::DEFAULT_TEXTURE_ID("DEFAULT");
+const String TextureManager::sDefaultTextureId("DEFAULT");
 
 template <>
 TextureManager* Singleton<TextureManager>::sInstance = nullptr;
@@ -34,12 +34,12 @@ TextureManager::~TextureManager() {}
 void TextureManager::Initialize() {
     math::uvec2 defaultTextureSize(300, 300);
 
-    std::vector<Color32> defaultTextureData(defaultTextureSize.x * defaultTextureSize.y, Color32::GRAY);
+    std::vector<Color32> defaultTextureData(defaultTextureSize.x * defaultTextureSize.y, Color32::sGray);
 
     Image defaultImage;
     defaultImage.LoadFromMemory(defaultTextureData.data(), defaultTextureSize.x, defaultTextureSize.y);
 
-    LoadFromImage(DEFAULT_TEXTURE_ID, defaultImage);
+    LoadFromImage(sDefaultTextureId, defaultImage);
 }
 
 void TextureManager::Shutdown() {

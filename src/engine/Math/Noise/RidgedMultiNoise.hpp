@@ -10,14 +10,14 @@ namespace math {
 
 class ENGINE_API RidgedMultiNoise : public BaseNoise {
 public:
-    static const int DEFAULT_SEED;
-    static const int DEFAULT_OCTAVE_COUNT;
-    static const float DEFAULT_FREQUENCY;
-    static const float DEFAULT_LACUNARITY;
-    static const float DEFAULT_OFFSET;
-    static const float DEFAULT_GAIN;
-    static const float DEFAULT_EXPONENT;
-    static const int MAX_OCTAVE_COUNT;
+    static const int sDefaultSeed;
+    static const int sDefaultOctaveCount;
+    static const float sDefaultFrequency;
+    static const float sDefaultLacunarity;
+    static const float sDefaultOffset;
+    static const float sDefaultGain;
+    static const float sDefaultExponent;
+    static const int sMaxOctaveCount;
 
     RidgedMultiNoise();
 

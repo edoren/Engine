@@ -15,7 +15,7 @@ namespace engine {
 class ENGINE_API InputManager : public Singleton<InputManager> {
 public:
     // All current touch screens.
-    static const int kMaxSimultanuousPointers = 10;
+    static const int sMaxSimultanuousPointers = 10;
 
     InputManager();
 

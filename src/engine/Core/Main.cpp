@@ -122,7 +122,7 @@ void Main::Run() {
         m_app->m_delta_time = timer.GetElapsedTime();
         timer.Restart();
 
-        window.Clear(Color::BLACK);
+        window.Clear(Color::sBlack);
 
         m_app->Update();
 

@@ -30,7 +30,7 @@
 
 namespace engine {
 
-const std::size_t String::InvalidPos = std::basic_string<char8>::npos;
+const std::size_t String::sInvalidPos = std::basic_string<char8>::npos;
 
 String::String() {}
 
@@ -302,19 +302,19 @@ std::size_t String::Find(const String& str, std::size_t start) const {
     for (std::size_t i = 0; i < start; i++) {
         utf8::next(start_it, m_string.cend());
         if (start_it == m_string.cend()) {
-            return InvalidPos;
+            return sInvalidPos;
         }
     }
     // Find the string
     auto find_it(std::search(start_it, m_string.cend(), str.m_string.cbegin(), str.m_string.cend()));
-    return (find_it == m_string.cend()) ? InvalidPos : utf8::distance(m_string.cbegin(), find_it);
+    return (find_it == m_string.cend()) ? sInvalidPos : utf8::distance(m_string.cbegin(), find_it);
 }
 
 std::size_t String::FindFirstOf(const String& str, std::size_t pos) const {
     size_t str_size = GetSize();
 
     if (pos >= str_size) {
-        return InvalidPos;
+        return sInvalidPos;
     }
 
     // Iterate to the start codepoint
@@ -322,7 +322,7 @@ std::size_t String::FindFirstOf(const String& str, std::size_t pos) const {
     for (std::size_t i = 0; i < pos; i++) {
         utf8::next(start_it, m_string.cend());
         if (start_it == m_string.cend()) {
-            return InvalidPos;
+            return sInvalidPos;
         }
     }
 
@@ -330,7 +330,7 @@ std::size_t String::FindFirstOf(const String& str, std::size_t pos) const {
     auto end_it(start_it);
     while (true) {
         if (start_it == m_string.cend()) {
-            return InvalidPos;
+            return sInvalidPos;
         }
         utf8::next(end_it, m_string.cend());
         auto find_it(std::search(str.m_string.cbegin(), str.m_string.cend(), start_it, end_it));
@@ -344,7 +344,7 @@ std::size_t String::FindFirstOf(const String& str, std::size_t pos) const {
 std::size_t String::FindLastOf(const String& str, std::size_t pos) const {
     // Iterate to the start codepoint
     auto start_it(m_string.cbegin());
-    if (pos == InvalidPos) {
+    if (pos == sInvalidPos) {
         start_it = m_string.cend();
     } else {
         for (std::size_t i = 0; i < pos + 1; i++) {
@@ -359,7 +359,7 @@ std::size_t String::FindLastOf(const String& str, std::size_t pos) const {
     auto end_it(start_it);
     while (true) {
         if (start_it == m_string.cbegin()) {
-            return InvalidPos;
+            return sInvalidPos;
         }
         utf8::prior(end_it, m_string.cbegin());
         auto find_it(std::search(str.m_string.cbegin(), str.m_string.cend(), end_it, start_it));
@@ -369,7 +369,7 @@ std::size_t String::FindLastOf(const String& str, std::size_t pos) const {
         start_it = end_it;
     }
 
-    return InvalidPos;
+    return sInvalidPos;
 }
 
 void String::Replace(std::size_t position, std::size_t length, const String& replaceWith) {

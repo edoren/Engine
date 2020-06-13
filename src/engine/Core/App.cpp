@@ -8,7 +8,7 @@ const String sTag("App");
 
 }  // namespace
 
-App::App() : m_delta_time(Time::ZERO) {}
+App::App() : m_delta_time(Time::sZero) {}
 
 App::~App() {}
 

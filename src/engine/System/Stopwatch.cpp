@@ -6,7 +6,7 @@ Stopwatch::Stopwatch()
       : m_running(false),
         m_start_time(GetActualTime()),
         m_stop_time(m_start_time),
-        m_time_buffer(Time::ZERO) {}
+        m_time_buffer(Time::sZero) {}
 
 Time Stopwatch::GetElapsedTime() const {
     Time duration;
@@ -36,7 +36,7 @@ void Stopwatch::Restart() {
     Time now = GetActualTime();
     m_start_time = now;
     m_stop_time = now;
-    m_time_buffer = Time::ZERO;
+    m_time_buffer = Time::sZero;
 }
 
 Time Stopwatch::GetActualTime() const {

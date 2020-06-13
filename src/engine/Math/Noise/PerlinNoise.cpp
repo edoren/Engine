@@ -4,21 +4,21 @@ namespace engine {
 
 namespace math {
 
-const int PerlinNoise::DEFAULT_SEED = 0;
-const int PerlinNoise::DEFAULT_OCTAVE_COUNT = 6;
-const float PerlinNoise::DEFAULT_FREQUENCY = 1.0F;
-const float PerlinNoise::DEFAULT_LACUNARITY = 2.0F;
-const float PerlinNoise::DEFAULT_PERSISTENCE = 0.5F;
-const int PerlinNoise::MAX_OCTAVE_COUNT = 30;
+const int PerlinNoise::sDefaultSeed = 0;
+const int PerlinNoise::sDefaultOctaveCount = 6;
+const float PerlinNoise::sDefaultFrequency = 1.0F;
+const float PerlinNoise::sDefaultLacunarity = 2.0F;
+const float PerlinNoise::sDefaultPersistence = 0.5F;
+const int PerlinNoise::sMaxOctaveCount = 30;
 
-PerlinNoise::PerlinNoise() : PerlinNoise(DEFAULT_SEED) {}
+PerlinNoise::PerlinNoise() : PerlinNoise(sDefaultSeed) {}
 
 PerlinNoise::PerlinNoise(int seed)
       : BaseNoise(seed),
-        m_octave_count(DEFAULT_OCTAVE_COUNT),
-        m_frequency(DEFAULT_FREQUENCY),
-        m_lacunarity(DEFAULT_LACUNARITY),
-        m_persistence(DEFAULT_PERSISTENCE) {}
+        m_octave_count(sDefaultOctaveCount),
+        m_frequency(sDefaultFrequency),
+        m_lacunarity(sDefaultLacunarity),
+        m_persistence(sDefaultPersistence) {}
 
 int PerlinNoise::GetOctaveCount() const {
     return m_octave_count;

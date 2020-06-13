@@ -12,7 +12,7 @@ class String;
 
 class ENGINE_API TextureManager : public Singleton<TextureManager> {
 public:
-    static const String DEFAULT_TEXTURE_ID;
+    static const String sDefaultTextureId;
 
     TextureManager();
 

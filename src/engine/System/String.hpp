@@ -46,7 +46,7 @@ public:
     ////////////////////////////////////////////////////////////
     // Static member data
     ////////////////////////////////////////////////////////////
-    static const std::size_t InvalidPos;  ///< Represents an invalid position in the string
+    static const std::size_t sInvalidPos;  ///< Represents an invalid position in the string
 
     ////////////////////////////////////////////////////////////
     /// @brief Default constructor
@@ -570,7 +570,7 @@ public:
     ///         in the string, or String::InvalidPos if not found
     ///
     ////////////////////////////////////////////////////////////
-    std::size_t FindLastOf(const String& str, std::size_t pos = InvalidPos) const;
+    std::size_t FindLastOf(const String& str, std::size_t pos = sInvalidPos) const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Replace a SubString with another string
@@ -625,7 +625,7 @@ public:
     ///
     /// @return String object containing a SubString of this object
     ////////////////////////////////////////////////////////////
-    String SubString(std::size_t position, std::size_t length = InvalidPos) const;
+    String SubString(std::size_t position, std::size_t length = sInvalidPos) const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Get a pointer to the C-style array of characters

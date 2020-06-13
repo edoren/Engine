@@ -2,7 +2,7 @@
 
 namespace engine {
 
-const RenderStates RenderStates::Default = RenderStates();
+const RenderStates RenderStates::sDefault = RenderStates();
 
 RenderStates::RenderStates() {}
 

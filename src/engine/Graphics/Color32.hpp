@@ -10,16 +10,16 @@ class Color;
 
 class ENGINE_API Color32 {
 public:
-    static const Color32 BLACK;
-    static const Color32 BLUE;
-    static const Color32 CYAN;
-    static const Color32 GRAY;
-    static const Color32 GREEN;
-    static const Color32 MAGENTA;
-    static const Color32 RED;
-    static const Color32 TRANSPARENT;
-    static const Color32 WHITE;
-    static const Color32 YELLOW;
+    static const Color32 sBlack;
+    static const Color32 sBlue;
+    static const Color32 sCyan;
+    static const Color32 sGray;
+    static const Color32 sGreen;
+    static const Color32 sMagenta;
+    static const Color32 sRed;
+    static const Color32 sTransparent;
+    static const Color32 sWhite;
+    static const Color32 sYellow;
 
     Color32();
 

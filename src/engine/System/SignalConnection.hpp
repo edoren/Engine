@@ -21,7 +21,7 @@ private:
     SignalConnection(uint64_t id, DisconnectCallbackType disconnect_callback);
 
 public:
-    static const IdType InvalidId;
+    static const IdType sInvalidId;
 
     // Default constructor
     SignalConnection();
