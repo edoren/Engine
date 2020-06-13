@@ -25,7 +25,6 @@ private:
 
     const String& GetName();
 
-private:
     String m_name;
     std::map<Model*, std::vector<Transform>> m_models;
     std::map<String, uint32> m_num_model_instance;

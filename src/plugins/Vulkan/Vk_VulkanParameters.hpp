@@ -15,7 +15,7 @@ struct PhysicalDeviceParameters {
 
     PhysicalDeviceParameters() : handle(VK_NULL_HANDLE), properties(), features() {}
 
-    operator VkPhysicalDevice() {
+    operator VkPhysicalDevice() const {
         return handle;
     }
 
@@ -23,7 +23,7 @@ struct PhysicalDeviceParameters {
         return handle;
     }
 
-    VkFormatProperties GetFormatProperties(VkFormat format) {
+    VkFormatProperties GetFormatProperties(VkFormat format) const {
         VkFormatProperties format_properties;
         vkGetPhysicalDeviceFormatProperties(handle, format, &format_properties);
         return format_properties;
@@ -37,7 +37,7 @@ struct QueueParameters {
 
     QueueParameters() : handle(VK_NULL_HANDLE), family_index(UINT32_MAX), properties() {}
 
-    operator VkQueue() {
+    operator VkQueue() const {
         return handle;
     }
 
@@ -53,7 +53,7 @@ struct DescriptorSetParameters {
 
     DescriptorSetParameters() : handle(VK_NULL_HANDLE), pool(VK_NULL_HANDLE), layout(VK_NULL_HANDLE) {}
 
-    operator VkDescriptorSet() {
+    operator VkDescriptorSet() const {
         return handle;
     }
 

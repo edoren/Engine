@@ -54,7 +54,6 @@ private:
 
     GLint GetUniformLocation(const String& name);
 
-private:
     json m_descriptor;
 
     UniformBufferObject m_ubo;

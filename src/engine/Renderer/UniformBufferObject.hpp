@@ -60,7 +60,6 @@ private:
     size_t GetTypeSize(UniformBufferObject::DataType type);
     size_t GetTypeAllignment(UniformBufferObject::DataType type);
 
-private:
     size_t m_size;
     size_t m_dynamic_alignment;
 

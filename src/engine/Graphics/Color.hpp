@@ -21,7 +21,6 @@ public:
     static const Color WHITE;
     static const Color YELLOW;
 
-public:
     Color();
 
     Color(const Color& color);
@@ -36,7 +35,6 @@ public:
 
     static Color Lerp(const Color& a, const Color& b, float t);
 
-public:
     union {
         struct {
             float r, g, b, a;

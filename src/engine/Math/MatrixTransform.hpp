@@ -47,10 +47,10 @@ inline Matrix4x4<T> PerspectiveLH(T fovy, T aspect, T zNear, T zFar) {
 
     // clang-format off
     return Matrix4x4<T>(
-        one / (aspect * tan_half_fovy), 0.f, 0.f, 0.f,
-        0.f, one / (tan_half_fovy), 0.f, 0.f,
-        0.f, 0.f, (zFar + zNear) / (zFar - zNear), one,
-        0.f, 0.f, -(two * zFar * zNear) / (zFar - zNear), 0.f
+        one / (aspect * tan_half_fovy), 0.F, 0.F, 0.F,
+        0.F, one / (tan_half_fovy), 0.F, 0.F,
+        0.F, 0.F, (zFar + zNear) / (zFar - zNear), one,
+        0.F, 0.F, -(two * zFar * zNear) / (zFar - zNear), 0.F
     );
 
     // // DEPTH_ZERO_TO_ONE
@@ -74,10 +74,10 @@ inline Matrix4x4<T> PerspectiveRH(T fovy, T aspect, T zNear, T zFar) {
 
     // clang-format off
     return Matrix4x4<T>(
-        one / (aspect * tan_half_fovy), 0.f, 0.f, 0.f,
-        0.f, one / (tan_half_fovy), 0.f, 0.f,
-        0.f, 0.f, -(zFar + zNear) / (zFar - zNear), -one,
-        0.f, 0.f, -(two * zFar * zNear) / (zFar - zNear), 0.f
+        one / (aspect * tan_half_fovy), 0.F, 0.F, 0.F,
+        0.F, one / (tan_half_fovy), 0.F, 0.F,
+        0.F, 0.F, -(zFar + zNear) / (zFar - zNear), -one,
+        0.F, 0.F, -(two * zFar * zNear) / (zFar - zNear), 0.F
     );
 
     // // DEPTH_ZERO_TO_ONE
@@ -105,9 +105,9 @@ inline Matrix4x4<T> Ortho(T left, T right, T bottom, T top, T zNear, T zFar) {
     T two = static_cast<T>(2);
     // clang-format off
     return Matrix4x4<T>(
-                    two / (right - left),                              0.f,                              0.f, 0.f,
-                                     0.f,             two / (top - bottom),                              0.f, 0.f,
-                                     0.f,                              0.f,            -two / (zFar - zNear), 0.f,
+                    two / (right - left),                              0.F,                              0.F, 0.F,
+                                     0.F,             two / (top - bottom),                              0.F, 0.F,
+                                     0.F,                              0.F,            -two / (zFar - zNear), 0.F,
         -(right + left) / (right - left), -(top + bottom) / (top - bottom), -(zFar + zNear) / (zFar - zNear), one
     );
     // clang-format on
@@ -121,10 +121,10 @@ inline Matrix4x4<T> LookAtLH(const Vector3<T>& position, const Vector3<T>& targe
 
     // clang-format off
     return Matrix4x4<T>(
-        s.x, u.x, f.x, 0.f,
-        s.y, u.y, f.y, 0.f,
-        s.z, u.z, f.z, 0.f,
-        -Dot(s, position), -Dot(u, position), -Dot(f, position), 1.f
+        s.x, u.x, f.x, 0.F,
+        s.y, u.y, f.y, 0.F,
+        s.z, u.z, f.z, 0.F,
+        -Dot(s, position), -Dot(u, position), -Dot(f, position), 1.F
     );
     // clang-format on
 }
@@ -137,10 +137,10 @@ inline Matrix4x4<T> LookAtRH(const Vector3<T>& position, const Vector3<T>& targe
 
     // clang-format off
     return Matrix4x4<T>(
-                      s.x,               u.x,             -f.x, 0.f,
-                      s.y,               u.y,             -f.y, 0.f,
-                      s.z,               u.z,             -f.z, 0.f,
-        -Dot(s, position), -Dot(u, position), Dot(f, position), 1.f
+                      s.x,               u.x,             -f.x, 0.F,
+                      s.y,               u.y,             -f.y, 0.F,
+                      s.z,               u.z,             -f.z, 0.F,
+        -Dot(s, position), -Dot(u, position), Dot(f, position), 1.F
     );
     // clang-format on
 }
@@ -166,10 +166,10 @@ inline Matrix4x4<T> Rotate(T angle, const Vector3<T>& v) {
 
     // clang-format off
     return Matrix4x4<T>(
-                 c + axis.x * temp.x, axis.y * temp.x + axis.z * s, axis.z * temp.x - axis.y * s, 0.f,
-        axis.x * temp.y - axis.z * s,          c + axis.y * temp.y, axis.z * temp.y + axis.x * s, 0.f,
-        axis.x * temp.z + axis.y * s, axis.y * temp.z - axis.x * s,          c + axis.z * temp.z, 0.f,
-                                 0.f,                          0.f,                          0.f, 1.f
+                 c + axis.x * temp.x, axis.y * temp.x + axis.z * s, axis.z * temp.x - axis.y * s, 0.F,
+        axis.x * temp.y - axis.z * s,          c + axis.y * temp.y, axis.z * temp.y + axis.x * s, 0.F,
+        axis.x * temp.z + axis.y * s, axis.y * temp.z - axis.x * s,          c + axis.z * temp.z, 0.F,
+                                 0.F,                          0.F,                          0.F, 1.F
     );
     // clang-format on
 }
@@ -238,10 +238,10 @@ template <typename T>
 inline Matrix4x4<T> Scale(T x, T y, T z) {
     // clang-format off
     return Matrix4x4<T>(
-          x, 0.f, 0.f, 0.f,
-        0.f,   y, 0.f, 0.f,
-        0.f, 0.f,   z, 0.f,
-        0.f, 0.f, 0.f, 1.f
+          x, 0.F, 0.F, 0.F,
+        0.F,   y, 0.F, 0.F,
+        0.F, 0.F,   z, 0.F,
+        0.F, 0.F, 0.F, 1.F
     );
     // clang-format on
 }
@@ -255,10 +255,10 @@ template <typename T>
 inline Matrix4x4<T> Translate(T x, T y, T z) {
     // clang-format off
     return Matrix4x4<T>(
-        1.f, 0.f, 0.f, 0.f,
-        0.f, 1.f, 0.f, 0.f,
-        0.f, 0.f, 1.f, 0.f,
-          x,   y,   z, 1.f
+        1.F, 0.F, 0.F, 0.F,
+        0.F, 1.F, 0.F, 0.F,
+        0.F, 0.F, 1.F, 0.F,
+          x,   y,   z, 1.F
     );
     // clang-format on
 }

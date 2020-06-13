@@ -47,7 +47,6 @@ private:
 
     void Update(bool down);
 
-private:
     bool m_is_down;
     bool m_went_down;
     bool m_went_up;

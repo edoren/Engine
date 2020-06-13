@@ -141,16 +141,16 @@ private:
 
     template <typename FunctionType>
     static Ret CallFunction(const void* data, Args&&... args) {
-        auto callable = static_cast<const FunctionType*>(data);
+        const auto* callable = static_cast<const FunctionType*>(data);
         return (*callable)(std::forward<Args>(args)...);
     }
 
     template <typename FunctionType>
     static void ManageFunction(void* dest, const void* src, Operation op) {
-        auto dest_cast = static_cast<FunctionType*>(dest);
+        auto* dest_cast = static_cast<FunctionType*>(dest);
         switch (op) {
             case Operation::COPY: {
-                auto src_cast = static_cast<const FunctionType*>(src);
+                const auto* src_cast = static_cast<const FunctionType*>(src);
                 new (dest_cast) FunctionType(*src_cast);
                 break;
             }

@@ -80,7 +80,6 @@ private:
 
     bool CreateUBODescriptorPool();
 
-private:
     VkInstance m_instance;
     VkDevice m_device;
     PhysicalDeviceParameters m_physical_device;

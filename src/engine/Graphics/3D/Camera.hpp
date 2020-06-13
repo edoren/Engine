@@ -34,7 +34,6 @@ private:
 public:
     static math::vec3 WORLD_UP;
 
-public:
     // Camera vectors
     math::vec3 m_position;
     math::vec3 m_up;
