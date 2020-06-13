@@ -1,5 +1,4 @@
 #include <Core/Main.hpp>
-#include <Renderer/RendererFactory.hpp>
 #include <Renderer/TextureManager.hpp>
 #include <System/FileSystem.hpp>
 #include <System/LogManager.hpp>
@@ -44,9 +43,7 @@ void TextureManager::Initialize() {
 }
 
 void TextureManager::Shutdown() {
-    if (m_textures.size() > 0) {
-        LogDebug(sTag, "Textures2D not deleted");
-    }
+    m_textures.clear();
 }
 
 Texture2D* TextureManager::LoadFromFile(const String& basename) {
@@ -71,40 +68,38 @@ Texture2D* TextureManager::LoadFromFile(const String& basename) {
 }
 
 Texture2D* TextureManager::LoadFromImage(const String& name, const Image& image) {
-    Texture2D* new_texture = GetTexture2D(name);
-    if (new_texture != nullptr) {
-        return new_texture;
+    Texture2D* texture = GetTexture2D(name);
+    if (texture != nullptr) {
+        return texture;
     }
 
-    RendererFactory& factory = Main::GetInstance().GetActiveRenderer().GetRendererFactory();
-
-    new_texture = factory.CreateTexture2D();
+    std::unique_ptr<Texture2D> new_texture = CreateTexture2D();
     if (new_texture != nullptr) {
         LogDebug(sTag, "Loading Texture: " + name);
         if (!new_texture->LoadFromImage(image)) {
             LogDebug(sTag, "Could not load Texture: " + name);
-            delete new_texture;
-            new_texture = nullptr;
+            new_texture.reset();
         }
     } else {
         LogError(sTag, "Texture2D could not be created");
     }
 
+    texture = new_texture.get();
     if (new_texture != nullptr) {
-        m_textures[name] = new_texture;
+        m_textures[name] = std::move(new_texture);
     }
 
     // TMP
     if (m_active_texture == nullptr) {
-        m_active_texture = new_texture;
+        m_active_texture = texture;
     }
 
-    return new_texture;
+    return texture;
 }
 
 Texture2D* TextureManager::GetTexture2D(const String& name) {
     auto it = m_textures.find(name);
-    return (it != m_textures.end()) ? it->second : nullptr;
+    return (it != m_textures.end()) ? it->second.get() : nullptr;
 }
 
 void TextureManager::SetActiveTexture2D(const String& name) {

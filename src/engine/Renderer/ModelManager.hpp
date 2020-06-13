@@ -2,6 +2,7 @@
 
 #include <Util/Prerequisites.hpp>
 
+#include <Renderer/Mesh.hpp>
 #include <Renderer/Model.hpp>
 
 namespace engine {
@@ -20,14 +21,19 @@ public:
 
     Model* LoadFromFile(const String& basename);
 
-    Model* GetModel(const String& name);
+    void Unload(Model* model);
+    void UnloadFromFile(const String& basename);
 
     static ModelManager& GetInstance();
     static ModelManager* GetInstancePtr();
 
+    virtual std::unique_ptr<Mesh> CreateMesh() = 0;
+
 protected:
+    virtual std::unique_ptr<Model> CreateModel() = 0;
+
     std::map<String, Model*> m_name_map;
-    std::map<uint32, Model*> m_index_map;
+    std::map<Model*, uint32> m_model_ref_count;
     std::vector<std::unique_ptr<Model>> m_models;
 };
 

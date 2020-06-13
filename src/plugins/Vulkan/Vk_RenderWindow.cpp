@@ -1,6 +1,4 @@
 #include <Graphics/3D/Camera.hpp>
-#include <Renderer/Drawable.hpp>
-#include <Renderer/RenderStates.hpp>
 #include <Renderer/UniformBufferObject.hpp>
 #include <Renderer/Vertex.hpp>
 #include <System/FileSystem.hpp>
@@ -72,9 +70,7 @@ bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
     }
     if (!CheckWSISupport()) {
         PhysicalDeviceParameters& physical_device = context.GetPhysicalDevice();
-        LogError(sTag,
-                 "Physical device {} doesn't include WSI "
-                 "support"_format(physical_device.properties.deviceName));
+        LogError(sTag, "Physical device {} doesn't include WSI support"_format(physical_device.properties.deviceName));
         return false;
     }
 
@@ -469,41 +465,18 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         },
     }};
 
-    std::array<VkVertexInputAttributeDescription, 4> vertex_attribute_descriptions = {{
-        {
-            0,                           // location
-            sVertexBufferBindId,         // binding
-            VK_FORMAT_R32G32B32_SFLOAT,  // format
-            offsetof(Vertex, position)   // offset
-        },
-        {
-            1,                           // location
-            sVertexBufferBindId,         // binding
-            VK_FORMAT_R32G32B32_SFLOAT,  // format
-            offsetof(Vertex, normal)     // offset
-        },
-        {
-            2,                            // location
-            sVertexBufferBindId,          // binding
-            VK_FORMAT_R32G32_SFLOAT,      // format
-            offsetof(Vertex, tex_coords)  // offset
-        },
-        {
-            3,                              // location
-            sVertexBufferBindId,            // binding
-            VK_FORMAT_R32G32B32A32_SFLOAT,  // format
-            offsetof(Vertex, color)         // offset
-        },
-    }};
+    const Vk_VertexLayout& vertex_layout = shader->GetVertexLayout();
+
+    auto vertex_input_attrib_description = vertex_layout.GetVertexInputAttributeDescription(sVertexBufferBindId);
 
     VkPipelineVertexInputStateCreateInfo vertex_input_state_create_info = {
-        VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,    // sType
-        nullptr,                                                      // pNext
-        0,                                                            // flags;
-        static_cast<uint32_t>(vertex_binding_descriptions.size()),    // vertexBindingDescriptionCount
-        vertex_binding_descriptions.data(),                           // pVertexBindingDescriptions
-        static_cast<uint32_t>(vertex_attribute_descriptions.size()),  // vertexAttributeDescriptionCount
-        vertex_attribute_descriptions.data()                          // pVertexAttributeDescriptions
+        VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,      // sType
+        nullptr,                                                        // pNext
+        0,                                                              // flags;
+        static_cast<uint32_t>(vertex_binding_descriptions.size()),      // vertexBindingDescriptionCount
+        vertex_binding_descriptions.data(),                             // pVertexBindingDescriptions
+        static_cast<uint32_t>(vertex_input_attrib_description.size()),  // vertexAttributeDescriptionCount
+        vertex_input_attrib_description.data()                          // pVertexAttributeDescriptions
     };
 
     std::array<VkPipelineShaderStageCreateInfo, 2> shader_stage_create_infos = {{

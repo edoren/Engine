@@ -3,14 +3,12 @@
 #include <Util/Prerequisites.hpp>
 
 #include <Graphics/Color.hpp>
-#include <Renderer/RenderStates.hpp>
 #include <System/SignalConnection.hpp>
 #include <System/String.hpp>
 
 namespace engine {
 
 class Camera;
-class Drawable;
 class Mesh;
 
 class ENGINE_API RenderWindow {
@@ -38,9 +36,6 @@ public:
     virtual void Clear(const Color& color) = 0;
 
     bool IsVisible();
-
-    // RenderTarget
-    virtual void Draw(const Mesh& mesh, const RenderStates& states);
 
     // RenderTarget
     void SetActiveCamera(const Camera* camera);

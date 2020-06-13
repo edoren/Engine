@@ -10,6 +10,7 @@ class InputManager;
 
 class ENGINE_API Mouse : NonCopyable {
     friend class InputManager;
+    friend std::unique_ptr<Mouse> std::make_unique<Mouse>(Pointer& pointer);
 
 private:
     Mouse(Pointer& pointer);

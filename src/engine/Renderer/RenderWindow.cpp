@@ -1,5 +1,4 @@
 #include <Input/InputManager.hpp>
-#include <Renderer/Drawable.hpp>
 #include <Renderer/Mesh.hpp>
 #include <Renderer/RenderWindow.hpp>
 #include <System/LogManager.hpp>
@@ -112,10 +111,6 @@ void RenderWindow::SetFullScreen(bool fullscreen, bool is_fake) {
         SDL_SetWindowSize(window, m_size.x, m_size.y);
         m_is_fullscreen = fullscreen;
     }
-}
-
-void RenderWindow::Draw(const Mesh& mesh, const RenderStates& states) {
-    mesh.Draw(*this, states);
 }
 
 void RenderWindow::SetActiveCamera(const Camera* camera) {

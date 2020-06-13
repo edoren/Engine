@@ -26,11 +26,11 @@ GL_TextureManager::GL_TextureManager() : TextureManager() {
 }
 
 GL_TextureManager::~GL_TextureManager() {
-    for (auto texture_pair : m_textures) {
-        delete texture_pair.second;
-    }
-    m_textures.clear();
     sDerivedInstance = nullptr;
+}
+
+std::unique_ptr<Texture2D> GL_TextureManager::CreateTexture2D() {
+    return std::make_unique<GL_Texture2D>();
 }
 
 void GL_TextureManager::UseTexture2D(Texture2D* texture) {

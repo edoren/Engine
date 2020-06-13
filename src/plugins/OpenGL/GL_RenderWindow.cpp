@@ -1,6 +1,4 @@
 #include <Graphics/3D/Camera.hpp>
-#include <Renderer/Drawable.hpp>
-#include <Renderer/RenderStates.hpp>
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
 

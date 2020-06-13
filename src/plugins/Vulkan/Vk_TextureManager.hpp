@@ -15,7 +15,7 @@ class VULKAN_PLUGIN_API Vk_TextureManager : public TextureManager {
 public:
     Vk_TextureManager();
 
-    ~Vk_TextureManager();
+    ~Vk_TextureManager() override;
 
     VkDescriptorPool& GetDescriptorPool();
 
@@ -28,6 +28,7 @@ public:
     static Vk_TextureManager* GetInstancePtr();
 
 protected:
+    std::unique_ptr<Texture2D> CreateTexture2D() override;
     void UseTexture2D(Texture2D* texture) override;
 
 private:

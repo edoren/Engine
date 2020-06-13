@@ -45,10 +45,6 @@ public:
 
     Renderer* GetActiveRendererPtr();
 
-    RendererFactory& GetActiveRendererFactory();
-
-    std::unique_ptr<RendererFactory>& GetActiveRendererFactoryPtr();
-
     void ExecuteAsync(Function<void()>&& task);
 
     ////////////////////////////////////////////////////////////
@@ -120,7 +116,6 @@ private:
     std::unique_ptr<FileSystem> m_file_system;
     std::unique_ptr<SharedLibManager> m_shared_lib_manager;
     std::unique_ptr<InputManager> m_input_manager;
-    std::unique_ptr<ModelManager> m_model_manager;
     std::unique_ptr<SceneManager> m_scene_manager;
     std::unique_ptr<AsyncTaskRunner> m_async_task_runner;
 };

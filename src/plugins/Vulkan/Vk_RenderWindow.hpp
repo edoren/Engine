@@ -69,12 +69,12 @@ private:
 
     bool CreateDepthResources();
 
-    virtual void OnWindowResized(const math::ivec2& size) override;
+    void OnWindowResized(const math::ivec2& size) override;
 
-    virtual void OnAppWillEnterBackground() override;
-    virtual void OnAppDidEnterBackground() override;
-    virtual void OnAppWillEnterForeground() override;
-    virtual void OnAppDidEnterForeground() override;
+    void OnAppWillEnterBackground() override;
+    void OnAppDidEnterBackground() override;
+    void OnAppWillEnterForeground() override;
+    void OnAppDidEnterForeground() override;
 
 private:
     Vk_Surface m_surface;

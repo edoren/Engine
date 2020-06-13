@@ -21,12 +21,14 @@ private:
     explicit Scene(const json& data);
 
     bool Load();
+    bool Unload();
 
     const String& GetName();
 
 private:
     String m_name;
-    std::vector<std::pair<Model*, Transform>> m_models;
+    std::map<Model*, std::vector<Transform>> m_models;
+    std::map<String, uint32> m_num_model_instance;
     json m_data;
 };
 

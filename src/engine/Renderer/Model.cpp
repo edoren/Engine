@@ -1,7 +1,6 @@
 #include <Core/Main.hpp>
 #include <Renderer/Model.hpp>
 #include <Renderer/RenderStates.hpp>
-#include <Renderer/RendererFactory.hpp>
 #include <Renderer/Texture2D.hpp>
 #include <Renderer/TextureManager.hpp>
 #include <System/FileSystem.hpp>
@@ -130,13 +129,11 @@ TextureType GetTextureTypeFromAiTextureType(aiTextureType type) {
 
 }  // namespace
 
-Model::Model(const String& path) {
-    LoadModel(path);
-}
+Model::Model() {}
 
 Model::~Model() {
-    for (auto mesh : m_meshes) {
-        delete mesh;
+    for (auto& mesh : m_meshes) {
+        mesh.reset();
     }
 }
 
@@ -155,8 +152,6 @@ void Model::LoadModel(const String& path) {
 
     FileSystem& fs = FileSystem::GetInstance();
     String filename = fs.Join(sRootModelFolder, path);
-
-    LogDebug(sTag, "Loading model: " + filename);
 
     String path_noext = path.SubString(0, path.FindLastOf("."));
     String json_filename = fs.Join(sRootModelFolder, path_noext + ".json");
@@ -210,7 +205,7 @@ void Model::ProcessNode(aiNode* node, const aiScene* scene) {
     }
 }
 
-Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
+std::unique_ptr<Mesh> Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
     std::vector<Vertex> vertices;
     std::vector<uint32> indices;
     std::vector<std::pair<Texture2D*, TextureType>> textures;
@@ -321,6 +316,7 @@ Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
     }
 
     TextureManager& texture_manager = TextureManager::GetInstance();
+
     for (auto& pair : texture_filenames) {
         TextureType type = pair.first;
         const String& filename = pair.second;
@@ -333,8 +329,8 @@ Mesh* Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
         textures.push_back(std::make_pair(texture, TextureType::DIFFUSE));
     }
 
-    RendererFactory& factory = Main::GetInstance().GetActiveRendererFactory();
-    Mesh* ret = factory.CreateMesh();
+    ModelManager& model_manager = ModelManager::GetInstance();
+    std::unique_ptr<Mesh> ret = model_manager.CreateMesh();
     ret->LoadFromData(vertices, indices, textures);
 
     return ret;

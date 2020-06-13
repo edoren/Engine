@@ -85,16 +85,14 @@ public:
     static ShaderManager* GetInstancePtr();
 
 protected:
-    virtual Shader* CreateShader() = 0;
-
-    virtual void DeleteShader(Shader* shader) = 0;
+    virtual std::unique_ptr<Shader> CreateShader() = 0;
 
     virtual void UseShader(Shader* shader) = 0;
 
     virtual const String& GetShaderFolder() const = 0;
 
     Shader* m_active_shader;
-    std::map<String, Shader*> m_shaders;
+    std::map<String, std::unique_ptr<Shader>> m_shaders;
 };
 
 }  // namespace engine

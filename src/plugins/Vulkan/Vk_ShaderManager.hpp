@@ -30,9 +30,7 @@ public:
     static Vk_ShaderManager* GetInstancePtr();
 
 protected:
-    Shader* CreateShader() override;
-
-    void DeleteShader(Shader* shader) override;
+    std::unique_ptr<Shader> CreateShader() override;
 
     void UseShader(Shader* shader) override;
 

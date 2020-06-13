@@ -28,10 +28,6 @@ GL_ShaderManager::GL_ShaderManager() : ShaderManager() {
 }
 
 GL_ShaderManager::~GL_ShaderManager() {
-    for (auto shader_pair : m_shaders) {
-        DeleteShader(shader_pair.second);
-    }
-    m_shaders.clear();
     sDerivedInstance = nullptr;
 }
 
@@ -54,12 +50,8 @@ GL_Shader* GL_ShaderManager::GetActiveShader() {
     return reinterpret_cast<GL_Shader*>(m_active_shader);
 }
 
-Shader* GL_ShaderManager::CreateShader() {
-    return new GL_Shader();
-}
-
-void GL_ShaderManager::DeleteShader(Shader* shader) {
-    delete shader;
+std::unique_ptr<Shader> GL_ShaderManager::CreateShader() {
+    return std::make_unique<GL_Shader>();
 }
 
 void GL_ShaderManager::UseShader(Shader* shader) {

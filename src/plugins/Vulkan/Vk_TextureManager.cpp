@@ -40,11 +40,6 @@ Vk_TextureManager::~Vk_TextureManager() {
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.GetVulkanDevice();
 
-    for (auto texture_pair : m_textures) {
-        delete texture_pair.second;
-    }
-    m_textures.clear();
-
     if (m_descriptor_pool != VK_NULL_HANDLE) {
         vkDestroyDescriptorPool(device, m_descriptor_pool, nullptr);
         m_descriptor_pool = VK_NULL_HANDLE;
@@ -68,6 +63,10 @@ VkDescriptorSetLayout& Vk_TextureManager::GetDescriptorSetLayout() {
 
 Vk_Texture2D* Vk_TextureManager::GetActiveTexture2D() {
     return reinterpret_cast<Vk_Texture2D*>(m_active_texture);
+}
+
+std::unique_ptr<Texture2D> Vk_TextureManager::CreateTexture2D() {
+    return std::make_unique<Vk_Texture2D>();
 }
 
 void Vk_TextureManager::UseTexture2D(Texture2D* texture) {

@@ -92,6 +92,8 @@ VkDescriptorSetLayout& Vk_Shader::GetUBODescriptorSetLayout() {
 void Vk_Shader::SetDescriptor(json&& descriptor) {
     m_descriptor = std::move(descriptor);
 
+    String descriptor_name = m_descriptor["name"];
+
     std::vector<UniformBufferObject::Item> attributes;
     for (auto& attribute : m_descriptor["uniform_buffer"]["attributes"]) {
         String name = attribute["name"];
@@ -107,6 +109,25 @@ void Vk_Shader::SetDescriptor(json&& descriptor) {
         attributes.push_back({name, GetUBODataTypeFromString(type)});
     }
     m_ubo_dynamic.SetAttributes(attributes);
+
+    std::vector<VertexLayout::Component> vertex_inputs;
+    for (auto& component : m_descriptor["vertex_layout"]["vertex_input"]) {
+        if (component == "position") {
+            vertex_inputs.push_back(VertexLayout::Component::POSITION);
+        } else if (component == "color") {
+            vertex_inputs.push_back(VertexLayout::Component::COLOR);
+        } else if (component == "normal") {
+            vertex_inputs.push_back(VertexLayout::Component::NORMAL);
+        } else if (component == "uv") {
+            vertex_inputs.push_back(VertexLayout::Component::UV);
+        } else {
+            LogFatal(sTag,
+                     "Error invalid VertexLayout Component '{}', please check the vertex_layout "
+                     "in the '{}.json' shader descriptor"_format(component, descriptor_name));
+            return;
+        }
+    }
+    m_vertex_layout = std::move(vertex_inputs);
 
     if (!CreateUniformBuffers()) {
         LogError(sTag, "Could not create the UBO buffer");
@@ -259,6 +280,10 @@ UniformBufferObject& Vk_Shader::GetUBO() {
 
 UniformBufferObject& Vk_Shader::GetUBODynamic() {
     return m_ubo_dynamic;
+}
+
+const Vk_VertexLayout& Vk_Shader::GetVertexLayout() const {
+    return m_vertex_layout;
 }
 
 bool Vk_Shader::CreateUniformBuffers() {

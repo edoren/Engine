@@ -1,10 +1,89 @@
 {
-    "$schema": "http://json-schema.org/draft-04/schema",
+    "$schema": "https://json-schema.org/draft/2019-09/schema",
     "type": "object",
     "additionalProperties": false,
     "description": "Engine scenes description",
     "definitions": {},
-    "required": [],
+    "required": [
+        "name",
+        "data"
+    ],
     "properties": {
+        "$schema": {
+            "type": "string",
+            "description": "Used schema for the file"
+        },
+        "name": {
+            "type": "string",
+            "description": "The scene name"
+        },
+        "data": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "The scene data",
+            "required": [
+                "objects"
+            ],
+            "properties": {
+                "objects": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "object",
+                        "description": "Objects contained in the scene",
+                        "properties": {
+                            "model": {
+                                "type": "string",
+                                "description": "Model loaded for this object"
+                            },
+                            "position": {
+                                "type": "array",
+                                "description": "Position of the object",
+                                "minItems": 3,
+                                "additionalItems": false,
+                                "items": [
+                                    {
+                                        "type": "number",
+                                        "description": "Position X value"
+                                    },
+                                    {
+                                        "type": "number",
+                                        "description": "Position Y value"
+                                    },
+                                    {
+                                        "type": "number",
+                                        "description": "Position Z value"
+                                    }
+                                ]
+                            },
+                            "rotation": {
+                                "type": "array",
+                                "description": "Rotation of the object",
+                                "minItems": 3,
+                                "additionalItems": false,
+                                "items": [
+                                    {
+                                        "type": "number",
+                                        "description": "Rotation X value"
+                                    },
+                                    {
+                                        "type": "number",
+                                        "description": "Rotation Y value"
+                                    },
+                                    {
+                                        "type": "number",
+                                        "description": "Rotation Z value"
+                                    }
+                                ]
+                            },
+                            "scale": {
+                                "type": "number",
+                                "description": "Scale of the object"
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
