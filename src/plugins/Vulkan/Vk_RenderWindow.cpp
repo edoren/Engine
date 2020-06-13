@@ -158,17 +158,17 @@ void Vk_RenderWindow::SwapBuffers() {
         return;
     }
 
-    static size_t resource_index = 0;
+    static size_t sResourceIndex = 0;
 
     VkResult result = VK_SUCCESS;
 
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.GetVulkanDevice();
 
-    Vk_RenderResource& current_rendering_resource = m_render_resources[resource_index];
+    Vk_RenderResource& current_rendering_resource = m_render_resources[sResourceIndex];
     uint32_t image_index;
 
-    resource_index = (resource_index + 1) % m_swapchain.GetImages().size();
+    sResourceIndex = (sResourceIndex + 1) % m_swapchain.GetImages().size();
 
     result = vkWaitForFences(device, 1, &current_rendering_resource.fence, VK_FALSE, 1000000000);
     if (result == VK_TIMEOUT) {

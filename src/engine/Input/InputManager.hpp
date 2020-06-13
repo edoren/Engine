@@ -32,8 +32,8 @@ public:
     Button& GetPointerButton(int64 pointer);
 
     Mouse& GetMouse() {
-        static std::unique_ptr<Mouse> instance = std::make_unique<Mouse>(m_pointers[0]);
-        return *instance;
+        static std::unique_ptr<Mouse> sInstance = std::make_unique<Mouse>(m_pointers[0]);
+        return *sInstance;
     }
 
     inline bool exit_requested() const {
