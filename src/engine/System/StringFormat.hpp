@@ -33,3 +33,20 @@ inline UdlStringFormatProxy<wchar> operator"" _format(const wchar* str, std::siz
 }
 
 }  // namespace engine
+
+FMT_BEGIN_NAMESPACE
+
+template <typename T>
+struct formatter<std::vector<T>> {
+    template <typename ParseContext>
+    constexpr auto parse(ParseContext& ctx) {
+        return ctx.begin();
+    }
+
+    template <typename FormatContext = format_context>
+    auto format(const std::vector<T>& v, FormatContext& ctx) {
+        return fmt::format_to(ctx.out(), "[{}]", fmt::join(v, ", "));
+    }
+};
+
+FMT_END_NAMESPACE
