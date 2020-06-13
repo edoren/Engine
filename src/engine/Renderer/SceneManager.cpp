@@ -34,7 +34,11 @@ SceneManager::~SceneManager() {}
 
 void SceneManager::Initialize() {}
 
-void SceneManager::Shutdown() {}
+void SceneManager::Shutdown() {
+    m_scenes_name_map.clear();
+    m_scenes_index_map.clear();
+    m_scenes.clear();
+}
 
 void SceneManager::ChangeActiveScene(const String& scene_name_id) {
     FileSystem& fs = FileSystem::GetInstance();
@@ -69,6 +73,8 @@ void SceneManager::ChangeActiveScene(const String& scene_name_id) {
         }
         m_scenes_index_map[scene_index] = scene;
     }
+
+    LogInfo(sTag, "Scene '{}' successfully loaded"_format(filename));
 
     m_active_scene = scene;
 }

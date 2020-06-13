@@ -51,7 +51,6 @@ Main::Main(int argc, char* argv[])
     m_file_system = std::make_unique<FileSystem>();
     m_shared_lib_manager = std::make_unique<SharedLibManager>();
     m_input_manager = std::make_unique<InputManager>();
-    m_model_manager = std::make_unique<ModelManager>();
     m_scene_manager = std::make_unique<SceneManager>();
     m_async_task_runner = std::make_unique<AsyncTaskRunner>();
 }
@@ -60,7 +59,6 @@ Main::~Main() {
     Shutdown();
     m_async_task_runner.reset();
     m_scene_manager.reset();
-    m_model_manager.reset();
     m_input_manager.reset();
     m_shared_lib_manager.reset();
     m_file_system.reset();
@@ -149,10 +147,10 @@ void Main::Shutdown() {
         m_app = nullptr;
 
         // 2. Shutdown the renderer subsystems
+        SceneManager::GetInstance().Shutdown();
+        ModelManager::GetInstance().Shutdown();
         TextureManager::GetInstance().Shutdown();
         ShaderManager::GetInstance().Shutdown();
-        ModelManager::GetInstance().Shutdown();
-        SceneManager::GetInstance().Shutdown();
 
         // 3. Shutdown the active Renderer
         // 4. Destroy the render window of the the active renderer
@@ -261,14 +259,6 @@ Renderer& Main::GetActiveRenderer() {
 
 Renderer* Main::GetActiveRendererPtr() {
     return m_active_renderer;
-}
-
-RendererFactory& Main::GetActiveRendererFactory() {
-    return GetActiveRenderer().GetRendererFactory();
-}
-
-std::unique_ptr<RendererFactory>& Main::GetActiveRendererFactoryPtr() {
-    return GetActiveRenderer().GetRendererFactoryPtr();
 }
 
 void Main::ExecuteAsync(AsyncTaskRunner::Task&& task) {

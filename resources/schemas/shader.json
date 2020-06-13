@@ -1,5 +1,5 @@
 {
-    "$schema": "http://json-schema.org/draft-04/schema",
+    "$schema": "https://json-schema.org/draft/2019-09/schema",
     "type": "object",
     "additionalProperties": false,
     "description": "Engine shaders description",
@@ -20,17 +20,23 @@
     "required": [
         "name",
         "modules",
+        "vertex_layout",
         "uniform_buffer",
         "uniform_buffer_dynamic",
         "renderer"
     ],
     "properties": {
+        "$schema": {
+            "type": "string",
+            "description": "Used schema for the file"
+        },
         "name": {
             "type": "string",
             "description": "The shader name"
         },
         "modules": {
             "type": "array",
+            "description": "Types of shaders implemented",
             "minItems": 1,
             "uniqueItems": true,
             "items": {
@@ -45,39 +51,40 @@
                 ]
             }
         },
-        "vertex_input": {
-            "type": "array",
-            "description": "The vertex input description",
-            "items": {
-                "type": "object",
-                "additionalProperties": false,
-                "required": [
-                    "type",
-                    "attribute"
-                ],
-                "properties": {
-                    "type": {
-                        "type": "string",
-                        "enum": [
-                            "int",
-                            "uint",
-                            "float",
-                            "double"
-                        ]
-                    },
-                    "count": {
-                        "type": "integer",
-                        "default": 1,
-                        "minimum": 1,
-                        "maximum": 4
-                    },
-                    "attribute": {
+        "vertex_layout": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "The vertex layout description",
+            "required": [
+                "vertex_input"
+            ],
+            "properties": {
+                "vertex_input": {
+                    "type": "array",
+                    "description": "The vertex input description",
+                    "minItems": 1,
+                    "uniqueItems": true,
+                    "items": {
                         "type": "string",
                         "enum": [
                             "position",
                             "color",
                             "normal",
                             "uv"
+                        ]
+                    }
+                },
+                "instance_input": {
+                    "type": "array",
+                    "description": "The instance input description",
+                    "minItems": 1,
+                    "uniqueItems": true,
+                    "items": {
+                        "type": "string",
+                        "enum": [
+                            "position",
+                            "scale",
+                            "rotation"
                         ]
                     }
                 }

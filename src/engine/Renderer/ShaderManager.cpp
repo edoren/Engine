@@ -34,16 +34,12 @@ ShaderManager* ShaderManager::GetInstancePtr() {
 
 ShaderManager::ShaderManager() : m_active_shader(nullptr), m_shaders() {}
 
-ShaderManager::~ShaderManager() {
-    Shutdown();
-}
+ShaderManager::~ShaderManager() {}
 
 void ShaderManager::Initialize() {}
 
 void ShaderManager::Shutdown() {
-    if (m_shaders.size() > 0) {
-        LogDebug(sTag, "Shaders not deleted");
-    }
+    m_shaders.clear();
 }
 
 Shader* ShaderManager::LoadFromFile(const String& basename) {
@@ -52,7 +48,7 @@ Shader* ShaderManager::LoadFromFile(const String& basename) {
         return new_shader;
     }
 
-    new_shader = CreateShader();
+    std::unique_ptr<Shader> shader = CreateShader();
 
     FileSystem& fs = FileSystem::GetInstance();
 
@@ -88,14 +84,13 @@ Shader* ShaderManager::LoadFromFile(const String& basename) {
         if (filename_exist) {
             std::vector<byte> filename_data;
             fs.LoadFileData(filename, &filename_data);
-            if (!new_shader->LoadFromMemory(filename_data.data(), filename_data.size(), shader_type)) {
+            if (!shader->LoadFromMemory(filename_data.data(), filename_data.size(), shader_type)) {
                 LogError(sTag, "Could not load shader: {}"_format(basename));
                 ok = false;
             }
         }
 
         if (!ok) {
-            DeleteShader(new_shader);
             return nullptr;
         }
     }
@@ -106,15 +101,15 @@ Shader* ShaderManager::LoadFromFile(const String& basename) {
     bool is_valid_descriptor = json::accept(json_data.begin(), json_data.end());
     if (is_valid_descriptor) {
         json j = json::parse(json_data.begin(), json_data.end());
-        new_shader->SetDescriptor(std::move(j));
+        shader->SetDescriptor(std::move(j));
     } else {
         LogError(sTag, "Could not load shader descriptor: {}"_format(basename));
-        DeleteShader(new_shader);
         return nullptr;
     }
 
-    if (new_shader != nullptr) {
-        m_shaders[basename] = new_shader;
+    new_shader = shader.get();
+    if (shader != nullptr) {
+        m_shaders[basename] = std::move(shader);
     }
 
     if (m_active_shader == nullptr) {
@@ -138,7 +133,7 @@ Shader* ShaderManager::LoadFromMemory(const String& name, std::map<ShaderType, S
         return nullptr;
     }
 
-    Shader* new_shader = CreateShader();
+    std::unique_ptr<Shader> new_shader = CreateShader();
 
     for (auto& shader_data_pair : shader_data) {
         bool ok = true;
@@ -154,18 +149,17 @@ Shader* ShaderManager::LoadFromMemory(const String& name, std::map<ShaderType, S
         }
 
         if (!ok) {
-            DeleteShader(new_shader);
             return nullptr;
         }
     }
 
-    m_shaders[name] = new_shader;
-    return new_shader;
+    m_shaders[name] = std::move(new_shader);
+    return m_shaders[name].get();
 }
 
 Shader* ShaderManager::GetShader(const String& name) {
     auto it = m_shaders.find(name);
-    return (it != m_shaders.end()) ? it->second : nullptr;
+    return (it != m_shaders.end()) ? it->second.get() : nullptr;
 }
 
 void ShaderManager::SetActiveShader(const String& name) {

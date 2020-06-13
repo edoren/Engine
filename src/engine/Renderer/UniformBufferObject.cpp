@@ -111,7 +111,7 @@ void UniformBufferObject::SetBufferSize(size_t num_ubo_instances, size_t min_ubo
     // Get the next power of 2
     size_t i;
     size_t number = m_dynamic_alignment;
-    for(i = 0; number > 1; i++) {
+    for (i = 0; number > 1; i++) {
         number = number >> 1;
     }
     m_dynamic_alignment = 1 << (i + 1);

@@ -17,11 +17,11 @@ class Vk_Texture2D : public Texture2D {
 public:
     Vk_Texture2D();
 
-    virtual ~Vk_Texture2D();
+    ~Vk_Texture2D() override;
 
-    virtual bool LoadFromImage(const Image& img);
+    bool LoadFromImage(const Image& img) override;
 
-    virtual void Use();
+    void Use() override;
 
     VkDescriptorSet& GetDescriptorSet();
 

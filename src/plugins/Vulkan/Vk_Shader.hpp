@@ -7,6 +7,7 @@
 #include "Vk_Buffer.hpp"
 #include "Vk_Config.hpp"
 #include "Vk_Dependencies.hpp"
+#include "Vk_VertexLayout.hpp"
 
 namespace engine {
 
@@ -22,6 +23,8 @@ public:
 
     UniformBufferObject& GetUBO();
     UniformBufferObject& GetUBODynamic();
+
+    const Vk_VertexLayout& GetVertexLayout() const;
 
     VkShaderModule& GetModule(ShaderType type);
 
@@ -45,6 +48,8 @@ private:
 
     UniformBufferObject m_ubo;
     UniformBufferObject m_ubo_dynamic;
+
+    Vk_VertexLayout m_vertex_layout;
 
     std::array<VkShaderModule, sShaderTypeCount> m_modules;
 

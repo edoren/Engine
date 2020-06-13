@@ -1,7 +1,6 @@
 #include "GL_Renderer.hpp"
 #include "GL_Dependencies.hpp"
 #include "GL_RenderWindow.hpp"
-#include "GL_RendererFactory.hpp"
 #include "GL_ShaderManager.hpp"
 #include "GL_TextureManager.hpp"
 
@@ -23,7 +22,6 @@ bool GL_Renderer::Initialize() {
     bool ok = Renderer::Initialize();
     if (ok) {
         m_render_window = std::make_unique<GL_RenderWindow>();
-        m_renderer_factory = std::make_unique<GL_RendererFactory>();
         m_shader_manager = std::make_unique<GL_ShaderManager>();
         m_texture_manager = std::make_unique<GL_TextureManager>();
     }
@@ -33,7 +31,6 @@ bool GL_Renderer::Initialize() {
 void GL_Renderer::Shutdown() {
     m_texture_manager.reset();
     m_shader_manager.reset();
-    m_renderer_factory.reset();
     m_render_window.reset();
     Renderer::Shutdown();
 }

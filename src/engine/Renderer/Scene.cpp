@@ -1,7 +1,9 @@
 #include <Renderer/Scene.hpp>
 
 #include <Renderer/ModelManager.hpp>
+#include <Renderer/RenderStates.hpp>
 #include <Renderer/RenderWindow.hpp>
+#include <System/FileSystem.hpp>
 #include <System/JSON.hpp>
 #include <System/LogManager.hpp>
 
@@ -14,7 +16,9 @@ const String sTag("Scene");
 
 Scene::Scene(const json& data) : m_data(data) {}
 
-Scene::~Scene() {}
+Scene::~Scene() {
+    Unload();
+}
 
 bool Scene::Load() {
     if (!m_data.is_object()) {
@@ -28,6 +32,8 @@ bool Scene::Load() {
     } else {
         LogWarning(sTag, "Scene does not contain a name");
     }
+
+    auto& file_system = FileSystem::GetInstance();
 
     const json& json_data = m_data["data"];
     if (json_data.is_object()) {
@@ -49,8 +55,18 @@ bool Scene::Load() {
                 model_matrix.Translate({float(position_json[0]), float(position_json[1]), float(position_json[2])});
             }
 
-            Model* model = ModelManager::GetInstance().LoadFromFile(model_json);
-            m_models.emplace_back(std::make_pair(model, model_matrix));
+            String normalized_path = file_system.NormalizePath(model_json);
+
+            Model* model = ModelManager::GetInstance().LoadFromFile(normalized_path);
+            auto& transforms = m_models[model];
+            transforms.emplace_back(model_matrix);
+
+            auto found_it = m_num_model_instance.find(normalized_path);
+            if (found_it == m_num_model_instance.end()) {
+                m_num_model_instance.emplace(normalized_path, 1);
+            } else {
+                found_it->second += 1;
+            }
         }
     } else {
         LogError(sTag, "Scene does not contain data");
@@ -59,14 +75,24 @@ bool Scene::Load() {
     return true;
 }
 
+bool Scene::Unload() {
+    for (auto& model_pair : m_models) {
+        Model* model = model_pair.first;
+        std::for_each(model_pair.second.cbegin(), model_pair.second.cend(),
+                      [&model](auto&) { ModelManager::GetInstance().Unload(model); });
+    }
+    return true;
+}
+
 void Scene::Draw(RenderWindow& target) {
     for (auto& model_pair : m_models) {
         Model* model = model_pair.first;
 
         RenderStates states;
-        states.transform = model_pair.second;
-
-        model->Draw(target, states);
+        for (auto& transform : model_pair.second) {
+            states.transform = transform;
+            model->Draw(target, states);
+        }
     }
 }
 

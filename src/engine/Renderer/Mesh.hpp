@@ -2,7 +2,7 @@
 
 #include <Util/Prerequisites.hpp>
 
-#include <Renderer/Drawable.hpp>
+#include <Renderer/RenderWindow.hpp>
 #include <Renderer/TextureType.hpp>
 #include <Renderer/Transform.hpp>
 #include <Renderer/Vertex.hpp>

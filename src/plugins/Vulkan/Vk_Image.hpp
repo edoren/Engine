@@ -14,7 +14,7 @@ public:
 
     Vk_Image(Vk_Image&& other);
 
-    virtual ~Vk_Image();
+    ~Vk_Image();
 
     bool CreateImage(const math::uvec2& size, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage);
 

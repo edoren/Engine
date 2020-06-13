@@ -28,10 +28,6 @@ Vk_ShaderManager::Vk_ShaderManager() : ShaderManager() {
 }
 
 Vk_ShaderManager::~Vk_ShaderManager() {
-    for (auto shader_pair : m_shaders) {
-        DeleteShader(shader_pair.second);
-    }
-    m_shaders.clear();
     sDerivedInstance = nullptr;
 }
 
@@ -54,12 +50,8 @@ Vk_Shader* Vk_ShaderManager::GetActiveShader() {
     return reinterpret_cast<Vk_Shader*>(m_active_shader);
 }
 
-Shader* Vk_ShaderManager::CreateShader() {
-    return new Vk_Shader();
-}
-
-void Vk_ShaderManager::DeleteShader(Shader* shader) {
-    delete shader;
+std::unique_ptr<Shader> Vk_ShaderManager::CreateShader() {
+    return std::make_unique<Vk_Shader>();
 }
 
 void Vk_ShaderManager::UseShader(Shader* shader) {

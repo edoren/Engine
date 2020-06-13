@@ -113,40 +113,40 @@ String FileSystem::CurrentWorkingDirectory() const {
     String ret;
 #if PLATFORM_IS(PLATFORM_WINDOWS)
     DWORD buffer_length = PATH_MAX_LENGTH;
-    LPWSTR buffer = nullptr;
+    std::vector<std::remove_pointer_t<LPWSTR>> buffer;
     while (true) {
-        buffer = new std::remove_pointer<LPWSTR>::type[buffer_length + 1];
-        DWORD num_characters = GetCurrentDirectoryW(buffer_length, buffer);
+        buffer.resize(buffer_length + 1);
+        DWORD num_characters = GetCurrentDirectoryW(buffer_length, buffer.data());
         if (num_characters > 0) {
             if (buffer[num_characters - 1] != L'\\') {
                 buffer[num_characters++] = L'\\';
                 buffer[num_characters] = L'\0';
             }
-            ret = String::FromWide(buffer, buffer + num_characters);
-            delete[] buffer;
+            ret = String::FromWide(buffer.data(), buffer.data() + num_characters);
+            buffer.clear();
             break;
         }
-        delete[] buffer;
+        buffer.clear();
         buffer_length *= 2;
     }
 #elif PLATFORM_IS(PLATFORM_LINUX | PLATFORM_MACOS | PLATFORM_IOS | PLATFORM_ANDROID)
     size_t buffer_length = PATH_MAX_LENGTH;
-    char8* buffer = nullptr;
+    std::vector<char8> buffer;
     while (true) {
-        buffer = new char8[buffer_length + 1];
+        buffer.resize(buffer_length + 1);
         char8* result = nullptr;
-        result = getcwd(buffer, buffer_length);
+        result = getcwd(buffer.data(), buffer_length);
         if (result != nullptr) {
             size_t num_characters = strlen(result);
             if (num_characters > 0 && buffer[num_characters - 1] != '/') {
                 buffer[num_characters++] = '/';
                 buffer[num_characters] = '\0';
             }
-            ret = String::FromUtf8(buffer, buffer + num_characters);
-            delete[] buffer;
+            ret = String::FromUtf8(buffer.data(), buffer.data() + num_characters);
+            buffer.clear();
             break;
         }
-        delete[] buffer;
+        buffer.clear();
         buffer_length *= 2;
     }
 #endif

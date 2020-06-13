@@ -2,6 +2,7 @@
 
 #include <Graphics/3D/Camera.hpp>
 #include <Math/Utilities.hpp>
+#include <Renderer/RenderStates.hpp>
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
 

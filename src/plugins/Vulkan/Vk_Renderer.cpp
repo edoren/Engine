@@ -1,5 +1,5 @@
 #include "Vk_Renderer.hpp"
-#include "Vk_RendererFactory.hpp"
+#include "Vk_ModelManager.hpp"
 #include "Vk_ShaderManager.hpp"
 #include "Vk_TextureManager.hpp"
 
@@ -23,9 +23,9 @@ bool Vk_Renderer::Initialize() {
         m_context = std::make_unique<Vk_Context>();
         ok = ok && m_context->Initialize();
         m_render_window = std::make_unique<Vk_RenderWindow>();
-        m_renderer_factory = std::make_unique<Vk_RendererFactory>();
         m_shader_manager = std::make_unique<Vk_ShaderManager>();
         m_texture_manager = std::make_unique<Vk_TextureManager>();
+        m_model_manager = std::make_unique<Vk_ModelManager>();
 
         // TODO: Remove this
         m_shader_manager->LoadFromFile("model");
@@ -34,9 +34,9 @@ bool Vk_Renderer::Initialize() {
 }
 
 void Vk_Renderer::Shutdown() {
+    m_model_manager.reset();
     m_texture_manager.reset();
     m_shader_manager.reset();
-    m_renderer_factory.reset();
     m_render_window.reset();
     m_context.reset();
     Renderer::Shutdown();

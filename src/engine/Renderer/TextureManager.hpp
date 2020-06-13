@@ -80,10 +80,11 @@ public:
     static TextureManager* GetInstancePtr();
 
 protected:
+    virtual std::unique_ptr<Texture2D> CreateTexture2D() = 0;
     virtual void UseTexture2D(Texture2D* texture) = 0;
 
     Texture2D* m_active_texture;
-    std::map<String, Texture2D*> m_textures;
+    std::map<String, std::unique_ptr<Texture2D>> m_textures;
 };
 
 }  // namespace engine

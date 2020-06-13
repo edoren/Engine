@@ -29,7 +29,7 @@ public:
     void Clear(const Color& color) override;  // Render Target
 
 protected:
-    virtual void OnWindowResized(const math::ivec2& size) override;
+    void OnWindowResized(const math::ivec2& size) override;
 
 private:
     SDL_GLContext m_context;
