@@ -14,15 +14,15 @@ static_assert(sizeof(UUID) == 16, "UUID class size should be 16 bytes");
 UUID::UUID() {}
 
 UUID UUID::UUID4() {
-    static std::random_device rd;
-    static std::mt19937_64 rng(rd());
-    static std::uniform_int_distribution<uint64> dist;
+    static std::random_device sRd;
+    static std::mt19937_64 sRng(sRd());
+    static std::uniform_int_distribution<uint64> sDist;
 
     UUID output;
 
     uint64* uint64_uuid = reinterpret_cast<uint64*>(&output.m_uuid);
     for (int i = 0; i < 2; i++) {
-        uint64_uuid[i] = dist(rng);
+        uint64_uuid[i] = sDist(sRng);
     }
 
     output.m_uuid.clock_seq_hi_and_reserved = (output.m_uuid.clock_seq_hi_and_reserved & 0x3f) | 0x80;
