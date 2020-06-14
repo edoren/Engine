@@ -39,7 +39,7 @@ bool SharedLibrary::load() {
 
     String lib_name = LIBRARY_PREFIX + m_name + LIBRARY_EXTENSION;
 #if PLATFORM_IS(PLATFORM_WINDOWS)
-    auto wide_string = lib_name.ToWide();
+    auto wide_string = lib_name.toWide();
     m_handle = LoadLibraryW(wide_string.data());
 #elif PLATFORM_IS(PLATFORM_LINUX | PLATFORM_MACOS | PLATFORM_IOS | PLATFORM_ANDROID)
     auto utf8string = lib_name.toUtf8();

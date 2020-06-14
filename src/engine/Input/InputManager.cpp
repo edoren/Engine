@@ -61,7 +61,7 @@ Button& InputManager::getButton(int button) {
     return it != m_buttonMap.end() ? it->second : (m_buttonMap[button] = Button());
 }
 
-Button& InputManager::getPointerButton(SDL_FingerID pointer) {
+Button& InputManager::getPointerButton(int64 pointer) {
     return getButton(static_cast<int>(pointer + SDLK_POINTER1));
 }
 

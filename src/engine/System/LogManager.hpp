@@ -4,6 +4,11 @@
 
 #include <System/String.hpp>
 
+// On Windows undefine this anoying macro defined by windows.h
+#if PLATFORM_IS(PLATFORM_WINDOWS)
+    #undef ERROR
+#endif
+
 namespace engine {
 
 enum class LogPriority {
