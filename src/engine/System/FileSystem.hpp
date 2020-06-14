@@ -171,7 +171,7 @@ public:
     static FileSystem* GetInstancePtr();
 
 private:
-    std::vector<String> m_search_paths;
+    std::vector<String> m_searchPaths;
 };
 
 }  // namespace engine

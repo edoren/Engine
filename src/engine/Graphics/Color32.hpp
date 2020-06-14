@@ -39,7 +39,7 @@ public:
         struct {
             uint8 r, g, b, a;
         };
-        math::Vector4<uint8> m_data;
+        math::Vector4<uint8> data;
     };
 };
 

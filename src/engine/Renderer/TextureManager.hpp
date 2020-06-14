@@ -82,7 +82,7 @@ protected:
     virtual std::unique_ptr<Texture2D> createTexture2D() = 0;
     virtual void useTexture2D(Texture2D* texture) = 0;
 
-    Texture2D* m_active_texture;
+    Texture2D* m_activeTexture;
     std::map<String, std::unique_ptr<Texture2D>> m_textures;
 };
 

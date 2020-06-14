@@ -32,11 +32,11 @@ const math::mat4 sClipMatrix = {
 }  // namespace
 
 Vk_RenderWindow::Vk_RenderWindow()
-      : m_graphics_queue(nullptr),
-        m_present_queue(nullptr),
-        m_graphics_pipeline(VK_NULL_HANDLE),
-        m_pipeline_layout(VK_NULL_HANDLE),
-        m_render_pass(VK_NULL_HANDLE) {}
+      : m_graphicsQueue(nullptr),
+        m_presentQueue(nullptr),
+        m_graphicsPipeline(VK_NULL_HANDLE),
+        m_pipelineLayout(VK_NULL_HANDLE),
+        m_renderPass(VK_NULL_HANDLE) {}
 
 Vk_RenderWindow::~Vk_RenderWindow() {
     destroy();
@@ -55,8 +55,8 @@ bool Vk_RenderWindow::create(const String& name, const math::ivec2& size) {
 
     // We assume that the graphics queue can also present
     Vk_Context& context = Vk_Context::GetInstance();
-    m_graphics_queue = &context.getGraphicsQueue();
-    m_present_queue = m_graphics_queue;
+    m_graphicsQueue = &context.getGraphicsQueue();
+    m_presentQueue = m_graphicsQueue;
 
     // Update the base class attributes
     RenderWindow::create(name, size);
@@ -89,8 +89,8 @@ bool Vk_RenderWindow::create(const String& name, const math::ivec2& size) {
         return false;
     }
 
-    m_render_resources.resize(m_swapchain.getImages().size());
-    for (Vk_RenderResource& render_resource : m_render_resources) {
+    m_renderResources.resize(m_swapchain.getImages().size());
+    for (Vk_RenderResource& render_resource : m_renderResources) {
         if (!render_resource.create()) {
             LogError(sTag, "Could not create the RenderingResources");
             return false;
@@ -107,29 +107,29 @@ void Vk_RenderWindow::destroy() {
     if (device) {
         vkDeviceWaitIdle(device);
 
-        m_render_resources.clear();
+        m_renderResources.clear();
 
-        if (m_graphics_pipeline) {
-            vkDestroyPipeline(device, m_graphics_pipeline, nullptr);
-            m_graphics_pipeline = VK_NULL_HANDLE;
+        if (m_graphicsPipeline) {
+            vkDestroyPipeline(device, m_graphicsPipeline, nullptr);
+            m_graphicsPipeline = VK_NULL_HANDLE;
         }
 
-        if (m_pipeline_layout) {
-            vkDestroyPipelineLayout(device, m_pipeline_layout, nullptr);
-            m_pipeline_layout = VK_NULL_HANDLE;
+        if (m_pipelineLayout) {
+            vkDestroyPipelineLayout(device, m_pipelineLayout, nullptr);
+            m_pipelineLayout = VK_NULL_HANDLE;
         }
 
-        if (m_render_pass) {
-            vkDestroyRenderPass(device, m_render_pass, nullptr);
-            m_render_pass = VK_NULL_HANDLE;
+        if (m_renderPass) {
+            vkDestroyRenderPass(device, m_renderPass, nullptr);
+            m_renderPass = VK_NULL_HANDLE;
         }
 
         m_swapchain.destroy();
-        m_command_work_queue.clear();
+        m_commandWorkQueue.clear();
     }
 
-    m_present_queue = nullptr;
-    m_graphics_queue = nullptr;
+    m_presentQueue = nullptr;
+    m_graphicsQueue = nullptr;
 
     m_surface.destroy();
 
@@ -146,9 +146,9 @@ void Vk_RenderWindow::setFullScreen(bool fullscreen, bool is_fake) {
 
 void Vk_RenderWindow::setVSyncEnabled(bool /*vsync*/) {
     // if (SDL_GL_SetSwapInterval(vsync ? 1 : 0) == 0) {
-    //     m_is_vsync_enable = vsync;
+    //     m_isVsyncEnabled = vsync;
     // } else {
-    //     m_is_vsync_enable = false;
+    //     m_isVsyncEnabled = false;
     // }
 }
 
@@ -165,7 +165,7 @@ void Vk_RenderWindow::swapBuffers() {
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.getVulkanDevice();
 
-    Vk_RenderResource& current_rendering_resource = m_render_resources[sResourceIndex];
+    Vk_RenderResource& current_rendering_resource = m_renderResources[sResourceIndex];
     uint32_t image_index;
 
     sResourceIndex = (sResourceIndex + 1) % m_swapchain.getImages().size();
@@ -179,7 +179,7 @@ void Vk_RenderWindow::swapBuffers() {
     vkResetFences(device, 1, &current_rendering_resource.fence);
 
     result = vkAcquireNextImageKHR(device, m_swapchain.getHandle(), UINT64_MAX,
-                                   current_rendering_resource.image_available_semaphore, VK_NULL_HANDLE, &image_index);
+                                   current_rendering_resource.imageAvailableSemaphore, VK_NULL_HANDLE, &image_index);
     switch (result) {
         case VK_SUCCESS:
         case VK_SUBOPTIMAL_KHR:
@@ -192,25 +192,25 @@ void Vk_RenderWindow::swapBuffers() {
             return;
     }
 
-    if (!prepareFrame(current_rendering_resource.command_buffer, m_swapchain.getImages()[image_index],
+    if (!prepareFrame(current_rendering_resource.commandBuffer, m_swapchain.getImages()[image_index],
                       current_rendering_resource.framebuffer)) {
         return;
     }
 
     VkPipelineStageFlags wait_dst_stage_mask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
     VkSubmitInfo submit_info = {
-        VK_STRUCTURE_TYPE_SUBMIT_INFO,                            // sType
-        nullptr,                                                  // pNext
-        1,                                                        // waitSemaphoreCount
-        &current_rendering_resource.image_available_semaphore,    // pWaitSemaphores
-        &wait_dst_stage_mask,                                     // pWaitDstStageMask;
-        1,                                                        // commandBufferCount
-        &current_rendering_resource.command_buffer,               // pCommandBuffers
-        1,                                                        // signalSemaphoreCount
-        &current_rendering_resource.finished_rendering_semaphore  // pSignalSemaphores
+        VK_STRUCTURE_TYPE_SUBMIT_INFO,                          // sType
+        nullptr,                                                // pNext
+        1,                                                      // waitSemaphoreCount
+        &current_rendering_resource.imageAvailableSemaphore,    // pWaitSemaphores
+        &wait_dst_stage_mask,                                   // pWaitDstStageMask;
+        1,                                                      // commandBufferCount
+        &current_rendering_resource.commandBuffer,              // pCommandBuffers
+        1,                                                      // signalSemaphoreCount
+        &current_rendering_resource.finishedRenderingSemaphore  // pSignalSemaphores
     };
 
-    result = vkQueueSubmit(m_graphics_queue->getHandle(), 1, &submit_info, current_rendering_resource.fence);
+    result = vkQueueSubmit(m_graphicsQueue->getHandle(), 1, &submit_info, current_rendering_resource.fence);
 
     if (result != VK_SUCCESS) {
         LogError(sTag, "Error submitting the command buffers");
@@ -218,17 +218,17 @@ void Vk_RenderWindow::swapBuffers() {
     }
 
     VkPresentInfoKHR present_info = {
-        VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,                        // sType
-        nullptr,                                                   // pNext
-        1,                                                         // waitSemaphoreCount
-        &current_rendering_resource.finished_rendering_semaphore,  // pWaitSemaphores
-        1,                                                         // swapchainCount
-        &m_swapchain.getHandle(),                                  // pSwapchains
-        &image_index,                                              // pImageIndices
-        nullptr                                                    // pResults
+        VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,                      // sType
+        nullptr,                                                 // pNext
+        1,                                                       // waitSemaphoreCount
+        &current_rendering_resource.finishedRenderingSemaphore,  // pWaitSemaphores
+        1,                                                       // swapchainCount
+        &m_swapchain.getHandle(),                                // pSwapchains
+        &image_index,                                            // pImageIndices
+        nullptr                                                  // pResults
     };
 
-    result = vkQueuePresentKHR(m_present_queue->getHandle(), &present_info);
+    result = vkQueuePresentKHR(m_presentQueue->getHandle(), &present_info);
 
     switch (result) {
         case VK_SUCCESS:
@@ -253,7 +253,7 @@ void Vk_RenderWindow::clear(const Color& /*color*/) {  // RenderTarget
 
 void Vk_RenderWindow::addCommandExecution(CommandType&& func) {
     if (isVisible()) {
-        m_command_work_queue.push(std::move(func));
+        m_commandWorkQueue.push(std::move(func));
     }
 }
 
@@ -329,8 +329,8 @@ bool Vk_RenderWindow::checkWsiSupport() {
     PhysicalDeviceParameters& physical_device = context.getPhysicalDevice();
     QueueParameters& graphics_queue = context.getGraphicsQueue();
 
-    vkGetPhysicalDeviceSurfaceSupportKHR(physical_device.getHandle(), graphics_queue.family_index,
-                                         m_surface.getHandle(), &wsi_support);
+    vkGetPhysicalDeviceSurfaceSupportKHR(physical_device.getHandle(), graphics_queue.familyIndex, m_surface.getHandle(),
+                                         &wsi_support);
     return wsi_support == VK_TRUE;
 }
 
@@ -352,7 +352,7 @@ bool Vk_RenderWindow::createVulkanRenderPass() {
         },
         {
             VkAttachmentDescriptionFlags(),                    // flags
-            m_depth_format,                                    // format
+            m_depthFormat,                                     // format
             VK_SAMPLE_COUNT_1_BIT,                             // samples
             VK_ATTACHMENT_LOAD_OP_CLEAR,                       // loadOp
             VK_ATTACHMENT_STORE_OP_DONT_CARE,                  // storeOp
@@ -426,7 +426,7 @@ bool Vk_RenderWindow::createVulkanRenderPass() {
 
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.getVulkanDevice();
-    result = vkCreateRenderPass(device, &render_pass_create_info, nullptr, &m_render_pass);
+    result = vkCreateRenderPass(device, &render_pass_create_info, nullptr, &m_renderPass);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Could not create render pass");
         return false;
@@ -612,7 +612,7 @@ bool Vk_RenderWindow::createVulkanPipeline() {
         nullptr                                                // pPushConstantRanges
     };
 
-    result = vkCreatePipelineLayout(device, &layout_create_info, nullptr, &m_pipeline_layout);
+    result = vkCreatePipelineLayout(device, &layout_create_info, nullptr, &m_pipelineLayout);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Could not create pipeline layout");
         return false;
@@ -633,19 +633,19 @@ bool Vk_RenderWindow::createVulkanPipeline() {
         &depth_stencil_info,                                      // pDepthStencilState
         &color_blend_state_create_info,                           // pColorBlendState
         &dynamic_state_create_info,                               // pDynamicState
-        m_pipeline_layout,                                        // layout
-        m_render_pass,                                            // renderPass
+        m_pipelineLayout,                                         // layout
+        m_renderPass,                                             // renderPass
         0,                                                        // subpass
         VK_NULL_HANDLE,                                           // basePipelineHandle
         -1                                                        // basePipelineIndex
     };
 
     result =
-        vkCreateGraphicsPipelines(device, VkPipelineCache(), 1, &pipeline_create_info, nullptr, &m_graphics_pipeline);
+        vkCreateGraphicsPipelines(device, VkPipelineCache(), 1, &pipeline_create_info, nullptr, &m_graphicsPipeline);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Could not create graphics pipeline");
-        vkDestroyPipelineLayout(device, m_pipeline_layout, nullptr);
-        m_pipeline_layout = VK_NULL_HANDLE;
+        vkDestroyPipelineLayout(device, m_pipelineLayout, nullptr);
+        m_pipelineLayout = VK_NULL_HANDLE;
         return false;
     }
 
@@ -663,14 +663,14 @@ bool Vk_RenderWindow::createVulkanFrameBuffer(VkFramebuffer& framebuffer, VkImag
     }
 
     std::array<VkImageView, 2> attachments = {
-        {image_view, m_depth_image.getView()},
+        {image_view, m_depthImage.getView()},
     };
 
     VkFramebufferCreateInfo framebuffer_create_info = {
         VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO,  // sType
         nullptr,                                    // pNext
         VkFramebufferCreateFlags(),                 // flags
-        m_render_pass,                              // renderPass
+        m_renderPass,                               // renderPass
         static_cast<uint32_t>(attachments.size()),  // attachmentCount
         attachments.data(),                         // pAttachments
         static_cast<uint32_t>(m_size.x),            // width
@@ -711,7 +711,7 @@ bool Vk_RenderWindow::prepareFrame(VkCommandBuffer command_buffer, Vk_Image& ima
         1                           // layerCount
     };
 
-    if (m_present_queue->getHandle() != m_graphics_queue->getHandle()) {
+    if (m_presentQueue->getHandle() != m_graphicsQueue->getHandle()) {
         VkImageMemoryBarrier barrier_from_present_to_draw = {
             VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,  // sType
             nullptr,                                 // pNext
@@ -719,8 +719,8 @@ bool Vk_RenderWindow::prepareFrame(VkCommandBuffer command_buffer, Vk_Image& ima
             VK_ACCESS_MEMORY_READ_BIT,               // dstAccessMask
             VK_IMAGE_LAYOUT_UNDEFINED,               // oldLayout
             VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,         // newLayout
-            m_present_queue->family_index,           // srcQueueFamilyIndex
-            m_graphics_queue->family_index,          // dstQueueFamilyIndex
+            m_presentQueue->familyIndex,             // srcQueueFamilyIndex
+            m_graphicsQueue->familyIndex,            // dstQueueFamilyIndex
             image.getHandle(),                       // image
             image_subresource_range                  // subresourceRange
         };
@@ -736,7 +736,7 @@ bool Vk_RenderWindow::prepareFrame(VkCommandBuffer command_buffer, Vk_Image& ima
     VkRenderPassBeginInfo render_pass_begin_info = {
         VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,  // sType
         nullptr,                                   // pNext
-        m_render_pass,                             // renderPass
+        m_renderPass,                              // renderPass
         framebuffer,                               // framebuffer
         {
             // renderArea
@@ -782,7 +782,7 @@ bool Vk_RenderWindow::prepareFrame(VkCommandBuffer command_buffer, Vk_Image& ima
     vkCmdSetViewport(command_buffer, 0, 1, &viewport);
     vkCmdSetScissor(command_buffer, 0, 1, &scissor);
 
-    vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphics_pipeline);
+    vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphicsPipeline);
 
     Vk_Shader* shader = Vk_ShaderManager::GetInstance().getActiveShader();
 
@@ -803,16 +803,16 @@ bool Vk_RenderWindow::prepareFrame(VkCommandBuffer command_buffer, Vk_Image& ima
     ///
 
     uint32 index = 0;
-    while (m_command_work_queue.getSize() > 0) {
-        auto task = m_command_work_queue.pop();
-        task(index++, command_buffer, m_pipeline_layout);
+    while (m_commandWorkQueue.getSize() > 0) {
+        auto task = m_commandWorkQueue.pop();
+        task(index++, command_buffer, m_pipelineLayout);
     }
 
     shader->uploadUniformBuffers();
 
     vkCmdEndRenderPass(command_buffer);
 
-    if (m_graphics_queue->getHandle() != m_present_queue->getHandle()) {
+    if (m_graphicsQueue->getHandle() != m_presentQueue->getHandle()) {
         VkImageMemoryBarrier barrier_from_draw_to_present = {
             VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,  // sType
             nullptr,                                 // pNext
@@ -820,8 +820,8 @@ bool Vk_RenderWindow::prepareFrame(VkCommandBuffer command_buffer, Vk_Image& ima
             VK_ACCESS_MEMORY_READ_BIT,               // dstAccessMask
             VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,         // oldLayout
             VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,         // newLayout
-            m_graphics_queue->family_index,          // srcQueueFamilyIndex
-            m_present_queue->family_index,           // dstQueueFamilyIndex
+            m_graphicsQueue->familyIndex,            // srcQueueFamilyIndex
+            m_presentQueue->familyIndex,             // dstQueueFamilyIndex
             image.getHandle(),                       // image
             image_subresource_range                  // subresourceRange
         };
@@ -866,36 +866,36 @@ bool Vk_RenderWindow::createDepthResources() {
         return VK_FORMAT_UNDEFINED;
     };
 
-    m_depth_format =
+    m_depthFormat =
         lFindSupportedFormat({VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
                              VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 
-    if (m_depth_format == VK_FORMAT_UNDEFINED) {
+    if (m_depthFormat == VK_FORMAT_UNDEFINED) {
         LogError(sTag, "Supported Depth format not found");
         return false;
     }
 
-    m_depth_image.destroy();
+    m_depthImage.destroy();
 
-    if (!m_depth_image.createImage(math::uvec2(m_size), m_depth_format, VK_IMAGE_TILING_OPTIMAL,
-                                   VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT)) {
+    if (!m_depthImage.createImage(math::uvec2(m_size), m_depthFormat, VK_IMAGE_TILING_OPTIMAL,
+                                  VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT)) {
         LogError(sTag, "Could not create depth image");
         return false;
     }
 
-    if (!m_depth_image.allocateMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)) {
+    if (!m_depthImage.allocateMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)) {
         LogError(sTag, "Could not allocate memory for depth image");
         return false;
     }
 
-    if (!m_depth_image.createImageView(m_depth_format, VK_IMAGE_ASPECT_DEPTH_BIT)) {
+    if (!m_depthImage.createImageView(m_depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT)) {
         LogError(sTag, "Could not create depth image view");
         return false;
     }
 
     submitGraphicsCommand([this](VkCommandBuffer& command_buffer) {
         bool has_stencil_component =
-            (m_depth_format == VK_FORMAT_D32_SFLOAT_S8_UINT || m_depth_format == VK_FORMAT_D24_UNORM_S8_UINT);
+            (m_depthFormat == VK_FORMAT_D32_SFLOAT_S8_UINT || m_depthFormat == VK_FORMAT_D24_UNORM_S8_UINT);
 
         VkImageAspectFlags aspect_mask = VK_IMAGE_ASPECT_DEPTH_BIT;
         if (has_stencil_component) {
@@ -912,7 +912,7 @@ bool Vk_RenderWindow::createDepthResources() {
             VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,  // newLayout
             VK_QUEUE_FAMILY_IGNORED,                           // srcQueueFamilyIndex
             VK_QUEUE_FAMILY_IGNORED,                           // dstQueueFamilyIndex
-            m_depth_image.getHandle(),                         // image
+            m_depthImage.getHandle(),                          // image
             {
                 aspect_mask,  // aspectMask
                 0,            // baseMipLevel
@@ -937,17 +937,17 @@ void Vk_RenderWindow::onWindowResized(const math::ivec2& size) {
         createDepthResources();
         // Recreate the Vulkan Swapchain
         m_swapchain.create(m_surface, size.x, size.y);
-        m_command_work_queue.clear();
+        m_commandWorkQueue.clear();
     }
 }
 
 void Vk_RenderWindow::onAppWillEnterBackground() {
     RenderWindow::onAppWillEnterBackground();
-    vkQueueWaitIdle(m_graphics_queue->getHandle());
-    m_render_resources.clear();
+    vkQueueWaitIdle(m_graphicsQueue->getHandle());
+    m_renderResources.clear();
     m_swapchain.destroy();
     m_surface.destroy();
-    m_command_work_queue.clear();
+    m_commandWorkQueue.clear();
 }
 
 void Vk_RenderWindow::onAppDidEnterBackground() {
@@ -989,8 +989,8 @@ void Vk_RenderWindow::onAppDidEnterForeground() {
             return;
         }
 
-        m_render_resources.resize(m_swapchain.getImages().size());
-        for (Vk_RenderResource& render_resource : m_render_resources) {
+        m_renderResources.resize(m_swapchain.getImages().size());
+        for (Vk_RenderResource& render_resource : m_renderResources) {
             if (!render_resource.create()) {
                 LogFatal(sTag, "Could not create the RenderingResources");
                 return;

@@ -27,13 +27,13 @@ public:
     static ModelManager& GetInstance();
     static ModelManager* GetInstancePtr();
 
-    virtual std::unique_ptr<Mesh> createMesh() = 0;
+    virtual std::unique_ptr<Mesh> createMesh() = 0;  // TODO: protected
 
 protected:
     virtual std::unique_ptr<Model> createModel() = 0;
 
-    std::map<String, Model*> m_name_map;
-    std::map<Model*, uint32> m_model_ref_count;
+    std::map<String, Model*> m_nameMap;
+    std::map<Model*, uint32> m_modelRefCount;
     std::vector<std::unique_ptr<Model>> m_models;
 };
 

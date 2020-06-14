@@ -18,10 +18,10 @@ const String sTag("Renderer");
 }  // namespace
 
 Renderer::Renderer()
-      : m_render_window(nullptr),
-        m_shader_manager(nullptr),
-        m_texture_manager(nullptr),
-        m_model_manager(nullptr) {}
+      : m_renderWindow(nullptr),
+        m_shaderManager(nullptr),
+        m_textureManager(nullptr),
+        m_modelManager(nullptr) {}
 
 Renderer::~Renderer() {}
 
@@ -36,23 +36,23 @@ void Renderer::shutdown() {
 }
 
 void Renderer::advanceFrame() {
-    if (!m_render_window) {
+    if (!m_renderWindow) {
         return;
     }
-    if (!m_render_window->isVisible()) {
+    if (!m_renderWindow->isVisible()) {
         SDL_Delay(10);
     } else {
-        m_render_window->swapBuffers();
+        m_renderWindow->swapBuffers();
     }
 }
 
 RenderWindow& Renderer::getRenderWindow() {
-    assert(m_render_window);
-    return *m_render_window;
+    assert(m_renderWindow);
+    return *m_renderWindow;
 }
 
 std::unique_ptr<RenderWindow>& Renderer::getRenderWindowPtr() {
-    return m_render_window;
+    return m_renderWindow;
 }
 
 }  // namespace engine

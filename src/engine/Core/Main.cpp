@@ -35,38 +35,37 @@ Main* Main::GetInstancePtr() {
 }
 
 Main::Main(int argc, char* argv[])
-      : m_active_renderer(nullptr),
-
+      : m_activeRenderer(nullptr),
         m_app(nullptr),
-        m_log_manager(nullptr),
-        m_file_system(nullptr),
-        m_shared_lib_manager(nullptr),
-        m_input_manager(nullptr),
-        m_scene_manager(nullptr) {
+        m_logManager(nullptr),
+        m_fileSystem(nullptr),
+        m_sharedLibManager(nullptr),
+        m_inputManager(nullptr),
+        m_sceneManager(nullptr) {
     ENGINE_UNUSED(argc);
     ENGINE_UNUSED(argv);
-    m_log_manager = std::make_unique<LogManager>();
-    m_file_system = std::make_unique<FileSystem>();
-    m_shared_lib_manager = std::make_unique<SharedLibManager>();
-    m_input_manager = std::make_unique<InputManager>();
-    m_scene_manager = std::make_unique<SceneManager>();
-    m_async_task_runner = std::make_unique<AsyncTaskRunner>();
+    m_logManager = std::make_unique<LogManager>();
+    m_fileSystem = std::make_unique<FileSystem>();
+    m_sharedLibManager = std::make_unique<SharedLibManager>();
+    m_inputManager = std::make_unique<InputManager>();
+    m_sceneManager = std::make_unique<SceneManager>();
+    m_asyncTaskRunner = std::make_unique<AsyncTaskRunner>();
 }
 
 Main::~Main() {
     shutdown();
-    m_async_task_runner.reset();
-    m_scene_manager.reset();
-    m_input_manager.reset();
-    m_shared_lib_manager.reset();
-    m_file_system.reset();
-    m_log_manager.reset();
+    m_asyncTaskRunner.reset();
+    m_sceneManager.reset();
+    m_inputManager.reset();
+    m_sharedLibManager.reset();
+    m_fileSystem.reset();
+    m_logManager.reset();
 }
 
 void Main::initialize(App* app) {
     setActiveRenderer();  // TODO: Change this to a configurable way
 
-    if (!m_active_renderer) {
+    if (!m_activeRenderer) {
         LogFatal(sTag, "Could not find an avaliable Renderer");
     }
 
@@ -86,12 +85,12 @@ void Main::initialize(App* app) {
         initializePlugins();
 
         // 4. Initialize the active Renderer
-        if (!m_active_renderer->initialize()) {
+        if (!m_activeRenderer->initialize()) {
             LogFatal(sTag, "Could not initialize the Renderer");
         }
 
         // 5. Create the render window using the active renderer
-        RenderWindow& window = m_active_renderer->getRenderWindow();
+        RenderWindow& window = m_activeRenderer->getRenderWindow();
         if (!window.create(app->getName(), app->getWindowSize())) {
             LogFatal(sTag, "Could not create the RenderWindow");
         }
@@ -114,12 +113,12 @@ void Main::run() {
         return;
     }
 
-    RenderWindow& window = m_active_renderer->getRenderWindow();
+    RenderWindow& window = m_activeRenderer->getRenderWindow();
 
     Stopwatch timer;
     timer.start();
-    while (!m_input_manager->exitRequested()) {
-        m_app->m_delta_time = timer.getElapsedTime();
+    while (!m_inputManager->exitRequested()) {
+        m_app->m_deltaTime = timer.getElapsedTime();
         timer.restart();
 
         window.clear(Color::sBlack);
@@ -131,8 +130,8 @@ void Main::run() {
             active_scene->draw(window);
         }
 
-        m_input_manager->advanceFrame();
-        m_active_renderer->advanceFrame();
+        m_inputManager->advanceFrame();
+        m_activeRenderer->advanceFrame();
     }
 }
 
@@ -152,8 +151,8 @@ void Main::shutdown() {
 
         // 3. Shutdown the active Renderer
         // 4. Destroy the render window of the the active renderer
-        m_active_renderer->shutdown();
-        m_active_renderer = nullptr;
+        m_activeRenderer->shutdown();
+        m_activeRenderer = nullptr;
         m_renderers.clear();
 
         // 5. Shutdown plugins
@@ -176,12 +175,12 @@ void Main::setActiveScene(const String& scene_name) {
 
 void Main::loadPlugin(const String& name) {
     // Load plugin library
-    SharedLibrary* lib = m_shared_lib_manager->load(name);
+    SharedLibrary* lib = m_sharedLibManager->load(name);
 
     // Check for existence
-    auto it = std::find(m_plugin_libs.begin(), m_plugin_libs.end(), lib);
-    if (it == m_plugin_libs.end()) {
-        m_plugin_libs.push_back(lib);
+    auto it = std::find(m_pluginLibs.begin(), m_pluginLibs.end(), lib);
+    if (it == m_pluginLibs.end()) {
+        m_pluginLibs.push_back(lib);
 
         // Call startup function
         PFN_START_PLUGIN pFunc = reinterpret_cast<PFN_START_PLUGIN>(lib->getSymbol("StartPlugin"));
@@ -196,7 +195,7 @@ void Main::loadPlugin(const String& name) {
 }
 
 void Main::unloadPlugin(const String& pluginName) {
-    for (auto it = m_plugin_libs.begin(); it != m_plugin_libs.end(); it++) {
+    for (auto it = m_pluginLibs.begin(); it != m_pluginLibs.end(); it++) {
         SharedLibrary* shared_lib = *it;
         if (shared_lib->getName() == pluginName) {
             // Call plugin shutdown
@@ -212,7 +211,7 @@ void Main::unloadPlugin(const String& pluginName) {
 
             // Unload library (destroyed by SharedLibManager)
             SharedLibManager::GetInstance().unload(shared_lib);
-            it = m_plugin_libs.erase(it);
+            it = m_pluginLibs.erase(it);
             return;
         }
     }
@@ -258,11 +257,11 @@ Renderer& Main::getActiveRenderer() {
 }
 
 Renderer* Main::getActiveRendererPtr() {
-    return m_active_renderer;
+    return m_activeRenderer;
 }
 
 void Main::executeAsync(AsyncTaskRunner::Task&& task) {
-    m_async_task_runner->execute(std::move(task));
+    m_asyncTaskRunner->execute(std::move(task));
 }
 
 void Main::initializePlugins() {
@@ -273,7 +272,7 @@ void Main::initializePlugins() {
 
 void Main::shutdownPlugins() {
     // Unload all the Plugins loaded through shared libraries
-    for (auto& plugin_lib : m_plugin_libs) {
+    for (auto& plugin_lib : m_pluginLibs) {
         // Call plugin shutdown
         PFN_STOP_PLUGIN pFunc = reinterpret_cast<PFN_STOP_PLUGIN>(plugin_lib->getSymbol("StopPlugin"));
 
@@ -288,7 +287,7 @@ void Main::shutdownPlugins() {
         // Unload library & destroy
         SharedLibManager::GetInstance().unload(plugin_lib);
     }
-    m_plugin_libs.clear();
+    m_pluginLibs.clear();
 
     // Now deal with any remaining plugins that were registered through
     // other means
@@ -302,7 +301,7 @@ void Main::shutdownPlugins() {
 
 void Main::setActiveRenderer() {
     // TODO: Add a configurable way to select this
-    m_active_renderer = !m_renderers.empty() ? m_renderers[0].get() : nullptr;
+    m_activeRenderer = !m_renderers.empty() ? m_renderers[0].get() : nullptr;
 }
 
 }  // namespace engine

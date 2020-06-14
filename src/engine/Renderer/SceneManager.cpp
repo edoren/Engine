@@ -35,8 +35,8 @@ SceneManager::~SceneManager() {}
 void SceneManager::initialize() {}
 
 void SceneManager::shutdown() {
-    m_scenes_name_map.clear();
-    m_scenes_index_map.clear();
+    m_scenesNameMap.clear();
+    m_scenesIndexMap.clear();
     m_scenes.clear();
 }
 
@@ -69,18 +69,18 @@ void SceneManager::changeActiveScene(const String& scene_name_id) {
         const uint32 scene_index = sSceneIndex++;
 
         if (!scene_name.isEmpty()) {
-            m_scenes_name_map[scene_name] = scene;
+            m_scenesNameMap[scene_name] = scene;
         }
-        m_scenes_index_map[scene_index] = scene;
+        m_scenesIndexMap[scene_index] = scene;
     }
 
     LogInfo(sTag, "Scene '{}' successfully loaded"_format(filename));
 
-    m_active_scene = scene;
+    m_activeScene = scene;
 }
 
 Scene* SceneManager::getActiveScene() {
-    return m_active_scene;
+    return m_activeScene;
 }
 
 }  // namespace engine

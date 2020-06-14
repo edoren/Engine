@@ -28,10 +28,10 @@ public:
     std::unique_ptr<RenderWindow>& getRenderWindowPtr();
 
 protected:
-    std::unique_ptr<RenderWindow> m_render_window;
-    std::unique_ptr<ShaderManager> m_shader_manager;
-    std::unique_ptr<TextureManager> m_texture_manager;
-    std::unique_ptr<ModelManager> m_model_manager;
+    std::unique_ptr<RenderWindow> m_renderWindow;
+    std::unique_ptr<ShaderManager> m_shaderManager;
+    std::unique_ptr<TextureManager> m_textureManager;
+    std::unique_ptr<ModelManager> m_modelManager;
 };
 
 }  // namespace engine

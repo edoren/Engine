@@ -2,33 +2,33 @@
 
 namespace engine {
 
-Button::Button() : m_is_down(false) {
+Button::Button() : m_isDown(false) {
     advanceFrame();
 }
 
 bool Button::isDown() const {
-    return m_is_down;
+    return m_isDown;
 }
 
 bool Button::wentDown() const {
-    return m_went_down;
+    return m_wentDown;
 }
 
 bool Button::wentUp() const {
-    return m_went_up;
+    return m_wentUp;
 }
 
 void Button::advanceFrame() {
-    m_went_down = m_went_up = false;
+    m_wentDown = m_wentUp = false;
 }
 
 void Button::update(bool down) {
-    if (!m_is_down && down) {
-        m_went_down = true;
-    } else if (m_is_down && !down) {
-        m_went_up = true;
+    if (!m_isDown && down) {
+        m_wentDown = true;
+    } else if (m_isDown && !down) {
+        m_wentUp = true;
     }
-    m_is_down = down;
+    m_isDown = down;
 }
 
 }  // namespace engine

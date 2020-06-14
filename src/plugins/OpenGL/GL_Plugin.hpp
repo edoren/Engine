@@ -33,8 +33,8 @@ public:
 
 protected:
     GL_Renderer* m_renderer;
-    GL_ShaderManagerDelegate* m_shader_manager_delegate;
-    GL_TextureManagerDelegate* m_texture_manager_delegate;
+    GL_ShaderManagerDelegate* m_shaderManagerDelegate;
+    GL_TextureManagerDelegate* m_textureManagerDelegate;
 };
 
 }  // namespace engine

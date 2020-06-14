@@ -27,7 +27,7 @@ private:
 
     String m_name;
     std::map<Model*, std::vector<Transform>> m_models;
-    std::map<String, uint32> m_num_model_instance;
+    std::map<String, uint32> m_numModelInstance;
     json m_data;
 };
 

@@ -27,7 +27,7 @@ TextureManager* TextureManager::GetInstancePtr() {
     return Singleton<TextureManager>::GetInstancePtr();
 }
 
-TextureManager::TextureManager() : m_active_texture(nullptr) {}
+TextureManager::TextureManager() : m_activeTexture(nullptr) {}
 
 TextureManager::~TextureManager() {}
 
@@ -89,8 +89,8 @@ Texture2D* TextureManager::loadFromImage(const String& name, const Image& image)
     }
 
     // TMP
-    if (m_active_texture == nullptr) {
-        m_active_texture = texture;
+    if (m_activeTexture == nullptr) {
+        m_activeTexture = texture;
     }
 
     return texture;
@@ -104,15 +104,15 @@ Texture2D* TextureManager::getTexture2D(const String& name) {
 void TextureManager::setActiveTexture2D(const String& name) {
     Texture2D* found_texture = getTexture2D(name);
     if (found_texture != nullptr) {
-        m_active_texture = found_texture;
-        useTexture2D(m_active_texture);
+        m_activeTexture = found_texture;
+        useTexture2D(m_activeTexture);
     } else {
         LogError(sTag, "Could not find a Texture2D named: {}"_format(name.toUtf8()));
     }
 }
 
 Texture2D* TextureManager::getActiveTexture2D() {
-    return m_active_texture;
+    return m_activeTexture;
 }
 
 }  // namespace engine

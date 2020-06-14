@@ -38,9 +38,9 @@ InputManager* InputManager::GetInstancePtr() {
 }
 
 InputManager::InputManager()
-      : m_exit_requested(false),
+      : m_exitRequested(false),
         m_pointers(sMaxSimultanuousPointers),
-        m_mousewheel_delta(math::ivec2(0, 0)) {}
+        m_mousewheelDelta(math::ivec2(0, 0)) {}
 
 InputManager::~InputManager() {
     shutdown();
@@ -57,8 +57,8 @@ void InputManager::shutdown() {
 }
 
 Button& InputManager::getButton(int button) {
-    auto it = m_button_map.find(button);
-    return it != m_button_map.end() ? it->second : (m_button_map[button] = Button());
+    auto it = m_buttonMap.find(button);
+    return it != m_buttonMap.end() ? it->second : (m_buttonMap[button] = Button());
 }
 
 Button& InputManager::getPointerButton(SDL_FingerID pointer) {
@@ -67,8 +67,8 @@ Button& InputManager::getPointerButton(SDL_FingerID pointer) {
 
 void InputManager::advanceFrame() {
     // Reset our per-frame input state.
-    m_mousewheel_delta.x = m_mousewheel_delta.y = 0;
-    for (auto& button : m_button_map) {
+    m_mousewheelDelta.x = m_mousewheelDelta.y = 0;
+    for (auto& button : m_buttonMap) {
         button.second.advanceFrame();
     }
     for (auto& pointer : m_pointers) {
@@ -79,41 +79,41 @@ void InputManager::advanceFrame() {
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
             case SDL_QUIT: {
-                m_exit_requested = true;
+                m_exitRequested = true;
                 break;
             }
             case SDL_APP_TERMINATING:
             case SDL_APP_LOWMEMORY:
                 break;
             case SDL_APP_WILLENTERBACKGROUND: {
-                on_app_will_enter_background.emit();
+                onAppWillEnterBackground.emit();
                 break;
             }
             case SDL_APP_DIDENTERBACKGROUND: {
-                on_app_did_enter_background.emit();
+                onAppDidEnterBackground.emit();
                 break;
             }
             case SDL_APP_WILLENTERFOREGROUND: {
-                on_app_will_enter_foreground.emit();
+                onAppWillEnterForeground.emit();
                 break;
             }
             case SDL_APP_DIDENTERFOREGROUND: {
-                on_app_did_enter_foreground.emit();
+                onAppDidEnterForeground.emit();
                 break;
             }
             case SDL_WINDOWEVENT: {
                 switch (event.window.event) {
                     case SDL_WINDOWEVENT_RESIZED: {
                         math::ivec2 window_size(event.window.data1, event.window.data2);
-                        on_window_resized.emit(window_size);
+                        onWindowResized.emit(window_size);
                         break;
                     }
                     case SDL_WINDOWEVENT_MINIMIZED: {
-                        on_window_minimized.emit();
+                        onWindowMinimized.emit();
                         break;
                     }
                     case SDL_WINDOWEVENT_RESTORED: {
-                        on_window_restored.emit();
+                        onWindowRestored.emit();
                         break;
                     }
                 }
@@ -143,7 +143,7 @@ void InputManager::advanceFrame() {
                 break;
             }
             case SDL_MOUSEWHEEL: {
-                m_mousewheel_delta += math::ivec2(event.wheel.x, event.wheel.y);
+                m_mousewheelDelta += math::ivec2(event.wheel.x, event.wheel.y);
                 break;
             }
             case SDL_JOYAXISMOTION:

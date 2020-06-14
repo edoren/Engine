@@ -52,18 +52,18 @@ void aligned_free(void* ptr) {
 
 UniformBufferObject::UniformBufferObject()
       : m_size(0),
-        m_dynamic_alignment(0),
-        m_layout_type(LayoutType::STD140),
+        m_dynamicAlignment(0),
+        m_layoutType(LayoutType::STD140),
         m_buffer(nullptr),
-        m_buffer_size(0),
-        m_buffer_changed(false) {}
+        m_bufferSize(0),
+        m_bufferChanged(false) {}
 
 UniformBufferObject::UniformBufferObject(const std::vector<Item>& attributes) : UniformBufferObject() {
     setAttributes(attributes);
 }
 
 UniformBufferObject::~UniformBufferObject() {
-    if (m_dynamic_alignment > 0) {
+    if (m_dynamicAlignment > 0) {
         aligned_free(m_buffer);
     } else {
         free(m_buffer);
@@ -71,7 +71,7 @@ UniformBufferObject::~UniformBufferObject() {
 }
 
 void UniformBufferObject::setAttributes(const std::vector<Item>& attributes) {
-    m_attributes_alligned_offset.clear();
+    m_attributesAllignedOffset.clear();
 
     size_t current_allignment = 0;
 
@@ -85,59 +85,59 @@ void UniformBufferObject::setAttributes(const std::vector<Item>& attributes) {
             current_allignment += padding;
         }
 
-        m_attributes_alligned_offset.push_back(current_allignment);
+        m_attributesAllignedOffset.push_back(current_allignment);
         current_allignment += attr_size;
     }
 
     m_buffer = (byte*)malloc(current_allignment);
     m_size = current_allignment;
-    m_buffer_size = m_size;
+    m_bufferSize = m_size;
     m_attributes = attributes;
 }
 
 void UniformBufferObject::setBufferSize(size_t num_ubo_instances, size_t min_ubo_alignment) {
     if (m_buffer != nullptr) {
-        if (m_dynamic_alignment > 0) {
+        if (m_dynamicAlignment > 0) {
             aligned_free(m_buffer);
         } else {
             free(m_buffer);
         }
     }
 
-    m_dynamic_alignment = getSize();
+    m_dynamicAlignment = getSize();
 
     // Get the next power of 2
     size_t i;
-    size_t number = m_dynamic_alignment;
+    size_t number = m_dynamicAlignment;
     for (i = 0; number > 1; i++) {
         number = number >> 1;
     }
-    m_dynamic_alignment = 1 << (i + 1);
+    m_dynamicAlignment = 1 << (i + 1);
 
     // Calculate the alignment based on the min required alignment
     if (min_ubo_alignment > getSize() && is_power_of_two(min_ubo_alignment)) {
-        m_dynamic_alignment = min_ubo_alignment;
+        m_dynamicAlignment = min_ubo_alignment;
     } else if (min_ubo_alignment > 0) {
-        m_dynamic_alignment = (m_dynamic_alignment + min_ubo_alignment - 1) & ~(min_ubo_alignment - 1);
+        m_dynamicAlignment = (m_dynamicAlignment + min_ubo_alignment - 1) & ~(min_ubo_alignment - 1);
     }
 
-    size_t buffer_size = num_ubo_instances * m_dynamic_alignment;
+    size_t buffer_size = num_ubo_instances * m_dynamicAlignment;
 
     LogDebug(sTag, "UBO size: {} bytes"_format(getSize()));
     LogDebug(sTag, "Minimum UBO alignment: {} bytes"_format(min_ubo_alignment));
-    LogDebug(sTag, "Dynamic UBO alignment: {} bytes"_format(m_dynamic_alignment));
+    LogDebug(sTag, "Dynamic UBO alignment: {} bytes"_format(m_dynamicAlignment));
 
-    m_buffer = (byte*)aligned_malloc(buffer_size, m_dynamic_alignment);
-    m_buffer_size = buffer_size;
+    m_buffer = (byte*)aligned_malloc(buffer_size, m_dynamicAlignment);
+    m_bufferSize = buffer_size;
 }
 
 void UniformBufferObject::setAttributeValue(const String& name, const math::mat4& value, size_t offset) {
     auto it = std::find(m_attributes.begin(), m_attributes.end(), name);
     if (it != m_attributes.end() && it->type == DataType::MATRIX4X4) {
         size_t pos = it - m_attributes.begin();
-        size_t attribute_offset = m_attributes_alligned_offset[pos];
+        size_t attribute_offset = m_attributesAllignedOffset[pos];
 
-        if (m_layout_type == LayoutType::STD140) {
+        if (m_layoutType == LayoutType::STD140) {
             for (size_t col = 0; col < 4; col++) {
                 for (size_t row = 0; row < 4; row++) {
                     math::mat4::value_type val = value(row, col);
@@ -155,9 +155,9 @@ void UniformBufferObject::setAttributeValue(const String& name, const math::mat3
     auto it = std::find(m_attributes.begin(), m_attributes.end(), name);
     if (it != m_attributes.end() && it->type == DataType::MATRIX3X3) {
         size_t pos = it - m_attributes.begin();
-        size_t attribute_offset = m_attributes_alligned_offset[pos];
+        size_t attribute_offset = m_attributesAllignedOffset[pos];
 
-        if (m_layout_type == LayoutType::STD140) {
+        if (m_layoutType == LayoutType::STD140) {
             for (size_t col = 0; col < 3; col++) {
                 for (size_t row = 0; row < 3; row++) {
                     math::mat3::value_type val = value(row, col);
@@ -175,9 +175,9 @@ void UniformBufferObject::setAttributeValue(const String& name, const math::mat2
     auto it = std::find(m_attributes.begin(), m_attributes.end(), name);
     if (it != m_attributes.end() && it->type == DataType::MATRIX2X2) {
         size_t pos = it - m_attributes.begin();
-        size_t attribute_offset = m_attributes_alligned_offset[pos];
+        size_t attribute_offset = m_attributesAllignedOffset[pos];
 
-        if (m_layout_type == LayoutType::STD140) {
+        if (m_layoutType == LayoutType::STD140) {
             for (size_t col = 0; col < 2; col++) {
                 for (size_t row = 0; row < 2; row++) {
                     math::mat2::value_type val = value(row, col);
@@ -195,7 +195,7 @@ void UniformBufferObject::setAttributeValue(const String& name, const math::vec4
     auto it = std::find(m_attributes.begin(), m_attributes.end(), name);
     if (it != m_attributes.end() && it->type == DataType::VECTOR4) {
         size_t pos = it - m_attributes.begin();
-        size_t attribute_offset = m_attributes_alligned_offset[pos];
+        size_t attribute_offset = m_attributesAllignedOffset[pos];
         math::Vector4Packed<float> packed_vector(value);
         setDataAtOffset(&packed_vector, sizeof(packed_vector), offset + attribute_offset);
     } else {
@@ -207,7 +207,7 @@ void UniformBufferObject::setAttributeValue(const String& name, const math::vec3
     auto it = std::find(m_attributes.begin(), m_attributes.end(), name);
     if (it != m_attributes.end() && it->type == DataType::VECTOR3) {
         size_t pos = it - m_attributes.begin();
-        size_t attribute_offset = m_attributes_alligned_offset[pos];
+        size_t attribute_offset = m_attributesAllignedOffset[pos];
         math::Vector3Packed<float> packed_vector(value);
         setDataAtOffset(&packed_vector, sizeof(packed_vector), offset + attribute_offset);
     } else {
@@ -219,7 +219,7 @@ void UniformBufferObject::setAttributeValue(const String& name, const math::vec2
     auto it = std::find(m_attributes.begin(), m_attributes.end(), name);
     if (it != m_attributes.end() && it->type == DataType::VECTOR2) {
         size_t pos = it - m_attributes.begin();
-        size_t attribute_offset = m_attributes_alligned_offset[pos];
+        size_t attribute_offset = m_attributesAllignedOffset[pos];
         math::Vector2Packed<float> packed_vector(value);
         setDataAtOffset(&packed_vector, sizeof(packed_vector), offset + attribute_offset);
     } else {
@@ -251,9 +251,9 @@ void UniformBufferObject::setAttributeValue(const String& name, const void* valu
 }
 
 void UniformBufferObject::setDataAtOffset(const void* data, size_t size, size_t offset) {
-    if (offset + size <= m_buffer_size) {
+    if (offset + size <= m_bufferSize) {
         std::memcpy(m_buffer + offset, data, size);
-        m_buffer_changed = true;
+        m_bufferChanged = true;
     } else {
         LogError(sTag, "Out of memory bounds");
     }
@@ -264,7 +264,7 @@ size_t UniformBufferObject::getSize() const {
 }
 
 size_t UniformBufferObject::getDynamicAlignment() const {
-    return m_dynamic_alignment;
+    return m_dynamicAlignment;
 }
 
 byte* UniformBufferObject::getData() {
@@ -276,11 +276,11 @@ const byte* UniformBufferObject::getData() const {
 }
 
 size_t UniformBufferObject::getDataSize() const {
-    return m_buffer_size != 0 ? m_buffer_size : getSize();
+    return m_bufferSize != 0 ? m_bufferSize : getSize();
 }
 
 size_t UniformBufferObject::getTypeSize(DataType type) {
-    switch (m_layout_type) {
+    switch (m_layoutType) {
         case LayoutType::STD140: {
             switch (type) {
                 case DataType::MATRIX4X4:
@@ -308,7 +308,7 @@ size_t UniformBufferObject::getTypeSize(DataType type) {
 }
 
 size_t UniformBufferObject::getTypeAllignment(DataType type) {
-    switch (m_layout_type) {
+    switch (m_layoutType) {
         case LayoutType::STD140: {
             switch (type) {
                 case DataType::MATRIX4X4:

@@ -18,8 +18,8 @@ public:
     VertexLayout(std::vector<Component>&& vertex_input);
 
 protected:
-    std::vector<Component> m_vertex_input;
-    std::vector<Component> m_instance_input;
+    std::vector<Component> m_vertexInput;
+    std::vector<Component> m_instanceInput;
 };
 
 }  // namespace engine

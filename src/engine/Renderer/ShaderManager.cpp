@@ -32,7 +32,7 @@ ShaderManager* ShaderManager::GetInstancePtr() {
     return Singleton<ShaderManager>::GetInstancePtr();
 }
 
-ShaderManager::ShaderManager() : m_active_shader(nullptr) {}
+ShaderManager::ShaderManager() : m_activeShader(nullptr) {}
 
 ShaderManager::~ShaderManager() {}
 
@@ -112,8 +112,8 @@ Shader* ShaderManager::loadFromFile(const String& basename) {
         m_shaders[basename] = std::move(shader);
     }
 
-    if (m_active_shader == nullptr) {
-        m_active_shader = new_shader;
+    if (m_activeShader == nullptr) {
+        m_activeShader = new_shader;
     }
 
     return new_shader;
@@ -165,15 +165,15 @@ Shader* ShaderManager::getShader(const String& name) {
 void ShaderManager::setActiveShader(const String& name) {
     Shader* found_shader = getShader(name);
     if (found_shader != nullptr) {
-        m_active_shader = found_shader;
-        useShader(m_active_shader);
+        m_activeShader = found_shader;
+        useShader(m_activeShader);
     } else {
         LogError(sTag, "Could not find a Shader named: {}"_format(name));
     }
 }
 
 Shader* ShaderManager::getActiveShader() {
-    return m_active_shader;
+    return m_activeShader;
 }
 
 }  // namespace engine

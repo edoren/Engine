@@ -47,7 +47,7 @@ GL_Shader* GL_ShaderManager::getShader(const String& name) {
 }
 
 GL_Shader* GL_ShaderManager::getActiveShader() {
-    return reinterpret_cast<GL_Shader*>(m_active_shader);
+    return reinterpret_cast<GL_Shader*>(m_activeShader);
 }
 
 std::unique_ptr<Shader> GL_ShaderManager::createShader() {

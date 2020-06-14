@@ -23,8 +23,8 @@ public:
 private:
     void setupMesh();
 
-    Vk_Buffer m_vertex_buffer;
-    Vk_Buffer m_index_buffer;
+    Vk_Buffer m_vertexBuffer;
+    Vk_Buffer m_indexBuffer;
 };
 
 }  // namespace engine

@@ -37,7 +37,7 @@ public:
     }
 
     inline bool exitRequested() const {
-        return m_exit_requested;
+        return m_exitRequested;
     }
 
     ////////////////////////////////////////////////////////////
@@ -76,20 +76,20 @@ public:
     ////////////////////////////////////////////////////////////
     static InputManager* GetInstancePtr();
 
-    Signal<const math::ivec2&> on_window_resized;
-    Signal<> on_window_minimized;
-    Signal<> on_window_restored;
+    Signal<const math::ivec2&> onWindowResized;
+    Signal<> onWindowMinimized;
+    Signal<> onWindowRestored;
 
-    Signal<> on_app_will_enter_background;
-    Signal<> on_app_did_enter_background;
-    Signal<> on_app_will_enter_foreground;
-    Signal<> on_app_did_enter_foreground;
+    Signal<> onAppWillEnterBackground;
+    Signal<> onAppDidEnterBackground;
+    Signal<> onAppWillEnterForeground;
+    Signal<> onAppDidEnterForeground;
 
 private:
-    bool m_exit_requested;
+    bool m_exitRequested;
     std::vector<Pointer> m_pointers;
-    std::map<int, Button> m_button_map;
-    math::ivec2 m_mousewheel_delta;
+    std::map<int, Button> m_buttonMap;
+    math::ivec2 m_mousewheelDelta;
 };
 
 }  // namespace engine

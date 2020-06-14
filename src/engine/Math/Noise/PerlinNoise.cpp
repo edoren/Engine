@@ -15,13 +15,13 @@ PerlinNoise::PerlinNoise() : PerlinNoise(sDefaultSeed) {}
 
 PerlinNoise::PerlinNoise(int seed)
       : BaseNoise(seed),
-        m_octave_count(sDefaultOctaveCount),
+        m_octaveCount(sDefaultOctaveCount),
         m_frequency(sDefaultFrequency),
         m_lacunarity(sDefaultLacunarity),
         m_persistence(sDefaultPersistence) {}
 
 int PerlinNoise::getOctaveCount() const {
-    return m_octave_count;
+    return m_octaveCount;
 }
 
 float PerlinNoise::getFrequency() const {
@@ -42,7 +42,7 @@ float PerlinNoise::getValue(float x, float y, float z) const {
     float frequency = m_frequency;
     float amplitude = 1.F;
 
-    for (int current_octave = 0; current_octave < m_octave_count; current_octave++) {
+    for (int current_octave = 0; current_octave < m_octaveCount; current_octave++) {
         signal = coherentNoise3D(x * frequency, y * frequency, z * frequency);
         value += signal * amplitude;
 
@@ -54,7 +54,7 @@ float PerlinNoise::getValue(float x, float y, float z) const {
 }
 
 void PerlinNoise::setOctaveCount(int octave_count) {
-    m_octave_count = octave_count;
+    m_octaveCount = octave_count;
 }
 
 void PerlinNoise::setFrequency(float frequency) {

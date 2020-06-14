@@ -61,9 +61,9 @@ bool Scene::load() {
             auto& transforms = m_models[model];
             transforms.emplace_back(model_matrix);
 
-            auto found_it = m_num_model_instance.find(normalized_path);
-            if (found_it == m_num_model_instance.end()) {
-                m_num_model_instance.emplace(normalized_path, 1);
+            auto found_it = m_numModelInstance.find(normalized_path);
+            if (found_it == m_numModelInstance.end()) {
+                m_numModelInstance.emplace(normalized_path, 1);
             } else {
                 found_it->second += 1;
             }

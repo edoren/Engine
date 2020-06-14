@@ -29,7 +29,7 @@ struct Vector3Packed {
     }
 
     union {
-        data_type m_data;
+        data_type data;
         struct {
             T x, y, z;
         };
@@ -43,20 +43,20 @@ public:
 
     inline Vector3() {}
 
-    explicit inline Vector3(const T& s) : m_data(s) {}
+    explicit inline Vector3(const T& s) : data(s) {}
 
-    inline Vector3(const T& x, const T& y, const T& z) : m_data(x, y, z) {}
+    inline Vector3(const T& x, const T& y, const T& z) : data(x, y, z) {}
 
-    inline Vector3(const Vector2<T>& v, const T& z) : m_data(v.x, v.y, z) {}
+    inline Vector3(const Vector2<T>& v, const T& z) : data(v.x, v.y, z) {}
 
-    inline Vector3(const Vector3<T>& v) : m_data(v.m_data) {}
+    inline Vector3(const Vector3<T>& v) : data(v.data) {}
 
-    inline Vector3(const Vector4<T>& v) : m_data(v.m_data.xyz()) {}
+    inline Vector3(const Vector4<T>& v) : data(v.data.xyz()) {}
 
     template <typename T2>
-    explicit inline Vector3(const Vector3<T2>& v) : m_data(v.m_data) {}
+    explicit inline Vector3(const Vector3<T2>& v) : data(v.data) {}
 
-    explicit inline Vector3(const data_type& v) : m_data(v) {}
+    explicit inline Vector3(const data_type& v) : data(v) {}
 
     inline Vector3<T>& operator=(const Vector2<T>& v) {
         x = v.x;
@@ -79,86 +79,86 @@ public:
     }
 
     inline T& operator[](const size_t i) {
-        return m_data[static_cast<int>(i)];
+        return data[static_cast<int>(i)];
     }
 
     inline const T& operator[](const size_t i) const {
-        return m_data[static_cast<int>(i)];
+        return data[static_cast<int>(i)];
     }
 
     inline Vector3<T> operator-() const {
-        return Vector3<T>(-m_data);
+        return Vector3<T>(-data);
     }
 
     inline Vector3<T> operator*(const Vector3<T>& v) const {
-        return Vector3<T>(m_data * v.m_data);
+        return Vector3<T>(data * v.data);
     }
 
     inline Vector3<T> operator/(const Vector3<T>& v) const {
-        return Vector3<T>(m_data / v.m_data);
+        return Vector3<T>(data / v.data);
     }
 
     inline Vector3<T> operator+(const Vector3<T>& v) const {
-        return Vector3<T>(m_data + v.m_data);
+        return Vector3<T>(data + v.data);
     }
 
     inline Vector3<T> operator-(const Vector3<T>& v) const {
-        return Vector3<T>(m_data - v.m_data);
+        return Vector3<T>(data - v.data);
     }
 
     inline Vector3<T> operator*(const T& s) const {
-        return Vector3<T>(m_data * s);
+        return Vector3<T>(data * s);
     }
 
     inline Vector3<T> operator/(const T& s) const {
-        return Vector3<T>(m_data / s);
+        return Vector3<T>(data / s);
     }
 
     inline Vector3<T> operator+(const T& s) const {
-        return Vector3<T>(m_data + s);
+        return Vector3<T>(data + s);
     }
 
     inline Vector3<T> operator-(const T& s) const {
-        return Vector3<T>(m_data - s);
+        return Vector3<T>(data - s);
     }
 
     inline Vector3<T>& operator*=(const Vector3<T>& v) {
-        m_data *= v.m_data;
+        data *= v.data;
         return *this;
     }
 
     inline Vector3<T>& operator/=(const Vector3<T>& v) {
-        m_data /= v.m_data;
+        data /= v.data;
         return *this;
     }
 
     inline Vector3<T>& operator+=(const Vector3<T>& v) {
-        m_data += v.m_data;
+        data += v.data;
         return *this;
     }
 
     inline Vector3<T>& operator-=(const Vector3<T>& v) {
-        m_data -= v.m_data;
+        data -= v.data;
         return *this;
     }
 
     inline Vector3<T>& operator*=(const T& s) {
-        m_data *= s;
+        data *= s;
         return *this;
     }
 
     inline Vector3<T>& operator/=(const T& s) {
-        m_data /= s;
+        data /= s;
         return *this;
     }
 
     inline Vector3<T>& operator+=(const T& s) {
-        m_data += s;
+        data += s;
         return *this;
     }
 
     inline Vector3<T>& operator-=(const T& s) {
-        m_data -= s;
+        data -= s;
         return *this;
     }
 
@@ -171,7 +171,7 @@ public:
     }
 
     inline Vector2<T> xy() const {
-        return Vector2<T>(m_data.xy());
+        return Vector2<T>(data.xy());
     }
 
     inline void pack(Vector3Packed<T>* vector) const {
@@ -181,11 +181,11 @@ public:
     }
 
     static inline Vector3<T> Lerp(const Vector3<T>& v1, const Vector3<T>& v2, const T percent) {
-        return Vector3<T>(data_type::Lerp(v1.m_data, v2.m_data, percent));
+        return Vector3<T>(data_type::Lerp(v1.data, v2.data, percent));
     }
 
     union {
-        data_type m_data;
+        data_type data;
         struct {
             T x, y, z;
         };

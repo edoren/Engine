@@ -200,7 +200,7 @@ void Model::loadModel(const String& path) {
         return;
     }
 
-    m_relative_directory = path.subString(0, path.findLastOf("/\\"));
+    m_relativeDirectory = path.subString(0, path.findLastOf("/\\"));
 
     processNode(scene->mRootNode, scene);
 }
@@ -250,7 +250,7 @@ std::unique_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
             math::vec2 vec;
             vec.x = mesh->mTextureCoords[0][i].x;
             vec.y = mesh->mTextureCoords[0][i].y;
-            vertex.tex_coords = vec;
+            vertex.texCoords = vec;
         }
 
         // Process vertex positions, normals and texture coordinates
@@ -289,7 +289,7 @@ std::unique_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
             const json& type = json_texture["type"];
             const json& name = json_texture["name"];
             if (type.is_string() && name.is_string()) {
-                texture_filenames.emplace_back(GetTextureTypeFromString(type), fs.join(m_relative_directory, name));
+                texture_filenames.emplace_back(GetTextureTypeFromString(type), fs.join(m_relativeDirectory, name));
             }
         }
     };
@@ -324,7 +324,7 @@ std::unique_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
                 material->GetTexture(type, i, &str);
 
                 texture_filenames.emplace_back(
-                    std::make_pair(GetTextureTypeFromAiTextureType(type), fs.join(m_relative_directory, str.C_Str())));
+                    std::make_pair(GetTextureTypeFromAiTextureType(type), fs.join(m_relativeDirectory, str.C_Str())));
             }
         }
     }

@@ -7,9 +7,9 @@ namespace engine {
 
 IOStream::IOStream() : m_file(nullptr) {}
 
-IOStream::IOStream(IOStream&& other) : m_file(other.m_file), m_last_error(std::move(other.m_last_error)) {
+IOStream::IOStream(IOStream&& other) : m_file(other.m_file), m_lastError(std::move(other.m_lastError)) {
     other.m_file = nullptr;
-    other.m_last_error.clear();
+    other.m_lastError.clear();
 }
 
 IOStream::~IOStream() {
@@ -30,7 +30,7 @@ bool IOStream::open(const String& filename, const char* mode) {
     }
     m_file = SDL_RWFromFile(filename.getData(), mode);
     if (!m_file) {
-        m_last_error = SDL_GetError();
+        m_lastError = SDL_GetError();
         return false;
     }
     return true;
@@ -77,7 +77,7 @@ bool IOStream::isOpen() const {
 }
 
 const String& IOStream::getLastError() const {
-    return m_last_error;
+    return m_lastError;
 }
 
 }  // namespace engine

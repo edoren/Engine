@@ -75,10 +75,10 @@ public:
     static LogManager* GetInstancePtr();
 
 private:
-    String m_app_name;
-    String m_log_file;
-    bool m_file_logging_enable;
-    bool m_console_logging_enable;
+    String m_appName;
+    String m_logFile;
+    bool m_fileLoggingEnable;
+    bool m_consoleLoggingEnable;
 };
 
 inline void LogVerbose(const String& tag, const String& message) {

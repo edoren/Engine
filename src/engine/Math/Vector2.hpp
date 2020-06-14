@@ -29,7 +29,7 @@ struct Vector2Packed {
     }
 
     union {
-        data_type m_data;
+        data_type data;
         struct {
             T x, y;
         };
@@ -43,20 +43,20 @@ public:
 
     inline Vector2() {}
 
-    explicit inline Vector2(const T& s) : m_data(s) {}
+    explicit inline Vector2(const T& s) : data(s) {}
 
-    inline Vector2(const T& x, const T& y) : m_data(x, y) {}
+    inline Vector2(const T& x, const T& y) : data(x, y) {}
 
-    inline Vector2(const Vector2<T>& v) : m_data(v.m_data) {}
+    inline Vector2(const Vector2<T>& v) : data(v.data) {}
 
-    inline Vector2(const Vector3<T>& v) : m_data(v.x, v.y) {}
+    inline Vector2(const Vector3<T>& v) : data(v.x, v.y) {}
 
-    inline Vector2(const Vector4<T>& v) : m_data(v.x, v.y) {}
+    inline Vector2(const Vector4<T>& v) : data(v.x, v.y) {}
 
     template <typename T2>
-    explicit inline Vector2(const Vector2<T2>& v) : m_data(v.m_data) {}
+    explicit inline Vector2(const Vector2<T2>& v) : data(v.data) {}
 
-    explicit inline Vector2(const data_type& v) : m_data(v) {}
+    explicit inline Vector2(const data_type& v) : data(v) {}
 
     inline Vector2<T>& operator=(const Vector2<T>& v) {
         x = v.x;
@@ -77,86 +77,86 @@ public:
     }
 
     inline T& operator[](const size_t i) {
-        return m_data[static_cast<int>(i)];
+        return data[static_cast<int>(i)];
     }
 
     inline const T& operator[](const size_t i) const {
-        return m_data[static_cast<int>(i)];
+        return data[static_cast<int>(i)];
     }
 
     inline Vector2<T> operator-() const {
-        return Vector2<T>(-m_data);
+        return Vector2<T>(-data);
     }
 
     inline Vector2<T> operator*(const Vector2<T>& v) const {
-        return Vector2<T>(m_data * v.m_data);
+        return Vector2<T>(data * v.data);
     }
 
     inline Vector2<T> operator/(const Vector2<T>& v) const {
-        return Vector2<T>(m_data / v.m_data);
+        return Vector2<T>(data / v.data);
     }
 
     inline Vector2<T> operator+(const Vector2<T>& v) const {
-        return Vector2<T>(m_data + v.m_data);
+        return Vector2<T>(data + v.data);
     }
 
     inline Vector2<T> operator-(const Vector2<T>& v) const {
-        return Vector2<T>(m_data - v.m_data);
+        return Vector2<T>(data - v.data);
     }
 
     inline Vector2<T> operator*(const T& s) const {
-        return Vector2<T>(m_data * s);
+        return Vector2<T>(data * s);
     }
 
     inline Vector2<T> operator/(const T& s) const {
-        return Vector2<T>(m_data / s);
+        return Vector2<T>(data / s);
     }
 
     inline Vector2<T> operator+(const T& s) const {
-        return Vector2<T>(m_data + s);
+        return Vector2<T>(data + s);
     }
 
     inline Vector2<T> operator-(const T& s) const {
-        return Vector2<T>(m_data - s);
+        return Vector2<T>(data - s);
     }
 
     inline Vector2<T>& operator*=(const Vector2<T>& v) {
-        m_data *= v.m_data;
+        data *= v.data;
         return *this;
     }
 
     inline Vector2<T>& operator/=(const Vector2<T>& v) {
-        m_data /= v.m_data;
+        data /= v.data;
         return *this;
     }
 
     inline Vector2<T>& operator+=(const Vector2<T>& v) {
-        m_data += v.m_data;
+        data += v.data;
         return *this;
     }
 
     inline Vector2<T>& operator-=(const Vector2<T>& v) {
-        m_data -= v.m_data;
+        data -= v.data;
         return *this;
     }
 
     inline Vector2<T>& operator*=(const T& s) {
-        m_data *= s;
+        data *= s;
         return *this;
     }
 
     inline Vector2<T>& operator/=(const T& s) {
-        m_data /= s;
+        data /= s;
         return *this;
     }
 
     inline Vector2<T>& operator+=(const T& s) {
-        m_data += s;
+        data += s;
         return *this;
     }
 
     inline Vector2<T>& operator-=(const T& s) {
-        m_data -= s;
+        data -= s;
         return *this;
     }
 
@@ -174,11 +174,11 @@ public:
     }
 
     static inline Vector2<T> Lerp(const Vector2<T>& v1, const Vector2<T>& v2, const T percent) {
-        return Vector2<T>(data_type::Lerp(v1.m_data, v2.m_data, percent));
+        return Vector2<T>(data_type::Lerp(v1.data, v2.data, percent));
     }
 
     union {
-        data_type m_data;
+        data_type data;
         struct {
             T x, y;
         };

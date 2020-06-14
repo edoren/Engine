@@ -57,9 +57,9 @@ public:
     void emit(Args... args);
 
 private:
-    SignalConnection::IdType m_current_id;
+    SignalConnection::IdType m_currentId;
     std::map<SignalConnection::IdType, std::pair<SignalConnection, SlotType>> m_slots;
-    mutable std::mutex m_slots_mutex;
+    mutable std::mutex m_slotsMutex;
 };
 
 }  // namespace engine

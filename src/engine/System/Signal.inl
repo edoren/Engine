@@ -1,11 +1,11 @@
 namespace engine {
 
 template <typename... Args>
-Signal<Args...>::Signal() : m_current_id(0) {}
+Signal<Args...>::Signal() : m_currentId(0) {}
 
 template <typename... Args>
-Signal<Args...>::Signal(const Signal<Args...>& other) : m_current_id(0) {
-    std::lock_guard<std::mutex> lock(other.m_slots_mutex);
+Signal<Args...>::Signal(const Signal<Args...>& other) : m_currentId(0) {
+    std::lock_guard<std::mutex> lock(other.m_slotsMutex);
     for (auto& pair : other.m_slots) {
         SlotType slot = pair.second.second;
         connect(slot);
@@ -13,8 +13,8 @@ Signal<Args...>::Signal(const Signal<Args...>& other) : m_current_id(0) {
 }
 
 template <typename... Args>
-Signal<Args...>::Signal(Signal<Args...>&& other) : m_current_id(other.m_current_id) {
-    std::lock_guard<std::mutex> lock(other.m_slots_mutex);
+Signal<Args...>::Signal(Signal<Args...>&& other) : m_currentId(other.m_currentId) {
+    std::lock_guard<std::mutex> lock(other.m_slotsMutex);
     m_slots = std::move(other.m_slots);
 }
 
@@ -57,8 +57,8 @@ SignalConnection& Signal<Args...>::connect(InstanceType& instance, void (MFInsta
 
 template <typename... Args>
 SignalConnection& Signal<Args...>::connect(const typename Signal<Args...>::SlotType& slot) {
-    std::lock_guard<std::mutex> lock(m_slots_mutex);
-    SignalConnection::IdType id = ++m_current_id;
+    std::lock_guard<std::mutex> lock(m_slotsMutex);
+    SignalConnection::IdType id = ++m_currentId;
     SignalConnection connection(id, [this](SignalConnection& connection) { this->disconnect(connection); });
     auto pair = m_slots.emplace(id, std::make_pair(std::move(connection), slot));
     return pair.first->second.first;
@@ -66,14 +66,14 @@ SignalConnection& Signal<Args...>::connect(const typename Signal<Args...>::SlotT
 
 template <typename... Args>
 void Signal<Args...>::disconnect(SignalConnection& connection) {
-    std::lock_guard<std::mutex> lock(m_slots_mutex);
+    std::lock_guard<std::mutex> lock(m_slotsMutex);
     connection.disconnectWithoutCallback();
     m_slots.erase(connection.getId());
 }
 
 template <typename... Args>
 void Signal<Args...>::disconnectAll() {
-    std::lock_guard<std::mutex> lock(m_slots_mutex);
+    std::lock_guard<std::mutex> lock(m_slotsMutex);
     for (auto& pair : m_slots) {
         pair.second.first.disconnectWithoutCallback();
     }
@@ -82,7 +82,7 @@ void Signal<Args...>::disconnectAll() {
 
 template <typename... Args>
 void Signal<Args...>::emit(Args... args) {
-    std::lock_guard<std::mutex> lock(m_slots_mutex);
+    std::lock_guard<std::mutex> lock(m_slotsMutex);
     for (auto& pair : m_slots) {
         pair.second.second(std::forward<Args>(args)...);
     }

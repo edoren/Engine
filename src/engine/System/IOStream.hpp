@@ -44,7 +44,7 @@ public:
 
 private:
     SDL_RWops* m_file;
-    String m_last_error;
+    String m_lastError;
 };
 
 }  // namespace engine

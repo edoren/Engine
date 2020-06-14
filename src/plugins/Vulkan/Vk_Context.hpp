@@ -82,23 +82,23 @@ private:
 
     VkInstance m_instance;
     VkDevice m_device;
-    PhysicalDeviceParameters m_physical_device;
+    PhysicalDeviceParameters m_physicalDevice;
 
-    VkPhysicalDeviceFeatures m_enabled_features;
+    VkPhysicalDeviceFeatures m_enabledFeatures;
 
-    QueueParameters m_graphics_queue;
+    QueueParameters m_graphicsQueue;
 
-    VkCommandPool m_graphics_queue_cmd_pool;
+    VkCommandPool m_graphicsQueueCmdPool;
 
-    VkDescriptorPool m_ubo_descriptor_pool;
+    VkDescriptorPool m_uboDescriptorPool;
 
-    VkDebugReportCallbackEXT m_debug_report_callback;
+    VkDebugReportCallbackEXT m_debugReportCallback;
 
-    bool m_validation_layers_enabled;
-    std::vector<const char*> m_validation_layers;
+    bool m_validationLayersEnabled;
+    std::vector<const char*> m_validationLayers;
 
-    std::vector<const char*> m_instance_extensions;
-    std::vector<const char*> m_device_extensions;
+    std::vector<const char*> m_instanceExtensions;
+    std::vector<const char*> m_deviceExtensions;
 };
 
 }  // namespace engine

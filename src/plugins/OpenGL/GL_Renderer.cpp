@@ -21,17 +21,17 @@ GL_Renderer::~GL_Renderer() {
 bool GL_Renderer::initialize() {
     bool ok = Renderer::initialize();
     if (ok) {
-        m_render_window = std::make_unique<GL_RenderWindow>();
-        m_shader_manager = std::make_unique<GL_ShaderManager>();
-        m_texture_manager = std::make_unique<GL_TextureManager>();
+        m_renderWindow = std::make_unique<GL_RenderWindow>();
+        m_shaderManager = std::make_unique<GL_ShaderManager>();
+        m_textureManager = std::make_unique<GL_TextureManager>();
     }
     return ok;
 }
 
 void GL_Renderer::shutdown() {
-    m_texture_manager.reset();
-    m_shader_manager.reset();
-    m_render_window.reset();
+    m_textureManager.reset();
+    m_shaderManager.reset();
+    m_renderWindow.reset();
     Renderer::shutdown();
 }
 

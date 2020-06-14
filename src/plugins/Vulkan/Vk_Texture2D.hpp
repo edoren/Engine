@@ -35,8 +35,8 @@ private:
 
     Vk_Image m_image;
     VkSampler m_sampler;
-    Vk_Buffer m_staging_buffer;
-    VkDescriptorSet m_descriptor_set;
+    Vk_Buffer m_stagingBuffer;
+    VkDescriptorSet m_descriptorSet;
 };
 
 }  // namespace engine

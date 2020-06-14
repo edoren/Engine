@@ -61,16 +61,16 @@ private:
     size_t getTypeAllignment(UniformBufferObject::DataType type);
 
     size_t m_size;
-    size_t m_dynamic_alignment;
+    size_t m_dynamicAlignment;
 
-    LayoutType m_layout_type;
+    LayoutType m_layoutType;
 
     byte* m_buffer;
-    size_t m_buffer_size;
-    bool m_buffer_changed;
+    size_t m_bufferSize;
+    bool m_bufferChanged;
 
     std::vector<Item> m_attributes;
-    std::vector<size_t> m_attributes_alligned_offset;
+    std::vector<size_t> m_attributesAllignedOffset;
 };
 
 }  // namespace engine

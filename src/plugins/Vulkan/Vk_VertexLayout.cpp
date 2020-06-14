@@ -56,7 +56,7 @@ Vk_VertexLayout::Vk_VertexLayout(std::vector<VertexLayout::Component>&& componen
 
 std::vector<VkVertexInputAttributeDescription> Vk_VertexLayout::getVertexInputAttributeDescription(
     uint32 buffer_bind_id) const {
-    return GetAttribDescription(m_vertex_input, buffer_bind_id);
+    return GetAttribDescription(m_vertexInput, buffer_bind_id);
 }
 
 }  // namespace engine
