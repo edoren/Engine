@@ -7,7 +7,7 @@
 #include <Renderer/RenderWindow.hpp>
 #include <Renderer/Vertex.hpp>
 #include <Util/Function.hpp>
-#include <Util/SafeQueue.hpp>
+#include <Util/Container/SafeQueue.hpp>
 
 #include "Vk_Buffer.hpp"
 #include "Vk_Config.hpp"

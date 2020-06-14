@@ -3,7 +3,7 @@
 #include <Util/Prerequisites.hpp>
 
 #include <Util/Function.hpp>
-#include <Util/SafeQueue.hpp>
+#include <Util/Container/SafeQueue.hpp>
 
 namespace engine {
 
