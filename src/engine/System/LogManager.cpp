@@ -1,7 +1,8 @@
-#include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
 
 #include <SDL2.h>
+
+#include <System/LogManager.hpp>
 
 #if PLATFORM_IS(PLATFORM_ANDROID)
     #include <android/log.h>

@@ -32,7 +32,7 @@ std::vector<VkVertexInputAttributeDescription> GetAttribDescription(const std::v
                 size = 4 * sizeof(float);
                 break;
             default:
-                break;
+                continue;
         }
         attribute_descriptions.push_back({
             location++,    // location

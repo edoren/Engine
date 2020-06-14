@@ -250,7 +250,7 @@ String FileSystem::normalizePath(const String& path) const {
 
 #if PLATFORM_IS(PLATFORM_WINDOWS)
     // Fix separators on Windows
-    ret.Replace('/', '\\');
+    ret.replace('/', '\\');
 #endif
 
     return ret;

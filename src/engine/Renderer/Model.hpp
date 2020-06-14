@@ -15,11 +15,12 @@ namespace engine {
 
 class Texture2D;
 
-class ENGINE_API Model {
+class ENGINE_API Model : NonCopyable {
     friend class ModelManager;
 
 public:
     Model();
+
     virtual ~Model();
 
     void setTransform(const Transform& transform);

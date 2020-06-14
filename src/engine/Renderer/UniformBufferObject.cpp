@@ -112,7 +112,7 @@ void UniformBufferObject::setBufferSize(size_t numUboInstances, size_t minUboAli
     for (i = 0; number > 1; i++) {
         number = number >> 1;
     }
-    m_dynamicAlignment = 1 << (i + 1);
+    m_dynamicAlignment = size_t(1) << (i + 1);
 
     // Calculate the alignment based on the min required alignment
     if (minUboAlignment > getSize() && is_power_of_two(minUboAlignment)) {

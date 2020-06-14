@@ -16,10 +16,10 @@ void Camera::move(const math::vec3& direction) {
     position += direction;
 }
 
-void Camera::rotate(float yaw, float pitch, bool limitPitch) {
+void Camera::rotate(float yawDelta, float pitchDelta, bool limitPitch) {
     // Apply euler angles to rotate the pitch
-    yaw += yaw;
-    pitch -= pitch;
+    yaw += yawDelta;
+    pitch -= pitchDelta;
 
     // Limit the pitch movement to avoid strange behaviors
     if (limitPitch) {
@@ -38,11 +38,11 @@ void Camera::rotate(const math::vec2& offset, bool limitPitch) {
     rotate(offset.x, offset.y, limitPitch);
 }
 
-void Camera::lookAt(const math::vec3& position) {
-    math::vec3 front = math::Normalize(position - this->position);
+void Camera::lookAt(const math::vec3& newPosition) {
+    math::vec3 newFront = math::Normalize(newPosition - position);
 
-    pitch = math::Degrees(std::asin(front.y));
-    yaw = math::Degrees(std::atan2(front.z, front.x));
+    pitch = math::Degrees(std::asin(newFront.y));
+    yaw = math::Degrees(std::atan2(newFront.z, newFront.x));
 
     updateCameraVectors();
 }
