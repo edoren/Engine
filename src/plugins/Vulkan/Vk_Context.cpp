@@ -1,5 +1,6 @@
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
+#include <Util/Container/Vector.hpp>
 #include <Util/Function.hpp>
 
 #include "Vk_Context.hpp"
@@ -453,7 +454,7 @@ bool Vk_Context::checkValidationLayerSupport() const {
 
     // Get the avaliable layers
     uint32 layer_count = 0;
-    std::vector<VkLayerProperties> avaliable_layers;
+    Vector<VkLayerProperties> avaliable_layers;
     result = vkEnumerateInstanceLayerProperties(&layer_count, nullptr);
     if (layer_count > 0 && result == VK_SUCCESS) {
         avaliable_layers.resize(layer_count);
@@ -466,11 +467,8 @@ bool Vk_Context::checkValidationLayerSupport() const {
         return false;
     }
 
-    std::vector<const char*> available_layer_list;
-    available_layer_list.reserve(avaliable_layers.size());
-    for (const auto& layer : avaliable_layers) {
-        available_layer_list.push_back(layer.layerName);
-    }
+    std::vector<const char*> available_layer_list =
+        avaliable_layers.map([](const auto& layer) { return layer.layerName; });
     LogInfo(sTag, "Available Layers: {}"_format(available_layer_list));
 
     // Check that all the validation layers exists
