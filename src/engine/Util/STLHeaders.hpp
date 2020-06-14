@@ -6,6 +6,7 @@
 #include <memory>
 #include <type_traits>
 #include <utility>
+#include <optional>
 
 // Strings library
 #include <sstream>
