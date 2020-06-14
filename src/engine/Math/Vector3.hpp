@@ -20,11 +20,11 @@ struct Vector3Packed {
     Vector3Packed() {}
 
     explicit Vector3Packed(const Vector3<T>& vector) {
-        vector.Pack(this);
+        vector.pack(this);
     }
 
     Vector3Packed& operator=(const Vector3<T>& vector) {
-        vector.Pack(this);
+        vector.pack(this);
         return *this;
     }
 
@@ -174,7 +174,7 @@ public:
         return Vector2<T>(m_data.xy());
     }
 
-    inline void Pack(Vector3Packed<T>* vector) const {
+    inline void pack(Vector3Packed<T>* vector) const {
         vector->x = x;
         vector->y = y;
         vector->z = z;

@@ -15,11 +15,11 @@ String sRendererName("OpenGL");
 GL_Renderer::GL_Renderer() {}
 
 GL_Renderer::~GL_Renderer() {
-    Shutdown();
+    shutdown();
 }
 
-bool GL_Renderer::Initialize() {
-    bool ok = Renderer::Initialize();
+bool GL_Renderer::initialize() {
+    bool ok = Renderer::initialize();
     if (ok) {
         m_render_window = std::make_unique<GL_RenderWindow>();
         m_shader_manager = std::make_unique<GL_ShaderManager>();
@@ -28,22 +28,22 @@ bool GL_Renderer::Initialize() {
     return ok;
 }
 
-void GL_Renderer::Shutdown() {
+void GL_Renderer::shutdown() {
     m_texture_manager.reset();
     m_shader_manager.reset();
     m_render_window.reset();
-    Renderer::Shutdown();
+    Renderer::shutdown();
 }
 
-void GL_Renderer::AdvanceFrame() {
-    Renderer::AdvanceFrame();
+void GL_Renderer::advanceFrame() {
+    Renderer::advanceFrame();
     // TODO: User enable depth test
     if (!glIsEnabled(GL_DEPTH_TEST)) {
         GL_CALL(glEnable(GL_DEPTH_TEST));
     }
 }
 
-const String& GL_Renderer::GetName() const {
+const String& GL_Renderer::getName() const {
     return sRendererName;
 }
 

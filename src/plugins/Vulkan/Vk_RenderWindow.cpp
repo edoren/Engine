@@ -39,15 +39,15 @@ Vk_RenderWindow::Vk_RenderWindow()
         m_render_pass(VK_NULL_HANDLE) {}
 
 Vk_RenderWindow::~Vk_RenderWindow() {
-    Destroy();
+    destroy();
 }
 
-bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
+bool Vk_RenderWindow::create(const String& name, const math::ivec2& size) {
     // Create the window
     math::ivec2 initial_pos(SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
     uint32 window_flags(SDL_WINDOW_VULKAN | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 
-    m_window = SDL_CreateWindow(name.GetData(), initial_pos.x, initial_pos.y, size.x, size.y, window_flags);
+    m_window = SDL_CreateWindow(name.getData(), initial_pos.x, initial_pos.y, size.x, size.y, window_flags);
     if (!m_window) {
         LogError(sTag, "SDL_CreateWindow fail: {}"_format(SDL_GetError()));
         return false;
@@ -55,43 +55,43 @@ bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
 
     // We assume that the graphics queue can also present
     Vk_Context& context = Vk_Context::GetInstance();
-    m_graphics_queue = &context.GetGraphicsQueue();
+    m_graphics_queue = &context.getGraphicsQueue();
     m_present_queue = m_graphics_queue;
 
     // Update the base class attributes
-    RenderWindow::Create(name, size);
+    RenderWindow::create(name, size);
 
-    if (!m_surface.Create(reinterpret_cast<SDL_Window*>(m_window))) {
+    if (!m_surface.create(reinterpret_cast<SDL_Window*>(m_window))) {
         LogFatal(sTag, "Could not create the Surface");
         return false;
     }
-    if (!CheckWSISupport()) {
-        PhysicalDeviceParameters& physical_device = context.GetPhysicalDevice();
+    if (!checkWsiSupport()) {
+        PhysicalDeviceParameters& physical_device = context.getPhysicalDevice();
         LogError(sTag, "Physical device {} doesn't include WSI support"_format(physical_device.properties.deviceName));
         return false;
     }
 
-    if (!CreateDepthResources()) {
+    if (!createDepthResources()) {
         LogError(sTag, "Could not create the DepthResources");
         return false;
     }
 
-    if (!m_swapchain.Create(m_surface, m_size.x, m_size.y)) {
+    if (!m_swapchain.create(m_surface, m_size.x, m_size.y)) {
         LogError(sTag, "Could not create the SwapChain");
         return false;
     }
-    if (!CreateVulkanRenderPass()) {
+    if (!createVulkanRenderPass()) {
         LogError(sTag, "Could not create the RenderPass");
         return false;
     }
-    if (!CreateVulkanPipeline()) {
+    if (!createVulkanPipeline()) {
         LogError(sTag, "Could not create the Pipeline");
         return false;
     }
 
-    m_render_resources.resize(m_swapchain.GetImages().size());
+    m_render_resources.resize(m_swapchain.getImages().size());
     for (Vk_RenderResource& render_resource : m_render_resources) {
-        if (!render_resource.Create()) {
+        if (!render_resource.create()) {
             LogError(sTag, "Could not create the RenderingResources");
             return false;
         }
@@ -100,9 +100,9 @@ bool Vk_RenderWindow::Create(const String& name, const math::ivec2& size) {
     return true;
 }
 
-void Vk_RenderWindow::Destroy() {
+void Vk_RenderWindow::destroy() {
     Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
+    VkDevice& device = context.getVulkanDevice();
 
     if (device) {
         vkDeviceWaitIdle(device);
@@ -124,27 +124,27 @@ void Vk_RenderWindow::Destroy() {
             m_render_pass = VK_NULL_HANDLE;
         }
 
-        m_swapchain.Destroy();
-        m_command_work_queue.Clear();
+        m_swapchain.destroy();
+        m_command_work_queue.clear();
     }
 
     m_present_queue = nullptr;
     m_graphics_queue = nullptr;
 
-    m_surface.Destroy();
+    m_surface.destroy();
 
-    RenderWindow::Destroy();
+    RenderWindow::destroy();
 }
 
-void Vk_RenderWindow::Resize(int width, int height) {
-    RenderWindow::Resize(width, height);
+void Vk_RenderWindow::resize(int width, int height) {
+    RenderWindow::resize(width, height);
 }
 
-void Vk_RenderWindow::SetFullScreen(bool fullscreen, bool is_fake) {
-    RenderWindow::SetFullScreen(fullscreen, is_fake);
+void Vk_RenderWindow::setFullScreen(bool fullscreen, bool is_fake) {
+    RenderWindow::setFullScreen(fullscreen, is_fake);
 }
 
-void Vk_RenderWindow::SetVSyncEnabled(bool /*vsync*/) {
+void Vk_RenderWindow::setVSyncEnabled(bool /*vsync*/) {
     // if (SDL_GL_SetSwapInterval(vsync ? 1 : 0) == 0) {
     //     m_is_vsync_enable = vsync;
     // } else {
@@ -152,8 +152,8 @@ void Vk_RenderWindow::SetVSyncEnabled(bool /*vsync*/) {
     // }
 }
 
-void Vk_RenderWindow::SwapBuffers() {
-    if (m_swapchain.GetHandle() == VK_NULL_HANDLE) {
+void Vk_RenderWindow::swapBuffers() {
+    if (m_swapchain.getHandle() == VK_NULL_HANDLE) {
         LogWarning(sTag, "SwapChain not avaliable");
         return;
     }
@@ -163,12 +163,12 @@ void Vk_RenderWindow::SwapBuffers() {
     VkResult result = VK_SUCCESS;
 
     Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
+    VkDevice& device = context.getVulkanDevice();
 
     Vk_RenderResource& current_rendering_resource = m_render_resources[sResourceIndex];
     uint32_t image_index;
 
-    sResourceIndex = (sResourceIndex + 1) % m_swapchain.GetImages().size();
+    sResourceIndex = (sResourceIndex + 1) % m_swapchain.getImages().size();
 
     result = vkWaitForFences(device, 1, &current_rendering_resource.fence, VK_FALSE, 1000000000);
     if (result == VK_TIMEOUT) {
@@ -178,21 +178,21 @@ void Vk_RenderWindow::SwapBuffers() {
 
     vkResetFences(device, 1, &current_rendering_resource.fence);
 
-    result = vkAcquireNextImageKHR(device, m_swapchain.GetHandle(), UINT64_MAX,
+    result = vkAcquireNextImageKHR(device, m_swapchain.getHandle(), UINT64_MAX,
                                    current_rendering_resource.image_available_semaphore, VK_NULL_HANDLE, &image_index);
     switch (result) {
         case VK_SUCCESS:
         case VK_SUBOPTIMAL_KHR:
             break;
         case VK_ERROR_OUT_OF_DATE_KHR:
-            OnWindowResized(m_size);
+            onWindowResized(m_size);
             return;
         default:
             LogError(sTag, "Problem occurred during SwapChain image acquisition");
             return;
     }
 
-    if (!PrepareFrame(current_rendering_resource.command_buffer, m_swapchain.GetImages()[image_index],
+    if (!prepareFrame(current_rendering_resource.command_buffer, m_swapchain.getImages()[image_index],
                       current_rendering_resource.framebuffer)) {
         return;
     }
@@ -210,7 +210,7 @@ void Vk_RenderWindow::SwapBuffers() {
         &current_rendering_resource.finished_rendering_semaphore  // pSignalSemaphores
     };
 
-    result = vkQueueSubmit(m_graphics_queue->GetHandle(), 1, &submit_info, current_rendering_resource.fence);
+    result = vkQueueSubmit(m_graphics_queue->getHandle(), 1, &submit_info, current_rendering_resource.fence);
 
     if (result != VK_SUCCESS) {
         LogError(sTag, "Error submitting the command buffers");
@@ -223,12 +223,12 @@ void Vk_RenderWindow::SwapBuffers() {
         1,                                                         // waitSemaphoreCount
         &current_rendering_resource.finished_rendering_semaphore,  // pWaitSemaphores
         1,                                                         // swapchainCount
-        &m_swapchain.GetHandle(),                                  // pSwapchains
+        &m_swapchain.getHandle(),                                  // pSwapchains
         &image_index,                                              // pImageIndices
         nullptr                                                    // pResults
     };
 
-    result = vkQueuePresentKHR(m_present_queue->GetHandle(), &present_info);
+    result = vkQueuePresentKHR(m_present_queue->getHandle(), &present_info);
 
     switch (result) {
         case VK_SUCCESS:
@@ -237,7 +237,7 @@ void Vk_RenderWindow::SwapBuffers() {
         case VK_SUBOPTIMAL_KHR:
 #if !PLATFORM_IS(PLATFORM_ANDROID)
             LogDebug(sTag, "VK_SUBOPTIMAL_KHR: Recreating SwapChain");
-            OnWindowResized(m_size);
+            onWindowResized(m_size);
 #endif
             return;
         default:
@@ -246,20 +246,20 @@ void Vk_RenderWindow::SwapBuffers() {
     }
 }
 
-void Vk_RenderWindow::Clear(const Color& /*color*/) {  // RenderTarget
+void Vk_RenderWindow::clear(const Color& /*color*/) {  // RenderTarget
     // GL_CALL(glClearColor(color.r, color.g, color.b, color.a));
     // GL_CALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }
 
-void Vk_RenderWindow::AddCommandExecution(CommandType&& func) {
-    if (IsVisible()) {
-        m_command_work_queue.Push(std::move(func));
+void Vk_RenderWindow::addCommandExecution(CommandType&& func) {
+    if (isVisible()) {
+        m_command_work_queue.push(std::move(func));
     }
 }
 
-void Vk_RenderWindow::SubmitGraphicsCommand(Function<void(VkCommandBuffer&)>&& func) {
+void Vk_RenderWindow::submitGraphicsCommand(Function<void(VkCommandBuffer&)>&& func) {
     Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
+    VkDevice& device = context.getVulkanDevice();
 
     VkResult result = VK_SUCCESS;
 
@@ -268,7 +268,7 @@ void Vk_RenderWindow::SubmitGraphicsCommand(Function<void(VkCommandBuffer&)>&& f
     VkCommandBufferAllocateInfo allocInfo = {
         VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,  // sType
         nullptr,                                         // pNext
-        context.GetGraphicsQueueCmdPool(),               // commandPool
+        context.getGraphicsQueueCmdPool(),               // commandPool
         VK_COMMAND_BUFFER_LEVEL_PRIMARY,                 // level
         1                                                // commandBufferCount
     };
@@ -308,40 +308,40 @@ void Vk_RenderWindow::SubmitGraphicsCommand(Function<void(VkCommandBuffer&)>&& f
         nullptr                         // pSignalSemaphores
     };
 
-    result = vkQueueSubmit(context.GetGraphicsQueue().GetHandle(), 1, &submit_info, VK_NULL_HANDLE);
+    result = vkQueueSubmit(context.getGraphicsQueue().getHandle(), 1, &submit_info, VK_NULL_HANDLE);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Error submiting command buffer");
         return;
     }
 
-    vkQueueWaitIdle(context.GetGraphicsQueue().GetHandle());
+    vkQueueWaitIdle(context.getGraphicsQueue().getHandle());
 }
 
-void Vk_RenderWindow::UpdateProjectionMatrix() {
-    RenderWindow::UpdateProjectionMatrix();
+void Vk_RenderWindow::updateProjectionMatrix() {
+    RenderWindow::updateProjectionMatrix();
     m_projection = sClipMatrix * m_projection;
 }
 
-bool Vk_RenderWindow::CheckWSISupport() {
+bool Vk_RenderWindow::checkWsiSupport() {
     // Check that the device graphics queue family has WSI support
     VkBool32 wsi_support;
     Vk_Context& context = Vk_Context::GetInstance();
-    PhysicalDeviceParameters& physical_device = context.GetPhysicalDevice();
-    QueueParameters& graphics_queue = context.GetGraphicsQueue();
+    PhysicalDeviceParameters& physical_device = context.getPhysicalDevice();
+    QueueParameters& graphics_queue = context.getGraphicsQueue();
 
-    vkGetPhysicalDeviceSurfaceSupportKHR(physical_device.GetHandle(), graphics_queue.family_index,
-                                         m_surface.GetHandle(), &wsi_support);
+    vkGetPhysicalDeviceSurfaceSupportKHR(physical_device.getHandle(), graphics_queue.family_index,
+                                         m_surface.getHandle(), &wsi_support);
     return wsi_support == VK_TRUE;
 }
 
-bool Vk_RenderWindow::CreateVulkanRenderPass() {
+bool Vk_RenderWindow::createVulkanRenderPass() {
     VkResult result = VK_SUCCESS;
 
     // Create the attachment descriptions
     std::array<VkAttachmentDescription, 2> attachment_descriptions = {{
         {
             VkAttachmentDescriptionFlags(),    // flags
-            m_swapchain.GetFormat(),           // format
+            m_swapchain.getFormat(),           // format
             VK_SAMPLE_COUNT_1_BIT,             // samples
             VK_ATTACHMENT_LOAD_OP_CLEAR,       // loadOp
             VK_ATTACHMENT_STORE_OP_STORE,      // storeOp
@@ -425,7 +425,7 @@ bool Vk_RenderWindow::CreateVulkanRenderPass() {
     // NOTES: Dependencies are important for performance
 
     Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
+    VkDevice& device = context.getVulkanDevice();
     result = vkCreateRenderPass(device, &render_pass_create_info, nullptr, &m_render_pass);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Could not create render pass");
@@ -435,13 +435,13 @@ bool Vk_RenderWindow::CreateVulkanRenderPass() {
     return true;
 }
 
-bool Vk_RenderWindow::CreateVulkanPipeline() {
+bool Vk_RenderWindow::createVulkanPipeline() {
     Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
+    VkDevice& device = context.getVulkanDevice();
 
     VkResult result = VK_SUCCESS;
 
-    Vk_Shader* shader = Vk_ShaderManager::GetInstance().GetActiveShader();
+    Vk_Shader* shader = Vk_ShaderManager::GetInstance().getActiveShader();
     Vk_TextureManager& texture_manager = Vk_TextureManager::GetInstance();
 
     if (shader == nullptr) {
@@ -449,7 +449,7 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         return false;
     }
 
-    if (!shader->GetModule(ShaderType::VERTEX) || !shader->GetModule(ShaderType::FRAGMENT)) {
+    if (!shader->getModule(ShaderType::VERTEX) || !shader->getModule(ShaderType::FRAGMENT)) {
         LogError(sTag, "Coud not get Vertex and/or Fragment shader module");
         return false;
     }
@@ -462,9 +462,9 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
         },
     }};
 
-    const Vk_VertexLayout& vertex_layout = shader->GetVertexLayout();
+    const Vk_VertexLayout& vertex_layout = shader->getVertexLayout();
 
-    auto vertex_input_attrib_description = vertex_layout.GetVertexInputAttributeDescription(sVertexBufferBindId);
+    auto vertex_input_attrib_description = vertex_layout.getVertexInputAttributeDescription(sVertexBufferBindId);
 
     VkPipelineVertexInputStateCreateInfo vertex_input_state_create_info = {
         VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,      // sType
@@ -483,7 +483,7 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
             nullptr,                                              // pNext
             VkPipelineShaderStageCreateFlags(),                   // flags
             VK_SHADER_STAGE_VERTEX_BIT,                           // stage
-            shader->GetModule(ShaderType::VERTEX),                // module
+            shader->getModule(ShaderType::VERTEX),                // module
             sShaderEntryPoint,                                    // pName
             nullptr                                               // pSpecializationInfo
         },
@@ -493,7 +493,7 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
             nullptr,                                              // pNext
             VkPipelineShaderStageCreateFlags(),                   // flags
             VK_SHADER_STAGE_FRAGMENT_BIT,                         // stage
-            shader->GetModule(ShaderType::FRAGMENT),              // module
+            shader->getModule(ShaderType::FRAGMENT),              // module
             sShaderEntryPoint,                                    // pName
             nullptr                                               // pSpecializationInfo
         },
@@ -598,8 +598,8 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
 
     // Create the PipelineLayout
     std::array<VkDescriptorSetLayout, 2> descriptor_set_layouts = {{
-        shader->GetUBODescriptorSetLayout(),
-        texture_manager.GetDescriptorSetLayout(),
+        shader->getUboDescriptorSetLayout(),
+        texture_manager.getDescriptorSetLayout(),
     }};
 
     VkPipelineLayoutCreateInfo layout_create_info = {
@@ -652,18 +652,18 @@ bool Vk_RenderWindow::CreateVulkanPipeline() {
     return true;
 }
 
-bool Vk_RenderWindow::CreateVulkanFrameBuffer(VkFramebuffer& framebuffer, VkImageView& image_view) {
+bool Vk_RenderWindow::createVulkanFrameBuffer(VkFramebuffer& framebuffer, VkImageView& image_view) {
     VkResult result = VK_SUCCESS;
 
     Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
+    VkDevice& device = context.getVulkanDevice();
 
     if (framebuffer) {
         vkDestroyFramebuffer(device, framebuffer, nullptr);
     }
 
     std::array<VkImageView, 2> attachments = {
-        {image_view, m_depth_image.GetView()},
+        {image_view, m_depth_image.getView()},
     };
 
     VkFramebufferCreateInfo framebuffer_create_info = {
@@ -687,10 +687,10 @@ bool Vk_RenderWindow::CreateVulkanFrameBuffer(VkFramebuffer& framebuffer, VkImag
     return true;
 }
 
-bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer, Vk_Image& image, VkFramebuffer& framebuffer) {
+bool Vk_RenderWindow::prepareFrame(VkCommandBuffer command_buffer, Vk_Image& image, VkFramebuffer& framebuffer) {
     VkResult result = VK_SUCCESS;
 
-    if (!CreateVulkanFrameBuffer(framebuffer, image.GetView())) {
+    if (!createVulkanFrameBuffer(framebuffer, image.getView())) {
         return false;
     }
 
@@ -711,7 +711,7 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer, Vk_Image& ima
         1                           // layerCount
     };
 
-    if (m_present_queue->GetHandle() != m_graphics_queue->GetHandle()) {
+    if (m_present_queue->getHandle() != m_graphics_queue->getHandle()) {
         VkImageMemoryBarrier barrier_from_present_to_draw = {
             VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,  // sType
             nullptr,                                 // pNext
@@ -721,7 +721,7 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer, Vk_Image& ima
             VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,         // newLayout
             m_present_queue->family_index,           // srcQueueFamilyIndex
             m_graphics_queue->family_index,          // dstQueueFamilyIndex
-            image.GetHandle(),                       // image
+            image.getHandle(),                       // image
             image_subresource_range                  // subresourceRange
         };
         vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
@@ -784,35 +784,35 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer, Vk_Image& ima
 
     vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphics_pipeline);
 
-    Vk_Shader* shader = Vk_ShaderManager::GetInstance().GetActiveShader();
+    Vk_Shader* shader = Vk_ShaderManager::GetInstance().getActiveShader();
 
     // Update static uniform buffer
-    const Camera* active_camera = GetActiveCamera();
+    const Camera* active_camera = getActiveCamera();
 
     math::vec3 front_vector;
     math::vec3 light_position;  // TMP: Get this from other
                                 //      part a LightManager maybe?
     if (active_camera != nullptr) {
-        front_vector = active_camera->GetFrontVector();
-        light_position = active_camera->GetPosition();
+        front_vector = active_camera->getFrontVector();
+        light_position = active_camera->getPosition();
     }
 
-    UniformBufferObject& ubo = shader->GetUBO();
-    ubo.SetAttributeValue("cameraFront", front_vector);
-    ubo.SetAttributeValue("lightPosition", light_position);
+    UniformBufferObject& ubo = shader->getUbo();
+    ubo.setAttributeValue("cameraFront", front_vector);
+    ubo.setAttributeValue("lightPosition", light_position);
     ///
 
     uint32 index = 0;
-    while (m_command_work_queue.GetSize() > 0) {
-        auto task = m_command_work_queue.Pop();
+    while (m_command_work_queue.getSize() > 0) {
+        auto task = m_command_work_queue.pop();
         task(index++, command_buffer, m_pipeline_layout);
     }
 
-    shader->UploadUniformBuffers();
+    shader->uploadUniformBuffers();
 
     vkCmdEndRenderPass(command_buffer);
 
-    if (m_graphics_queue->GetHandle() != m_present_queue->GetHandle()) {
+    if (m_graphics_queue->getHandle() != m_present_queue->getHandle()) {
         VkImageMemoryBarrier barrier_from_draw_to_present = {
             VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,  // sType
             nullptr,                                 // pNext
@@ -822,7 +822,7 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer, Vk_Image& ima
             VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,         // newLayout
             m_graphics_queue->family_index,          // srcQueueFamilyIndex
             m_present_queue->family_index,           // dstQueueFamilyIndex
-            image.GetHandle(),                       // image
+            image.getHandle(),                       // image
             image_subresource_range                  // subresourceRange
         };
         vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
@@ -839,14 +839,14 @@ bool Vk_RenderWindow::PrepareFrame(VkCommandBuffer command_buffer, Vk_Image& ima
     return true;
 }
 
-bool Vk_RenderWindow::CreateDepthResources() {
+bool Vk_RenderWindow::createDepthResources() {
     Vk_Context& context = Vk_Context::GetInstance();
-    PhysicalDeviceParameters& physical_device = context.GetPhysicalDevice();
+    PhysicalDeviceParameters& physical_device = context.getPhysicalDevice();
 
     auto lFindSupportedFormat = [&physical_device](const std::vector<VkFormat>& candidates, VkImageTiling tiling,
                                                    VkFormatFeatureFlags features) -> VkFormat {
         for (VkFormat format : candidates) {
-            VkFormatProperties properties = physical_device.GetFormatProperties(format);
+            VkFormatProperties properties = physical_device.getFormatProperties(format);
             switch (tiling) {
                 case VK_IMAGE_TILING_LINEAR:
                     if ((properties.linearTilingFeatures & features) == features) {
@@ -875,25 +875,25 @@ bool Vk_RenderWindow::CreateDepthResources() {
         return false;
     }
 
-    m_depth_image.Destroy();
+    m_depth_image.destroy();
 
-    if (!m_depth_image.CreateImage(math::uvec2(m_size), m_depth_format, VK_IMAGE_TILING_OPTIMAL,
+    if (!m_depth_image.createImage(math::uvec2(m_size), m_depth_format, VK_IMAGE_TILING_OPTIMAL,
                                    VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT)) {
         LogError(sTag, "Could not create depth image");
         return false;
     }
 
-    if (!m_depth_image.AllocateMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)) {
+    if (!m_depth_image.allocateMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)) {
         LogError(sTag, "Could not allocate memory for depth image");
         return false;
     }
 
-    if (!m_depth_image.CreateImageView(m_depth_format, VK_IMAGE_ASPECT_DEPTH_BIT)) {
+    if (!m_depth_image.createImageView(m_depth_format, VK_IMAGE_ASPECT_DEPTH_BIT)) {
         LogError(sTag, "Could not create depth image view");
         return false;
     }
 
-    SubmitGraphicsCommand([this](VkCommandBuffer& command_buffer) {
+    submitGraphicsCommand([this](VkCommandBuffer& command_buffer) {
         bool has_stencil_component =
             (m_depth_format == VK_FORMAT_D32_SFLOAT_S8_UINT || m_depth_format == VK_FORMAT_D24_UNORM_S8_UINT);
 
@@ -912,7 +912,7 @@ bool Vk_RenderWindow::CreateDepthResources() {
             VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,  // newLayout
             VK_QUEUE_FAMILY_IGNORED,                           // srcQueueFamilyIndex
             VK_QUEUE_FAMILY_IGNORED,                           // dstQueueFamilyIndex
-            m_depth_image.GetHandle(),                         // image
+            m_depth_image.getHandle(),                         // image
             {
                 aspect_mask,  // aspectMask
                 0,            // baseMipLevel
@@ -931,67 +931,67 @@ bool Vk_RenderWindow::CreateDepthResources() {
     return true;
 }
 
-void Vk_RenderWindow::OnWindowResized(const math::ivec2& size) {
-    if (m_surface.GetHandle() != VK_NULL_HANDLE) {
+void Vk_RenderWindow::onWindowResized(const math::ivec2& size) {
+    if (m_surface.getHandle() != VK_NULL_HANDLE) {
         // Recreate the depth image
-        CreateDepthResources();
+        createDepthResources();
         // Recreate the Vulkan Swapchain
-        m_swapchain.Create(m_surface, size.x, size.y);
-        m_command_work_queue.Clear();
+        m_swapchain.create(m_surface, size.x, size.y);
+        m_command_work_queue.clear();
     }
 }
 
-void Vk_RenderWindow::OnAppWillEnterBackground() {
-    RenderWindow::OnAppWillEnterBackground();
-    vkQueueWaitIdle(m_graphics_queue->GetHandle());
+void Vk_RenderWindow::onAppWillEnterBackground() {
+    RenderWindow::onAppWillEnterBackground();
+    vkQueueWaitIdle(m_graphics_queue->getHandle());
     m_render_resources.clear();
-    m_swapchain.Destroy();
-    m_surface.Destroy();
-    m_command_work_queue.Clear();
+    m_swapchain.destroy();
+    m_surface.destroy();
+    m_command_work_queue.clear();
 }
 
-void Vk_RenderWindow::OnAppDidEnterBackground() {
-    RenderWindow::OnAppDidEnterBackground();
+void Vk_RenderWindow::onAppDidEnterBackground() {
+    RenderWindow::onAppDidEnterBackground();
 }
 
-void Vk_RenderWindow::OnAppWillEnterForeground() {
-    RenderWindow::OnAppWillEnterForeground();
+void Vk_RenderWindow::onAppWillEnterForeground() {
+    RenderWindow::onAppWillEnterForeground();
 }
 
-void Vk_RenderWindow::OnAppDidEnterForeground() {
-    RenderWindow::OnAppDidEnterForeground();
+void Vk_RenderWindow::onAppDidEnterForeground() {
+    RenderWindow::onAppDidEnterForeground();
     Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
+    VkDevice& device = context.getVulkanDevice();
 
     if (device) {
         vkDeviceWaitIdle(device);
 
-        if (!m_surface.Create(reinterpret_cast<SDL_Window*>(m_window))) {
+        if (!m_surface.create(reinterpret_cast<SDL_Window*>(m_window))) {
             LogFatal(sTag, "Could not create the Surface");
             return;
         }
 
-        if (!CheckWSISupport()) {
-            PhysicalDeviceParameters& physical_device = context.GetPhysicalDevice();
+        if (!checkWsiSupport()) {
+            PhysicalDeviceParameters& physical_device = context.getPhysicalDevice();
             LogFatal(sTag,
                      "Physical device {} doesn't include WSI "
                      "support"_format(physical_device.properties.deviceName));
             return;
         }
 
-        if (!CreateDepthResources()) {
+        if (!createDepthResources()) {
             LogFatal(sTag, "Could not create the DepthResources");
             return;
         }
 
-        if (!m_swapchain.Create(m_surface, m_size.x, m_size.y)) {
+        if (!m_swapchain.create(m_surface, m_size.x, m_size.y)) {
             LogFatal(sTag, "Could not create the SwapChain");
             return;
         }
 
-        m_render_resources.resize(m_swapchain.GetImages().size());
+        m_render_resources.resize(m_swapchain.getImages().size());
         for (Vk_RenderResource& render_resource : m_render_resources) {
-            if (!render_resource.Create()) {
+            if (!render_resource.create()) {
                 LogFatal(sTag, "Could not create the RenderingResources");
                 return;
             }

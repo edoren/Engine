@@ -23,29 +23,29 @@ public:
 
     ~Main();
 
-    void Initialize(App* app);
+    void initialize(App* app);
 
-    void Run();
+    void run();
 
-    void Shutdown();
+    void shutdown();
 
-    void SetActiveScene(const String& scene_name);
+    void setActiveScene(const String& scene_name);
 
-    void LoadPlugin(const String& pluginName);
+    void loadPlugin(const String& pluginName);
 
-    void UnloadPlugin(const String& pluginName);
+    void unloadPlugin(const String& pluginName);
 
-    void InstallPlugin(Plugin* plugin);
+    void installPlugin(Plugin* plugin);
 
-    void UninstallPlugin(Plugin* plugin);
+    void uninstallPlugin(Plugin* plugin);
 
-    void AddRenderer(std::unique_ptr<Renderer>&& new_renderer);
+    void addRenderer(std::unique_ptr<Renderer>&& new_renderer);
 
-    Renderer& GetActiveRenderer();
+    Renderer& getActiveRenderer();
 
-    Renderer* GetActiveRendererPtr();
+    Renderer* getActiveRendererPtr();
 
-    void ExecuteAsync(Function<void()>&& task);
+    void executeAsync(Function<void()>&& task);
 
     ////////////////////////////////////////////////////////////
     /// @brief Override standard Singleton retrieval.
@@ -88,19 +88,19 @@ private:
     /// @brief Initialize all the loaded installed
     ///
     ////////////////////////////////////////////////////////////
-    void InitializePlugins();
+    void initializePlugins();
 
     ////////////////////////////////////////////////////////////
     /// @brief Shutdown all the loaded installed
     ///
     ////////////////////////////////////////////////////////////
-    void ShutdownPlugins();
+    void shutdownPlugins();
 
     ////////////////////////////////////////////////////////////
     /// @brief Set the Renderer that the engine will use
     ///
     ////////////////////////////////////////////////////////////
-    void SetActiveRenderer();
+    void setActiveRenderer();
 
     std::vector<SharedLibrary*> m_plugin_libs;
     std::vector<Plugin*> m_plugins;

@@ -12,20 +12,20 @@ public:
     Vk_SwapChain();
     ~Vk_SwapChain();
 
-    bool Create(Vk_Surface& surface, uint32 width, uint32 height);
-    void Destroy();
+    bool create(Vk_Surface& surface, uint32 width, uint32 height);
+    void destroy();
 
-    VkSwapchainKHR& GetHandle();
-    VkFormat& GetFormat();
-    std::vector<Vk_Image>& GetImages();
+    VkSwapchainKHR& getHandle();
+    VkFormat& getFormat();
+    std::vector<Vk_Image>& getImages();
 
 private:
-    uint32 GetNumImages(const VkSurfaceCapabilitiesKHR& surface_capabilities);
-    VkSurfaceFormatKHR GetFormat(const std::vector<VkSurfaceFormatKHR>& surface_formats);
-    VkExtent2D GetExtent(const VkSurfaceCapabilitiesKHR& surface_capabilities, uint32 width, uint32 height);
-    VkImageUsageFlags GetUsageFlags(const VkSurfaceCapabilitiesKHR& surface_capabilities);
-    VkSurfaceTransformFlagBitsKHR GetTransform(const VkSurfaceCapabilitiesKHR& surface_capabilities);
-    VkPresentModeKHR GetPresentMode(const std::vector<VkPresentModeKHR>& present_modes);
+    uint32 getNumImages(const VkSurfaceCapabilitiesKHR& surface_capabilities);
+    VkSurfaceFormatKHR getFormat(const std::vector<VkSurfaceFormatKHR>& surface_formats);
+    VkExtent2D getExtent(const VkSurfaceCapabilitiesKHR& surface_capabilities, uint32 width, uint32 height);
+    VkImageUsageFlags getUsageFlags(const VkSurfaceCapabilitiesKHR& surface_capabilities);
+    VkSurfaceTransformFlagBitsKHR getTransform(const VkSurfaceCapabilitiesKHR& surface_capabilities);
+    VkPresentModeKHR getPresentMode(const std::vector<VkPresentModeKHR>& present_modes);
 
     VkSwapchainKHR m_handle;
     VkFormat m_format;

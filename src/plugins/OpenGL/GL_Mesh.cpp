@@ -35,16 +35,16 @@ GL_Mesh::~GL_Mesh() {
     }
 }
 
-void GL_Mesh::LoadFromData(std::vector<Vertex> vertices,
+void GL_Mesh::loadFromData(std::vector<Vertex> vertices,
                            std::vector<uint32> indices,
                            std::vector<std::pair<Texture2D*, TextureType>> textures) {
     m_vertices = std::move(vertices);
     m_indices = std::move(indices);
     m_textures = std::move(textures);
-    SetupMesh();
+    setupMesh();
 }
 
-void GL_Mesh::SetupMesh() {
+void GL_Mesh::setupMesh() {
     GL_CALL(glGenVertexArrays(1, &m_VAO));
 
     GL_CALL(glGenBuffers(1, &m_VBO));
@@ -74,9 +74,9 @@ void GL_Mesh::SetupMesh() {
     GL_CALL(glBindVertexArray(0));
 }
 
-void GL_Mesh::Draw(RenderWindow& target, const RenderStates& states) const {
+void GL_Mesh::draw(RenderWindow& target, const RenderStates& states) const {
     GL_RenderWindow& window = static_cast<GL_RenderWindow&>(target);
-    GL_Shader* shader = GL_ShaderManager::GetInstance().GetActiveShader();
+    GL_Shader* shader = GL_ShaderManager::GetInstance().getActiveShader();
 
     uint32 diffuse_num = 1;
     uint32 specular_num = 1;
@@ -100,30 +100,30 @@ void GL_Mesh::Draw(RenderWindow& target, const RenderStates& states) const {
         GL_CALL(glActiveTexture(static_cast<GLenum>(GL_TEXTURE0 + i)));
 
         if (shader != nullptr) {
-            shader->SetUniform(uniform_name, static_cast<GLint>(i));
+            shader->setUniform(uniform_name, static_cast<GLint>(i));
         }
 
         if (current_texture) {
-            current_texture->Use();
+            current_texture->use();
         }
     }
 
     if (shader) {
-        const Camera* active_camera = window.GetActiveCamera();
+        const Camera* active_camera = window.getActiveCamera();
 
-        math::mat4 model_matrix = states.transform.GetMatrix();
+        math::mat4 model_matrix = states.transform.getMatrix();
 
-        math::mat4 view_matrix = (active_camera != nullptr) ? active_camera->GetViewMatrix() : math::mat4();
-        const math::mat4& projection_matrix = window.GetProjectionMatrix();
+        math::mat4 view_matrix = (active_camera != nullptr) ? active_camera->getViewMatrix() : math::mat4();
+        const math::mat4& projection_matrix = window.getProjectionMatrix();
 
         math::mat4 mvp_matrix = projection_matrix * view_matrix * model_matrix;
-        math::mat4 normal_matrix = model_matrix.Inverse().Transpose();
+        math::mat4 normal_matrix = model_matrix.inverse().transpose();
 
-        UniformBufferObject& ubo_dynamic = shader->GetUBODynamic();
-        ubo_dynamic.SetAttributeValue("model", model_matrix);
-        ubo_dynamic.SetAttributeValue("normalMatrix", normal_matrix);
-        ubo_dynamic.SetAttributeValue("mvp", mvp_matrix);
-        shader->UploadUniformBuffers();
+        UniformBufferObject& ubo_dynamic = shader->getUboDynamic();
+        ubo_dynamic.setAttributeValue("model", model_matrix);
+        ubo_dynamic.setAttributeValue("normalMatrix", normal_matrix);
+        ubo_dynamic.setAttributeValue("mvp", mvp_matrix);
+        shader->uploadUniformBuffers();
     }
 
     GL_CALL(glActiveTexture(GL_TEXTURE0));

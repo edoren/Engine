@@ -19,11 +19,11 @@ struct PhysicalDeviceParameters {
         return handle;
     }
 
-    VkPhysicalDevice& GetHandle() {
+    VkPhysicalDevice& getHandle() {
         return handle;
     }
 
-    VkFormatProperties GetFormatProperties(VkFormat format) const {
+    VkFormatProperties getFormatProperties(VkFormat format) const {
         VkFormatProperties format_properties;
         vkGetPhysicalDeviceFormatProperties(handle, format, &format_properties);
         return format_properties;
@@ -41,7 +41,7 @@ struct QueueParameters {
         return handle;
     }
 
-    VkQueue& GetHandle() {
+    VkQueue& getHandle() {
         return handle;
     }
 };
@@ -57,7 +57,7 @@ struct DescriptorSetParameters {
         return handle;
     }
 
-    VkDescriptorSet& GetHandle() {
+    VkDescriptorSet& getHandle() {
         return handle;
     }
 };

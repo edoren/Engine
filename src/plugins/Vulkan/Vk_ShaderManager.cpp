@@ -31,34 +31,34 @@ Vk_ShaderManager::~Vk_ShaderManager() {
     sDerivedInstance = nullptr;
 }
 
-Vk_Shader* Vk_ShaderManager::LoadFromFile(const String& basename) {
-    Shader* base_shader = ShaderManager::LoadFromFile(basename);
+Vk_Shader* Vk_ShaderManager::loadFromFile(const String& basename) {
+    Shader* base_shader = ShaderManager::loadFromFile(basename);
     return reinterpret_cast<Vk_Shader*>(base_shader);
 }
 
-Vk_Shader* Vk_ShaderManager::LoadFromMemory(const String& name, std::map<ShaderType, String*> shader_data_map) {
-    Shader* base_shader = ShaderManager::LoadFromMemory(name, shader_data_map);
+Vk_Shader* Vk_ShaderManager::loadFromMemory(const String& name, std::map<ShaderType, String*> shader_data_map) {
+    Shader* base_shader = ShaderManager::loadFromMemory(name, shader_data_map);
     return reinterpret_cast<Vk_Shader*>(base_shader);
 }
 
-Vk_Shader* Vk_ShaderManager::GetShader(const String& name) {
-    Shader* base_shader = ShaderManager::GetShader(name);
+Vk_Shader* Vk_ShaderManager::getShader(const String& name) {
+    Shader* base_shader = ShaderManager::getShader(name);
     return reinterpret_cast<Vk_Shader*>(base_shader);
 }
 
-Vk_Shader* Vk_ShaderManager::GetActiveShader() {
+Vk_Shader* Vk_ShaderManager::getActiveShader() {
     return reinterpret_cast<Vk_Shader*>(m_active_shader);
 }
 
-std::unique_ptr<Shader> Vk_ShaderManager::CreateShader() {
+std::unique_ptr<Shader> Vk_ShaderManager::createShader() {
     return std::make_unique<Vk_Shader>();
 }
 
-void Vk_ShaderManager::UseShader(Shader* shader) {
+void Vk_ShaderManager::useShader(Shader* shader) {
     ENGINE_UNUSED(shader);
 }
 
-const String& Vk_ShaderManager::GetShaderFolder() const {
+const String& Vk_ShaderManager::getShaderFolder() const {
     return sShaderFolder;
 }
 

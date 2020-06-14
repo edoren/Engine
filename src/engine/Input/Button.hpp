@@ -36,16 +36,16 @@ class ENGINE_API Button {
 public:
     Button();
 
-    bool IsDown() const;
+    bool isDown() const;
 
-    bool WentDown() const;
+    bool wentDown() const;
 
-    bool WentUp() const;
+    bool wentUp() const;
 
 private:
-    void AdvanceFrame();
+    void advanceFrame();
 
-    void Update(bool down);
+    void update(bool down);
 
     bool m_is_down;
     bool m_went_down;

@@ -18,29 +18,29 @@ public:
 
     virtual ~TextureManager();
 
-    virtual void Initialize();
+    virtual void initialize();
 
-    virtual void Shutdown();
+    virtual void shutdown();
 
     ////////////////////////////////////////////////////////////
     /// @brief Load a texture from the filesystem
     ///
     /// @return On success returns the Texture2D handler or nullptr on failure
     ////////////////////////////////////////////////////////////
-    virtual Texture2D* LoadFromFile(const String& basename);
+    virtual Texture2D* loadFromFile(const String& basename);
 
     ////////////////////////////////////////////////////////////
     /// @brief Load a texture from a Image
     ///
     /// @return On success returns the Texture2D handler or nullptr on failure
     ////////////////////////////////////////////////////////////
-    virtual Texture2D* LoadFromImage(const String& name, const Image& image);
+    virtual Texture2D* loadFromImage(const String& name, const Image& image);
 
-    Texture2D* GetTexture2D(const String& name);
+    Texture2D* getTexture2D(const String& name);
 
-    void SetActiveTexture2D(const String& basename);
+    void setActiveTexture2D(const String& basename);
 
-    Texture2D* GetActiveTexture2D();
+    Texture2D* getActiveTexture2D();
 
     ////////////////////////////////////////////////////////////
     /// @brief Override standard Singleton retrieval.
@@ -79,8 +79,8 @@ public:
     static TextureManager* GetInstancePtr();
 
 protected:
-    virtual std::unique_ptr<Texture2D> CreateTexture2D() = 0;
-    virtual void UseTexture2D(Texture2D* texture) = 0;
+    virtual std::unique_ptr<Texture2D> createTexture2D() = 0;
+    virtual void useTexture2D(Texture2D* texture) = 0;
 
     Texture2D* m_active_texture;
     std::map<String, std::unique_ptr<Texture2D>> m_textures;

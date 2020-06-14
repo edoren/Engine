@@ -16,16 +16,16 @@ public:
 
     virtual ~Renderer();
 
-    virtual bool Initialize();
+    virtual bool initialize();
 
-    virtual void Shutdown();
+    virtual void shutdown();
 
-    virtual void AdvanceFrame();
+    virtual void advanceFrame();
 
-    virtual const String& GetName() const = 0;
+    virtual const String& getName() const = 0;
 
-    RenderWindow& GetRenderWindow();
-    std::unique_ptr<RenderWindow>& GetRenderWindowPtr();
+    RenderWindow& getRenderWindow();
+    std::unique_ptr<RenderWindow>& getRenderWindowPtr();
 
 protected:
     std::unique_ptr<RenderWindow> m_render_window;

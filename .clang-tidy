@@ -10,8 +10,10 @@ CheckOptions:
     #   value: "lower_case"
     # - key: readability-identifier-naming.ClassMemberPrefix
     #   value: "m_"
-    # - key: readability-identifier-naming.ClassMethodCase
-    #   value: "camelBack"
+    - key: readability-identifier-naming.MethodCase
+      value: "camelBack"
+    - key: readability-identifier-naming.ClassMethodCase
+      value: "CamelCase"
     - key: readability-identifier-naming.ClassConstantCase
       value: "CamelCase"
     - key: readability-identifier-naming.ClassConstantPrefix

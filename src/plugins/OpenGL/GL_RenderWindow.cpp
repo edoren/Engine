@@ -18,10 +18,10 @@ const String sTag("GL_RenderWindow");
 GL_RenderWindow::GL_RenderWindow() : m_context(nullptr) {}
 
 GL_RenderWindow::~GL_RenderWindow() {
-    Destroy();
+    destroy();
 }
 
-bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
+bool GL_RenderWindow::create(const String& name, const math::ivec2& size) {
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
@@ -37,7 +37,7 @@ bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
 
     math::ivec2 initial_pos(SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
     Uint32 window_flags(SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
-    m_window = SDL_CreateWindow(name.GetData(), initial_pos.x, initial_pos.y, size.x, size.y, window_flags);
+    m_window = SDL_CreateWindow(name.getData(), initial_pos.x, initial_pos.y, size.x, size.y, window_flags);
     if (!m_window) {
         LogError(sTag, SDL_GetError());
         return false;
@@ -104,7 +104,7 @@ bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
     GL_CALL(glEnable(GL_DEPTH_TEST));
 
     // Update the base class attributes
-    RenderWindow::Create(name, size);
+    RenderWindow::create(name, size);
 
     return true;
 }
@@ -120,27 +120,27 @@ bool GL_RenderWindow::Create(const String& name, const math::ivec2& size) {
 //    // GL_CALL(glViewport(0, 0, m_window_size.x, m_window_size.y));
 //}
 
-void GL_RenderWindow::Destroy() {
+void GL_RenderWindow::destroy() {
     if (m_context) {
         SDL_GL_DeleteContext(m_context);
         m_context = nullptr;
     }
-    RenderWindow::Destroy();
+    RenderWindow::destroy();
 }
 
-void GL_RenderWindow::Resize(int width, int height) {
-    RenderWindow::Resize(width, height);
+void GL_RenderWindow::resize(int width, int height) {
+    RenderWindow::resize(width, height);
     // TODO: TMP Update the ViewPort
     GL_CALL(glViewport(0, 0, m_size.x, m_size.y));
 }
 
-void GL_RenderWindow::SetFullScreen(bool fullscreen, bool is_fake) {
-    RenderWindow::SetFullScreen(fullscreen, is_fake);
+void GL_RenderWindow::setFullScreen(bool fullscreen, bool is_fake) {
+    RenderWindow::setFullScreen(fullscreen, is_fake);
     // TODO: TMP Update the ViewPort
     GL_CALL(glViewport(0, 0, m_size.x, m_size.y));
 }
 
-void GL_RenderWindow::SetVSyncEnabled(bool vsync) {
+void GL_RenderWindow::setVSyncEnabled(bool vsync) {
     if (SDL_GL_SetSwapInterval(vsync ? 1 : 0) == 0) {
         m_is_vsync_enable = vsync;
     } else {
@@ -148,32 +148,32 @@ void GL_RenderWindow::SetVSyncEnabled(bool vsync) {
     }
 }
 
-void GL_RenderWindow::SwapBuffers() {
+void GL_RenderWindow::swapBuffers() {
     // Update static uniform buffer
-    GL_Shader* shader = GL_ShaderManager::GetInstance().GetActiveShader();
-    const Camera* active_camera = GetActiveCamera();
+    GL_Shader* shader = GL_ShaderManager::GetInstance().getActiveShader();
+    const Camera* active_camera = getActiveCamera();
 
     math::vec3 front_vector;
     math::vec3 light_position;  // TMP: Get this from other
                                 //      part a LightManager maybe?
     if (active_camera != nullptr) {
-        front_vector = active_camera->GetFrontVector();
-        light_position = active_camera->GetPosition();
+        front_vector = active_camera->getFrontVector();
+        light_position = active_camera->getPosition();
     }
 
-    UniformBufferObject& ubo = shader->GetUBO();
-    ubo.SetAttributeValue("cameraFront", front_vector);
-    ubo.SetAttributeValue("lightPosition", light_position);
+    UniformBufferObject& ubo = shader->getUbo();
+    ubo.setAttributeValue("cameraFront", front_vector);
+    ubo.setAttributeValue("lightPosition", light_position);
     ///
 
     SDL_GL_SwapWindow(reinterpret_cast<SDL_Window*>(m_window));
 }
 
-void GL_RenderWindow::OnWindowResized(const math::ivec2& size) {
+void GL_RenderWindow::onWindowResized(const math::ivec2& size) {
     ENGINE_UNUSED(size);
 }
 
-void GL_RenderWindow::Clear(const Color& color) {  // RenderTarget
+void GL_RenderWindow::clear(const Color& color) {  // RenderTarget
     GL_CALL(glClearColor(color.r, color.g, color.b, color.a));
     GL_CALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }

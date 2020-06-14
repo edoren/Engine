@@ -14,41 +14,41 @@ String sRendererName("Vulkan");
 Vk_Renderer::Vk_Renderer() {}
 
 Vk_Renderer::~Vk_Renderer() {
-    Shutdown();
+    shutdown();
 }
 
-bool Vk_Renderer::Initialize() {
-    bool ok = Renderer::Initialize();
+bool Vk_Renderer::initialize() {
+    bool ok = Renderer::initialize();
     if (ok) {
         m_context = std::make_unique<Vk_Context>();
-        ok = ok && m_context->Initialize();
+        ok = ok && m_context->initialize();
         m_render_window = std::make_unique<Vk_RenderWindow>();
         m_shader_manager = std::make_unique<Vk_ShaderManager>();
         m_texture_manager = std::make_unique<Vk_TextureManager>();
         m_model_manager = std::make_unique<Vk_ModelManager>();
 
         // TODO: Remove this
-        m_shader_manager->LoadFromFile("model");
+        m_shader_manager->loadFromFile("model");
     }
     return ok;
 }
 
-void Vk_Renderer::Shutdown() {
+void Vk_Renderer::shutdown() {
     m_model_manager.reset();
     m_texture_manager.reset();
     m_shader_manager.reset();
     m_render_window.reset();
     m_context.reset();
-    Renderer::Shutdown();
+    Renderer::shutdown();
 }
 
-void Vk_Renderer::AdvanceFrame() {
-    Renderer::AdvanceFrame();
+void Vk_Renderer::advanceFrame() {
+    Renderer::advanceFrame();
     // TODO: User enable depth test
     // Vk_CALL(glEnable(Vk_DEPTH_TEST));
 }
 
-const String& Vk_Renderer::GetName() const {
+const String& Vk_Renderer::getName() const {
     return sRendererName;
 }
 

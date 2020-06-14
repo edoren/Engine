@@ -13,7 +13,7 @@ GL_Texture2D::~GL_Texture2D() {
     }
 }
 
-bool GL_Texture2D::LoadFromImage(const Image& img) {
+bool GL_Texture2D::loadFromImage(const Image& img) {
     GL_CALL(glBindTexture(GL_TEXTURE_2D, m_texture));
 
     GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
@@ -21,8 +21,8 @@ bool GL_Texture2D::LoadFromImage(const Image& img) {
     GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
     GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
 
-    const math::uvec2& size = img.GetSize();
-    const byte* data = img.GetData();
+    const math::uvec2& size = img.getSize();
+    const byte* data = img.getData();
 
     GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, data));
     GL_CALL(glGenerateMipmap(GL_TEXTURE_2D));
@@ -32,7 +32,7 @@ bool GL_Texture2D::LoadFromImage(const Image& img) {
     return true;
 }
 
-void GL_Texture2D::Use() {
+void GL_Texture2D::use() {
     GL_CALL(glBindTexture(GL_TEXTURE_2D, m_texture));
 }
 

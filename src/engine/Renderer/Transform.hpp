@@ -17,11 +17,11 @@ public:
     Transform& operator=(const Transform& other);
     Transform& operator=(Transform&& other);
 
-    void Rotate(const math::Vector3<float>& euler_angles);
-    void Scale(const math::Vector3<float>& scale);
-    void Translate(const math::Vector3<float>& translate);
+    void rotate(const math::Vector3<float>& euler_angles);
+    void scale(const math::Vector3<float>& scale);
+    void translate(const math::Vector3<float>& translate);
 
-    math::Matrix4x4<float> GetMatrix() const;
+    math::Matrix4x4<float> getMatrix() const;
 
 private:
     math::Vector3<float> m_scale;

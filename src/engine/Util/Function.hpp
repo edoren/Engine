@@ -109,7 +109,7 @@ public:
         return *this;
     }
 
-    void Swap(Function& other) {
+    void swap(Function& other) {
         std::swap(m_data, other.m_data);
         std::swap(m_manager, other.m_manager);
         std::swap(m_invoker, other.m_invoker);

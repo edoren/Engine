@@ -10,17 +10,17 @@ class ENGINE_API Stopwatch {
 public:
     Stopwatch();
 
-    Time GetElapsedTime() const;
+    Time getElapsedTime() const;
 
-    void Start();
+    void start();
 
-    void Stop();
+    void stop();
 
-    void Restart();
+    void restart();
 
 private:
     // Return actual time since epoch
-    Time GetActualTime() const;
+    Time getActualTime() const;
 
     bool m_running;
     Time m_start_time;

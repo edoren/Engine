@@ -18,8 +18,8 @@ Vk_Texture2D::Vk_Texture2D() {}
 
 Vk_Texture2D::~Vk_Texture2D() {
     Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
-    QueueParameters& graphics_queue = context.GetGraphicsQueue();
+    VkDevice& device = context.getVulkanDevice();
+    QueueParameters& graphics_queue = context.getGraphicsQueue();
 
     vkQueueWaitIdle(graphics_queue.handle);
 
@@ -29,50 +29,50 @@ Vk_Texture2D::~Vk_Texture2D() {
     }
 }
 
-bool Vk_Texture2D::LoadFromImage(const Image& img) {
-    if (!m_image.CreateImage(img.GetSize(), VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL,
+bool Vk_Texture2D::loadFromImage(const Image& img) {
+    if (!m_image.createImage(img.getSize(), VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_TILING_OPTIMAL,
                              (VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT))) {
         LogError(sTag, "Could not create image");
         return false;
     }
 
-    if (!m_image.AllocateMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)) {
+    if (!m_image.allocateMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)) {
         LogError(sTag, "Could not allocate memory for image");
         return false;
     }
 
-    if (!m_image.CreateImageView(VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT)) {
+    if (!m_image.createImageView(VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_ASPECT_COLOR_BIT)) {
         LogError(sTag, "Could not create image view");
         return false;
     }
 
-    if (!CreateSampler()) {
+    if (!createSampler()) {
         LogError(sTag, "Could not create sampler");
         return false;
     }
 
-    if (!CopyTextureData(img)) {
+    if (!copyTextureData(img)) {
         LogError(sTag, "Could not upload texture data to device memory");
         return false;
     }
 
-    AllocateDescriptorSet();
-    UpdateDescriptorSet();
+    allocateDescriptorSet();
+    updateDescriptorSet();
 
     return true;
 }
 
-void Vk_Texture2D::Use() {}
+void Vk_Texture2D::use() {}
 
-VkDescriptorSet& Vk_Texture2D::GetDescriptorSet() {
+VkDescriptorSet& Vk_Texture2D::getDescriptorSet() {
     return m_descriptor_set;
 }
 
-bool Vk_Texture2D::CreateSampler() {
+bool Vk_Texture2D::createSampler() {
     Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
+    VkDevice& device = context.getVulkanDevice();
 
-    VkBool32 anisotropyEnable = context.GetEnabledFeatures().samplerAnisotropy;
+    VkBool32 anisotropyEnable = context.getEnabledFeatures().samplerAnisotropy;
     float maxAnisotropy = 16.0F;
 
     // TODO: This should be configurable from the Renderer instance
@@ -102,21 +102,21 @@ bool Vk_Texture2D::CreateSampler() {
     return result == VK_SUCCESS;
 }
 
-bool Vk_Texture2D::CopyTextureData(const Image& img) {
+bool Vk_Texture2D::copyTextureData(const Image& img) {
     Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
-    QueueParameters& graphics_queue = context.GetGraphicsQueue();
+    VkDevice& device = context.getVulkanDevice();
+    QueueParameters& graphics_queue = context.getGraphicsQueue();
 
     VkResult result = VK_SUCCESS;
 
-    if (!m_staging_buffer.Create(img.GetDataSize(), VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+    if (!m_staging_buffer.create(img.getDataSize(), VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                                  VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) {
         LogFatal(sTag, "Could not create Staging Buffer");
     }
 
     // Prepare data in staging buffer
     void* staging_buffer_memory_pointer;
-    result = vkMapMemory(device, m_staging_buffer.GetMemory(), 0, img.GetDataSize(), 0, &staging_buffer_memory_pointer);
+    result = vkMapMemory(device, m_staging_buffer.getMemory(), 0, img.getDataSize(), 0, &staging_buffer_memory_pointer);
     if (result != VK_SUCCESS) {
         LogError(sTag,
                  "Could not map memory and upload "
@@ -124,25 +124,25 @@ bool Vk_Texture2D::CopyTextureData(const Image& img) {
         return false;
     }
 
-    std::memcpy(staging_buffer_memory_pointer, img.GetData(), img.GetDataSize());
+    std::memcpy(staging_buffer_memory_pointer, img.getData(), img.getDataSize());
 
     VkMappedMemoryRange flush_range = {
         VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,  // sType
         nullptr,                                // pNext
-        m_staging_buffer.GetMemory(),           // memory
+        m_staging_buffer.getMemory(),           // memory
         0,                                      // offset
-        img.GetDataSize()                       // size
+        img.getDataSize()                       // size
     };
     vkFlushMappedMemoryRanges(device, 1, &flush_range);
 
-    vkUnmapMemory(device, m_staging_buffer.GetMemory());
+    vkUnmapMemory(device, m_staging_buffer.getMemory());
 
     // Prepare command buffer to copy data from staging buffer to a vertex
     // buffer
     VkCommandBufferAllocateInfo allocInfo = {
         VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,  // sType
         nullptr,                                         // pNext
-        context.GetGraphicsQueueCmdPool(),               // commandPool
+        context.getGraphicsQueueCmdPool(),               // commandPool
         VK_COMMAND_BUFFER_LEVEL_PRIMARY,                 // level
         1                                                // commandBufferCount
     };
@@ -180,7 +180,7 @@ bool Vk_Texture2D::CopyTextureData(const Image& img) {
         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,    // newLayout
         VK_QUEUE_FAMILY_IGNORED,                 // srcQueueFamilyIndex
         VK_QUEUE_FAMILY_IGNORED,                 // dstQueueFamilyIndex
-        m_image.GetHandle(),                     // image
+        m_image.getHandle(),                     // image
         image_subresource_range                  // subresourceRange
     };
     vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0,
@@ -205,12 +205,12 @@ bool Vk_Texture2D::CopyTextureData(const Image& img) {
         },
         {
             // VkExtent3D imageExtent
-            img.GetSize().x,  // width
-            img.GetSize().y,  // height
+            img.getSize().x,  // width
+            img.getSize().y,  // height
             1                 // depth
         },
     };
-    vkCmdCopyBufferToImage(command_buffer, m_staging_buffer.GetHandle(), m_image.GetHandle(),
+    vkCmdCopyBufferToImage(command_buffer, m_staging_buffer.getHandle(), m_image.getHandle(),
                            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &buffer_image_copy_info);
 
     VkImageMemoryBarrier image_memory_barrier_from_transfer_to_shader_read = {
@@ -222,7 +222,7 @@ bool Vk_Texture2D::CopyTextureData(const Image& img) {
         VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,  // newLayout
         VK_QUEUE_FAMILY_IGNORED,                   // srcQueueFamilyIndex
         VK_QUEUE_FAMILY_IGNORED,                   // dstQueueFamilyIndex
-        m_image.GetHandle(),                       // image
+        m_image.getHandle(),                       // image
         image_subresource_range                    // subresourceRange
     };
     vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0,
@@ -255,9 +255,9 @@ bool Vk_Texture2D::CopyTextureData(const Image& img) {
     return true;
 }
 
-bool Vk_Texture2D::AllocateDescriptorSet() {
+bool Vk_Texture2D::allocateDescriptorSet() {
     Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
+    VkDevice& device = context.getVulkanDevice();
 
     Vk_TextureManager* texture_manager = Vk_TextureManager::GetInstancePtr();
 
@@ -266,9 +266,9 @@ bool Vk_Texture2D::AllocateDescriptorSet() {
     VkDescriptorSetAllocateInfo descriptor_set_allocate_info = {
         VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,  // sType
         nullptr,                                         // pNext
-        texture_manager->GetDescriptorPool(),            // descriptorPool
+        texture_manager->getDescriptorPool(),            // descriptorPool
         1,                                               // descriptorSetCount
-        &texture_manager->GetDescriptorSetLayout()       // pSetLayouts
+        &texture_manager->getDescriptorSetLayout()       // pSetLayouts
     };
 
     result = vkAllocateDescriptorSets(device, &descriptor_set_allocate_info, &m_descriptor_set);
@@ -280,16 +280,16 @@ bool Vk_Texture2D::AllocateDescriptorSet() {
     return true;
 }
 
-bool Vk_Texture2D::UpdateDescriptorSet() {
+bool Vk_Texture2D::updateDescriptorSet() {
     // This tell the driver which resources are going to be used by the
     // descriptor set
 
     Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
+    VkDevice& device = context.getVulkanDevice();
 
     VkDescriptorImageInfo image_info = {
         m_sampler,                                // sampler
-        m_image.GetView(),                        // imageView
+        m_image.getView(),                        // imageView
         VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL  // imageLayout
     };
 

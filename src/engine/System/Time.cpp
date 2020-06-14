@@ -33,27 +33,27 @@ Time Time::FromHours(float hours) {
     return Time(static_cast<int64>(hours * 3600000000000.F));
 }
 
-int64 Time::AsNanoseconds() const {
+int64 Time::asNanoseconds() const {
     return m_nanoseconds;
 }
 
-int64 Time::AsMicroseconds() const {
+int64 Time::asMicroseconds() const {
     return m_nanoseconds / 1000;
 }
 
-int64 Time::AsMilliseconds() const {
+int64 Time::asMilliseconds() const {
     return m_nanoseconds / 1000000;
 }
 
-float Time::AsSeconds() const {
+float Time::asSeconds() const {
     return static_cast<float>(m_nanoseconds / 1000000000.F);
 }
 
-float Time::AsMinutes() const {
+float Time::asMinutes() const {
     return static_cast<float>(m_nanoseconds / 60000000000.F);
 }
 
-float Time::AsHours() const {
+float Time::asHours() const {
     return static_cast<float>(m_nanoseconds / 3600000000000.F);
 }
 

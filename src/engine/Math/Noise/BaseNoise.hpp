@@ -12,24 +12,24 @@ public:
 
     virtual ~BaseNoise();
 
-    int GetSeed() const;
+    int getSeed() const;
 
-    virtual float GetValue(float x, float y, float z) const = 0;
+    virtual float getValue(float x, float y, float z) const = 0;
 
-    void SetSeed(int seed);
+    void setSeed(int seed);
 
-    float CoherentNoise3D(float x, float y, float z) const;
+    float coherentNoise3D(float x, float y, float z) const;
 
 private:
-    void GeneratePermutationVector();
+    void generatePermutationVector();
 
-    float Grad(int hash, float x, float y, float z) const;
+    float grad(int hash, float x, float y, float z) const;
 
-    float Fade(float t) const;
+    float fade(float t) const;
 
-    int FastFloor(float x) const;
+    int fastFloor(float x) const;
 
-    float Lerp(float t, float a, float b) const;
+    float lerp(float t, float a, float b) const;
 
     int m_seed;
     std::vector<int> m_perm;

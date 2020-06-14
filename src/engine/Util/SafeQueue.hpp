@@ -9,36 +9,36 @@ class SafeQueue {
 public:
     SafeQueue() {}
 
-    bool IsEmpty() const {
+    bool isEmpty() const {
         return m_impl.empty();
     }
 
-    size_t GetSize() const {
+    size_t getSize() const {
         return m_impl.size();
     }
 
-    void Clear() {
+    void clear() {
         std::lock_guard<std::mutex> lk(m_mutex);
         m_impl.clear();
     }
 
-    void Push(const T& value) {
+    void push(const T& value) {
         std::lock_guard<std::mutex> lk(m_mutex);
         return m_impl.push_back(value);
     }
 
-    void Push(T&& value) {
+    void push(T&& value) {
         std::lock_guard<std::mutex> lk(m_mutex);
         return m_impl.push_back(value);
     }
 
     template <class... Args>
-    void Emplace(Args&&... args) {
+    void emplace(Args&&... args) {
         std::lock_guard<std::mutex> lk(m_mutex);
         return m_impl.emplace_back(std::forward<Args>(args)...);
     }
 
-    T Pop() {
+    T pop() {
         T value = m_impl.front();
         m_impl.pop_front();
         return value;

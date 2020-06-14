@@ -365,7 +365,7 @@ public:
     ///
     /// @see ToUtf16, ToUtf32
     ////////////////////////////////////////////////////////////
-    const std::basic_string<char8>& ToUtf8() const;
+    const std::basic_string<char8>& toUtf8() const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Convert the Unicode string to a UTF-16 string
@@ -374,7 +374,7 @@ public:
     ///
     /// @see ToUtf8, ToUtf32
     ////////////////////////////////////////////////////////////
-    std::basic_string<char16> ToUtf16() const;
+    std::basic_string<char16> toUtf16() const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Convert the Unicode string to a UTF-32 string
@@ -383,7 +383,7 @@ public:
     ///
     /// @see ToUtf8, ToUtf16
     ////////////////////////////////////////////////////////////
-    std::basic_string<char32> ToUtf32() const;
+    std::basic_string<char32> toUtf32() const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Convert the Unicode string to a UTF-32 string
@@ -392,7 +392,7 @@ public:
     ///
     /// @see ToUtf8, ToUtf16
     ////////////////////////////////////////////////////////////
-    std::basic_string<wchar> ToWide() const;
+    std::basic_string<wchar> toWide() const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Overload of assignment operator
@@ -481,7 +481,7 @@ public:
     ///
     /// @see IsEmpty, erase
     ////////////////////////////////////////////////////////////
-    void Clear();
+    void clear();
 
     ////////////////////////////////////////////////////////////
     /// @brief Get the size of the string
@@ -490,7 +490,7 @@ public:
     ///
     /// @see IsEmpty
     ////////////////////////////////////////////////////////////
-    std::size_t GetSize() const;
+    std::size_t getSize() const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Check whether the string is empty or not
@@ -499,7 +499,7 @@ public:
     ///
     /// @see Clear, getSize
     ////////////////////////////////////////////////////////////
-    bool IsEmpty() const;
+    bool isEmpty() const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Erase one or more characters from the string
@@ -510,7 +510,7 @@ public:
     /// @param position Position of the first character to erase
     /// @param count    Number of characters to erase
     ////////////////////////////////////////////////////////////
-    void Erase(std::size_t position, std::size_t count = 1);
+    void erase(std::size_t position, std::size_t count = 1);
 
     ////////////////////////////////////////////////////////////
     /// @brief Insert one or more characters into the string
@@ -521,7 +521,7 @@ public:
     /// @param position Position of insertion
     /// @param str      Characters to insert
     ////////////////////////////////////////////////////////////
-    void Insert(std::size_t position, const String& str);
+    void insert(std::size_t position, const String& str);
 
     ////////////////////////////////////////////////////////////
     /// @brief Find a sequence of one or more characters in
@@ -536,7 +536,7 @@ public:
     /// @return Position of \a str in the string, or String::InvalidPos
     ///         if not found
     ////////////////////////////////////////////////////////////
-    std::size_t Find(const String& str, std::size_t start = 0) const;
+    std::size_t find(const String& str, std::size_t start = 0) const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Finds the first character equal to one of the
@@ -553,7 +553,7 @@ public:
     ///         in the string, or String::InvalidPos if not found
     ///
     ////////////////////////////////////////////////////////////
-    std::size_t FindFirstOf(const String& str, std::size_t pos = 0) const;
+    std::size_t findFirstOf(const String& str, std::size_t pos = 0) const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Finds the last character equal to one of the
@@ -570,7 +570,7 @@ public:
     ///         in the string, or String::InvalidPos if not found
     ///
     ////////////////////////////////////////////////////////////
-    std::size_t FindLastOf(const String& str, std::size_t pos = sInvalidPos) const;
+    std::size_t findLastOf(const String& str, std::size_t pos = sInvalidPos) const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Replace a SubString with another string
@@ -584,7 +584,7 @@ public:
     ///                    end of the string.
     /// @param replaceWith String that replaces the given SubString.
     ////////////////////////////////////////////////////////////
-    void Replace(std::size_t position, std::size_t length, const String& replaceWith);
+    void replace(std::size_t position, std::size_t length, const String& replaceWith);
 
     ////////////////////////////////////////////////////////////
     /// @brief Replace all occurrences of an Unicode code point with other
@@ -597,7 +597,7 @@ public:
     /// @param replaceWith The code point that replaces found \a searchFor
     ///                    code point
     ////////////////////////////////////////////////////////////
-    void Replace(uint32 searchFor, uint32 replaceWith);
+    void replace(uint32 searchFor, uint32 replaceWith);
 
     ////////////////////////////////////////////////////////////
     /// @brief Replace all occurrences of a SubString with a replacement string
@@ -608,7 +608,7 @@ public:
     /// @param searchFor   The value being searched for
     /// @param replaceWith The value that replaces found \a searchFor values
     ////////////////////////////////////////////////////////////
-    void Replace(const String& searchFor, const String& replaceWith);
+    void replace(const String& searchFor, const String& replaceWith);
 
     ////////////////////////////////////////////////////////////
     /// @brief Return a part of the string
@@ -625,7 +625,7 @@ public:
     ///
     /// @return String object containing a SubString of this object
     ////////////////////////////////////////////////////////////
-    String SubString(std::size_t position, std::size_t length = sInvalidPos) const;
+    String subString(std::size_t position, std::size_t length = sInvalidPos) const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Get a pointer to the C-style array of characters
@@ -637,7 +637,7 @@ public:
     ///
     /// @return Read-only pointer to the array of characters
     ////////////////////////////////////////////////////////////
-    const char8* GetData() const;
+    const char8* getData() const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Return an iterator to the beginning of the string
@@ -646,7 +646,7 @@ public:
     ///
     /// @see end
     ////////////////////////////////////////////////////////////
-    iterator Begin();
+    iterator begin();
 
     ////////////////////////////////////////////////////////////
     /// @brief Return an iterator to the beginning of the string
@@ -655,7 +655,7 @@ public:
     ///
     /// @see end
     ////////////////////////////////////////////////////////////
-    const_iterator Begin() const;
+    const_iterator begin() const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Return an iterator to the end of the string
@@ -668,7 +668,7 @@ public:
     ///
     /// @see begin
     ////////////////////////////////////////////////////////////
-    iterator End();
+    iterator end();
 
     ////////////////////////////////////////////////////////////
     /// @brief Return an iterator to the end of the string
@@ -681,7 +681,7 @@ public:
     ///
     /// @see begin
     ////////////////////////////////////////////////////////////
-    const_iterator End() const;
+    const_iterator end() const;
 
 private:
     friend ENGINE_API bool operator==(const String& left, const String& right);

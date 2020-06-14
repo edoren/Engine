@@ -13,13 +13,13 @@ public:
 
     ~SharedLibManager();
 
-    void Initialize();
+    void initialize();
 
-    void Shutdown();
+    void shutdown();
 
-    SharedLibrary* Load(const String& name);
+    SharedLibrary* load(const String& name);
 
-    void Unload(SharedLibrary* lib);
+    void unload(SharedLibrary* lib);
 
     ////////////////////////////////////////////////////////////
     /// @brief Override standard Singleton retrieval.

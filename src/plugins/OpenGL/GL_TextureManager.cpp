@@ -29,13 +29,13 @@ GL_TextureManager::~GL_TextureManager() {
     sDerivedInstance = nullptr;
 }
 
-std::unique_ptr<Texture2D> GL_TextureManager::CreateTexture2D() {
+std::unique_ptr<Texture2D> GL_TextureManager::createTexture2D() {
     return std::make_unique<GL_Texture2D>();
 }
 
-void GL_TextureManager::UseTexture2D(Texture2D* texture) {
+void GL_TextureManager::useTexture2D(Texture2D* texture) {
     GL_Texture2D* casted_texture = reinterpret_cast<GL_Texture2D*>(texture);
-    casted_texture->Use();
+    casted_texture->use();
 }
 
 }  // namespace engine

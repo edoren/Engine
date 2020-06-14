@@ -23,24 +23,24 @@ public:
 
     IOStream& operator=(IOStream&& other);
 
-    bool Open(const String& filename, const char* mode);
-    bool Open(const char8* filename, const char* mode);
+    bool open(const String& filename, const char* mode);
+    bool open(const char8* filename, const char* mode);
 
-    void Close();
+    void close();
 
-    size_t Read(void* buffer, size_t size, size_t count);
+    size_t read(void* buffer, size_t size, size_t count);
 
-    size_t Write(const void* buffer, size_t size, size_t count);
+    size_t write(const void* buffer, size_t size, size_t count);
 
-    int64 Seek(size_t offset, Origin origin);
+    int64 seek(size_t offset, Origin origin);
 
-    int64 Tell() const;
+    int64 tell() const;
 
-    size_t GetSize() const;
+    size_t getSize() const;
 
-    bool IsOpen() const;
+    bool isOpen() const;
 
-    const String& GetLastError() const;
+    const String& getLastError() const;
 
 private:
     SDL_RWops* m_file;

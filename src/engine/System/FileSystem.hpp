@@ -12,16 +12,16 @@ public:
 
     ~FileSystem();
 
-    void Initialize();
+    void initialize();
 
-    void Shutdown();
+    void shutdown();
 
     ////////////////////////////////////////////////////////////
     /// @brief Checks if a file exist
     ///
     /// @return true if the file exist, false otherwise
     ////////////////////////////////////////////////////////////
-    bool FileExists(const String& filename) const;
+    bool fileExists(const String& filename) const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Load a file to the memory
@@ -29,7 +29,7 @@ public:
     /// @return true if the file could be loaded, false
     ///         otherwise
     ////////////////////////////////////////////////////////////
-    bool LoadFileData(const String& filename, String* dest) const;
+    bool loadFileData(const String& filename, String* dest) const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Load a file to the memory
@@ -37,14 +37,14 @@ public:
     /// @return true if the file could be loaded, false
     ///         otherwise
     ////////////////////////////////////////////////////////////
-    bool LoadFileData(const String& filename, std::vector<byte>* dest) const;
+    bool loadFileData(const String& filename, std::vector<byte>* dest) const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Get the OS specific path separator
     ///
     /// @return The character that represents the path separator
     ////////////////////////////////////////////////////////////
-    char8 GetOsSeparator() const;
+    char8 getOsSeparator() const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Get the directory that contains the executable
@@ -52,7 +52,7 @@ public:
     ///
     /// @return String containing the executable directory
     ////////////////////////////////////////////////////////////
-    String ExecutableDirectory() const;
+    String executableDirectory() const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Return a string representing the current working
@@ -60,14 +60,14 @@ public:
     ///
     /// @return String containing the current working directory
     ////////////////////////////////////////////////////////////
-    String CurrentWorkingDirectory() const;
+    String currentWorkingDirectory() const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Return the absolute path
     ///
     /// @return String containing the absolute path
     ////////////////////////////////////////////////////////////
-    String AbsolutePath(const String& path) const;
+    String absolutePath(const String& path) const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Normalize a pathname by collapsing redundant
@@ -79,14 +79,14 @@ public:
     ///
     /// @return String containing the normalized path
     ////////////////////////////////////////////////////////////
-    String NormalizePath(const String& path) const;
+    String normalizePath(const String& path) const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Check if a path is absolute
     ///
     /// @return true if the path is absolute, false otherwise
     ////////////////////////////////////////////////////////////
-    bool IsAbsolutePath(const String& path) const;
+    bool isAbsolutePath(const String& path) const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Join two path components. The return value is
@@ -95,7 +95,7 @@ public:
     ///
     /// @return String concatenating the two paths components
     ////////////////////////////////////////////////////////////
-    String Join(const String& left, const String& right) const;
+    String join(const String& left, const String& right) const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Variadic version of the Join function that
@@ -105,8 +105,8 @@ public:
     ///         components
     ////////////////////////////////////////////////////////////
     template <typename... Args>
-    String Join(const String& left, const String& right, Args... Paths) const {
-        return Join(Join(left, right), Paths...);
+    String join(const String& left, const String& right, Args... Paths) const {
+        return join(join(left, right), Paths...);
     }
 
     ////////////////////////////////////////////////////////////
@@ -114,7 +114,7 @@ public:
     ///
     /// @param[in] search_paths Vector of new search paths
     ////////////////////////////////////////////////////////////
-    void SetSearchPaths(std::vector<String> search_paths);
+    void setSearchPaths(std::vector<String> search_paths);
 
     ////////////////////////////////////////////////////////////
     /// @brief Obtain the serch paths used to open files
@@ -122,7 +122,7 @@ public:
     /// @return A constant reference to the currently used search
     ///         paths
     ////////////////////////////////////////////////////////////
-    const std::vector<String>& GetSearchPaths() const;
+    const std::vector<String>& getSearchPaths() const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Add a path to the search paths used to open files
@@ -132,7 +132,7 @@ public:
     /// @return A constant reference to the currently used search
     ///         paths
     ////////////////////////////////////////////////////////////
-    void AddSearchPath(const String& path);
+    void addSearchPath(const String& path);
 
     ////////////////////////////////////////////////////////////
     /// @brief Override standard Singleton retrieval.

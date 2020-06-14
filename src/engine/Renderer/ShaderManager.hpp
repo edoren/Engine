@@ -13,9 +13,9 @@ public:
 
     virtual ~ShaderManager();
 
-    virtual void Initialize();
+    virtual void initialize();
 
-    virtual void Shutdown();
+    virtual void shutdown();
 
     ////////////////////////////////////////////////////////////
     /// @brief Load a shader from the filesystem
@@ -29,7 +29,7 @@ public:
     ///
     /// @return On success returns the Shader handler or nullptr on failure
     ////////////////////////////////////////////////////////////
-    Shader* LoadFromFile(const String& basename);
+    Shader* loadFromFile(const String& basename);
 
     ////////////////////////////////////////////////////////////
     /// @brief Load a shader from the memory
@@ -40,13 +40,13 @@ public:
     ///
     /// @return On success returns the Shader handler or nullptr on failure
     ////////////////////////////////////////////////////////////
-    Shader* LoadFromMemory(const String& name, std::map<ShaderType, String*> shader_data_map);
+    Shader* loadFromMemory(const String& name, std::map<ShaderType, String*> shader_data_map);
 
-    Shader* GetShader(const String& name);
+    Shader* getShader(const String& name);
 
-    void SetActiveShader(const String& basename);
+    void setActiveShader(const String& basename);
 
-    Shader* GetActiveShader();
+    Shader* getActiveShader();
 
     ////////////////////////////////////////////////////////////
     /// @brief Override standard Singleton retrieval.
@@ -85,11 +85,11 @@ public:
     static ShaderManager* GetInstancePtr();
 
 protected:
-    virtual std::unique_ptr<Shader> CreateShader() = 0;
+    virtual std::unique_ptr<Shader> createShader() = 0;
 
-    virtual void UseShader(Shader* shader) = 0;
+    virtual void useShader(Shader* shader) = 0;
 
-    virtual const String& GetShaderFolder() const = 0;
+    virtual const String& getShaderFolder() const = 0;
 
     Shader* m_active_shader;
     std::map<String, std::unique_ptr<Shader>> m_shaders;

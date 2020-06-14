@@ -14,22 +14,22 @@ public:
 
     ~Vk_Context();
 
-    bool Initialize();
+    bool initialize();
 
-    void Shutdown();
+    void shutdown();
 
-    VkInstance& GetVulkanInstance();
-    VkDevice& GetVulkanDevice();
+    VkInstance& getVulkanInstance();
+    VkDevice& getVulkanDevice();
 
-    PhysicalDeviceParameters& GetPhysicalDevice();
+    PhysicalDeviceParameters& getPhysicalDevice();
 
-    QueueParameters& GetGraphicsQueue();
+    QueueParameters& getGraphicsQueue();
 
-    VkCommandPool& GetGraphicsQueueCmdPool();
+    VkCommandPool& getGraphicsQueueCmdPool();
 
-    VkDescriptorPool& GetUBODescriptorPool();
+    VkDescriptorPool& getUboDescriptorPool();
 
-    const VkPhysicalDeviceFeatures& GetEnabledFeatures();
+    const VkPhysicalDeviceFeatures& getEnabledFeatures();
 
     ////////////////////////////////////////////////////////////
     /// @brief Override standard Singleton retrieval.
@@ -68,17 +68,17 @@ public:
     static Vk_Context* GetInstancePtr();
 
 private:
-    bool CreateInstance();
-    bool CreateDevice();
+    bool createInstance();
+    bool createDevice();
 
-    bool SelectPhysicalDevice(VkPhysicalDevice& physical_device);
+    bool selectPhysicalDevice(VkPhysicalDevice& physical_device);
 
-    bool CheckValidationLayerSupport() const;
-    bool CheckInstanceExtensionsSupport() const;
+    bool checkValidationLayerSupport() const;
+    bool checkInstanceExtensionsSupport() const;
 
-    bool CreateVulkanCommandPool(QueueParameters& queue, VkCommandPool* cmd_pool);
+    bool createVulkanCommandPool(QueueParameters& queue, VkCommandPool* cmd_pool);
 
-    bool CreateUBODescriptorPool();
+    bool createUboDescriptorPool();
 
     VkInstance m_instance;
     VkDevice m_device;

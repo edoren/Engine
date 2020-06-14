@@ -141,11 +141,11 @@ public:
 
     // Matrix Functions
 
-    inline type Inverse() const {
+    inline type inverse() const {
         return type(m_data.Inverse());
     }
 
-    inline transpose_type Transpose() const {
+    inline transpose_type transpose() const {
         return transpose_type(m_data.Transpose());
     }
 

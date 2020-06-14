@@ -22,30 +22,30 @@ RenderWindow::RenderWindow()
         m_active_camera(nullptr) {
     auto& input = InputManager::GetInstance();
 
-    on_window_resize_connection = input.OnWindowResized.Connect(*this, &RenderWindow::_OnWindowResized);
+    on_window_resize_connection = input.OnWindowResized.connect(*this, &RenderWindow::onWindowResizedPriv);
 
     on_app_will_enter_background_connection =
-        input.OnAppWillEnterBackground.Connect(*this, &RenderWindow::_OnAppWillEnterBackground);
+        input.OnAppWillEnterBackground.connect(*this, &RenderWindow::onAppWillEnterBackgroundPriv);
     on_app_did_enter_background_connection =
-        input.OnAppDidEnterBackground.Connect(*this, &RenderWindow::_OnAppDidEnterBackground);
+        input.OnAppDidEnterBackground.connect(*this, &RenderWindow::onAppDidEnterBackgroundPriv);
     on_app_will_enter_foreground_connection =
-        input.OnAppWillEnterForeground.Connect(*this, &RenderWindow::_OnAppWillEnterForeground);
+        input.OnAppWillEnterForeground.connect(*this, &RenderWindow::onAppWillEnterForegroundPriv);
     on_app_did_enter_foreground_connection =
-        input.OnAppDidEnterForeground.Connect(*this, &RenderWindow::_OnAppDidEnterForeground);
+        input.OnAppDidEnterForeground.connect(*this, &RenderWindow::onAppDidEnterForegroundPriv);
 }
 
 RenderWindow::~RenderWindow() {
     auto& input = InputManager::GetInstance();
 
-    input.OnWindowResized.Disconnect(on_window_resize_connection);
+    input.OnWindowResized.disconnect(on_window_resize_connection);
 
-    input.OnAppWillEnterBackground.Disconnect(on_app_will_enter_background_connection);
-    input.OnAppDidEnterBackground.Disconnect(on_app_did_enter_background_connection);
-    input.OnAppWillEnterForeground.Disconnect(on_app_will_enter_foreground_connection);
-    input.OnAppDidEnterForeground.Disconnect(on_app_did_enter_foreground_connection);
+    input.OnAppWillEnterBackground.disconnect(on_app_will_enter_background_connection);
+    input.OnAppDidEnterBackground.disconnect(on_app_did_enter_background_connection);
+    input.OnAppWillEnterForeground.disconnect(on_app_will_enter_foreground_connection);
+    input.OnAppDidEnterForeground.disconnect(on_app_did_enter_foreground_connection);
 }
 
-bool RenderWindow::Create(const String& name, const math::ivec2& size) {
+bool RenderWindow::create(const String& name, const math::ivec2& size) {
     ENGINE_UNUSED(size);
 
     m_name = name;
@@ -62,36 +62,36 @@ bool RenderWindow::Create(const String& name, const math::ivec2& size) {
     LogInfo(sTag, "Created Window '{}' with size: [{}, {}]"_format(name, m_size.x, m_size.y));
 
     // Update the base class attributes
-    UpdateProjectionMatrix();
+    updateProjectionMatrix();
 
     return true;
 }
 
-void RenderWindow::Destroy() {
+void RenderWindow::destroy() {
     if (SDL_Window* window = reinterpret_cast<SDL_Window*>(m_window)) {
         SDL_DestroyWindow(window);
         m_window = nullptr;
     }
 }
 
-void RenderWindow::Reposition(int left, int top) {
+void RenderWindow::reposition(int left, int top) {
     if (SDL_Window* window = reinterpret_cast<SDL_Window*>(m_window)) {
         SDL_SetWindowPosition(window, left, top);
     }
 }
 
-void RenderWindow::Resize(int width, int height) {
+void RenderWindow::resize(int width, int height) {
     // TODO check errors
     SDL_Window* window = reinterpret_cast<SDL_Window*>(m_window);
-    if (window && !IsFullScreen()) {
+    if (window && !isFullScreen()) {
         SDL_SetWindowSize(window, width, height);
 
         // Update the base class attributes
-        _OnWindowResized(m_size);
+        onWindowResizedPriv(m_size);
     }
 }
 
-void RenderWindow::SetFullScreen(bool fullscreen, bool is_fake) {
+void RenderWindow::setFullScreen(bool fullscreen, bool is_fake) {
     // TODO: check errors
     if (SDL_Window* window = reinterpret_cast<SDL_Window*>(m_window)) {
         Uint32 flag = 0;
@@ -101,45 +101,45 @@ void RenderWindow::SetFullScreen(bool fullscreen, bool is_fake) {
         SDL_SetWindowFullscreen(window, flag);
 
         // Update the base class attributes
-        _OnWindowResized(m_size);
+        onWindowResizedPriv(m_size);
         SDL_SetWindowSize(window, m_size.x, m_size.y);
         m_is_fullscreen = fullscreen;
     }
 }
 
-void RenderWindow::SetActiveCamera(const Camera* camera) {
+void RenderWindow::setActiveCamera(const Camera* camera) {
     m_active_camera = camera;
 }
 
-const Camera* RenderWindow::GetActiveCamera() const {
+const Camera* RenderWindow::getActiveCamera() const {
     return m_active_camera;
 }
 
-void RenderWindow::AdvanceFrame(bool minimized) {
+void RenderWindow::advanceFrame(bool minimized) {
     ENGINE_UNUSED(minimized);
 }
 
-const String& RenderWindow::GetName() const {
+const String& RenderWindow::getName() const {
     return m_name;
 };
 
-const math::ivec2& RenderWindow::GetSize() const {
+const math::ivec2& RenderWindow::getSize() const {
     return m_size;
 };
 
-bool RenderWindow::IsVSyncEnabled() const {
+bool RenderWindow::isVSyncEnabled() const {
     return m_is_vsync_enable;
 };
 
-bool RenderWindow::IsFullScreen() const {
+bool RenderWindow::isFullScreen() const {
     return m_is_fullscreen;
 }
 
-const math::mat4& RenderWindow::GetProjectionMatrix() const {
+const math::mat4& RenderWindow::getProjectionMatrix() const {
     return m_projection;
 }
 
-void RenderWindow::UpdateProjectionMatrix() {
+void RenderWindow::updateProjectionMatrix() {
     float fov = math::Radians(45.F);
     float aspect_ratio = m_size.x / static_cast<float>(m_size.y);
     float z_near = 0.1F;
@@ -147,34 +147,34 @@ void RenderWindow::UpdateProjectionMatrix() {
     m_projection = math::Perspective(fov, aspect_ratio, z_near, z_far);
 }
 
-void RenderWindow::OnWindowResized(const math::ivec2& /*unused*/) {}
+void RenderWindow::onWindowResized(const math::ivec2& /*unused*/) {}
 
-void RenderWindow::OnAppWillEnterBackground() {
+void RenderWindow::onAppWillEnterBackground() {
     LogInfo(sTag, "OnAppWillEnterBackground");
 }
 
-void RenderWindow::OnAppDidEnterBackground() {
+void RenderWindow::onAppDidEnterBackground() {
     LogInfo(sTag, "OnAppDidEnterBackground");
 }
 
-void RenderWindow::OnAppWillEnterForeground() {
+void RenderWindow::onAppWillEnterForeground() {
     LogInfo(sTag, "OnAppWillEnterForeground");
 }
 
-void RenderWindow::OnAppDidEnterForeground() {
+void RenderWindow::onAppDidEnterForeground() {
     LogInfo(sTag, "OnAppDidEnterForeground");
 }
 
-bool RenderWindow::IsVisible() {
+bool RenderWindow::isVisible() {
     Uint32 flags = SDL_WINDOW_HIDDEN | SDL_WINDOW_MINIMIZED;
     Uint32 mask = SDL_GetWindowFlags(reinterpret_cast<SDL_Window*>(m_window));
     return (mask & flags) == 0;
 }
 
-void RenderWindow::_OnWindowResized(const math::ivec2& size) {
+void RenderWindow::onWindowResizedPriv(const math::ivec2& size) {
     ENGINE_UNUSED(size);
 
-    if (IsFullScreen()) {
+    if (isFullScreen()) {
         return;
     }
 
@@ -184,29 +184,29 @@ void RenderWindow::_OnWindowResized(const math::ivec2& size) {
     if (new_size != m_size) {
         m_size = new_size;
         LogDebug(sTag, "OnWindowResized {}x{}"_format(m_size.x, m_size.y));
-        UpdateProjectionMatrix();
-        OnWindowResized(m_size);
+        updateProjectionMatrix();
+        onWindowResized(m_size);
     }
 }
 
-void RenderWindow::_OnAppWillEnterBackground() {
+void RenderWindow::onAppWillEnterBackgroundPriv() {
     LogDebug(sTag, "OnAppWillEnterBackground");
-    OnAppWillEnterBackground();
+    onAppWillEnterBackground();
 }
 
-void RenderWindow::_OnAppDidEnterBackground() {
+void RenderWindow::onAppDidEnterBackgroundPriv() {
     LogDebug(sTag, "OnAppDidEnterBackground");
-    OnAppDidEnterBackground();
+    onAppDidEnterBackground();
 }
 
-void RenderWindow::_OnAppWillEnterForeground() {
+void RenderWindow::onAppWillEnterForegroundPriv() {
     LogDebug(sTag, "OnAppWillEnterForeground");
-    OnAppWillEnterForeground();
+    onAppWillEnterForeground();
 }
 
-void RenderWindow::_OnAppDidEnterForeground() {
+void RenderWindow::onAppDidEnterForegroundPriv() {
     LogDebug(sTag, "OnAppDidEnterForeground");
-    OnAppDidEnterForeground();
+    onAppDidEnterForeground();
 }
 
 }  // namespace engine

@@ -17,10 +17,10 @@ const String sTag("Scene");
 Scene::Scene(const json& data) : m_data(data) {}
 
 Scene::~Scene() {
-    Unload();
+    unload();
 }
 
-bool Scene::Load() {
+bool Scene::load() {
     if (!m_data.is_object()) {
         LogError(sTag, "Data must be an object");
         return false;
@@ -46,18 +46,18 @@ bool Scene::Load() {
 
             Transform model_matrix;
             if (!scale_json.is_null()) {
-                model_matrix.Scale(math::vec3(float(scale_json)));
+                model_matrix.scale(math::vec3(float(scale_json)));
             }
             if (!rotation_json.is_null()) {
-                model_matrix.Rotate({float(rotation_json[0]), float(rotation_json[1]), float(rotation_json[2])});
+                model_matrix.rotate({float(rotation_json[0]), float(rotation_json[1]), float(rotation_json[2])});
             }
             if (!position_json.is_null()) {
-                model_matrix.Translate({float(position_json[0]), float(position_json[1]), float(position_json[2])});
+                model_matrix.translate({float(position_json[0]), float(position_json[1]), float(position_json[2])});
             }
 
-            String normalized_path = file_system.NormalizePath(model_json);
+            String normalized_path = file_system.normalizePath(model_json);
 
-            Model* model = ModelManager::GetInstance().LoadFromFile(normalized_path);
+            Model* model = ModelManager::GetInstance().loadFromFile(normalized_path);
             auto& transforms = m_models[model];
             transforms.emplace_back(model_matrix);
 
@@ -75,28 +75,28 @@ bool Scene::Load() {
     return true;
 }
 
-bool Scene::Unload() {
+bool Scene::unload() {
     for (auto& model_pair : m_models) {
         Model* model = model_pair.first;
         std::for_each(model_pair.second.cbegin(), model_pair.second.cend(),
-                      [&model](auto& /*unused*/) { ModelManager::GetInstance().Unload(model); });
+                      [&model](auto& /*unused*/) { ModelManager::GetInstance().unload(model); });
     }
     return true;
 }
 
-void Scene::Draw(RenderWindow& target) {
+void Scene::draw(RenderWindow& target) {
     for (auto& model_pair : m_models) {
         Model* model = model_pair.first;
 
         RenderStates states;
         for (auto& transform : model_pair.second) {
             states.transform = transform;
-            model->Draw(target, states);
+            model->draw(target, states);
         }
     }
 }
 
-const String& Scene::GetName() {
+const String& Scene::getName() {
     return m_name;
 }
 

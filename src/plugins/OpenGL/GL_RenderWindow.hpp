@@ -14,22 +14,22 @@ public:
     GL_RenderWindow();
     ~GL_RenderWindow();
 
-    bool Create(const String& name, const math::ivec2& size) override;
+    bool create(const String& name, const math::ivec2& size) override;
 
-    void Destroy(void) override;
+    void destroy(void) override;
 
-    void Resize(int width, int height) override;
+    void resize(int width, int height) override;
 
-    void SetFullScreen(bool fullscreen, bool is_fake) override;
+    void setFullScreen(bool fullscreen, bool is_fake) override;
 
-    void SetVSyncEnabled(bool vsync) override;
+    void setVSyncEnabled(bool vsync) override;
 
-    void SwapBuffers() override;
+    void swapBuffers() override;
 
-    void Clear(const Color& color) override;  // Render Target
+    void clear(const Color& color) override;  // Render Target
 
 protected:
-    void OnWindowResized(const math::ivec2& size) override;
+    void onWindowResized(const math::ivec2& size) override;
 
 private:
     SDL_GLContext m_context;

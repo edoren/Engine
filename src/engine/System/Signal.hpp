@@ -38,23 +38,23 @@ public:
 
     // Connects a member function to this Signal
     template <typename InstanceType, typename FMInstanceType>
-    SignalConnection& Connect(InstanceType& instance, void (FMInstanceType::*func)(Args...));
+    SignalConnection& connect(InstanceType& instance, void (FMInstanceType::*func)(Args...));
 
     // Connects a const member function to this Signal
     template <typename InstanceType, typename FMInstanceType>
-    SignalConnection& Connect(InstanceType& instance, void (FMInstanceType::*func)(Args...) const);
+    SignalConnection& connect(InstanceType& instance, void (FMInstanceType::*func)(Args...) const);
 
     // Connects a Slot to this Signal
-    SignalConnection& Connect(const SlotType& slot);
+    SignalConnection& connect(const SlotType& slot);
 
     // Disconnects a previously connected function
-    void Disconnect(SignalConnection& connection);
+    void disconnect(SignalConnection& connection);
 
     // Disconnects all previously connected functions
-    void DisconnectAll();
+    void disconnectAll();
 
     // Calls all connected functions
-    void Emit(Args... args);
+    void emit(Args... args);
 
 private:
     SignalConnection::IdType m_current_id;

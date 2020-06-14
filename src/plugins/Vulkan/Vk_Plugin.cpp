@@ -14,21 +14,21 @@ const String sPluginName("Vulkan");
 
 Vk_Plugin::Vk_Plugin() : m_renderer(nullptr) {}
 
-const String& Vk_Plugin::GetName() const {
+const String& Vk_Plugin::getName() const {
     return sPluginName;
 }
 
-void Vk_Plugin::Install() {
+void Vk_Plugin::install() {
     auto renderer = std::make_unique<Vk_Renderer>();
     m_renderer = renderer.get();
-    Main::GetInstance().AddRenderer(std::move(renderer));
+    Main::GetInstance().addRenderer(std::move(renderer));
 }
 
-void Vk_Plugin::Initialize() {}
+void Vk_Plugin::initialize() {}
 
-void Vk_Plugin::Shutdown() {}
+void Vk_Plugin::shutdown() {}
 
-void Vk_Plugin::Uninstall() {
+void Vk_Plugin::uninstall() {
     m_renderer = nullptr;
 }
 

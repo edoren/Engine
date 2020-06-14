@@ -17,53 +17,53 @@ public:
 
     virtual ~RenderWindow();
 
-    virtual bool Create(const String& name, const math::ivec2& size);
+    virtual bool create(const String& name, const math::ivec2& size);
 
-    virtual void Destroy();
+    virtual void destroy();
 
-    void Reposition(int left, int top);
+    void reposition(int left, int top);
 
-    virtual void Resize(int width, int height);
+    virtual void resize(int width, int height);
 
-    virtual void SetFullScreen(bool fullscreen, bool is_fake = false);
+    virtual void setFullScreen(bool fullscreen, bool is_fake = false);
 
-    virtual void SetVSyncEnabled(bool vsync) = 0;
-
-    // RenderTarget
-    virtual void SwapBuffers() = 0;
+    virtual void setVSyncEnabled(bool vsync) = 0;
 
     // RenderTarget
-    virtual void Clear(const Color& color) = 0;
-
-    bool IsVisible();
+    virtual void swapBuffers() = 0;
 
     // RenderTarget
-    void SetActiveCamera(const Camera* camera);
-    const Camera* GetActiveCamera() const;
+    virtual void clear(const Color& color) = 0;
+
+    bool isVisible();
+
+    // RenderTarget
+    void setActiveCamera(const Camera* camera);
+    const Camera* getActiveCamera() const;
 
     // RenderTarget?
-    void AdvanceFrame(bool minimized);
+    void advanceFrame(bool minimized);
 
-    const String& GetName() const;
+    const String& getName() const;
 
-    const math::ivec2& GetSize() const;
+    const math::ivec2& getSize() const;
 
-    bool IsVSyncEnabled() const;
+    bool isVSyncEnabled() const;
 
-    bool IsFullScreen() const;
+    bool isFullScreen() const;
 
-    const math::mat4& GetProjectionMatrix() const;
+    const math::mat4& getProjectionMatrix() const;
 
 protected:
     // RenderTarget
-    virtual void UpdateProjectionMatrix();
+    virtual void updateProjectionMatrix();
 
-    virtual void OnWindowResized(const math::ivec2& size);
+    virtual void onWindowResized(const math::ivec2& size);
 
-    virtual void OnAppWillEnterBackground();
-    virtual void OnAppDidEnterBackground();
-    virtual void OnAppWillEnterForeground();
-    virtual void OnAppDidEnterForeground();
+    virtual void onAppWillEnterBackground();
+    virtual void onAppDidEnterBackground();
+    virtual void onAppWillEnterForeground();
+    virtual void onAppDidEnterForeground();
 
     void* m_window;
 
@@ -77,12 +77,12 @@ protected:
     const Camera* m_active_camera;
 
 private:
-    void _OnWindowResized(const math::ivec2& size);
+    void onWindowResizedPriv(const math::ivec2& size);
 
-    void _OnAppWillEnterBackground();
-    void _OnAppDidEnterBackground();
-    void _OnAppWillEnterForeground();
-    void _OnAppDidEnterForeground();
+    void onAppWillEnterBackgroundPriv();
+    void onAppDidEnterBackgroundPriv();
+    void onAppWillEnterForegroundPriv();
+    void onAppDidEnterForegroundPriv();
 
     SignalConnection on_window_resize_connection;
     SignalConnection on_app_will_enter_background_connection;

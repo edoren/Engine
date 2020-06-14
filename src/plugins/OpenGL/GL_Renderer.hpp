@@ -12,13 +12,13 @@ public:
 
     ~GL_Renderer();
 
-    bool Initialize() override;
+    bool initialize();
 
-    void Shutdown() override;
+    void shutdown();
 
-    void AdvanceFrame() override;
+    void advanceFrame();
 
-    const String& GetName() const override;
+    const String& getName() const;
 };
 
 }  // namespace engine

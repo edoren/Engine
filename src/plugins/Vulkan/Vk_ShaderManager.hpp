@@ -17,24 +17,24 @@ public:
 
     ~Vk_ShaderManager();
 
-    Vk_Shader* LoadFromFile(const String& basename);
+    Vk_Shader* loadFromFile(const String& basename);
 
-    Vk_Shader* LoadFromMemory(const String& name, std::map<ShaderType, String*> shader_data_map);
+    Vk_Shader* loadFromMemory(const String& name, std::map<ShaderType, String*> shader_data_map);
 
-    Vk_Shader* GetShader(const String& name);
+    Vk_Shader* getShader(const String& name);
 
-    Vk_Shader* GetActiveShader();
+    Vk_Shader* getActiveShader();
 
     static Vk_ShaderManager& GetInstance();
 
     static Vk_ShaderManager* GetInstancePtr();
 
 protected:
-    std::unique_ptr<Shader> CreateShader() override;
+    std::unique_ptr<Shader> createShader() override;
 
-    void UseShader(Shader* shader) override;
+    void useShader(Shader* shader) override;
 
-    const String& GetShaderFolder() const override;
+    const String& getShaderFolder() const override;
 };
 
 }  // namespace engine

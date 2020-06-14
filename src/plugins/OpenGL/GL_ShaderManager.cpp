@@ -31,35 +31,35 @@ GL_ShaderManager::~GL_ShaderManager() {
     sDerivedInstance = nullptr;
 }
 
-GL_Shader* GL_ShaderManager::LoadFromFile(const String& basename) {
-    Shader* base_shader = ShaderManager::LoadFromFile(basename);
+GL_Shader* GL_ShaderManager::loadFromFile(const String& basename) {
+    Shader* base_shader = ShaderManager::loadFromFile(basename);
     return reinterpret_cast<GL_Shader*>(base_shader);
 }
 
-GL_Shader* GL_ShaderManager::LoadFromMemory(const String& name, std::map<ShaderType, String*> shader_data_map) {
-    Shader* base_shader = ShaderManager::LoadFromMemory(name, shader_data_map);
+GL_Shader* GL_ShaderManager::loadFromMemory(const String& name, std::map<ShaderType, String*> shader_data_map) {
+    Shader* base_shader = ShaderManager::loadFromMemory(name, shader_data_map);
     return reinterpret_cast<GL_Shader*>(base_shader);
 }
 
-GL_Shader* GL_ShaderManager::GetShader(const String& name) {
-    Shader* base_shader = ShaderManager::GetShader(name);
+GL_Shader* GL_ShaderManager::getShader(const String& name) {
+    Shader* base_shader = ShaderManager::getShader(name);
     return reinterpret_cast<GL_Shader*>(base_shader);
 }
 
-GL_Shader* GL_ShaderManager::GetActiveShader() {
+GL_Shader* GL_ShaderManager::getActiveShader() {
     return reinterpret_cast<GL_Shader*>(m_active_shader);
 }
 
-std::unique_ptr<Shader> GL_ShaderManager::CreateShader() {
+std::unique_ptr<Shader> GL_ShaderManager::createShader() {
     return std::make_unique<GL_Shader>();
 }
 
-void GL_ShaderManager::UseShader(Shader* shader) {
+void GL_ShaderManager::useShader(Shader* shader) {
     GL_Shader* casted_shader = reinterpret_cast<GL_Shader*>(shader);
-    casted_shader->Use();
+    casted_shader->use();
 }
 
-const String& GL_ShaderManager::GetShaderFolder() const {
+const String& GL_ShaderManager::getShaderFolder() const {
     return sShaderFolder;
 }
 

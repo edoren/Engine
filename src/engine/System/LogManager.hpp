@@ -22,21 +22,21 @@ public:
 
     ~LogManager();
 
-    void Initialize();
+    void initialize();
 
-    void Shutdown();
+    void shutdown();
 
-    void Verbose(const String& tag, const String& message);
-    void Debug(const String& tag, const String& message);
-    void Info(const String& tag, const String& message);
-    void Warning(const String& tag, const String& message);
-    void Error(const String& tag, const String& message);
-    void Fatal(const String& tag, const String& message);
+    void verbose(const String& tag, const String& message);
+    void debug(const String& tag, const String& message);
+    void info(const String& tag, const String& message);
+    void warning(const String& tag, const String& message);
+    void error(const String& tag, const String& message);
+    void fatal(const String& tag, const String& message);
 
-    void LogMessage(LogPriority priority, const String& tag, const String& message);
+    void logMessage(LogPriority priority, const String& tag, const String& message);
 
-    void EnableFileLogging(bool enable);
-    void EnableConsoleLogging(bool enable);
+    void enableFileLogging(bool enable);
+    void enableConsoleLogging(bool enable);
 
     ////////////////////////////////////////////////////////////
     /// @brief Override standard Singleton retrieval.
@@ -82,27 +82,27 @@ private:
 };
 
 inline void LogVerbose(const String& tag, const String& message) {
-    LogManager::GetInstance().Verbose(tag, message);
+    LogManager::GetInstance().verbose(tag, message);
 }
 
 inline void LogDebug(const String& tag, const String& message) {
-    LogManager::GetInstance().Debug(tag, message);
+    LogManager::GetInstance().debug(tag, message);
 }
 
 inline void LogInfo(const String& tag, const String& message) {
-    LogManager::GetInstance().Info(tag, message);
+    LogManager::GetInstance().info(tag, message);
 }
 
 inline void LogWarning(const String& tag, const String& message) {
-    LogManager::GetInstance().Warning(tag, message);
+    LogManager::GetInstance().warning(tag, message);
 }
 
 inline void LogError(const String& tag, const String& message) {
-    LogManager::GetInstance().Error(tag, message);
+    LogManager::GetInstance().error(tag, message);
 }
 
 inline void LogFatal(const String& tag, const String& message) {
-    LogManager::GetInstance().Fatal(tag, message);
+    LogManager::GetInstance().fatal(tag, message);
 }
 
 }  // namespace engine

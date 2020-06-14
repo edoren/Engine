@@ -43,33 +43,33 @@ InputManager::InputManager()
         m_mousewheel_delta(math::ivec2(0, 0)) {}
 
 InputManager::~InputManager() {
-    Shutdown();
+    shutdown();
 }
 
-bool InputManager::Initialize() {
+bool InputManager::initialize() {
     int status = SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER);
     SDL_SetEventFilter(EngineEventFilter, this);
     return status == 0;
 }
 
-void InputManager::Shutdown() {
+void InputManager::shutdown() {
     SDL_QuitSubSystem(SDL_INIT_GAMECONTROLLER);
 }
 
-Button& InputManager::GetButton(int button) {
+Button& InputManager::getButton(int button) {
     auto it = m_button_map.find(button);
     return it != m_button_map.end() ? it->second : (m_button_map[button] = Button());
 }
 
-Button& InputManager::GetPointerButton(SDL_FingerID pointer) {
-    return GetButton(static_cast<int>(pointer + SDLK_POINTER1));
+Button& InputManager::getPointerButton(SDL_FingerID pointer) {
+    return getButton(static_cast<int>(pointer + SDLK_POINTER1));
 }
 
-void InputManager::AdvanceFrame() {
+void InputManager::advanceFrame() {
     // Reset our per-frame input state.
     m_mousewheel_delta.x = m_mousewheel_delta.y = 0;
     for (auto& button : m_button_map) {
-        button.second.AdvanceFrame();
+        button.second.advanceFrame();
     }
     for (auto& pointer : m_pointers) {
         pointer.mousedelta.x = pointer.mousedelta.y = 0;
@@ -86,34 +86,34 @@ void InputManager::AdvanceFrame() {
             case SDL_APP_LOWMEMORY:
                 break;
             case SDL_APP_WILLENTERBACKGROUND: {
-                OnAppWillEnterBackground.Emit();
+                OnAppWillEnterBackground.emit();
                 break;
             }
             case SDL_APP_DIDENTERBACKGROUND: {
-                OnAppDidEnterBackground.Emit();
+                OnAppDidEnterBackground.emit();
                 break;
             }
             case SDL_APP_WILLENTERFOREGROUND: {
-                OnAppWillEnterForeground.Emit();
+                OnAppWillEnterForeground.emit();
                 break;
             }
             case SDL_APP_DIDENTERFOREGROUND: {
-                OnAppDidEnterForeground.Emit();
+                OnAppDidEnterForeground.emit();
                 break;
             }
             case SDL_WINDOWEVENT: {
                 switch (event.window.event) {
                     case SDL_WINDOWEVENT_RESIZED: {
                         math::ivec2 window_size(event.window.data1, event.window.data2);
-                        OnWindowResized.Emit(window_size);
+                        OnWindowResized.emit(window_size);
                         break;
                     }
                     case SDL_WINDOWEVENT_MINIMIZED: {
-                        OnWindowMinimized.Emit();
+                        OnWindowMinimized.emit();
                         break;
                     }
                     case SDL_WINDOWEVENT_RESTORED: {
-                        OnWindowRestored.Emit();
+                        OnWindowRestored.emit();
                         break;
                     }
                 }
@@ -123,7 +123,7 @@ void InputManager::AdvanceFrame() {
                 break;
             case SDL_KEYDOWN:
             case SDL_KEYUP: {
-                GetButton(event.key.keysym.sym).Update(event.key.state == SDL_PRESSED);
+                getButton(event.key.keysym.sym).update(event.key.state == SDL_PRESSED);
                 break;
             }
             case SDL_TEXTEDITING:
@@ -137,7 +137,7 @@ void InputManager::AdvanceFrame() {
             }
             case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEBUTTONUP: {
-                GetPointerButton(event.button.button - 1).Update(event.button.state == SDL_PRESSED);
+                getPointerButton(event.button.button - 1).update(event.button.state == SDL_PRESSED);
                 m_pointers[0].mousepos = math::ivec2(event.button.x, event.button.y);
                 m_pointers[0].used = true;
                 break;

@@ -13,21 +13,21 @@ const String sPluginName("OpenGL");
 
 GL_Plugin::GL_Plugin() : m_renderer(nullptr), m_shader_manager_delegate(nullptr), m_texture_manager_delegate(nullptr) {}
 
-const String& GL_Plugin::GetName() const {
+const String& GL_Plugin::getName() const {
     return sPluginName;
 }
 
-void GL_Plugin::Install() {
+void GL_Plugin::install() {
     auto renderer = std::make_unique<GL_Renderer>();
     m_renderer = renderer.get();
-    Main::GetInstance().AddRenderer(std::move(renderer));
+    Main::GetInstance().addRenderer(std::move(renderer));
 }
 
-void GL_Plugin::Initialize() {}
+void GL_Plugin::initialize() {}
 
-void GL_Plugin::Shutdown() {}
+void GL_Plugin::shutdown() {}
 
-void GL_Plugin::Uninstall() {
+void GL_Plugin::uninstall() {
     m_renderer = nullptr;
 }
 

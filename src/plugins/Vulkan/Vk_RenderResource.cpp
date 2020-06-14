@@ -13,27 +13,27 @@ Vk_RenderResource::Vk_RenderResource()
         fence(VK_NULL_HANDLE) {}
 
 Vk_RenderResource::~Vk_RenderResource() {
-    Destroy();
+    destroy();
 }
 
-bool Vk_RenderResource::Create() {
+bool Vk_RenderResource::create() {
     Vk_Context& context = Vk_Context::GetInstance();
 
-    return !(!Vk_Utilities::AllocateCommandBuffers(context.GetGraphicsQueueCmdPool(), 1, &command_buffer) ||
+    return !(!Vk_Utilities::AllocateCommandBuffers(context.getGraphicsQueueCmdPool(), 1, &command_buffer) ||
              !Vk_Utilities::CreateVulkanSemaphore(&image_available_semaphore) ||
              !Vk_Utilities::CreateVulkanSemaphore(&finished_rendering_semaphore) ||
              !Vk_Utilities::CreateVulkanFence(VK_FENCE_CREATE_SIGNALED_BIT, &fence));
 }
 
-void Vk_RenderResource::Destroy() {
+void Vk_RenderResource::destroy() {
     Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
+    VkDevice& device = context.getVulkanDevice();
 
     if (framebuffer) {
         vkDestroyFramebuffer(device, framebuffer, nullptr);
     }
     if (command_buffer) {
-        vkFreeCommandBuffers(device, context.GetGraphicsQueueCmdPool(), 1, &command_buffer);
+        vkFreeCommandBuffers(device, context.getGraphicsQueueCmdPool(), 1, &command_buffer);
     }
     if (image_available_semaphore) {
         vkDestroySemaphore(device, image_available_semaphore, nullptr);

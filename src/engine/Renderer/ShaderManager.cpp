@@ -36,24 +36,24 @@ ShaderManager::ShaderManager() : m_active_shader(nullptr) {}
 
 ShaderManager::~ShaderManager() {}
 
-void ShaderManager::Initialize() {}
+void ShaderManager::initialize() {}
 
-void ShaderManager::Shutdown() {
+void ShaderManager::shutdown() {
     m_shaders.clear();
 }
 
-Shader* ShaderManager::LoadFromFile(const String& basename) {
-    Shader* new_shader = GetShader(basename);
+Shader* ShaderManager::loadFromFile(const String& basename) {
+    Shader* new_shader = getShader(basename);
     if (new_shader != nullptr) {
         return new_shader;
     }
 
-    std::unique_ptr<Shader> shader = CreateShader();
+    std::unique_ptr<Shader> shader = createShader();
 
     FileSystem& fs = FileSystem::GetInstance();
 
-    String shader_folder = fs.Join(sRootShaderFolder, GetShaderFolder());
-    String shader_descriptor_folder = fs.Join(sRootShaderFolder, sShaderDescriptorFolder);
+    String shader_folder = fs.join(sRootShaderFolder, getShaderFolder());
+    String shader_descriptor_folder = fs.join(sRootShaderFolder, sShaderDescriptorFolder);
 
     for (auto shader_type : sAvailableShaderTypes) {
         bool ok = true;
@@ -71,9 +71,9 @@ Shader* ShaderManager::LoadFromFile(const String& basename) {
                 break;
         }
 
-        String filename = fs.Join(shader_folder, basename + shader_extension);
+        String filename = fs.join(shader_folder, basename + shader_extension);
 
-        bool filename_exist = fs.FileExists(filename);
+        bool filename_exist = fs.fileExists(filename);
 
         // Vertex and Fragment shaders are completly required
         if (!filename_exist && (shader_type == ShaderType::VERTEX || shader_type == ShaderType::FRAGMENT)) {
@@ -83,8 +83,8 @@ Shader* ShaderManager::LoadFromFile(const String& basename) {
 
         if (filename_exist) {
             std::vector<byte> filename_data;
-            fs.LoadFileData(filename, &filename_data);
-            if (!shader->LoadFromMemory(filename_data.data(), filename_data.size(), shader_type)) {
+            fs.loadFileData(filename, &filename_data);
+            if (!shader->loadFromMemory(filename_data.data(), filename_data.size(), shader_type)) {
                 LogError(sTag, "Could not load shader: {}"_format(basename));
                 ok = false;
             }
@@ -95,13 +95,13 @@ Shader* ShaderManager::LoadFromFile(const String& basename) {
         }
     }
 
-    String filename = fs.Join(shader_descriptor_folder, basename + ".json");
+    String filename = fs.join(shader_descriptor_folder, basename + ".json");
     std::vector<byte> json_data;
-    fs.LoadFileData(filename, &json_data);
+    fs.loadFileData(filename, &json_data);
     bool is_valid_descriptor = json::accept(json_data.begin(), json_data.end());
     if (is_valid_descriptor) {
         json j = json::parse(json_data.begin(), json_data.end());
-        shader->SetDescriptor(std::move(j));
+        shader->setDescriptor(std::move(j));
     } else {
         LogError(sTag, "Could not load shader descriptor: {}"_format(basename));
         return nullptr;
@@ -119,8 +119,8 @@ Shader* ShaderManager::LoadFromFile(const String& basename) {
     return new_shader;
 }
 
-Shader* ShaderManager::LoadFromMemory(const String& name, std::map<ShaderType, String*> shader_data) {
-    if (GetShader(name) != nullptr) {
+Shader* ShaderManager::loadFromMemory(const String& name, std::map<ShaderType, String*> shader_data) {
+    if (getShader(name) != nullptr) {
         LogError(sTag, "Shader '{}' already loaded");
         return nullptr;
     }
@@ -133,7 +133,7 @@ Shader* ShaderManager::LoadFromMemory(const String& name, std::map<ShaderType, S
         return nullptr;
     }
 
-    std::unique_ptr<Shader> new_shader = CreateShader();
+    std::unique_ptr<Shader> new_shader = createShader();
 
     for (auto& shader_data_pair : shader_data) {
         bool ok = true;
@@ -141,8 +141,8 @@ Shader* ShaderManager::LoadFromMemory(const String& name, std::map<ShaderType, S
         ShaderType shader_type = shader_data_pair.first;
         String* shader_source = shader_data_pair.second;
 
-        auto shader_source_data = shader_source->ToUtf8();
-        if (!new_shader->LoadFromMemory(reinterpret_cast<const byte*>(shader_source_data.data()),
+        auto shader_source_data = shader_source->toUtf8();
+        if (!new_shader->loadFromMemory(reinterpret_cast<const byte*>(shader_source_data.data()),
                                         shader_source_data.size(), shader_type)) {
             LogDebug(sTag, "Could not load shader: {}"_format(static_cast<int>(shader_type)));
             ok = false;
@@ -157,22 +157,22 @@ Shader* ShaderManager::LoadFromMemory(const String& name, std::map<ShaderType, S
     return m_shaders[name].get();
 }
 
-Shader* ShaderManager::GetShader(const String& name) {
+Shader* ShaderManager::getShader(const String& name) {
     auto it = m_shaders.find(name);
     return (it != m_shaders.end()) ? it->second.get() : nullptr;
 }
 
-void ShaderManager::SetActiveShader(const String& name) {
-    Shader* found_shader = GetShader(name);
+void ShaderManager::setActiveShader(const String& name) {
+    Shader* found_shader = getShader(name);
     if (found_shader != nullptr) {
         m_active_shader = found_shader;
-        UseShader(m_active_shader);
+        useShader(m_active_shader);
     } else {
         LogError(sTag, "Could not find a Shader named: {}"_format(name));
     }
 }
 
-Shader* ShaderManager::GetActiveShader() {
+Shader* ShaderManager::getActiveShader() {
     return m_active_shader;
 }
 

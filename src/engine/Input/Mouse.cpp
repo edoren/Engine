@@ -6,7 +6,7 @@ namespace engine {
 
 Mouse::Mouse(Pointer& pointer) : pointer(pointer) {}
 
-void Mouse::SetRelativeMouseMode(bool enable) {
+void Mouse::setRelativeMouseMode(bool enable) {
     if (enable) {
         SDL_SetRelativeMouseMode(SDL_TRUE);
     } else {
@@ -14,10 +14,10 @@ void Mouse::SetRelativeMouseMode(bool enable) {
     }
 }
 
-void Mouse::ShowCursor() {
+void Mouse::showCursor() {
     SDL_ShowCursor(1);
 }
-void Mouse::HideCursor() {
+void Mouse::hideCursor() {
     SDL_ShowCursor(0);
 }
 

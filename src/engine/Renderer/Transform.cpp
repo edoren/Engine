@@ -28,19 +28,19 @@ Transform& Transform::operator=(Transform&& other) {
     return *this;
 }
 
-math::Matrix4x4<float> Transform::GetMatrix() const {
+math::Matrix4x4<float> Transform::getMatrix() const {
     return math::Translate(m_translate) * math::Scale(m_scale) * math::Rotate(m_rotate);
 }
 
-void Transform::Rotate(const math::Vector3<float>& euler_angles) {
+void Transform::rotate(const math::Vector3<float>& euler_angles) {
     m_rotate += euler_angles;
 }
 
-void Transform::Scale(const math::Vector3<float>& scale) {
+void Transform::scale(const math::Vector3<float>& scale) {
     m_scale *= scale;
 }
 
-void Transform::Translate(const math::Vector3<float>& translate) {
+void Transform::translate(const math::Vector3<float>& translate) {
     m_translate += translate;
 }
 

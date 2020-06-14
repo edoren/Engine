@@ -30,41 +30,41 @@ protected:
     // Constructor protected for private usage by CustomAssimpIOSystem
     CustomAssimpIOStream(const char* pFile, const char* pMode) {
         FileSystem& fs = FileSystem::GetInstance();
-        for (const String& path : fs.GetSearchPaths()) {
-            String file_path = fs.Join(path, pFile);
-            if (m_file.Open(file_path.GetData(), pMode)) {
+        for (const String& path : fs.getSearchPaths()) {
+            String file_path = fs.join(path, pFile);
+            if (m_file.open(file_path.getData(), pMode)) {
                 break;
             }
         }
-        if (!m_file.IsOpen()) {
+        if (!m_file.isOpen()) {
             LogError("CustomAssimpIOStream", String("Could not open file") + pFile);
         }
     }
 
 public:
     ~CustomAssimpIOStream() {
-        m_file.Close();
+        m_file.close();
     }
 
     size_t Read(void* pvBuffer, size_t pSize, size_t pCount) override {
-        return m_file.Read(pvBuffer, pSize, pCount);
+        return m_file.read(pvBuffer, pSize, pCount);
     }
 
     size_t Write(const void* pvBuffer, size_t pSize, size_t pCount) override {
-        return m_file.Write(pvBuffer, pSize, pCount);
+        return m_file.write(pvBuffer, pSize, pCount);
     }
 
     aiReturn Seek(size_t pOffset, aiOrigin pOrigin) override {
-        int64 ret = m_file.Seek(pOffset, static_cast<engine::IOStream::Origin>(pOrigin));
+        int64 ret = m_file.seek(pOffset, static_cast<engine::IOStream::Origin>(pOrigin));
         return static_cast<aiReturn>(ret);
     }
 
     size_t Tell() const override {
-        return static_cast<size_t>(m_file.Tell());
+        return static_cast<size_t>(m_file.tell());
     }
 
     size_t FileSize() const override {
-        return m_file.GetSize();
+        return m_file.getSize();
     }
 
     void Flush() override {
@@ -82,11 +82,11 @@ public:
     ~CustomAssimpIOSystem() {}
 
     bool Exists(const char* pFile) const override {
-        return FileSystem::GetInstance().FileExists(pFile);
+        return FileSystem::GetInstance().fileExists(pFile);
     }
 
     char getOsSeparator() const override {
-        return FileSystem::GetInstance().GetOsSeparator();
+        return FileSystem::GetInstance().getOsSeparator();
     }
 
     Assimp::IOStream* Open(const char* pFile, const char* pMode) override {
@@ -149,28 +149,28 @@ Model::~Model() {
     }
 }
 
-void Model::SetTransform(const Transform& transform) {
+void Model::setTransform(const Transform& transform) {
     m_transform = transform;
 }
 
-void Model::Draw(RenderWindow& target, const RenderStates& states) const {
+void Model::draw(RenderWindow& target, const RenderStates& states) const {
     for (const auto& mesh : m_meshes) {
-        mesh->Draw(target, states);
+        mesh->draw(target, states);
     }
 }
 
-void Model::LoadModel(const String& path) {
+void Model::loadModel(const String& path) {
     Assimp::Importer importer;
 
     FileSystem& fs = FileSystem::GetInstance();
-    String filename = fs.Join(sRootModelFolder, path);
+    String filename = fs.join(sRootModelFolder, path);
 
-    String path_noext = path.SubString(0, path.FindLastOf("."));
-    String json_filename = fs.Join(sRootModelFolder, path_noext + ".json");
-    if (fs.FileExists(json_filename)) {
+    String path_noext = path.subString(0, path.findLastOf("."));
+    String json_filename = fs.join(sRootModelFolder, path_noext + ".json");
+    if (fs.fileExists(json_filename)) {
         std::vector<byte> json_data;
 
-        fs.LoadFileData(json_filename, &json_data);
+        fs.loadFileData(json_filename, &json_data);
         if (json::accept(json_data.begin(), json_data.end())) {
             m_descriptor = json::parse(json_data.begin(), json_data.end());
             LogDebug(sTag, "Loading descriptor: " + json_filename);
@@ -183,10 +183,10 @@ void Model::LoadModel(const String& path) {
         const json& scale = properties["scale"];
         const json& rotation = properties["rotation"];
         if (!scale.is_null()) {
-            model_matrix.Scale(math::vec3(float(scale)));
+            model_matrix.scale(math::vec3(float(scale)));
         }
         if (!rotation.is_null()) {
-            model_matrix.Rotate({float(rotation[0]), float(rotation[1]), float(rotation[2])});
+            model_matrix.rotate({float(rotation[0]), float(rotation[1]), float(rotation[2])});
         }
         m_transform = model_matrix;
     }
@@ -200,24 +200,24 @@ void Model::LoadModel(const String& path) {
         return;
     }
 
-    m_relative_directory = path.SubString(0, path.FindLastOf("/\\"));
+    m_relative_directory = path.subString(0, path.findLastOf("/\\"));
 
-    ProcessNode(scene->mRootNode, scene);
+    processNode(scene->mRootNode, scene);
 }
 
-void Model::ProcessNode(aiNode* node, const aiScene* scene) {
+void Model::processNode(aiNode* node, const aiScene* scene) {
     // Process all the node's meshes (if any)
     for (unsigned int i = 0; i < node->mNumMeshes; i++) {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-        m_meshes.push_back(ProcessMesh(mesh, scene));
+        m_meshes.push_back(processMesh(mesh, scene));
     }
     // Then do the same for each of its children
     for (unsigned int i = 0; i < node->mNumChildren; i++) {
-        ProcessNode(node->mChildren[i], scene);
+        processNode(node->mChildren[i], scene);
     }
 }
 
-std::unique_ptr<Mesh> Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
+std::unique_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     std::vector<Vertex> vertices;
     std::vector<uint32> indices;
     std::vector<std::pair<Texture2D*, TextureType>> textures;
@@ -289,7 +289,7 @@ std::unique_ptr<Mesh> Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
             const json& type = json_texture["type"];
             const json& name = json_texture["name"];
             if (type.is_string() && name.is_string()) {
-                texture_filenames.emplace_back(GetTextureTypeFromString(type), fs.Join(m_relative_directory, name));
+                texture_filenames.emplace_back(GetTextureTypeFromString(type), fs.join(m_relative_directory, name));
             }
         }
     };
@@ -324,7 +324,7 @@ std::unique_ptr<Mesh> Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
                 material->GetTexture(type, i, &str);
 
                 texture_filenames.emplace_back(
-                    std::make_pair(GetTextureTypeFromAiTextureType(type), fs.Join(m_relative_directory, str.C_Str())));
+                    std::make_pair(GetTextureTypeFromAiTextureType(type), fs.join(m_relative_directory, str.C_Str())));
             }
         }
     }
@@ -334,18 +334,18 @@ std::unique_ptr<Mesh> Model::ProcessMesh(aiMesh* mesh, const aiScene* scene) {
     for (auto& pair : texture_filenames) {
         TextureType type = pair.first;
         const String& filename = pair.second;
-        Texture2D* texture = texture_manager.LoadFromFile(filename);
+        Texture2D* texture = texture_manager.loadFromFile(filename);
         textures.push_back(std::make_pair(texture, type));
     }
 
     if (textures.empty()) {
-        Texture2D* texture = texture_manager.GetTexture2D(TextureManager::sDefaultTextureId);
+        Texture2D* texture = texture_manager.getTexture2D(TextureManager::sDefaultTextureId);
         textures.push_back(std::make_pair(texture, TextureType::DIFFUSE));
     }
 
     ModelManager& model_manager = ModelManager::GetInstance();
-    std::unique_ptr<Mesh> ret = model_manager.CreateMesh();
-    ret->LoadFromData(vertices, indices, textures);
+    std::unique_ptr<Mesh> ret = model_manager.createMesh();
+    ret->loadFromData(vertices, indices, textures);
 
     return ret;
 }

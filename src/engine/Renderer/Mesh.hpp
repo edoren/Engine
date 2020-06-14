@@ -18,16 +18,16 @@ public:
 
     virtual ~Mesh();
 
-    virtual void LoadFromData(std::vector<Vertex> vertices,
+    virtual void loadFromData(std::vector<Vertex> vertices,
                               std::vector<uint32> indices,
                               std::vector<std::pair<Texture2D*, TextureType>> textures) = 0;
 
-    virtual void Draw(RenderWindow& target, const RenderStates& states) const = 0;
+    virtual void draw(RenderWindow& target, const RenderStates& states) const = 0;
 
-    void SetTexture(TextureType type, Texture2D* texture);
+    void setTexture(TextureType type, Texture2D* texture);
 
-    const std::vector<Vertex>& GetVertices();
-    const std::vector<uint32>& GetIndices();
+    const std::vector<Vertex>& getVertices();
+    const std::vector<uint32>& getIndices();
 
 protected:
     std::vector<Vertex> m_vertices;

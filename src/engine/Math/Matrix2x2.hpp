@@ -109,11 +109,11 @@ public:
 
     // Matrix Functions
 
-    inline type Inverse() {
+    inline type inverse() {
         return type(m_data.Inverse());
     }
 
-    inline transpose_type Transpose() {
+    inline transpose_type transpose() {
         return transpose_type(m_data.Transpose());
     }
 

@@ -8,16 +8,16 @@ AsyncTaskRunner::AsyncTaskRunner() : m_is_running(true) {
     auto job = [this]() -> void {
         while (m_is_running) {
             std::unique_lock<std::mutex> lk(m_mutex);
-            if (m_work_queue.IsEmpty()) {
+            if (m_work_queue.isEmpty()) {
                 m_signaler.wait(lk);
-                if (m_work_queue.IsEmpty()) {
+                if (m_work_queue.isEmpty()) {
                     if (!m_is_running) {
                         break;
                     }
                     continue;
                 }
             }
-            Task task = m_work_queue.Pop();
+            Task task = m_work_queue.pop();
             lk.unlock();
             task();
         }
@@ -37,8 +37,8 @@ AsyncTaskRunner::~AsyncTaskRunner() {
     }
 }
 
-void AsyncTaskRunner::Execute(Task&& f) {
-    m_work_queue.Push(std::move(f));
+void AsyncTaskRunner::execute(Task&& f) {
+    m_work_queue.push(std::move(f));
     m_signaler.notify_one();
 }
 

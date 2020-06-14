@@ -91,10 +91,10 @@ Vk_Context::Vk_Context()
 }  // namespace engine
 
 Vk_Context::~Vk_Context() {
-    Shutdown();
+    shutdown();
 }
 
-bool Vk_Context::Initialize() {
+bool Vk_Context::initialize() {
     // Add the required validation layers
     if (m_validation_layers_enabled) {
 #if PLATFORM_IS(PLATFORM_ANDROID)
@@ -143,13 +143,13 @@ bool Vk_Context::Initialize() {
     m_device_extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
 
     // Check the validation layers support
-    if (m_validation_layers_enabled && !CheckValidationLayerSupport()) {
+    if (m_validation_layers_enabled && !checkValidationLayerSupport()) {
         LogFatal(sTag, "Validation layers requested, but not available");
         return false;
     }
 
-    CreateInstance();
-    CreateDevice();
+    createInstance();
+    createDevice();
 
     if (m_validation_layers_enabled && !m_debug_report_callback) {
         PFN_vkCreateDebugReportCallbackEXT vkCreateDebugReportCallbackEXT;
@@ -172,11 +172,11 @@ bool Vk_Context::Initialize() {
         }
     }
 
-    if (!CreateVulkanCommandPool(m_graphics_queue, &m_graphics_queue_cmd_pool)) {
+    if (!createVulkanCommandPool(m_graphics_queue, &m_graphics_queue_cmd_pool)) {
         return false;
     }
 
-    if (!CreateUBODescriptorPool()) {
+    if (!createUboDescriptorPool()) {
         LogError(sTag, "Could not create the UBO descriptor pool");
         return false;
     }
@@ -184,7 +184,7 @@ bool Vk_Context::Initialize() {
     return true;
 }
 
-void Vk_Context::Shutdown() {
+void Vk_Context::shutdown() {
     if (m_device) {
         if (m_graphics_queue_cmd_pool) {
             vkDestroyCommandPool(m_device, m_graphics_queue_cmd_pool, nullptr);
@@ -216,35 +216,35 @@ void Vk_Context::Shutdown() {
     }
 }
 
-VkInstance& Vk_Context::GetVulkanInstance() {
+VkInstance& Vk_Context::getVulkanInstance() {
     return m_instance;
 }
 
-VkDevice& Vk_Context::GetVulkanDevice() {
+VkDevice& Vk_Context::getVulkanDevice() {
     return m_device;
 }
 
-PhysicalDeviceParameters& Vk_Context::GetPhysicalDevice() {
+PhysicalDeviceParameters& Vk_Context::getPhysicalDevice() {
     return m_physical_device;
 }
 
-QueueParameters& Vk_Context::GetGraphicsQueue() {
+QueueParameters& Vk_Context::getGraphicsQueue() {
     return m_graphics_queue;
 }
 
-VkCommandPool& Vk_Context::GetGraphicsQueueCmdPool() {
+VkCommandPool& Vk_Context::getGraphicsQueueCmdPool() {
     return m_graphics_queue_cmd_pool;
 }
 
-VkDescriptorPool& Vk_Context::GetUBODescriptorPool() {
+VkDescriptorPool& Vk_Context::getUboDescriptorPool() {
     return m_ubo_descriptor_pool;
 }
 
-const VkPhysicalDeviceFeatures& Vk_Context::GetEnabledFeatures() {
+const VkPhysicalDeviceFeatures& Vk_Context::getEnabledFeatures() {
     return m_enabled_features;
 }
 
-bool Vk_Context::CreateInstance() {
+bool Vk_Context::createInstance() {
     // Define the application information
     VkApplicationInfo appInfo = {
         VK_STRUCTURE_TYPE_APPLICATION_INFO,  // sType
@@ -257,7 +257,7 @@ bool Vk_Context::CreateInstance() {
     };
 
     // Check that all the instance extensions are supported
-    if (!CheckInstanceExtensionsSupport()) {
+    if (!checkInstanceExtensionsSupport()) {
         LogFatal(sTag, "Error instance extensions");
         return false;
     };
@@ -284,7 +284,7 @@ bool Vk_Context::CreateInstance() {
     return true;
 }
 
-bool Vk_Context::CreateDevice() {
+bool Vk_Context::createDevice() {
     VkResult result = VK_SUCCESS;
 
     // Query all the avaliable physical devices
@@ -304,7 +304,7 @@ bool Vk_Context::CreateDevice() {
     // Check all the queried physical devices for one with the required
     // caracteristics and avaliable queues
     for (size_t i = 0; i < physical_devices.size(); i++) {
-        if (SelectPhysicalDevice(physical_devices[i])) {
+        if (selectPhysicalDevice(physical_devices[i])) {
             break;
         }
     }
@@ -356,7 +356,7 @@ bool Vk_Context::CreateDevice() {
     return true;
 }
 
-bool Vk_Context::SelectPhysicalDevice(VkPhysicalDevice& physical_device) {
+bool Vk_Context::selectPhysicalDevice(VkPhysicalDevice& physical_device) {
     VkResult result = VK_SUCCESS;
 
     // Check the PhysicalDevice properties and features
@@ -448,7 +448,7 @@ bool Vk_Context::SelectPhysicalDevice(VkPhysicalDevice& physical_device) {
     return true;
 }
 
-bool Vk_Context::CheckValidationLayerSupport() const {
+bool Vk_Context::checkValidationLayerSupport() const {
     VkResult result = VK_SUCCESS;
 
     // Get the avaliable layers
@@ -484,7 +484,7 @@ bool Vk_Context::CheckValidationLayerSupport() const {
     return true;
 }
 
-bool Vk_Context::CheckInstanceExtensionsSupport() const {
+bool Vk_Context::checkInstanceExtensionsSupport() const {
     VkResult result = VK_SUCCESS;
 
     // Get the avaliable extensions
@@ -536,7 +536,7 @@ bool Vk_Context::CheckInstanceExtensionsSupport() const {
     return all_extensions_found;
 }
 
-bool Vk_Context::CreateVulkanCommandPool(QueueParameters& queue, VkCommandPool* cmd_pool) {
+bool Vk_Context::createVulkanCommandPool(QueueParameters& queue, VkCommandPool* cmd_pool) {
     VkResult result = VK_SUCCESS;
 
     // Create the pool for the command buffers
@@ -556,7 +556,7 @@ bool Vk_Context::CreateVulkanCommandPool(QueueParameters& queue, VkCommandPool* 
     return true;
 }
 
-bool Vk_Context::CreateUBODescriptorPool() {
+bool Vk_Context::createUboDescriptorPool() {
     VkResult result = VK_SUCCESS;
 
     std::array<VkDescriptorPoolSize, 2> pool_sizes = {{

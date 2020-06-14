@@ -14,14 +14,14 @@ public:
 
     ~Vk_Mesh() override;
 
-    void LoadFromData(std::vector<Vertex> vertices,
+    void loadFromData(std::vector<Vertex> vertices,
                       std::vector<uint32> indices,
                       std::vector<std::pair<Texture2D*, TextureType>> textures) override;
 
-    void Draw(RenderWindow& target, const RenderStates& states) const override;
+    void draw(RenderWindow& target, const RenderStates& states) const override;
 
 private:
-    void SetupMesh();
+    void setupMesh();
 
     Vk_Buffer m_vertex_buffer;
     Vk_Buffer m_index_buffer;

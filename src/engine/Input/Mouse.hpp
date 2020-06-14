@@ -16,11 +16,11 @@ private:
     Mouse(Pointer& pointer);
 
 public:
-    void SetRelativeMouseMode(bool enable);
+    void setRelativeMouseMode(bool enable);
 
-    void ShowCursor();
+    void showCursor();
 
-    void HideCursor();
+    void hideCursor();
 
     Pointer& pointer;
 };
