@@ -167,13 +167,13 @@ public:
     template <typename D>
     friend inline typename Matrix3x3<D>::col_type operator*(const typename Matrix3x3<D>::row_type& v,
                                                             const Matrix3x3<D>& m) {
-        return typename Matrix3x3<D>::col_type(v.m_data * m.m_data);
+        return typename Matrix3x3<D>::col_type(v.data * m.m_data);
     }
 
     template <typename D>
     friend inline typename Matrix3x3<D>::row_type operator*(const Matrix3x3<D>& m,
                                                             const typename Matrix3x3<D>::col_type& v) {
-        return typename Matrix3x3<D>::row_type(m.m_data * v.m_data);
+        return typename Matrix3x3<D>::row_type(m.m_data * v.data);
     }
 
     // Matrix multiplications

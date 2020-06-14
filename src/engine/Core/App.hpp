@@ -69,7 +69,7 @@ protected:
     const Time& getDeltaTime();
 
 private:
-    Time m_delta_time;
+    Time m_deltaTime;
 };
 
 }  // namespace engine

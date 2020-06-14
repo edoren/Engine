@@ -33,7 +33,7 @@ FileSystem* FileSystem::GetInstancePtr() {
 }
 
 FileSystem::FileSystem() {
-    m_search_paths = {
+    m_searchPaths = {
 #if PLATFORM_IS(PLATFORM_ANDROID)
         ""
 #else
@@ -50,7 +50,7 @@ void FileSystem::shutdown() {}
 
 bool FileSystem::fileExists(const String& filename) const {
     IOStream file;
-    for (const String& path : m_search_paths) {
+    for (const String& path : m_searchPaths) {
         String file_path = join(path, filename);
         if (file.open(file_path, "r")) {
             return true;
@@ -76,7 +76,7 @@ bool FileSystem::loadFileData(const String& filename, std::vector<byte>* dest) c
     filename_cpy.replace('\\', getOsSeparator());
     filename_cpy.replace('/', getOsSeparator());
 
-    for (const String& path : m_search_paths) {
+    for (const String& path : m_searchPaths) {
         String file_path = join(path, filename_cpy);
         if (file.open(file_path.getData(), "rb")) {
             break;
@@ -294,15 +294,15 @@ String FileSystem::join(const String& left, const String& right) const {
 }
 
 void FileSystem::setSearchPaths(std::vector<String> search_paths) {
-    m_search_paths = search_paths;
+    m_searchPaths = search_paths;
 }
 
 const std::vector<String>& FileSystem::getSearchPaths() const {
-    return m_search_paths;
+    return m_searchPaths;
 }
 
 void FileSystem::addSearchPath(const String& path) {
-    m_search_paths.push_back(path);
+    m_searchPaths.push_back(path);
 }
 
 }  // namespace engine

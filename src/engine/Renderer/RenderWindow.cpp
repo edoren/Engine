@@ -16,33 +16,32 @@ const String sTag("RenderWindow");
 
 RenderWindow::RenderWindow()
       : m_window(nullptr),
-
-        m_is_fullscreen(false),
-        m_is_vsync_enable(false),
-        m_active_camera(nullptr) {
+        m_isFullscreen(false),
+        m_isVsyncEnabled(false),
+        m_activeCamera(nullptr) {
     auto& input = InputManager::GetInstance();
 
-    on_window_resize_connection = input.on_window_resized.connect(*this, &RenderWindow::onWindowResizedPriv);
+    m_onWindowResizeConnection = input.onWindowResized.connect(*this, &RenderWindow::onWindowResizedPriv);
 
-    on_app_will_enter_background_connection =
-        input.on_app_will_enter_background.connect(*this, &RenderWindow::onAppWillEnterBackgroundPriv);
-    on_app_did_enter_background_connection =
-        input.on_app_did_enter_background.connect(*this, &RenderWindow::onAppDidEnterBackgroundPriv);
-    on_app_will_enter_foreground_connection =
-        input.on_app_will_enter_foreground.connect(*this, &RenderWindow::onAppWillEnterForegroundPriv);
-    on_app_did_enter_foreground_connection =
-        input.on_app_did_enter_foreground.connect(*this, &RenderWindow::onAppDidEnterForegroundPriv);
+    m_onAppWillEnterBackgroundConnection =
+        input.onAppWillEnterBackground.connect(*this, &RenderWindow::onAppWillEnterBackgroundPriv);
+    m_onAppDidEnterBackgroundConnection =
+        input.onAppDidEnterBackground.connect(*this, &RenderWindow::onAppDidEnterBackgroundPriv);
+    m_onAppWillEnterForegroundConnection =
+        input.onAppWillEnterForeground.connect(*this, &RenderWindow::onAppWillEnterForegroundPriv);
+    m_onAppDidEnterForegroundConnection =
+        input.onAppDidEnterForeground.connect(*this, &RenderWindow::onAppDidEnterForegroundPriv);
 }
 
 RenderWindow::~RenderWindow() {
     auto& input = InputManager::GetInstance();
 
-    input.on_window_resized.disconnect(on_window_resize_connection);
+    input.onWindowResized.disconnect(m_onWindowResizeConnection);
 
-    input.on_app_will_enter_background.disconnect(on_app_will_enter_background_connection);
-    input.on_app_did_enter_background.disconnect(on_app_did_enter_background_connection);
-    input.on_app_will_enter_foreground.disconnect(on_app_will_enter_foreground_connection);
-    input.on_app_did_enter_foreground.disconnect(on_app_did_enter_foreground_connection);
+    input.onAppWillEnterBackground.disconnect(m_onAppWillEnterBackgroundConnection);
+    input.onAppDidEnterBackground.disconnect(m_onAppDidEnterBackgroundConnection);
+    input.onAppWillEnterForeground.disconnect(m_onAppWillEnterForegroundConnection);
+    input.onAppDidEnterForeground.disconnect(m_onAppDidEnterForegroundConnection);
 }
 
 bool RenderWindow::create(const String& name, const math::ivec2& size) {
@@ -103,16 +102,16 @@ void RenderWindow::setFullScreen(bool fullscreen, bool is_fake) {
         // Update the base class attributes
         onWindowResizedPriv(m_size);
         SDL_SetWindowSize(window, m_size.x, m_size.y);
-        m_is_fullscreen = fullscreen;
+        m_isFullscreen = fullscreen;
     }
 }
 
 void RenderWindow::setActiveCamera(const Camera* camera) {
-    m_active_camera = camera;
+    m_activeCamera = camera;
 }
 
 const Camera* RenderWindow::getActiveCamera() const {
-    return m_active_camera;
+    return m_activeCamera;
 }
 
 void RenderWindow::advanceFrame(bool minimized) {
@@ -128,11 +127,11 @@ const math::ivec2& RenderWindow::getSize() const {
 };
 
 bool RenderWindow::isVSyncEnabled() const {
-    return m_is_vsync_enable;
+    return m_isVsyncEnabled;
 };
 
 bool RenderWindow::isFullScreen() const {
-    return m_is_fullscreen;
+    return m_isFullscreen;
 }
 
 const math::mat4& RenderWindow::getProjectionMatrix() const {

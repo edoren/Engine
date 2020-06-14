@@ -25,8 +25,8 @@ UUID UUID::UUID4() {
         uint64_uuid[i] = sDist(sRng);
     }
 
-    output.m_uuid.clock_seq_hi_and_reserved = (output.m_uuid.clock_seq_hi_and_reserved & 0x3f) | 0x80;
-    output.m_uuid.clock_seq_low = (output.m_uuid.clock_seq_low & 0x0f) | 0x40;
+    output.m_uuid.clockSeqHiAndReserved = (output.m_uuid.clockSeqHiAndReserved & 0x3f) | 0x80;
+    output.m_uuid.clockSeqLow = (output.m_uuid.clockSeqLow & 0x0f) | 0x40;
 
     return output;
 }

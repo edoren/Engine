@@ -91,7 +91,7 @@ protected:
 
     virtual const String& getShaderFolder() const = 0;
 
-    Shader* m_active_shader;
+    Shader* m_activeShader;
     std::map<String, std::unique_ptr<Shader>> m_shaders;
 };
 

@@ -102,21 +102,21 @@ private:
     ////////////////////////////////////////////////////////////
     void setActiveRenderer();
 
-    std::vector<SharedLibrary*> m_plugin_libs;
+    std::vector<SharedLibrary*> m_pluginLibs;
     std::vector<Plugin*> m_plugins;
 
-    Renderer* m_active_renderer;
+    Renderer* m_activeRenderer;
     std::vector<std::unique_ptr<Renderer>> m_renderers;
 
     App* m_app;
 
     // Singletons
-    std::unique_ptr<LogManager> m_log_manager;
-    std::unique_ptr<FileSystem> m_file_system;
-    std::unique_ptr<SharedLibManager> m_shared_lib_manager;
-    std::unique_ptr<InputManager> m_input_manager;
-    std::unique_ptr<SceneManager> m_scene_manager;
-    std::unique_ptr<AsyncTaskRunner> m_async_task_runner;
+    std::unique_ptr<LogManager> m_logManager;
+    std::unique_ptr<FileSystem> m_fileSystem;
+    std::unique_ptr<SharedLibManager> m_sharedLibManager;
+    std::unique_ptr<InputManager> m_inputManager;
+    std::unique_ptr<SceneManager> m_sceneManager;
+    std::unique_ptr<AsyncTaskRunner> m_asyncTaskRunner;
 };
 
 }  // namespace engine

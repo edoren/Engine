@@ -180,13 +180,13 @@ public:
     template <typename D>
     friend inline typename Matrix4x4<D>::col_type operator*(const typename Matrix4x4<D>::row_type& v,
                                                             const Matrix4x4<D>& m) {
-        return typename Matrix4x4<D>::col_type(v.m_data * m.m_data);
+        return typename Matrix4x4<D>::col_type(v.data * m.m_data);
     }
 
     template <typename D>
     friend inline typename Matrix4x4<D>::row_type operator*(const Matrix4x4<D>& m,
                                                             const typename Matrix4x4<D>::col_type& v) {
-        return typename Matrix4x4<D>::row_type(m.m_data * v.m_data);
+        return typename Matrix4x4<D>::row_type(m.m_data * v.data);
     }
 
     // Matrix multiplications

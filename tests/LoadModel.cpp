@@ -22,32 +22,33 @@
 using namespace engine;
 
 struct Vertex {
-    Vertex(const math::vec3& position, const math::vec3& normal,
-           const math::vec2& tex_coords)
-          : position(position), normal(normal), tex_coords(tex_coords) {}
+    Vertex(const math::vec3& position, const math::vec3& normal, const math::vec2& tex_coords)
+          : position(position),
+            normal(normal),
+            texCoords(tex_coords) {}
     math::vec3 position;
     math::vec3 normal;
-    math::vec2 tex_coords;
+    math::vec2 texCoords;
 };
 
 class LoadModelApp : public App {
 public:
-    LoadModelApp(const String& scene_name) : m_scene_name(scene_name), m_window_size(800, 600) {}
+    LoadModelApp(const String& scene_name) : m_sceneName(scene_name), m_windowSize(800, 600) {}
 
 protected:
     bool initialize() override {
         Main& engine = Main::GetInstance();
 
         m_input = InputManager::GetInstancePtr();
-        m_shader_manager = ShaderManager::GetInstancePtr();
+        m_shaderManager = ShaderManager::GetInstancePtr();
         m_render = engine.getActiveRendererPtr();
         m_window = m_render->getRenderWindowPtr().get();
 
-        m_shader_manager->loadFromFile("model");
+        m_shaderManager->loadFromFile("model");
 
         SceneManager* scene_manager = SceneManager::GetInstancePtr();
         if (scene_manager) {
-            scene_manager->changeActiveScene(m_scene_name);
+            scene_manager->changeActiveScene(m_sceneName);
         }
 
         // Mouse& mouse = m_input->GetMouse();
@@ -56,8 +57,8 @@ protected:
 
         m_camera = Camera({10, 10, 10});
         m_camera.lookAt({0, 0, 0});
-        m_camera_speed = 2.5F;
-        m_mouse_sensivity = 0.1F;
+        m_cameraSpeed = 2.5F;
+        m_mouseSensivity = 0.1F;
 
         m_window->setActiveCamera(&m_camera);
 
@@ -65,7 +66,7 @@ protected:
     }
 
     void update() override {
-        m_window_size = m_window->getSize();
+        m_windowSize = m_window->getSize();
 
         // Camera movement
         const math::vec3& camera_front = m_camera.getFrontVector();
@@ -79,7 +80,7 @@ protected:
 
         // Camera key movements
         float delta_time = getDeltaTime().asSeconds();
-        float speed = m_camera_speed * delta_time;
+        float speed = m_cameraSpeed * delta_time;
         if (m_input->getButton(SDLK_w).isDown()) {
             m_camera.move(speed * camera_forward);
         }
@@ -114,7 +115,7 @@ protected:
                 [] { LogInfo("LoadModel", "Hello Thread {}"_format(std::this_thread::get_id())); });
         }
 
-        m_shader_manager->setActiveShader("model");
+        m_shaderManager->setActiveShader("model");
     }
 
     void shutdown() override {}
@@ -124,19 +125,19 @@ protected:
     }
 
     math::Vector2<int32> getWindowSize() override {
-        return m_window_size;
+        return m_windowSize;
     }
 
 private:
-    String m_scene_name;
-    math::ivec2 m_window_size;
+    String m_sceneName;
+    math::ivec2 m_windowSize;
 
     Camera m_camera;
-    float m_camera_speed;
-    float m_mouse_sensivity;
+    float m_cameraSpeed;
+    float m_mouseSensivity;
 
     InputManager* m_input;
-    ShaderManager* m_shader_manager;
+    ShaderManager* m_shaderManager;
     Renderer* m_render;
     RenderWindow* m_window;
     std::mutex m_mutex;

@@ -35,8 +35,8 @@ private:
     bool createDescriptorPool();
     bool createDescriptorSetLayout();
 
-    VkDescriptorPool m_descriptor_pool;
-    VkDescriptorSetLayout m_descriptor_set_layout;
+    VkDescriptorPool m_descriptorPool;
+    VkDescriptorSetLayout m_descriptorSetLayout;
 };
 
 }  // namespace engine

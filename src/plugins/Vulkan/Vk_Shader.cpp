@@ -32,12 +32,12 @@ Vk_Shader::~Vk_Shader() {
         }
     }
 
-    if (m_ubo_descriptor_set_layout != VK_NULL_HANDLE) {
-        vkDestroyDescriptorSetLayout(device, m_ubo_descriptor_set_layout, nullptr);
-        m_ubo_descriptor_set_layout = VK_NULL_HANDLE;
+    if (m_uboDescriptorSetLayout != VK_NULL_HANDLE) {
+        vkDestroyDescriptorSetLayout(device, m_uboDescriptorSetLayout, nullptr);
+        m_uboDescriptorSetLayout = VK_NULL_HANDLE;
     }
 
-    m_uniform_buffers.m_static.destroy();
+    m_uniformBuffers._static.destroy();
 }
 
 Vk_Shader& Vk_Shader::operator=(Vk_Shader&& other) {
@@ -82,11 +82,11 @@ VkShaderModule& Vk_Shader::getModule(ShaderType type) {
 }
 
 VkDescriptorSet& Vk_Shader::getUboDescriptorSet() {
-    return m_ubo_descriptor_set;
+    return m_uboDescriptorSet;
 }
 
 VkDescriptorSetLayout& Vk_Shader::getUboDescriptorSetLayout() {
-    return m_ubo_descriptor_set_layout;
+    return m_uboDescriptorSetLayout;
 }
 
 void Vk_Shader::setDescriptor(json&& descriptor) {
@@ -108,7 +108,7 @@ void Vk_Shader::setDescriptor(json&& descriptor) {
         String type = attribute["type"];
         attributes.push_back({name, getUboDataTypeFromString(type)});
     }
-    m_ubo_dynamic.setAttributes(attributes);
+    m_uboDynamic.setAttributes(attributes);
 
     std::vector<VertexLayout::Component> vertex_inputs;
     for (auto& component : m_descriptor["vertex_layout"]["vertex_input"]) {
@@ -127,7 +127,7 @@ void Vk_Shader::setDescriptor(json&& descriptor) {
             return;
         }
     }
-    m_vertex_layout = std::move(vertex_inputs);
+    m_vertexLayout = std::move(vertex_inputs);
 
     if (!createUniformBuffers()) {
         LogError(sTag, "Could not create the UBO buffer");
@@ -191,7 +191,7 @@ bool Vk_Shader::createUboDescriptorSetLayout() {
     };
 
     result =
-        vkCreateDescriptorSetLayout(device, &descriptor_set_layout_create_info, nullptr, &m_ubo_descriptor_set_layout);
+        vkCreateDescriptorSetLayout(device, &descriptor_set_layout_create_info, nullptr, &m_uboDescriptorSetLayout);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Could not create descriptor set layout");
         return false;
@@ -211,10 +211,10 @@ bool Vk_Shader::allocateUboDescriptorSet() {
         nullptr,                                         // pNext
         context.getUboDescriptorPool(),                  // descriptorPool
         1,                                               // descriptorSetCount
-        &m_ubo_descriptor_set_layout                     // pSetLayouts
+        &m_uboDescriptorSetLayout                        // pSetLayouts
     };
 
-    result = vkAllocateDescriptorSets(device, &descriptor_set_allocate_info, &m_ubo_descriptor_set);
+    result = vkAllocateDescriptorSets(device, &descriptor_set_allocate_info, &m_uboDescriptorSet);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Could not allocate descriptor set");
         return false;
@@ -227,18 +227,18 @@ bool Vk_Shader::updateUboDescriptorSet() {
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.getVulkanDevice();
 
-    LogDebug(sTag, "Buffer UBO Dynamic Size: {}"_format(m_uniform_buffers.m_dynamic.getSize()));
+    LogDebug(sTag, "Buffer UBO Dynamic Size: {}"_format(m_uniformBuffers.dynamic.getSize()));
 
     std::array<VkDescriptorBufferInfo, 2> bufferInfos = {{
         {
-            m_uniform_buffers.m_static.getHandle(),  // buffer
-            0,                                      // offset
-            VK_WHOLE_SIZE                           // range
+            m_uniformBuffers._static.getHandle(),  // buffer
+            0,                                     // offset
+            VK_WHOLE_SIZE                          // range
         },
         {
-            m_uniform_buffers.m_dynamic.getHandle(),  // buffer
-            0,                                      // offset
-            VK_WHOLE_SIZE                           // range
+            m_uniformBuffers.dynamic.getHandle(),  // buffer
+            0,                                     // offset
+            VK_WHOLE_SIZE                          // range
         },
     }};
 
@@ -246,7 +246,7 @@ bool Vk_Shader::updateUboDescriptorSet() {
         {
             VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,  // sType
             nullptr,                                 // pNext
-            m_ubo_descriptor_set,                    // dstSet
+            m_uboDescriptorSet,                      // dstSet
             0,                                       // dstBinding
             0,                                       // dstArrayElement
             1,                                       // descriptorCount
@@ -258,7 +258,7 @@ bool Vk_Shader::updateUboDescriptorSet() {
         {
             VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,     // sType
             nullptr,                                    // pNext
-            m_ubo_descriptor_set,                       // dstSet
+            m_uboDescriptorSet,                         // dstSet
             1,                                          // dstBinding
             0,                                          // dstArrayElement
             1,                                          // descriptorCount
@@ -279,11 +279,11 @@ UniformBufferObject& Vk_Shader::getUbo() {
 }
 
 UniformBufferObject& Vk_Shader::getUboDynamic() {
-    return m_ubo_dynamic;
+    return m_uboDynamic;
 }
 
 const Vk_VertexLayout& Vk_Shader::getVertexLayout() const {
-    return m_vertex_layout;
+    return m_vertexLayout;
 }
 
 bool Vk_Shader::createUniformBuffers() {
@@ -291,24 +291,24 @@ bool Vk_Shader::createUniformBuffers() {
 
     // Static UBO memory buffer
     result &=
-        m_uniform_buffers.m_static.create(m_ubo.getDataSize(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                                         (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT));
+        m_uniformBuffers._static.create(m_ubo.getDataSize(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                                        (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT));
 
     // Dynamic UBO memory buffer
     PhysicalDeviceParameters& physical_device = Vk_Context::GetInstance().getPhysicalDevice();
     size_t minUboAlignment = static_cast<size_t>(physical_device.properties.limits.minUniformBufferOffsetAlignment);
 
-    m_ubo_dynamic.setBufferSize(50, minUboAlignment);  // TODO: CHANGE THIS
+    m_uboDynamic.setBufferSize(50, minUboAlignment);  // TODO: CHANGE THIS
 
-    result &= m_uniform_buffers.m_dynamic.create(m_ubo_dynamic.getDataSize(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                                               VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+    result &= m_uniformBuffers.dynamic.create(m_uboDynamic.getDataSize(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                                              VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
 
     return result;
 }
 
 bool Vk_Shader::uploadUniformBuffers() {
-    if (m_uniform_buffers.m_static.getHandle() == VK_NULL_HANDLE ||
-        m_uniform_buffers.m_dynamic.getHandle() == VK_NULL_HANDLE) {
+    if (m_uniformBuffers._static.getHandle() == VK_NULL_HANDLE ||
+        m_uniformBuffers.dynamic.getHandle() == VK_NULL_HANDLE) {
         return false;
     }
     Vk_Context& context = Vk_Context::GetInstance();
@@ -316,26 +316,26 @@ bool Vk_Shader::uploadUniformBuffers() {
 
     {
         void* data;
-        vkMapMemory(device, m_uniform_buffers.m_static.getMemory(), 0, m_ubo.getDataSize(), 0, &data);
+        vkMapMemory(device, m_uniformBuffers._static.getMemory(), 0, m_ubo.getDataSize(), 0, &data);
         std::memcpy(data, m_ubo.getData(), m_ubo.getDataSize());
-        vkUnmapMemory(device, m_uniform_buffers.m_static.getMemory());
+        vkUnmapMemory(device, m_uniformBuffers._static.getMemory());
     }
 
     {
         void* data;
-        vkMapMemory(device, m_uniform_buffers.m_dynamic.getMemory(), 0, m_ubo_dynamic.getDataSize(), 0, &data);
-        std::memcpy(data, m_ubo_dynamic.getData(), m_ubo_dynamic.getDataSize());
+        vkMapMemory(device, m_uniformBuffers.dynamic.getMemory(), 0, m_uboDynamic.getDataSize(), 0, &data);
+        std::memcpy(data, m_uboDynamic.getData(), m_uboDynamic.getDataSize());
 
         VkMappedMemoryRange memoryRange = {
             VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,  // sType;
             nullptr,                                // pNext;
-            m_uniform_buffers.m_dynamic.getMemory(),  // memory;
+            m_uniformBuffers.dynamic.getMemory(),   // memory;
             0,                                      // offset;
-            m_ubo_dynamic.getDataSize()             // size;
+            m_uboDynamic.getDataSize()              // size;
         };
         vkFlushMappedMemoryRanges(device, 1, &memoryRange);
 
-        vkUnmapMemory(device, m_uniform_buffers.m_dynamic.getMemory());
+        vkUnmapMemory(device, m_uniformBuffers.dynamic.getMemory());
     }
 
     return true;

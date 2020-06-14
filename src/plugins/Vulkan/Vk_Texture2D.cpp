@@ -65,7 +65,7 @@ bool Vk_Texture2D::loadFromImage(const Image& img) {
 void Vk_Texture2D::use() {}
 
 VkDescriptorSet& Vk_Texture2D::getDescriptorSet() {
-    return m_descriptor_set;
+    return m_descriptorSet;
 }
 
 bool Vk_Texture2D::createSampler() {
@@ -109,14 +109,14 @@ bool Vk_Texture2D::copyTextureData(const Image& img) {
 
     VkResult result = VK_SUCCESS;
 
-    if (!m_staging_buffer.create(img.getDataSize(), VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) {
+    if (!m_stagingBuffer.create(img.getDataSize(), VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) {
         LogFatal(sTag, "Could not create Staging Buffer");
     }
 
     // Prepare data in staging buffer
     void* staging_buffer_memory_pointer;
-    result = vkMapMemory(device, m_staging_buffer.getMemory(), 0, img.getDataSize(), 0, &staging_buffer_memory_pointer);
+    result = vkMapMemory(device, m_stagingBuffer.getMemory(), 0, img.getDataSize(), 0, &staging_buffer_memory_pointer);
     if (result != VK_SUCCESS) {
         LogError(sTag,
                  "Could not map memory and upload "
@@ -129,13 +129,13 @@ bool Vk_Texture2D::copyTextureData(const Image& img) {
     VkMappedMemoryRange flush_range = {
         VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,  // sType
         nullptr,                                // pNext
-        m_staging_buffer.getMemory(),           // memory
+        m_stagingBuffer.getMemory(),            // memory
         0,                                      // offset
         img.getDataSize()                       // size
     };
     vkFlushMappedMemoryRanges(device, 1, &flush_range);
 
-    vkUnmapMemory(device, m_staging_buffer.getMemory());
+    vkUnmapMemory(device, m_stagingBuffer.getMemory());
 
     // Prepare command buffer to copy data from staging buffer to a vertex
     // buffer
@@ -210,7 +210,7 @@ bool Vk_Texture2D::copyTextureData(const Image& img) {
             1                 // depth
         },
     };
-    vkCmdCopyBufferToImage(command_buffer, m_staging_buffer.getHandle(), m_image.getHandle(),
+    vkCmdCopyBufferToImage(command_buffer, m_stagingBuffer.getHandle(), m_image.getHandle(),
                            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &buffer_image_copy_info);
 
     VkImageMemoryBarrier image_memory_barrier_from_transfer_to_shader_read = {
@@ -271,7 +271,7 @@ bool Vk_Texture2D::allocateDescriptorSet() {
         &texture_manager->getDescriptorSetLayout()       // pSetLayouts
     };
 
-    result = vkAllocateDescriptorSets(device, &descriptor_set_allocate_info, &m_descriptor_set);
+    result = vkAllocateDescriptorSets(device, &descriptor_set_allocate_info, &m_descriptorSet);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Could not allocate descriptor set");
         return false;
@@ -296,7 +296,7 @@ bool Vk_Texture2D::updateDescriptorSet() {
     VkWriteDescriptorSet descriptor_writes = {
         VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,     // sType
         nullptr,                                    // pNext
-        m_descriptor_set,                           // dstSet
+        m_descriptorSet,                            // dstSet
         0,                                          // dstBinding
         0,                                          // dstArrayElement
         1,                                          // descriptorCount

@@ -79,16 +79,16 @@ Vk_Context* Vk_Context::GetInstancePtr() {
 Vk_Context::Vk_Context()
       : m_instance(VK_NULL_HANDLE),
         m_device(VK_NULL_HANDLE),
-        m_graphics_queue_cmd_pool(VK_NULL_HANDLE),
-        m_ubo_descriptor_pool(VK_NULL_HANDLE),
-        m_debug_report_callback(VK_NULL_HANDLE),
+        m_graphicsQueueCmdPool(VK_NULL_HANDLE),
+        m_uboDescriptorPool(VK_NULL_HANDLE),
+        m_debugReportCallback(VK_NULL_HANDLE),
 #ifdef ENGINE_DEBUG
-        m_validation_layers_enabled(true) {
+        m_validationLayersEnabled(true) {
 #else
-        m_validation_layers_enabled(false){
+        m_validationLayersEnabled(false) {
 #endif
 
-}  // namespace engine
+}
 
 Vk_Context::~Vk_Context() {
     shutdown();
@@ -96,54 +96,54 @@ Vk_Context::~Vk_Context() {
 
 bool Vk_Context::initialize() {
     // Add the required validation layers
-    if (m_validation_layers_enabled) {
+    if (m_validationLayersEnabled) {
 #if PLATFORM_IS(PLATFORM_ANDROID)
-        m_validation_layers = {"VK_LAYER_GOOGLE_threading", "VK_LAYER_LUNARG_parameter_validation",
-                               "VK_LAYER_LUNARG_object_tracker", "VK_LAYER_LUNARG_core_validation",
-                               "VK_LAYER_GOOGLE_unique_objects"};
+        m_validationLayers = {"VK_LAYER_GOOGLE_threading", "VK_LAYER_LUNARG_parameter_validation",
+                              "VK_LAYER_LUNARG_object_tracker", "VK_LAYER_LUNARG_core_validation",
+                              "VK_LAYER_GOOGLE_unique_objects"};
 #elif PLATFORM_IS(PLATFORM_IOS)
-        m_validation_layers_enabled = false;
+        m_validationLayersEnabled = false;
 #else
-        m_validation_layers = {"VK_LAYER_KHRONOS_validation"};
+        m_validationLayers = {"VK_LAYER_KHRONOS_validation"};
 #endif
     }
 
     // Add the required Instance extensions
-    m_instance_extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
+    m_instanceExtensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
 #if defined(SDL_VIDEO_DRIVER_WINDOWS)
-    m_instance_extensions.push_back("VK_KHR_win32_surface");
+    m_instanceExtensions.push_back("VK_KHR_win32_surface");
 #endif
 #if defined(SDL_VIDEO_DRIVER_X11)
-    m_instance_extensions.push_back("VK_KHR_xcb_surface");
-    m_instance_extensions.push_back("VK_KHR_xlib_surface");
+    m_instanceExtensions.push_back("VK_KHR_xcb_surface");
+    m_instanceExtensions.push_back("VK_KHR_xlib_surface");
 #endif
 #if defined(SDL_VIDEO_DRIVER_WAYLAND)
-    m_instance_extensions.push_back("VK_KHR_wayland_surface");
+    m_instanceExtensions.push_back("VK_KHR_wayland_surface");
 #endif
 #if defined(SDL_VIDEO_DRIVER_MIR)
-    m_instance_extensions.push_back("VK_KHR_mir_surface");
+    m_instanceExtensions.push_back("VK_KHR_mir_surface");
 #endif
 #if defined(SDL_VIDEO_DRIVER_ANDROID)
-    m_instance_extensions.push_back("VK_KHR_android_surface");
+    m_instanceExtensions.push_back("VK_KHR_android_surface");
 #endif
 #if defined(SDL_VIDEO_DRIVER_COCOA)
-    m_instance_extensions.push_back("VK_MVK_macos_surface");
+    m_instanceExtensions.push_back("VK_MVK_macos_surface");
 #endif
 #if defined(SDL_VIDEO_DRIVER_UIKIT)
-    m_instance_extensions.push_back("VK_MVK_ios_surface");
+    m_instanceExtensions.push_back("VK_MVK_ios_surface");
 #endif
-    if (m_instance_extensions.size() < 2) {
+    if (m_instanceExtensions.size() < 2) {
         LogFatal(sTag, "Platform does not has a supported surface extension");
     }
-    if (m_validation_layers_enabled) {
-        m_instance_extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
+    if (m_validationLayersEnabled) {
+        m_instanceExtensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
     }
 
     // Add the required Device extensions
-    m_device_extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+    m_deviceExtensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
 
     // Check the validation layers support
-    if (m_validation_layers_enabled && !checkValidationLayerSupport()) {
+    if (m_validationLayersEnabled && !checkValidationLayerSupport()) {
         LogFatal(sTag, "Validation layers requested, but not available");
         return false;
     }
@@ -151,7 +151,7 @@ bool Vk_Context::initialize() {
     createInstance();
     createDevice();
 
-    if (m_validation_layers_enabled && !m_debug_report_callback) {
+    if (m_validationLayersEnabled && !m_debugReportCallback) {
         PFN_vkCreateDebugReportCallbackEXT vkCreateDebugReportCallbackEXT;
 
         vkCreateDebugReportCallbackEXT = reinterpret_cast<PFN_vkCreateDebugReportCallbackEXT>(
@@ -168,11 +168,11 @@ bool Vk_Context::initialize() {
                 nullptr                                         // pUserData
             };
 
-            vkCreateDebugReportCallbackEXT(m_instance, &create_info, nullptr, &m_debug_report_callback);
+            vkCreateDebugReportCallbackEXT(m_instance, &create_info, nullptr, &m_debugReportCallback);
         }
     }
 
-    if (!createVulkanCommandPool(m_graphics_queue, &m_graphics_queue_cmd_pool)) {
+    if (!createVulkanCommandPool(m_graphicsQueue, &m_graphicsQueueCmdPool)) {
         return false;
     }
 
@@ -186,27 +186,27 @@ bool Vk_Context::initialize() {
 
 void Vk_Context::shutdown() {
     if (m_device) {
-        if (m_graphics_queue_cmd_pool) {
-            vkDestroyCommandPool(m_device, m_graphics_queue_cmd_pool, nullptr);
-            m_graphics_queue_cmd_pool = VK_NULL_HANDLE;
+        if (m_graphicsQueueCmdPool) {
+            vkDestroyCommandPool(m_device, m_graphicsQueueCmdPool, nullptr);
+            m_graphicsQueueCmdPool = VK_NULL_HANDLE;
         }
 
-        if (m_ubo_descriptor_pool) {
-            vkDestroyDescriptorPool(m_device, m_ubo_descriptor_pool, nullptr);
-            m_ubo_descriptor_pool = VK_NULL_HANDLE;
+        if (m_uboDescriptorPool) {
+            vkDestroyDescriptorPool(m_device, m_uboDescriptorPool, nullptr);
+            m_uboDescriptorPool = VK_NULL_HANDLE;
         }
 
         vkDestroyDevice(m_device, nullptr);
         m_device = VK_NULL_HANDLE;
     }
 
-    if (m_validation_layers_enabled && m_debug_report_callback) {
+    if (m_validationLayersEnabled && m_debugReportCallback) {
         PFN_vkDestroyDebugReportCallbackEXT vkDestroyDebugReportCallbackEXT;
         vkDestroyDebugReportCallbackEXT = reinterpret_cast<PFN_vkDestroyDebugReportCallbackEXT>(
             vkGetInstanceProcAddr(m_instance, "vkDestroyDebugReportCallbackEXT"));
 
         if (vkDestroyDebugReportCallbackEXT) {
-            vkDestroyDebugReportCallbackEXT(m_instance, m_debug_report_callback, nullptr);
+            vkDestroyDebugReportCallbackEXT(m_instance, m_debugReportCallback, nullptr);
         }
     }
 
@@ -225,23 +225,23 @@ VkDevice& Vk_Context::getVulkanDevice() {
 }
 
 PhysicalDeviceParameters& Vk_Context::getPhysicalDevice() {
-    return m_physical_device;
+    return m_physicalDevice;
 }
 
 QueueParameters& Vk_Context::getGraphicsQueue() {
-    return m_graphics_queue;
+    return m_graphicsQueue;
 }
 
 VkCommandPool& Vk_Context::getGraphicsQueueCmdPool() {
-    return m_graphics_queue_cmd_pool;
+    return m_graphicsQueueCmdPool;
 }
 
 VkDescriptorPool& Vk_Context::getUboDescriptorPool() {
-    return m_ubo_descriptor_pool;
+    return m_uboDescriptorPool;
 }
 
 const VkPhysicalDeviceFeatures& Vk_Context::getEnabledFeatures() {
-    return m_enabled_features;
+    return m_enabledFeatures;
 }
 
 bool Vk_Context::createInstance() {
@@ -264,14 +264,14 @@ bool Vk_Context::createInstance() {
 
     // Define all the information for the instance
     VkInstanceCreateInfo create_info = {
-        VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,             // sType
-        nullptr,                                            // pNext
-        VkInstanceCreateFlags(),                            //  flags
-        &appInfo,                                           //  pApplicationInfo
-        static_cast<uint32>(m_validation_layers.size()),    //  enabledLayerCount
-        m_validation_layers.data(),                         //  ppEnabledLayerNames
-        static_cast<uint32>(m_instance_extensions.size()),  //  enabledExtensionCount
-        m_instance_extensions.data()                        //  ppEnabledExtensionNames
+        VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,            // sType
+        nullptr,                                           // pNext
+        VkInstanceCreateFlags(),                           //  flags
+        &appInfo,                                          //  pApplicationInfo
+        static_cast<uint32>(m_validationLayers.size()),    //  enabledLayerCount
+        m_validationLayers.data(),                         //  ppEnabledLayerNames
+        static_cast<uint32>(m_instanceExtensions.size()),  //  enabledExtensionCount
+        m_instanceExtensions.data()                        //  ppEnabledExtensionNames
     };
 
     // Create the Vulkan instance based on the provided info
@@ -308,7 +308,7 @@ bool Vk_Context::createDevice() {
             break;
         }
     }
-    if (!m_physical_device.handle || m_graphics_queue.family_index == UINT32_MAX) {
+    if (!m_physicalDevice.handle || m_graphicsQueue.familyIndex == UINT32_MAX) {
         LogFatal("Vk_Core", "No physical device that supports the required caracteristics");
         return false;
     }
@@ -320,38 +320,38 @@ bool Vk_Context::createDevice() {
         VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,    // sType
         nullptr,                                       // pNext
         VkDeviceQueueCreateFlags(),                    // flags
-        m_graphics_queue.family_index,                 // queueFamilyIndex
+        m_graphicsQueue.familyIndex,                   // queueFamilyIndex
         static_cast<uint32>(queue_priorities.size()),  // queueCount
         queue_priorities.data()                        // pQueuePriorities
     });
 
     // TODO: Configure this in runtime
-    m_enabled_features = {};
-    m_enabled_features.samplerAnisotropy = m_physical_device.features.samplerAnisotropy;
+    m_enabledFeatures = {};
+    m_enabledFeatures.samplerAnisotropy = m_physicalDevice.features.samplerAnisotropy;
 
     // Define all the information for the logical device
     VkDeviceCreateInfo device_create_info = {
-        VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,             // sType
-        nullptr,                                          // pNext
-        VkDeviceCreateFlags(),                            // flags
-        static_cast<uint32>(queue_create_infos.size()),   // queueCreateInfoCount
-        queue_create_infos.data(),                        // pQueueCreateInfos
-        static_cast<uint32>(m_validation_layers.size()),  // enabledLayerCount
-        m_validation_layers.data(),                       // ppEnabledLayerNames
-        static_cast<uint32>(m_device_extensions.size()),  // enabledExtensionCount
-        m_device_extensions.data(),                       // ppEnabledExtensionNames
-        &m_enabled_features                               // pEnabledFeatures
+        VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,            // sType
+        nullptr,                                         // pNext
+        VkDeviceCreateFlags(),                           // flags
+        static_cast<uint32>(queue_create_infos.size()),  // queueCreateInfoCount
+        queue_create_infos.data(),                       // pQueueCreateInfos
+        static_cast<uint32>(m_validationLayers.size()),  // enabledLayerCount
+        m_validationLayers.data(),                       // ppEnabledLayerNames
+        static_cast<uint32>(m_deviceExtensions.size()),  // enabledExtensionCount
+        m_deviceExtensions.data(),                       // ppEnabledExtensionNames
+        &m_enabledFeatures                               // pEnabledFeatures
     };
 
     // Create the logical device based on the retrived info
-    result = vkCreateDevice(m_physical_device.handle, &device_create_info, nullptr, &m_device);
+    result = vkCreateDevice(m_physicalDevice.handle, &device_create_info, nullptr, &m_device);
     if (result != VK_SUCCESS) {
         LogFatal(sTag, "Could not create Vulkan device");
         return false;
     }
 
     // Get the Queue handles
-    vkGetDeviceQueue(m_device, m_graphics_queue.family_index, 0, &m_graphics_queue.handle);
+    vkGetDeviceQueue(m_device, m_graphicsQueue.familyIndex, 0, &m_graphicsQueue.handle);
 
     return true;
 }
@@ -396,11 +396,11 @@ bool Vk_Context::selectPhysicalDevice(VkPhysicalDevice& physical_device) {
     }
 
     // Check that all the required device extensions exists
-    for (size_t i = 0; i < m_device_extensions.size(); i++) {
-        if (!CheckExtensionAvailability(m_device_extensions[i], available_extensions)) {
+    for (size_t i = 0; i < m_deviceExtensions.size(); i++) {
+        if (!CheckExtensionAvailability(m_deviceExtensions[i], available_extensions)) {
             LogError(sTag,
                      "Physical device {} doesn't support extension "
-                     "named \"{}\""_format(properties.deviceName, m_device_extensions[i]));
+                     "named \"{}\""_format(properties.deviceName, m_deviceExtensions[i]));
             return false;
         }
     }
@@ -437,13 +437,13 @@ bool Vk_Context::selectPhysicalDevice(VkPhysicalDevice& physical_device) {
     }
 
     // Set the PhysicalDeviceProperties
-    m_physical_device.handle = physical_device;
-    m_physical_device.properties = properties;
-    m_physical_device.features = features;
+    m_physicalDevice.handle = physical_device;
+    m_physicalDevice.properties = properties;
+    m_physicalDevice.features = features;
 
     // Set the graphical QueueProperties
-    m_graphics_queue.family_index = graphics_queue_family_index;
-    m_graphics_queue.properties = queue_family_properties[m_graphics_queue.family_index];
+    m_graphicsQueue.familyIndex = graphics_queue_family_index;
+    m_graphicsQueue.properties = queue_family_properties[m_graphicsQueue.familyIndex];
 
     return true;
 }
@@ -474,7 +474,7 @@ bool Vk_Context::checkValidationLayerSupport() const {
     LogInfo(sTag, "Available Layers: {}"_format(available_layer_list));
 
     // Check that all the validation layers exists
-    for (const auto& requested_layer : m_validation_layers) {
+    for (const auto& requested_layer : m_validationLayers) {
         if (!CheckLayerAvailability(requested_layer, avaliable_layers)) {
             LogError(sTag, "Could not find validation layer named: {}"_format(requested_layer));
             return false;
@@ -519,7 +519,7 @@ bool Vk_Context::checkInstanceExtensionsSupport() const {
 
     // Check that all the required instance extensions exists
     bool all_extensions_found = true;
-    for (const char* instance_extension : m_instance_extensions) {
+    for (const char* instance_extension : m_instanceExtensions) {
 #if defined(SDL_VIDEO_DRIVER_X11)
         if (!strcmp(x11_extension_to_ignore, instance_extension)) {
             continue;
@@ -544,7 +544,7 @@ bool Vk_Context::createVulkanCommandPool(QueueParameters& queue, VkCommandPool* 
         VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,                                                // sType
         nullptr,                                                                                   // pNext
         (VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT | VK_COMMAND_POOL_CREATE_TRANSIENT_BIT),  // flags
-        queue.family_index                                                                         // queueFamilyIndex
+        queue.familyIndex                                                                          // queueFamilyIndex
     };
 
     result = vkCreateCommandPool(m_device, &cmd_pool_create_info, nullptr, cmd_pool);
@@ -584,7 +584,7 @@ bool Vk_Context::createUboDescriptorPool() {
         pool_sizes.data()                               // pPoolSizes
     };
 
-    result = vkCreateDescriptorPool(m_device, &descriptor_pool_create_info, nullptr, &m_ubo_descriptor_pool);
+    result = vkCreateDescriptorPool(m_device, &descriptor_pool_create_info, nullptr, &m_uboDescriptorPool);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Could not create descriptor pool");
         return false;

@@ -33,7 +33,7 @@ protected:
     std::vector<Vertex> m_vertices;
     std::vector<uint32> m_indices;
     std::vector<std::pair<Texture2D*, TextureType>> m_textures;
-    std::map<TextureType, Texture2D*> m_textures_map;
+    std::map<TextureType, Texture2D*> m_texturesMap;
 };
 
 }  // namespace engine

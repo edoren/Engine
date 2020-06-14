@@ -4,39 +4,39 @@ namespace engine {
 
 Stopwatch::Stopwatch()
       : m_running(false),
-        m_start_time(getActualTime()),
-        m_stop_time(m_start_time),
-        m_time_buffer(Time::sZero) {}
+        m_startTime(getActualTime()),
+        m_stopTime(m_startTime),
+        m_timeBuffer(Time::sZero) {}
 
 Time Stopwatch::getElapsedTime() const {
     Time duration;
     if (m_running) {
-        duration = getActualTime() - m_start_time - m_time_buffer;
+        duration = getActualTime() - m_startTime - m_timeBuffer;
     } else {
-        duration = m_stop_time - m_start_time - m_time_buffer;
+        duration = m_stopTime - m_startTime - m_timeBuffer;
     }
     return duration;
 }
 
 void Stopwatch::start() {
     if (!m_running) {
-        m_time_buffer += getActualTime() - m_stop_time;
+        m_timeBuffer += getActualTime() - m_stopTime;
         m_running = true;
     }
 }
 
 void Stopwatch::stop() {
     if (m_running) {
-        m_stop_time = getActualTime();
+        m_stopTime = getActualTime();
         m_running = false;
     }
 }
 
 void Stopwatch::restart() {
     Time now = getActualTime();
-    m_start_time = now;
-    m_stop_time = now;
-    m_time_buffer = Time::sZero;
+    m_startTime = now;
+    m_stopTime = now;
+    m_timeBuffer = Time::sZero;
 }
 
 Time Stopwatch::getActualTime() const {

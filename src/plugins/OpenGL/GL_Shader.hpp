@@ -57,15 +57,15 @@ private:
     json m_descriptor;
 
     UniformBufferObject m_ubo;
-    UniformBufferObject m_ubo_dynamic;
+    UniformBufferObject m_uboDynamic;
 
     GLuint m_program;
     std::array<GLuint, sShaderTypeCount> m_shaders;
 
     struct {
-        GLuint m_static;
-        GLuint m_dynamic;
-    } m_uniform_buffers;
+        GLuint _static;
+        GLuint dynamic;
+    } m_uniformBuffers;
 
     std::map<String, GLint> m_uniforms;
 };

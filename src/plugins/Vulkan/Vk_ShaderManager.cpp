@@ -47,7 +47,7 @@ Vk_Shader* Vk_ShaderManager::getShader(const String& name) {
 }
 
 Vk_Shader* Vk_ShaderManager::getActiveShader() {
-    return reinterpret_cast<Vk_Shader*>(m_active_shader);
+    return reinterpret_cast<Vk_Shader*>(m_activeShader);
 }
 
 std::unique_ptr<Shader> Vk_ShaderManager::createShader() {

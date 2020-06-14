@@ -34,7 +34,7 @@ private:
     std::unique_ptr<Mesh> processMesh(aiMesh* mesh, const aiScene* scene);
 
     std::vector<std::unique_ptr<Mesh>> m_meshes;
-    String m_relative_directory;
+    String m_relativeDirectory;
 
     Transform m_transform;
 

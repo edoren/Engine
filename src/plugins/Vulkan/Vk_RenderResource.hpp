@@ -16,9 +16,9 @@ public:
     void destroy();
 
     VkFramebuffer framebuffer;
-    VkCommandBuffer command_buffer;
-    VkSemaphore image_available_semaphore;
-    VkSemaphore finished_rendering_semaphore;
+    VkCommandBuffer commandBuffer;
+    VkSemaphore imageAvailableSemaphore;
+    VkSemaphore finishedRenderingSemaphore;
     VkFence fence;
 };
 

@@ -32,10 +32,10 @@ struct PhysicalDeviceParameters {
 
 struct QueueParameters {
     VkQueue handle;
-    uint32 family_index;
+    uint32 familyIndex;
     VkQueueFamilyProperties properties;
 
-    QueueParameters() : handle(VK_NULL_HANDLE), family_index(UINT32_MAX), properties() {}
+    QueueParameters() : handle(VK_NULL_HANDLE), familyIndex(UINT32_MAX), properties() {}
 
     operator VkQueue() const {
         return handle;

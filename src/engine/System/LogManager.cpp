@@ -51,16 +51,16 @@ LogManager* LogManager::GetInstancePtr() {
 }
 
 LogManager::LogManager()
-      : m_app_name("Engine"),
-        m_log_file("engine.log"),
-        m_file_logging_enable(true),
-        m_console_logging_enable(true) {}
+      : m_appName("Engine"),
+        m_logFile("engine.log"),
+        m_fileLoggingEnable(true),
+        m_consoleLoggingEnable(true) {}
 
 LogManager::LogManager(const String& app_name, const String& log_file)
-      : m_app_name(app_name),
-        m_log_file(log_file),
-        m_file_logging_enable(true),
-        m_console_logging_enable(true) {}
+      : m_appName(app_name),
+        m_logFile(log_file),
+        m_fileLoggingEnable(true),
+        m_consoleLoggingEnable(true) {}
 
 LogManager::~LogManager() {}
 
@@ -101,8 +101,8 @@ void LogManager::logMessage(LogPriority priority, const String& tag, const Strin
     String log_message = DefaultLogCallback(priority, tag, message);
 
     // Write the log to the file
-    if (m_file_logging_enable) {
-        if (SDL_RWops* pfile = SDL_RWFromFile(m_log_file.getData(), "ab")) {
+    if (m_fileLoggingEnable) {
+        if (SDL_RWops* pfile = SDL_RWFromFile(m_logFile.getData(), "ab")) {
             const std::string& str = log_message.toUtf8();
             SDL_RWwrite(pfile, str.data(), 1, str.size());
             SDL_RWwrite(pfile, sLineEnding, 1, strlen(sLineEnding));
@@ -111,9 +111,9 @@ void LogManager::logMessage(LogPriority priority, const String& tag, const Strin
     }
 
     // Write the log to console
-    if (m_console_logging_enable) {
+    if (m_consoleLoggingEnable) {
 #if PLATFORM_IS(PLATFORM_ANDROID)
-        __android_log_write(sAndroidLogPriorities[static_cast<int>(priority)], m_app_name.getData(),
+        __android_log_write(sAndroidLogPriorities[static_cast<int>(priority)], m_appName.getData(),
                             log_message.getData());
 #else
         fputs(log_message.getData(), stdout);
@@ -123,11 +123,11 @@ void LogManager::logMessage(LogPriority priority, const String& tag, const Strin
 }
 
 void LogManager::enableFileLogging(bool enable) {
-    m_file_logging_enable = enable;
+    m_fileLoggingEnable = enable;
 }
 
 void LogManager::enableConsoleLogging(bool enable) {
-    m_console_logging_enable = enable;
+    m_consoleLoggingEnable = enable;
 }
 
 }  // namespace engine

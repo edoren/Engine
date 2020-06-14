@@ -7,9 +7,9 @@ namespace engine {
 
 Vk_RenderResource::Vk_RenderResource()
       : framebuffer(VK_NULL_HANDLE),
-        command_buffer(VK_NULL_HANDLE),
-        image_available_semaphore(VK_NULL_HANDLE),
-        finished_rendering_semaphore(VK_NULL_HANDLE),
+        commandBuffer(VK_NULL_HANDLE),
+        imageAvailableSemaphore(VK_NULL_HANDLE),
+        finishedRenderingSemaphore(VK_NULL_HANDLE),
         fence(VK_NULL_HANDLE) {}
 
 Vk_RenderResource::~Vk_RenderResource() {
@@ -19,9 +19,9 @@ Vk_RenderResource::~Vk_RenderResource() {
 bool Vk_RenderResource::create() {
     Vk_Context& context = Vk_Context::GetInstance();
 
-    return !(!Vk_Utilities::AllocateCommandBuffers(context.getGraphicsQueueCmdPool(), 1, &command_buffer) ||
-             !Vk_Utilities::CreateVulkanSemaphore(&image_available_semaphore) ||
-             !Vk_Utilities::CreateVulkanSemaphore(&finished_rendering_semaphore) ||
+    return !(!Vk_Utilities::AllocateCommandBuffers(context.getGraphicsQueueCmdPool(), 1, &commandBuffer) ||
+             !Vk_Utilities::CreateVulkanSemaphore(&imageAvailableSemaphore) ||
+             !Vk_Utilities::CreateVulkanSemaphore(&finishedRenderingSemaphore) ||
              !Vk_Utilities::CreateVulkanFence(VK_FENCE_CREATE_SIGNALED_BIT, &fence));
 }
 
@@ -32,14 +32,14 @@ void Vk_RenderResource::destroy() {
     if (framebuffer) {
         vkDestroyFramebuffer(device, framebuffer, nullptr);
     }
-    if (command_buffer) {
-        vkFreeCommandBuffers(device, context.getGraphicsQueueCmdPool(), 1, &command_buffer);
+    if (commandBuffer) {
+        vkFreeCommandBuffers(device, context.getGraphicsQueueCmdPool(), 1, &commandBuffer);
     }
-    if (image_available_semaphore) {
-        vkDestroySemaphore(device, image_available_semaphore, nullptr);
+    if (imageAvailableSemaphore) {
+        vkDestroySemaphore(device, imageAvailableSemaphore, nullptr);
     }
-    if (finished_rendering_semaphore) {
-        vkDestroySemaphore(device, finished_rendering_semaphore, nullptr);
+    if (finishedRenderingSemaphore) {
+        vkDestroySemaphore(device, finishedRenderingSemaphore, nullptr);
     }
     if (fence) {
         vkDestroyFence(device, fence, nullptr);

@@ -54,7 +54,7 @@ private:
 
     IdType m_id;
     Reference* m_reference;
-    DisconnectCallbackType m_disconnect_callback;
+    DisconnectCallbackType m_disconnectCallback;
 };
 
 }  // namespace engine

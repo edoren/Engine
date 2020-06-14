@@ -78,22 +78,22 @@ private:
 
     Vk_Surface m_surface;
 
-    QueueParameters* m_graphics_queue;
-    QueueParameters* m_present_queue;
+    QueueParameters* m_graphicsQueue;
+    QueueParameters* m_presentQueue;
 
     Vk_SwapChain m_swapchain;
 
-    VkPipeline m_graphics_pipeline;
-    VkPipelineLayout m_pipeline_layout;
+    VkPipeline m_graphicsPipeline;
+    VkPipelineLayout m_pipelineLayout;
 
-    VkRenderPass m_render_pass;
+    VkRenderPass m_renderPass;
 
-    SafeQueue<CommandType> m_command_work_queue;
+    SafeQueue<CommandType> m_commandWorkQueue;
 
-    Vk_Image m_depth_image;
-    VkFormat m_depth_format;
+    Vk_Image m_depthImage;
+    VkFormat m_depthFormat;
 
-    std::vector<Vk_RenderResource> m_render_resources;
+    std::vector<Vk_RenderResource> m_renderResources;
 };
 
 }  // namespace engine

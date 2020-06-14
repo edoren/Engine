@@ -142,9 +142,9 @@ void GL_RenderWindow::setFullScreen(bool fullscreen, bool is_fake) {
 
 void GL_RenderWindow::setVSyncEnabled(bool vsync) {
     if (SDL_GL_SetSwapInterval(vsync ? 1 : 0) == 0) {
-        m_is_vsync_enable = vsync;
+        m_isVsyncEnabled = vsync;
     } else {
-        m_is_vsync_enable = false;
+        m_isVsyncEnabled = false;
     }
 }
 

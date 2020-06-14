@@ -4,20 +4,20 @@
 
 namespace engine {
 
-AsyncTaskRunner::AsyncTaskRunner() : m_is_running(true) {
+AsyncTaskRunner::AsyncTaskRunner() : m_isRunning(true) {
     auto job = [this]() -> void {
-        while (m_is_running) {
+        while (m_isRunning) {
             std::unique_lock<std::mutex> lk(m_mutex);
-            if (m_work_queue.isEmpty()) {
+            if (m_workQueue.isEmpty()) {
                 m_signaler.wait(lk);
-                if (m_work_queue.isEmpty()) {
-                    if (!m_is_running) {
+                if (m_workQueue.isEmpty()) {
+                    if (!m_isRunning) {
                         break;
                     }
                     continue;
                 }
             }
-            Task task = m_work_queue.pop();
+            Task task = m_workQueue.pop();
             lk.unlock();
             task();
         }
@@ -30,7 +30,7 @@ AsyncTaskRunner::AsyncTaskRunner() : m_is_running(true) {
 }
 
 AsyncTaskRunner::~AsyncTaskRunner() {
-    m_is_running = false;
+    m_isRunning = false;
     m_signaler.notify_all();
     for (auto& worker : m_workers) {
         worker.join();
@@ -38,7 +38,7 @@ AsyncTaskRunner::~AsyncTaskRunner() {
 }
 
 void AsyncTaskRunner::execute(Task&& f) {
-    m_work_queue.push(std::move(f));
+    m_workQueue.push(std::move(f));
     m_signaler.notify_one();
 }
 

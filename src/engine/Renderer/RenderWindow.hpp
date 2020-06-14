@@ -69,12 +69,12 @@ protected:
 
     String m_name;
     math::ivec2 m_size;  // If updated UpdateProjectionMatrix should be called
-    bool m_is_fullscreen;
-    bool m_is_vsync_enable;
+    bool m_isFullscreen;
+    bool m_isVsyncEnabled;
 
     math::mat4 m_projection;  // RenderTarget
 
-    const Camera* m_active_camera;
+    const Camera* m_activeCamera;
 
 private:
     void onWindowResizedPriv(const math::ivec2& size);
@@ -84,11 +84,11 @@ private:
     void onAppWillEnterForegroundPriv();
     void onAppDidEnterForegroundPriv();
 
-    SignalConnection on_window_resize_connection;
-    SignalConnection on_app_will_enter_background_connection;
-    SignalConnection on_app_did_enter_background_connection;
-    SignalConnection on_app_will_enter_foreground_connection;
-    SignalConnection on_app_did_enter_foreground_connection;
+    SignalConnection m_onWindowResizeConnection;
+    SignalConnection m_onAppWillEnterBackgroundConnection;
+    SignalConnection m_onAppDidEnterBackgroundConnection;
+    SignalConnection m_onAppWillEnterForegroundConnection;
+    SignalConnection m_onAppDidEnterForegroundConnection;
 };
 
 }  // namespace engine

@@ -148,13 +148,13 @@ public:
     template <typename D>
     friend inline typename Matrix2x2<D>::col_type operator*(const typename Matrix2x2<D>::row_type& v,
                                                             const Matrix2x2<D>& m) {
-        return typename Matrix2x2<D>::col_type(v.m_data * m.m_data);
+        return typename Matrix2x2<D>::col_type(v.data * m.m_data);
     }
 
     template <typename D>
     friend inline typename Matrix2x2<D>::row_type operator*(const Matrix2x2<D>& m,
                                                             const typename Matrix2x2<D>::col_type& v) {
-        return typename Matrix2x2<D>::row_type(m.m_data * v.m_data);
+        return typename Matrix2x2<D>::row_type(m.m_data * v.data);
     }
 
     // Matrix multiplications

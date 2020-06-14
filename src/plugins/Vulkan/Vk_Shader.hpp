@@ -47,19 +47,19 @@ private:
     json m_descriptor;
 
     UniformBufferObject m_ubo;
-    UniformBufferObject m_ubo_dynamic;
+    UniformBufferObject m_uboDynamic;
 
-    Vk_VertexLayout m_vertex_layout;
+    Vk_VertexLayout m_vertexLayout;
 
     std::array<VkShaderModule, sShaderTypeCount> m_modules;
 
     struct {
-        Vk_Buffer m_static;
-        Vk_Buffer m_dynamic;
-    } m_uniform_buffers;
+        Vk_Buffer _static;
+        Vk_Buffer dynamic;
+    } m_uniformBuffers;
 
-    VkDescriptorSetLayout m_ubo_descriptor_set_layout;
-    VkDescriptorSet m_ubo_descriptor_set;
+    VkDescriptorSetLayout m_uboDescriptorSetLayout;
+    VkDescriptorSet m_uboDescriptorSet;
 };
 
 }  // namespace engine

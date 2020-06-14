@@ -40,7 +40,7 @@ public:
     void setPersistence(float persistence);
 
 private:
-    int m_octave_count;
+    int m_octaveCount;
     float m_frequency;
     float m_lacunarity;
     float m_persistence;

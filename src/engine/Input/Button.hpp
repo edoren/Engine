@@ -47,9 +47,9 @@ private:
 
     void update(bool down);
 
-    bool m_is_down;
-    bool m_went_down;
-    bool m_went_up;
+    bool m_isDown;
+    bool m_wentDown;
+    bool m_wentUp;
 };
 
 }  // namespace engine

@@ -23,9 +23,9 @@ private:
     Time getActualTime() const;
 
     bool m_running;
-    Time m_start_time;
-    Time m_stop_time;
-    Time m_time_buffer;
+    Time m_startTime;
+    Time m_stopTime;
+    Time m_timeBuffer;
 };
 
 }  // namespace engine

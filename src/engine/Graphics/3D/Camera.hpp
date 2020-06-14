@@ -35,17 +35,17 @@ public:
     static math::vec3 WORLD_UP;
 
     // Camera vectors
-    math::vec3 m_position;
-    math::vec3 m_up;
-    math::vec3 m_right;
-    math::vec3 m_front;
+    math::vec3 position;
+    math::vec3 up;
+    math::vec3 right;
+    math::vec3 front;
 
     // Euler Angles
-    float m_yaw;
-    float m_pitch;
+    float yaw;
+    float pitch;
 
     // Camera options
-    float m_zoom;
+    float zoom;
 };
 
 }  // namespace engine

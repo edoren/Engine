@@ -25,9 +25,9 @@ public:
     static SceneManager* GetInstancePtr();
 
 private:
-    Scene* m_active_scene;
-    std::map<String, Scene*> m_scenes_name_map;
-    std::map<uint32, Scene*> m_scenes_index_map;
+    Scene* m_activeScene;
+    std::map<String, Scene*> m_scenesNameMap;
+    std::map<uint32, Scene*> m_scenesIndexMap;
     std::vector<std::unique_ptr<Scene>> m_scenes;
 };
 

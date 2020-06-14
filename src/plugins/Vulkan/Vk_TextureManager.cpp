@@ -25,7 +25,7 @@ Vk_TextureManager* Vk_TextureManager::GetInstancePtr() {
     return sDerivedInstance;
 }
 
-Vk_TextureManager::Vk_TextureManager() : m_descriptor_pool(VK_NULL_HANDLE), m_descriptor_set_layout(VK_NULL_HANDLE) {
+Vk_TextureManager::Vk_TextureManager() : m_descriptorPool(VK_NULL_HANDLE), m_descriptorSetLayout(VK_NULL_HANDLE) {
     TextureManager& base_instance = TextureManager::GetInstance();
     sDerivedInstance = reinterpret_cast<Vk_TextureManager*>(&base_instance);
 
@@ -37,29 +37,29 @@ Vk_TextureManager::~Vk_TextureManager() {
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.getVulkanDevice();
 
-    if (m_descriptor_pool != VK_NULL_HANDLE) {
-        vkDestroyDescriptorPool(device, m_descriptor_pool, nullptr);
-        m_descriptor_pool = VK_NULL_HANDLE;
+    if (m_descriptorPool != VK_NULL_HANDLE) {
+        vkDestroyDescriptorPool(device, m_descriptorPool, nullptr);
+        m_descriptorPool = VK_NULL_HANDLE;
     }
 
-    if (m_descriptor_set_layout != VK_NULL_HANDLE) {
-        vkDestroyDescriptorSetLayout(device, m_descriptor_set_layout, nullptr);
-        m_descriptor_set_layout = VK_NULL_HANDLE;
+    if (m_descriptorSetLayout != VK_NULL_HANDLE) {
+        vkDestroyDescriptorSetLayout(device, m_descriptorSetLayout, nullptr);
+        m_descriptorSetLayout = VK_NULL_HANDLE;
     }
 
     sDerivedInstance = nullptr;
 }
 
 VkDescriptorPool& Vk_TextureManager::getDescriptorPool() {
-    return m_descriptor_pool;
+    return m_descriptorPool;
 }
 
 VkDescriptorSetLayout& Vk_TextureManager::getDescriptorSetLayout() {
-    return m_descriptor_set_layout;
+    return m_descriptorSetLayout;
 }
 
 Vk_Texture2D* Vk_TextureManager::getActiveTexture2D() {
-    return reinterpret_cast<Vk_Texture2D*>(m_active_texture);
+    return reinterpret_cast<Vk_Texture2D*>(m_activeTexture);
 }
 
 std::unique_ptr<Texture2D> Vk_TextureManager::createTexture2D() {
@@ -91,7 +91,7 @@ bool Vk_TextureManager::createDescriptorPool() {
         &pool_size                                      // pPoolSizes
     };
 
-    result = vkCreateDescriptorPool(device, &descriptor_pool_create_info, nullptr, &m_descriptor_pool);
+    result = vkCreateDescriptorPool(device, &descriptor_pool_create_info, nullptr, &m_descriptorPool);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Could not create descriptor pool");
         return false;
@@ -125,7 +125,7 @@ bool Vk_TextureManager::createDescriptorSetLayout() {
         layout_bindings.data()                                // pBindings
     };
 
-    result = vkCreateDescriptorSetLayout(device, &descriptor_set_layout_create_info, nullptr, &m_descriptor_set_layout);
+    result = vkCreateDescriptorSetLayout(device, &descriptor_set_layout_create_info, nullptr, &m_descriptorSetLayout);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Could not create descriptor set layout");
         return false;
