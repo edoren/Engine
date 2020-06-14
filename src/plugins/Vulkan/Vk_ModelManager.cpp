@@ -31,11 +31,11 @@ Vk_ModelManager::Vk_ModelManager() {
 
 Vk_ModelManager::~Vk_ModelManager() {}
 
-std::unique_ptr<Model> Vk_ModelManager::CreateModel() {
+std::unique_ptr<Model> Vk_ModelManager::createModel() {
     return std::make_unique<Model>();
 }
 
-std::unique_ptr<Mesh> Vk_ModelManager::CreateMesh() {
+std::unique_ptr<Mesh> Vk_ModelManager::createMesh() {
     return std::make_unique<Vk_Mesh>();
 }
 

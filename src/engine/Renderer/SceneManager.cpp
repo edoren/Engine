@@ -32,26 +32,26 @@ SceneManager::SceneManager() {}
 
 SceneManager::~SceneManager() {}
 
-void SceneManager::Initialize() {}
+void SceneManager::initialize() {}
 
-void SceneManager::Shutdown() {
+void SceneManager::shutdown() {
     m_scenes_name_map.clear();
     m_scenes_index_map.clear();
     m_scenes.clear();
 }
 
-void SceneManager::ChangeActiveScene(const String& scene_name_id) {
+void SceneManager::changeActiveScene(const String& scene_name_id) {
     FileSystem& fs = FileSystem::GetInstance();
 
-    String filename_noext = fs.Join(sRootModelFolder, scene_name_id);
+    String filename_noext = fs.join(sRootModelFolder, scene_name_id);
 
     json json_object;
 
     String filename = filename_noext + ".json";
-    if (fs.FileExists(filename)) {
+    if (fs.fileExists(filename)) {
         std::vector<byte> json_data;
 
-        fs.LoadFileData(filename, &json_data);
+        fs.loadFileData(filename, &json_data);
         if (json::accept(json_data.begin(), json_data.end())) {
             json_object = json::parse(json_data.begin(), json_data.end());
             LogInfo(sTag, "Loading scene: " + filename);
@@ -64,11 +64,11 @@ void SceneManager::ChangeActiveScene(const String& scene_name_id) {
 
     Scene* scene = m_scenes.back().get();
 
-    if (scene->Load()) {
-        const String& scene_name = scene->GetName();
+    if (scene->load()) {
+        const String& scene_name = scene->getName();
         const uint32 scene_index = sSceneIndex++;
 
-        if (!scene_name.IsEmpty()) {
+        if (!scene_name.isEmpty()) {
             m_scenes_name_map[scene_name] = scene;
         }
         m_scenes_index_map[scene_index] = scene;
@@ -79,7 +79,7 @@ void SceneManager::ChangeActiveScene(const String& scene_name_id) {
     m_active_scene = scene;
 }
 
-Scene* SceneManager::GetActiveScene() {
+Scene* SceneManager::getActiveScene() {
     return m_active_scene;
 }
 

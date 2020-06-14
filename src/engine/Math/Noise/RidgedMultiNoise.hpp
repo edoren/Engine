@@ -23,34 +23,34 @@ public:
 
     RidgedMultiNoise(int seed);
 
-    int GetOctaveCount() const;
+    int getOctaveCount() const;
 
-    float GetFrequency() const;
+    float getFrequency() const;
 
-    float GetLacunarity() const;
+    float getLacunarity() const;
 
-    float GetOffset() const;
+    float getOffset() const;
 
-    float GetGain() const;
+    float getGain() const;
 
-    float GetExponent() const;
+    float getExponent() const;
 
-    float GetValue(float x, float y, float z) const;
+    float getValue(float x, float y, float z) const;
 
-    void SetOctaveCount(int octave_count);
+    void setOctaveCount(int octave_count);
 
-    void SetFrequency(float frequency);
+    void setFrequency(float frequency);
 
-    void SetLacunarity(float lacunarity);
+    void setLacunarity(float lacunarity);
 
-    void SetOffset(float offset);
+    void setOffset(float offset);
 
-    void SetGain(float gain);
+    void setGain(float gain);
 
-    void SetExponent(float exponent);
+    void setExponent(float exponent);
 
 private:
-    void CalcSpectralWeights();
+    void calcSpectralWeights();
 
     int m_octave_count;
     float m_frequency;

@@ -17,23 +17,23 @@ public:
 
     ~Vk_TextureManager() override;
 
-    VkDescriptorPool& GetDescriptorPool();
+    VkDescriptorPool& getDescriptorPool();
 
-    VkDescriptorSetLayout& GetDescriptorSetLayout();
+    VkDescriptorSetLayout& getDescriptorSetLayout();
 
-    Vk_Texture2D* GetActiveTexture2D();
+    Vk_Texture2D* getActiveTexture2D();
 
     static Vk_TextureManager& GetInstance();
 
     static Vk_TextureManager* GetInstancePtr();
 
 protected:
-    std::unique_ptr<Texture2D> CreateTexture2D() override;
-    void UseTexture2D(Texture2D* texture) override;
+    std::unique_ptr<Texture2D> createTexture2D() override;
+    void useTexture2D(Texture2D* texture) override;
 
 private:
-    bool CreateDescriptorPool();
-    bool CreateDescriptorSetLayout();
+    bool createDescriptorPool();
+    bool createDescriptorSetLayout();
 
     VkDescriptorPool m_descriptor_pool;
     VkDescriptorSetLayout m_descriptor_set_layout;

@@ -9,7 +9,7 @@ IOStream::IOStream() : m_file(nullptr) {}
 
 IOStream::IOStream(IOStream&& other) : m_file(other.m_file), m_last_error(std::move(other.m_last_error)) {
     other.m_file = nullptr;
-    other.m_last_error.Clear();
+    other.m_last_error.clear();
 }
 
 IOStream::~IOStream() {
@@ -24,11 +24,11 @@ IOStream& IOStream::operator=(IOStream&& other) {
     return *this;
 }
 
-bool IOStream::Open(const String& filename, const char* mode) {
+bool IOStream::open(const String& filename, const char* mode) {
     if (m_file) {
-        Close();
+        close();
     }
-    m_file = SDL_RWFromFile(filename.GetData(), mode);
+    m_file = SDL_RWFromFile(filename.getData(), mode);
     if (!m_file) {
         m_last_error = SDL_GetError();
         return false;
@@ -36,32 +36,32 @@ bool IOStream::Open(const String& filename, const char* mode) {
     return true;
 }
 
-bool IOStream::Open(const char* filename, const char* mode) {
-    return Open(String(filename), mode);
+bool IOStream::open(const char* filename, const char* mode) {
+    return open(String(filename), mode);
 }
 
-void IOStream::Close() {
+void IOStream::close() {
     SDL_RWclose(m_file);
     m_file = nullptr;
 }
 
-size_t IOStream::Read(void* buffer, size_t size, size_t count) {
+size_t IOStream::read(void* buffer, size_t size, size_t count) {
     return m_file ? SDL_RWread(m_file, buffer, size, count) : 0;
 }
 
-size_t IOStream::Write(const void* buffer, size_t size, size_t count) {
+size_t IOStream::write(const void* buffer, size_t size, size_t count) {
     return m_file ? SDL_RWwrite(m_file, buffer, size, count) : 0;
 }
 
-int64 IOStream::Seek(size_t offset, Origin origin) {
+int64 IOStream::seek(size_t offset, Origin origin) {
     return m_file ? SDL_RWseek(m_file, offset, static_cast<int>(origin)) : 0;
 }
 
-int64 IOStream::Tell() const {
+int64 IOStream::tell() const {
     return m_file ? SDL_RWtell(m_file) : 0;
 }
 
-size_t IOStream::GetSize() const {
+size_t IOStream::getSize() const {
     if (!m_file) {
         return 0;
     }
@@ -72,11 +72,11 @@ size_t IOStream::GetSize() const {
     return static_cast<size_t>(file_size);
 }
 
-bool IOStream::IsOpen() const {
+bool IOStream::isOpen() const {
     return m_file != nullptr;
 }
 
-const String& IOStream::GetLastError() const {
+const String& IOStream::getLastError() const {
     return m_last_error;
 }
 

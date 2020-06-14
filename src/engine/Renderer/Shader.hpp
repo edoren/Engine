@@ -22,12 +22,12 @@ public:
     Shader();
     virtual ~Shader();
 
-    virtual bool LoadFromMemory(const byte* source, std::size_t source_size, ShaderType type) = 0;
+    virtual bool loadFromMemory(const byte* source, std::size_t source_size, ShaderType type) = 0;
 
 protected:
-    virtual void SetDescriptor(json&& descriptor) = 0;
+    virtual void setDescriptor(json&& descriptor) = 0;
 
-    UniformBufferObject::DataType GetUBODataTypeFromString(const String& str);
+    UniformBufferObject::DataType getUboDataTypeFromString(const String& str);
 };
 
 }  // namespace engine

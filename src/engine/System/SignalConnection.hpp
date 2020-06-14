@@ -41,16 +41,16 @@ public:
     // Move assignment
     SignalConnection& operator=(SignalConnection&& other);
 
-    IdType GetId() const;
+    IdType getId() const;
 
-    void Disconnect();
+    void disconnect();
 
-    bool IsConnected();
+    bool isConnected();
 
 private:
-    void DisconnectWithCallback();
+    void disconnectWithCallback();
 
-    void DisconnectWithoutCallback();
+    void disconnectWithoutCallback();
 
     IdType m_id;
     Reference* m_reference;

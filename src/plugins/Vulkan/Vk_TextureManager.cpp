@@ -29,13 +29,13 @@ Vk_TextureManager::Vk_TextureManager() : m_descriptor_pool(VK_NULL_HANDLE), m_de
     TextureManager& base_instance = TextureManager::GetInstance();
     sDerivedInstance = reinterpret_cast<Vk_TextureManager*>(&base_instance);
 
-    CreateDescriptorPool();
-    CreateDescriptorSetLayout();
+    createDescriptorPool();
+    createDescriptorSetLayout();
 }
 
 Vk_TextureManager::~Vk_TextureManager() {
     Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
+    VkDevice& device = context.getVulkanDevice();
 
     if (m_descriptor_pool != VK_NULL_HANDLE) {
         vkDestroyDescriptorPool(device, m_descriptor_pool, nullptr);
@@ -50,30 +50,30 @@ Vk_TextureManager::~Vk_TextureManager() {
     sDerivedInstance = nullptr;
 }
 
-VkDescriptorPool& Vk_TextureManager::GetDescriptorPool() {
+VkDescriptorPool& Vk_TextureManager::getDescriptorPool() {
     return m_descriptor_pool;
 }
 
-VkDescriptorSetLayout& Vk_TextureManager::GetDescriptorSetLayout() {
+VkDescriptorSetLayout& Vk_TextureManager::getDescriptorSetLayout() {
     return m_descriptor_set_layout;
 }
 
-Vk_Texture2D* Vk_TextureManager::GetActiveTexture2D() {
+Vk_Texture2D* Vk_TextureManager::getActiveTexture2D() {
     return reinterpret_cast<Vk_Texture2D*>(m_active_texture);
 }
 
-std::unique_ptr<Texture2D> Vk_TextureManager::CreateTexture2D() {
+std::unique_ptr<Texture2D> Vk_TextureManager::createTexture2D() {
     return std::make_unique<Vk_Texture2D>();
 }
 
-void Vk_TextureManager::UseTexture2D(Texture2D* texture) {
+void Vk_TextureManager::useTexture2D(Texture2D* texture) {
     Vk_Texture2D* casted_texture = reinterpret_cast<Vk_Texture2D*>(texture);
-    casted_texture->Use();
+    casted_texture->use();
 }
 
-bool Vk_TextureManager::CreateDescriptorPool() {
+bool Vk_TextureManager::createDescriptorPool() {
     Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
+    VkDevice& device = context.getVulkanDevice();
 
     VkResult result = VK_SUCCESS;
 
@@ -100,9 +100,9 @@ bool Vk_TextureManager::CreateDescriptorPool() {
     return true;
 }
 
-bool Vk_TextureManager::CreateDescriptorSetLayout() {
+bool Vk_TextureManager::createDescriptorSetLayout() {
     Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
+    VkDevice& device = context.getVulkanDevice();
 
     VkResult result = VK_SUCCESS;
 

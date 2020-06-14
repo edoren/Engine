@@ -25,16 +25,16 @@ SharedLibManager::SharedLibManager() {}
 SharedLibManager::~SharedLibManager() {
     // Unload & delete resources in turn
     for (auto it = m_libraries.begin(); it != m_libraries.end(); it++) {
-        it->second.Unload();
+        it->second.unload();
     }
     m_libraries.clear();
 }
 
-void SharedLibManager::Initialize() {}
+void SharedLibManager::initialize() {}
 
-void SharedLibManager::Shutdown() {}
+void SharedLibManager::shutdown() {}
 
-SharedLibrary* SharedLibManager::Load(const String& name) {
+SharedLibrary* SharedLibManager::load(const String& name) {
     auto it = m_libraries.find(name);
 
     if (it != m_libraries.end()) {
@@ -42,20 +42,20 @@ SharedLibrary* SharedLibManager::Load(const String& name) {
     }
 
     SharedLibrary lib(name);
-    bool loaded = lib.Load();
+    bool loaded = lib.load();
     if (loaded) {
         auto result = m_libraries.emplace(name, std::move(lib));
         return result.second ? &(result.first->second) : nullptr;
     }
-    LogError(sTag, lib.GetErrorString());
+    LogError(sTag, lib.getErrorString());
     LogFatal(sTag, "Could not load SharedLibrary: " + name);
 
     return nullptr;
 }
 
-void SharedLibManager::Unload(SharedLibrary* lib) {
-    lib->Unload();
-    auto it = m_libraries.find(lib->GetName());
+void SharedLibManager::unload(SharedLibrary* lib) {
+    lib->unload();
+    auto it = m_libraries.find(lib->getName());
     if (it != m_libraries.end()) {
         m_libraries.erase(it);
     }

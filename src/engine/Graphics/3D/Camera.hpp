@@ -12,24 +12,24 @@ public:
 
     Camera(const math::vec3& position);
 
-    void Move(const math::vec3& direction);
+    void move(const math::vec3& direction);
 
-    void Rotate(float yaw, float pitch, bool limit_pitch = true);
+    void rotate(float yaw, float pitch, bool limit_pitch = true);
 
-    void Rotate(const math::vec2& offset, bool limit_pitch = true);
+    void rotate(const math::vec2& offset, bool limit_pitch = true);
 
-    void LookAt(const math::vec3& position);
+    void lookAt(const math::vec3& position);
 
-    math::mat4 GetViewMatrix() const;
+    math::mat4 getViewMatrix() const;
 
-    const math::vec3& GetPosition() const;
+    const math::vec3& getPosition() const;
 
-    const math::vec3& GetUpVector() const;
-    const math::vec3& GetRightVector() const;
-    const math::vec3& GetFrontVector() const;
+    const math::vec3& getUpVector() const;
+    const math::vec3& getRightVector() const;
+    const math::vec3& getFrontVector() const;
 
 private:
-    void UpdateCameraVectors();
+    void updateCameraVectors();
 
 public:
     static math::vec3 WORLD_UP;

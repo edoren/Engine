@@ -19,19 +19,19 @@ public:
 
     ~Vk_Texture2D() override;
 
-    bool LoadFromImage(const Image& img) override;
+    bool loadFromImage(const Image& img) override;
 
-    void Use() override;
+    void use() override;
 
-    VkDescriptorSet& GetDescriptorSet();
+    VkDescriptorSet& getDescriptorSet();
 
 private:
-    bool CreateSampler();
+    bool createSampler();
 
-    bool CopyTextureData(const Image& img);
+    bool copyTextureData(const Image& img);
 
-    bool AllocateDescriptorSet();
-    bool UpdateDescriptorSet();
+    bool allocateDescriptorSet();
+    bool updateDescriptorSet();
 
     Vk_Image m_image;
     VkSampler m_sampler;

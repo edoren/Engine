@@ -13,13 +13,13 @@ public:
 
     ~SceneManager();
 
-    void Initialize();
+    void initialize();
 
-    void Shutdown();
+    void shutdown();
 
-    void ChangeActiveScene(const String& scene_name);
+    void changeActiveScene(const String& scene_name);
 
-    Scene* GetActiveScene();
+    Scene* getActiveScene();
 
     static SceneManager& GetInstance();
     static SceneManager* GetInstancePtr();

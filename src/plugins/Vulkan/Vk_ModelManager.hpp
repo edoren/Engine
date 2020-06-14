@@ -22,8 +22,8 @@ public:
     static Vk_ModelManager* GetInstancePtr();
 
 protected:
-    std::unique_ptr<Model> CreateModel() override;
-    std::unique_ptr<Mesh> CreateMesh() override;
+    std::unique_ptr<Model> createModel() override;
+    std::unique_ptr<Mesh> createMesh() override;
 };
 
 }  // namespace engine

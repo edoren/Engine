@@ -12,8 +12,8 @@ public:
     Vk_RenderResource();
     ~Vk_RenderResource();
 
-    bool Create();
-    void Destroy();
+    bool create();
+    void destroy();
 
     VkFramebuffer framebuffer;
     VkCommandBuffer command_buffer;

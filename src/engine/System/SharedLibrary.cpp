@@ -23,17 +23,17 @@ SharedLibrary::SharedLibrary(const String& name) : m_name(name), m_handle(nullpt
 SharedLibrary::SharedLibrary(SharedLibrary&& other) {
     m_name = other.m_name;
     m_handle = other.m_handle;
-    other.m_name.Clear();
+    other.m_name.clear();
     other.m_handle = nullptr;
 }
 
 SharedLibrary::~SharedLibrary() {
-    Unload();
+    unload();
 }
 
-bool SharedLibrary::Load() {
+bool SharedLibrary::load() {
     // TODO: Add extension only if it does not exist
-    if (m_handle != nullptr || m_name.IsEmpty()) {
+    if (m_handle != nullptr || m_name.isEmpty()) {
         return false;
     }
 
@@ -42,18 +42,18 @@ bool SharedLibrary::Load() {
     auto wide_string = lib_name.ToWide();
     m_handle = LoadLibraryW(wide_string.data());
 #elif PLATFORM_IS(PLATFORM_LINUX | PLATFORM_MACOS | PLATFORM_IOS | PLATFORM_ANDROID)
-    auto utf8string = lib_name.ToUtf8();
+    auto utf8string = lib_name.toUtf8();
     FileSystem& fs = FileSystem::GetInstance();
-    String lib_exe_dir = fs.Join(fs.ExecutableDirectory(), lib_name);
-    if (fs.FileExists(lib_exe_dir)) {
-        utf8string = lib_exe_dir.ToUtf8();
+    String lib_exe_dir = fs.join(fs.executableDirectory(), lib_name);
+    if (fs.fileExists(lib_exe_dir)) {
+        utf8string = lib_exe_dir.toUtf8();
     }
     m_handle = dlopen(utf8string.data(), RTLD_LAZY | RTLD_LOCAL);
 #endif
     return (m_handle != nullptr);
 }
 
-void SharedLibrary::Unload() {
+void SharedLibrary::unload() {
     if (m_handle == nullptr) {
         return;
     }
@@ -65,8 +65,8 @@ void SharedLibrary::Unload() {
     m_handle = nullptr;
 }
 
-String SharedLibrary::GetErrorString() {
-    if (m_name.IsEmpty()) {
+String SharedLibrary::getErrorString() {
+    if (m_name.isEmpty()) {
         return String("the library name must not be empty");
     }
 #if PLATFORM_IS(PLATFORM_WINDOWS)
@@ -85,11 +85,11 @@ String SharedLibrary::GetErrorString() {
 #endif
 }
 
-const String& SharedLibrary::GetName() const {
+const String& SharedLibrary::getName() const {
     return m_name;
 }
 
-void* SharedLibrary::GetSymbol(const char* name) {
+void* SharedLibrary::getSymbol(const char* name) {
     if (m_handle == nullptr) {
         return nullptr;
     }
@@ -102,8 +102,8 @@ void* SharedLibrary::GetSymbol(const char* name) {
     return address;
 }
 
-void* SharedLibrary::GetSymbol(const String& name) {
-    return GetSymbol(name.GetData());
+void* SharedLibrary::getSymbol(const String& name) {
+    return getSymbol(name.getData());
 }
 
 }  // namespace engine

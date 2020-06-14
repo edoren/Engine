@@ -15,7 +15,7 @@ public:
 
     ~AsyncTaskRunner();
 
-    void Execute(Task&& f);
+    void execute(Task&& f);
 
 private:
     bool m_is_running;

@@ -26,15 +26,15 @@ ModelManager::ModelManager() {}
 
 ModelManager::~ModelManager() {}
 
-void ModelManager::Initialize() {}
+void ModelManager::initialize() {}
 
-void ModelManager::Shutdown() {
+void ModelManager::shutdown() {
     m_name_map.clear();
     m_model_ref_count.clear();
     m_models.clear();
 }
 
-Model* ModelManager::LoadFromFile(const String& basename) {
+Model* ModelManager::loadFromFile(const String& basename) {
     auto it = m_name_map.find(basename);
     if (it != m_name_map.end()) {
         m_model_ref_count[it->second] += 1;
@@ -43,15 +43,15 @@ Model* ModelManager::LoadFromFile(const String& basename) {
 
     LogDebug(sTag, "Loading model: " + basename);
 
-    m_models.emplace_back(CreateModel());
-    m_models.back()->LoadModel(basename);
+    m_models.emplace_back(createModel());
+    m_models.back()->loadModel(basename);
     m_name_map[basename] = m_models.back().get();
     m_model_ref_count[m_models.back().get()] = 1;
 
     return m_models.back().get();
 }
 
-void ModelManager::Unload(Model* model) {
+void ModelManager::unload(Model* model) {
     auto& ref_count = m_model_ref_count[model];
     ref_count -= 1;
 
@@ -71,12 +71,12 @@ void ModelManager::Unload(Model* model) {
     }
 }
 
-void ModelManager::UnloadFromFile(const String& basename) {
+void ModelManager::unloadFromFile(const String& basename) {
     auto it = m_name_map.find(basename);
     if (it == m_name_map.end()) {
         return;
     }
-    Unload(it->second);
+    unload(it->second);
 }
 
 }  // namespace engine

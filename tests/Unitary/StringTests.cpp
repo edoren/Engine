@@ -48,144 +48,144 @@ TEST_CASE("String to other encodings", "[String]") {
     String smiley = u8"\U0001F60A";
 
     SECTION("to Wide strings") {
-        std::wstring hello_wide = hello.ToWide();
+        std::wstring hello_wide = hello.toWide();
         REQUIRE(hello_wide == L"HELLO WORLD");
     }
     SECTION("to UTF-8 strings") {
-        std::string hello_utf8 = hello.ToUtf8();
-        std::string smiley_utf8 = smiley.ToUtf8();
+        std::string hello_utf8 = hello.toUtf8();
+        std::string smiley_utf8 = smiley.toUtf8();
         REQUIRE(hello_utf8 == u8"HELLO WORLD");
         REQUIRE(smiley_utf8 == u8"\U0001F60A");
     }
     SECTION("to UTF-16 strings") {
-        std::u16string hello_utf16 = hello.ToUtf16();
-        std::u16string smiley_utf16 = smiley.ToUtf16();
+        std::u16string hello_utf16 = hello.toUtf16();
+        std::u16string smiley_utf16 = smiley.toUtf16();
         REQUIRE(hello_utf16 == u"HELLO WORLD");
         REQUIRE(smiley_utf16 == u"\U0001F60A");
     }
     SECTION("to UTF-32 strings") {
-        std::u32string hello_utf32 = hello.ToUtf32();
-        std::u32string smiley_utf32 = smiley.ToUtf32();
+        std::u32string hello_utf32 = hello.toUtf32();
+        std::u32string smiley_utf32 = smiley.toUtf32();
         REQUIRE(hello_utf32 == U"HELLO WORLD");
         REQUIRE(smiley_utf32 == U"\U0001F60A");
     }
 }
 
-TEST_CASE("String::Find", "[String]") {
+TEST_CASE("String::find", "[String]") {
     // "Water, Fire, Earth, Wind, Void"
     String elements = "水、火、地、風、空";
 
     SECTION("must be able to find any UTF-8 string") {
-        size_t location = elements.Find("風", 0);
+        size_t location = elements.find("風", 0);
         REQUIRE(location == 6);
     }
     SECTION("if no start is specified it start from the beginning") {
-        size_t location = elements.Find("水");
+        size_t location = elements.find("水");
         REQUIRE(location == 0);
     }
     SECTION("it can start to search from any position") {
-        size_t location1 = elements.Find("地", 2);
-        size_t location2 = elements.Find("地", 4);
+        size_t location1 = elements.find("地", 2);
+        size_t location2 = elements.find("地", 4);
         REQUIRE(location1 == 4);
         REQUIRE(location1 == location2);
     }
     SECTION("if the string is not found it returns String::sInvalidPos") {
-        size_t location1 = elements.Find("A", 0);
-        size_t location2 = elements.Find("火", 5);
+        size_t location1 = elements.find("A", 0);
+        size_t location2 = elements.find("火", 5);
         REQUIRE(location1 == String::sInvalidPos);
         REQUIRE(location1 == location2);
     }
 }
 
-TEST_CASE("String::FindFirstOf", "[String]") {
+TEST_CASE("String::findFirstOf", "[String]") {
     // "Water, Fire, Earth, Wind, Void"
     String elements = "水、火、地、風、空";
 
     SECTION("must be able to find any of the specified UTF-8 codepoints") {
-        size_t location = elements.FindFirstOf("火ñ地", 0);
+        size_t location = elements.findFirstOf("火ñ地", 0);
         REQUIRE(location == 2);
     }
     SECTION("if no start is specified it start from the beginning") {
-        size_t location = elements.FindFirstOf("地火、");
+        size_t location = elements.findFirstOf("地火、");
         REQUIRE(location == 1);
     }
     SECTION("it can start to search from any position") {
-        size_t location1 = elements.FindFirstOf("、地火", 2);
-        size_t location2 = elements.FindFirstOf("空、地火", 4);
+        size_t location1 = elements.findFirstOf("、地火", 2);
+        size_t location2 = elements.findFirstOf("空、地火", 4);
         REQUIRE(location1 == 2);
         REQUIRE(location2 == 4);
     }
     SECTION(
         "if the any of the UTF-8 characters are not found "
         "it returns String::sInvalidPos") {
-        size_t location1 = elements.FindFirstOf("A", 0);
-        size_t location2 = elements.FindFirstOf("#空ñ、風");
+        size_t location1 = elements.findFirstOf("A", 0);
+        size_t location2 = elements.findFirstOf("#空ñ、風");
         REQUIRE(location1 == String::sInvalidPos);
         REQUIRE(location2 == 1);
     }
 }
 
-TEST_CASE("String::FindLastOf", "[String]") {
+TEST_CASE("String::findLastOf", "[String]") {
     // "Water, Fire, Earth, Wind, Void"
     String elements = "水、火、地、風、空";
 
     SECTION("must be able to find any of the specified UTF-8 codepoints") {
-        size_t location = elements.FindLastOf("火、地", elements.GetSize() - 1);
+        size_t location = elements.findLastOf("火、地", elements.getSize() - 1);
         REQUIRE(location == 7);
     }
     SECTION("if no start is specified it start from the end") {
-        size_t location = elements.FindLastOf("風地火");
+        size_t location = elements.findLastOf("風地火");
         REQUIRE(location == 6);
     }
     SECTION("it can start to search from any position") {
-        size_t location1 = elements.FindLastOf("、地火", 2);
-        size_t location2 = elements.FindLastOf("空、火", 4);
+        size_t location1 = elements.findLastOf("、地火", 2);
+        size_t location2 = elements.findLastOf("空、火", 4);
         REQUIRE(location1 == 2);
         REQUIRE(location2 == 3);
     }
     SECTION(
         "if the any of the UTF-8 characters are not found "
         "it returns String::sInvalidPos") {
-        size_t location1 = elements.FindLastOf("A");
-        size_t location2 = elements.FindLastOf("#空ñ、風");
+        size_t location1 = elements.findLastOf("A");
+        size_t location2 = elements.findLastOf("#空ñ、風");
         REQUIRE(location1 == String::sInvalidPos);
         REQUIRE(location2 == 8);
     }
 }
 
-TEST_CASE("String::Replace", "[String]") {
+TEST_CASE("String::replace", "[String]") {
     // "Water, Fire, Earth, Wind, Void"
     String elements = "水、火、地、風、空";
 
     SECTION("must be able to replace any UTF-8 string") {
-        elements.Replace("水", "Water");
-        elements.Replace("地", "Earth");
-        elements.Replace("空", "Void");
+        elements.replace("水", "Water");
+        elements.replace("地", "Earth");
+        elements.replace("空", "Void");
         REQUIRE(elements == "Water、火、Earth、風、Void");
     }
     SECTION("must replace all the ocurrences of the provided string") {
-        elements.Replace("、", ", ");
+        elements.replace("、", ", ");
         REQUIRE(elements == "水, 火, 地, 風, 空");
     }
     SECTION("could replace any element given a range") {
-        elements.Replace(4, 1, "Earth");
-        elements.Replace(0, 1, "Water");
-        elements.Replace(16, 1, "Void");
+        elements.replace(4, 1, "Earth");
+        elements.replace(0, 1, "Water");
+        elements.replace(16, 1, "Void");
         REQUIRE(elements == "Water、火、Earth、風、Void");
     }
     SECTION("could replace the whole string") {
-        elements.Replace(0, elements.GetSize(), "Hello World");
+        elements.replace(0, elements.getSize(), "Hello World");
         REQUIRE(elements == "Hello World");
     }
     SECTION("must replace any Unicode code point with another") {
         // Replace U+3001 (、) with U+1F603 (😃)
-        elements.Replace(0x3001, 0x1F603);
+        elements.replace(0x3001, 0x1F603);
         REQUIRE(elements == "水😃火😃地😃風😃空");
         // Replace U+1F603 (😃) with U+2D (-)
-        elements.Replace(0x1F603, '-');
+        elements.replace(0x1F603, '-');
         REQUIRE(elements == "水-火-地-風-空");
         // Replace U+2D (-) with U+20 (Space)
-        elements.Replace('-', ' ');
+        elements.replace('-', ' ');
         REQUIRE(elements == "水 火 地 風 空");
     }
 }

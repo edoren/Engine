@@ -15,15 +15,15 @@ class ENGINE_API Scene : NonCopyable {
 public:
     ~Scene();
 
-    void Draw(RenderWindow& target);
+    void draw(RenderWindow& target);
 
 private:
     explicit Scene(const json& data);
 
-    bool Load();
-    bool Unload();
+    bool load();
+    bool unload();
 
-    const String& GetName();
+    const String& getName();
 
     String m_name;
     std::map<Model*, std::vector<Transform>> m_models;

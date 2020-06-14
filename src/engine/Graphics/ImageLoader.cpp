@@ -18,7 +18,7 @@ namespace io {
 bool ImageLoader::LoadFromFile(const String& filename, std::vector<byte>& pixels, math::uvec2& size) {
     std::vector<byte> out;
     FileSystem& fs = FileSystem::GetInstance();
-    if (fs.LoadFileData(filename, &out)) {
+    if (fs.loadFileData(filename, &out)) {
         return LoadFromFileInMemory(out.data(), static_cast<uint32>(out.size()), pixels, size);
     }
     return false;

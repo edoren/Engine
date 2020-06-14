@@ -25,33 +25,33 @@ Renderer::Renderer()
 
 Renderer::~Renderer() {}
 
-bool Renderer::Initialize() {
+bool Renderer::initialize() {
     int code = SDL_InitSubSystem(SDL_INIT_VIDEO);
     LogInfo(sTag, "Current SDL video driver: {}"_format(SDL_GetCurrentVideoDriver()));
     return code == 0;
 }
 
-void Renderer::Shutdown() {
+void Renderer::shutdown() {
     SDL_QuitSubSystem(SDL_INIT_VIDEO);
 }
 
-void Renderer::AdvanceFrame() {
+void Renderer::advanceFrame() {
     if (!m_render_window) {
         return;
     }
-    if (!m_render_window->IsVisible()) {
+    if (!m_render_window->isVisible()) {
         SDL_Delay(10);
     } else {
-        m_render_window->SwapBuffers();
+        m_render_window->swapBuffers();
     }
 }
 
-RenderWindow& Renderer::GetRenderWindow() {
+RenderWindow& Renderer::getRenderWindow() {
     assert(m_render_window);
     return *m_render_window;
 }
 
-std::unique_ptr<RenderWindow>& Renderer::GetRenderWindowPtr() {
+std::unique_ptr<RenderWindow>& Renderer::getRenderWindowPtr() {
     return m_render_window;
 }
 

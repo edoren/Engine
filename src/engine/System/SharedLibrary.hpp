@@ -12,16 +12,16 @@ public:
     SharedLibrary(SharedLibrary&& other);
     ~SharedLibrary();
 
-    bool Load();
+    bool load();
 
-    void Unload();
+    void unload();
 
-    String GetErrorString();
+    String getErrorString();
 
-    const String& GetName() const;
+    const String& getName() const;
 
-    void* GetSymbol(const char* name);
-    void* GetSymbol(const String& name);
+    void* getSymbol(const char* name);
+    void* getSymbol(const String& name);
 
 private:
     String m_name;

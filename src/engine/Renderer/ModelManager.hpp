@@ -15,22 +15,22 @@ public:
 
     virtual ~ModelManager();
 
-    virtual void Initialize();
+    virtual void initialize();
 
-    virtual void Shutdown();
+    virtual void shutdown();
 
-    Model* LoadFromFile(const String& basename);
+    Model* loadFromFile(const String& basename);
 
-    void Unload(Model* model);
-    void UnloadFromFile(const String& basename);
+    void unload(Model* model);
+    void unloadFromFile(const String& basename);
 
     static ModelManager& GetInstance();
     static ModelManager* GetInstancePtr();
 
-    virtual std::unique_ptr<Mesh> CreateMesh() = 0;
+    virtual std::unique_ptr<Mesh> createMesh() = 0;
 
 protected:
-    virtual std::unique_ptr<Model> CreateModel() = 0;
+    virtual std::unique_ptr<Model> createModel() = 0;
 
     std::map<String, Model*> m_name_map;
     std::map<Model*, uint32> m_model_ref_count;

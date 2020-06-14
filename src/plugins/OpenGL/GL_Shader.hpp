@@ -18,41 +18,41 @@ public:
 
     GL_Shader& operator=(GL_Shader&& other);
 
-    bool LoadFromMemory(const byte* source, std::size_t source_size, ShaderType type) override;
+    bool loadFromMemory(const byte* source, std::size_t source_size, ShaderType type) override;
 
-    UniformBufferObject& GetUBO();
-    UniformBufferObject& GetUBODynamic();
+    UniformBufferObject& getUbo();
+    UniformBufferObject& getUboDynamic();
 
-    bool IsLinked() const;
+    bool isLinked() const;
 
-    bool Link();
+    bool link();
 
-    void Use();
+    void use();
 
-    void UploadUniformBuffers();
+    void uploadUniformBuffers();
 
-    void SetUniform(const String& name, float val);
-    void SetUniform(const String& name, int32 val);
-    void SetUniform(const String& name, uint32 val);
-    void SetUniform(const String& name, const math::mat4& val);
-    void SetUniform(const String& name, const math::mat3& val);
-    void SetUniform(const String& name, const math::mat2& val);
-    void SetUniform(const String& name, const math::vec4& val);
-    void SetUniform(const String& name, const math::vec3& val);
-    void SetUniform(const String& name, const math::vec2& val);
+    void setUniform(const String& name, float val);
+    void setUniform(const String& name, int32 val);
+    void setUniform(const String& name, uint32 val);
+    void setUniform(const String& name, const math::mat4& val);
+    void setUniform(const String& name, const math::mat3& val);
+    void setUniform(const String& name, const math::mat2& val);
+    void setUniform(const String& name, const math::vec4& val);
+    void setUniform(const String& name, const math::vec3& val);
+    void setUniform(const String& name, const math::vec2& val);
 
     static const std::vector<const char*>& GetRequiredExtensions();
 
 protected:
-    void SetDescriptor(json&& descriptor) override;
+    void setDescriptor(json&& descriptor) override;
 
 private:
-    GLuint Compile(const char8* source, std::size_t source_size, ShaderType type);
-    GLuint Compile(const byte* source, std::size_t source_size, ShaderType type);
+    GLuint compile(const char8* source, std::size_t source_size, ShaderType type);
+    GLuint compile(const byte* source, std::size_t source_size, ShaderType type);
 
-    void CleanUpShaders();
+    void cleanUpShaders();
 
-    GLint GetUniformLocation(const String& name);
+    GLint getUniformLocation(const String& name);
 
     json m_descriptor;
 

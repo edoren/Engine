@@ -20,30 +20,30 @@ PerlinNoise::PerlinNoise(int seed)
         m_lacunarity(sDefaultLacunarity),
         m_persistence(sDefaultPersistence) {}
 
-int PerlinNoise::GetOctaveCount() const {
+int PerlinNoise::getOctaveCount() const {
     return m_octave_count;
 }
 
-float PerlinNoise::GetFrequency() const {
+float PerlinNoise::getFrequency() const {
     return m_frequency;
 }
 
-float PerlinNoise::GetLacunarity() const {
+float PerlinNoise::getLacunarity() const {
     return m_lacunarity;
 }
 
-float PerlinNoise::GetPersistence() const {
+float PerlinNoise::getPersistence() const {
     return m_persistence;
 }
 
-float PerlinNoise::GetValue(float x, float y, float z) const {
+float PerlinNoise::getValue(float x, float y, float z) const {
     float value = 0.F;
     float signal = 0.F;
     float frequency = m_frequency;
     float amplitude = 1.F;
 
     for (int current_octave = 0; current_octave < m_octave_count; current_octave++) {
-        signal = CoherentNoise3D(x * frequency, y * frequency, z * frequency);
+        signal = coherentNoise3D(x * frequency, y * frequency, z * frequency);
         value += signal * amplitude;
 
         frequency *= m_lacunarity;
@@ -53,19 +53,19 @@ float PerlinNoise::GetValue(float x, float y, float z) const {
     return std::min(1.F, std::max(-1.F, value));
 }
 
-void PerlinNoise::SetOctaveCount(int octave_count) {
+void PerlinNoise::setOctaveCount(int octave_count) {
     m_octave_count = octave_count;
 }
 
-void PerlinNoise::SetFrequency(float frequency) {
+void PerlinNoise::setFrequency(float frequency) {
     m_frequency = frequency;
 }
 
-void PerlinNoise::SetLacunarity(float lacunarity) {
+void PerlinNoise::setLacunarity(float lacunarity) {
     m_lacunarity = lacunarity;
 }
 
-void PerlinNoise::SetPersistence(float persistence) {
+void PerlinNoise::setPersistence(float persistence) {
     m_persistence = persistence;
 }
 

@@ -20,8 +20,8 @@ public:
     static GL_TextureManager* GetInstancePtr();
 
 protected:
-    std::unique_ptr<Texture2D> CreateTexture2D() override;
-    void UseTexture2D(Texture2D* texture) override;
+    std::unique_ptr<Texture2D> createTexture2D();
+    void useTexture2D(Texture2D* texture);
 };
 
 }  // namespace engine

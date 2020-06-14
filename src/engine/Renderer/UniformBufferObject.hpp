@@ -32,33 +32,33 @@ public:
         DataType type;
     };
 
-    void SetBufferSize(size_t num_ubo_instances, size_t min_ubo_alignment);
+    void setBufferSize(size_t num_ubo_instances, size_t min_ubo_alignment);
 
-    void SetAttributes(const std::vector<Item>& attributes);
+    void setAttributes(const std::vector<Item>& attributes);
 
-    void SetAttributeValue(const String& name, const math::mat4& value, size_t offset = 0);
-    void SetAttributeValue(const String& name, const math::mat3& value, size_t offset = 0);
-    void SetAttributeValue(const String& name, const math::mat2& value, size_t offset = 0);
-    void SetAttributeValue(const String& name, const math::vec4& value, size_t offset = 0);
-    void SetAttributeValue(const String& name, const math::vec3& value, size_t offset = 0);
-    void SetAttributeValue(const String& name, const math::vec2& value, size_t offset = 0);
+    void setAttributeValue(const String& name, const math::mat4& value, size_t offset = 0);
+    void setAttributeValue(const String& name, const math::mat3& value, size_t offset = 0);
+    void setAttributeValue(const String& name, const math::mat2& value, size_t offset = 0);
+    void setAttributeValue(const String& name, const math::vec4& value, size_t offset = 0);
+    void setAttributeValue(const String& name, const math::vec3& value, size_t offset = 0);
+    void setAttributeValue(const String& name, const math::vec2& value, size_t offset = 0);
 
-    size_t GetSize() const;
-    size_t GetDynamicAlignment() const;
+    size_t getSize() const;
+    size_t getDynamicAlignment() const;
 
-    byte* GetData();
-    const byte* GetData() const;
-    size_t GetDataSize() const;
+    byte* getData();
+    const byte* getData() const;
+    size_t getDataSize() const;
 
 private:
     explicit UniformBufferObject(const std::vector<Item>& attributes);
 
-    void SetAttributeValue(const String& name, const void* value, size_t offset = 0);
+    void setAttributeValue(const String& name, const void* value, size_t offset = 0);
 
-    void SetDataAtOffset(const void* data, size_t size, size_t offset);
+    void setDataAtOffset(const void* data, size_t size, size_t offset);
 
-    size_t GetTypeSize(UniformBufferObject::DataType type);
-    size_t GetTypeAllignment(UniformBufferObject::DataType type);
+    size_t getTypeSize(UniformBufferObject::DataType type);
+    size_t getTypeAllignment(UniformBufferObject::DataType type);
 
     size_t m_size;
     size_t m_dynamic_alignment;

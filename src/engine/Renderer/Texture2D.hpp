@@ -10,9 +10,9 @@ public:
 
     virtual ~Texture2D() {}
 
-    virtual bool LoadFromImage(const Image& img) = 0;
+    virtual bool loadFromImage(const Image& img) = 0;
 
-    virtual void Use() = 0;
+    virtual void use() = 0;
 };
 
 }  // namespace engine

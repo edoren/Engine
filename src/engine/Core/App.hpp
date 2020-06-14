@@ -22,7 +22,7 @@ protected:
     ///
     /// @remark This is called before creating the RenderWindow
     ////////////////////////////////////////////////////////////
-    virtual bool Initialize() = 0;
+    virtual bool initialize() = 0;
 
     ////////////////////////////////////////////////////////////
     /// @brief Update the application the application
@@ -31,7 +31,7 @@ protected:
     ///
     /// @see GetDeltaTime
     ////////////////////////////////////////////////////////////
-    virtual void Update() = 0;
+    virtual void update() = 0;
 
     ////////////////////////////////////////////////////////////
     /// @brief Shutdown the application
@@ -41,21 +41,21 @@ protected:
     ///
     /// @see Initialize
     ////////////////////////////////////////////////////////////
-    virtual void Shutdown() = 0;
+    virtual void shutdown() = 0;
 
     ////////////////////////////////////////////////////////////
     /// @brief The obtain the name of the application
     ///
     /// @return String containing the name
     ////////////////////////////////////////////////////////////
-    virtual String GetName() = 0;
+    virtual String getName() = 0;
 
     ////////////////////////////////////////////////////////////
     /// @brief The intitial window size of the application
     ///
     /// @return 2D Vector containing the window size
     ////////////////////////////////////////////////////////////
-    virtual math::Vector2<int32> GetWindowSize() = 0;
+    virtual math::Vector2<int32> getWindowSize() = 0;
 
     ////////////////////////////////////////////////////////////
     /// @brief Obtains the delta time of the last frame
@@ -66,7 +66,7 @@ protected:
     /// @return A reference to a Time object containig the delta
     ///         time of the last frame
     ////////////////////////////////////////////////////////////
-    const Time& GetDeltaTime();
+    const Time& getDeltaTime();
 
 private:
     Time m_delta_time;

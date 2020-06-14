@@ -16,19 +16,19 @@ Vk_Buffer::Vk_Buffer() : m_handle(VK_NULL_HANDLE), m_memory(VK_NULL_HANDLE), m_s
 
 Vk_Buffer::~Vk_Buffer() {
     if (m_handle != VK_NULL_HANDLE) {
-        Destroy();
+        destroy();
     }
 }
 
-bool Vk_Buffer::Create(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags memory_properties) {
+bool Vk_Buffer::create(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags memory_properties) {
     if (m_handle != VK_NULL_HANDLE) {
-        Destroy();
+        destroy();
     }
 
     VkResult result = VK_SUCCESS;
 
     Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
+    VkDevice& device = context.getVulkanDevice();
 
     VkBufferCreateInfo buffer_create_info = {
         VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,  // sType
@@ -62,9 +62,9 @@ bool Vk_Buffer::Create(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryProp
     return true;
 }
 
-void Vk_Buffer::Destroy() {
+void Vk_Buffer::destroy() {
     Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
+    VkDevice& device = context.getVulkanDevice();
 
     if (m_handle) {
         vkDestroyBuffer(device, m_handle, nullptr);
@@ -77,19 +77,19 @@ void Vk_Buffer::Destroy() {
     }
 }
 
-VkBuffer& Vk_Buffer::GetHandle() {
+VkBuffer& Vk_Buffer::getHandle() {
     return m_handle;
 }
 
-const VkBuffer& Vk_Buffer::GetHandle() const {
+const VkBuffer& Vk_Buffer::getHandle() const {
     return m_handle;
 }
 
-VkDeviceMemory& Vk_Buffer::GetMemory() {
+VkDeviceMemory& Vk_Buffer::getMemory() {
     return m_memory;
 }
 
-VkDeviceSize Vk_Buffer::GetSize() const {
+VkDeviceSize Vk_Buffer::getSize() const {
     return m_size;
 }
 

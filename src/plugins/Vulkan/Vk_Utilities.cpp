@@ -17,7 +17,7 @@ bool Vk_Utilities::AllocateBufferMemory(const VkBuffer& buffer,
                                         VkDeviceMemory* memory,
                                         const VkMemoryPropertyFlags& memory_properties) {
     Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
+    VkDevice& device = context.getVulkanDevice();
 
     VkMemoryRequirements buffer_memory_requirements;
     vkGetBufferMemoryRequirements(device, buffer, &buffer_memory_requirements);
@@ -31,8 +31,8 @@ bool Vk_Utilities::AllocateMemory(VkDeviceMemory* memory,
     VkResult result = VK_SUCCESS;
 
     Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
-    VkPhysicalDevice physical_device = context.GetPhysicalDevice();
+    VkDevice& device = context.getVulkanDevice();
+    VkPhysicalDevice physical_device = context.getPhysicalDevice();
 
     VkPhysicalDeviceMemoryProperties physical_memory_properties;
     vkGetPhysicalDeviceMemoryProperties(physical_device, &physical_memory_properties);
@@ -60,7 +60,7 @@ bool Vk_Utilities::AllocateCommandBuffers(VkCommandPool& cmd_pool, uint32_t coun
     VkResult result = VK_SUCCESS;
 
     Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
+    VkDevice& device = context.getVulkanDevice();
 
     // Allocate space in the pool for the buffer
     VkCommandBufferAllocateInfo cmd_buffer_allocate_info = {
@@ -81,7 +81,7 @@ bool Vk_Utilities::AllocateCommandBuffers(VkCommandPool& cmd_pool, uint32_t coun
 
 bool Vk_Utilities::CreateVulkanSemaphore(VkSemaphore* semaphore) {
     Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
+    VkDevice& device = context.getVulkanDevice();
 
     VkSemaphoreCreateInfo semaphore_create_info = {
         VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,  // sType
@@ -102,7 +102,7 @@ bool Vk_Utilities::CreateVulkanFence(VkFenceCreateFlags flags, VkFence* fence) {
     VkResult result = VK_SUCCESS;
 
     Vk_Context& context = Vk_Context::GetInstance();
-    VkDevice& device = context.GetVulkanDevice();
+    VkDevice& device = context.getVulkanDevice();
 
     VkFenceCreateInfo fence_create_info = {
         VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,  // sType

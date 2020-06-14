@@ -13,14 +13,14 @@ public:
 
     ~GL_Mesh();
 
-    void LoadFromData(std::vector<Vertex> vertices,
+    void loadFromData(std::vector<Vertex> vertices,
                       std::vector<uint32> indices,
                       std::vector<std::pair<Texture2D*, TextureType>> textures) override;
 
-    void Draw(RenderWindow& target, const RenderStates& states) const override;
+    void draw(RenderWindow& target, const RenderStates& states) const override;
 
 private:
-    void SetupMesh();
+    void setupMesh();
 
     unsigned int m_VAO, m_VBO, m_EBO;
 };

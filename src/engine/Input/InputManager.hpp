@@ -21,22 +21,22 @@ public:
 
     ~InputManager();
 
-    bool Initialize();
+    bool initialize();
 
-    void Shutdown();
+    void shutdown();
 
-    void AdvanceFrame();
+    void advanceFrame();
 
-    Button& GetButton(int button);
+    Button& getButton(int button);
 
-    Button& GetPointerButton(int64 pointer);
+    Button& getPointerButton(int64 pointer);
 
-    Mouse& GetMouse() {
+    Mouse& getMouse() {
         static std::unique_ptr<Mouse> sInstance = std::make_unique<Mouse>(m_pointers[0]);
         return *sInstance;
     }
 
-    inline bool exit_requested() const {
+    inline bool exitRequested() const {
         return m_exit_requested;
     }
 

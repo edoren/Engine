@@ -19,19 +19,19 @@ public:
     CreateWindowApp() {}
 
 protected:
-    bool Initialize() override {
+    bool initialize() override {
         return true;
     }
 
-    void Update() override {}
+    void update() override {}
 
-    void Shutdown() override {}
+    void shutdown() override {}
 
-    String GetName() override {
+    String getName() override{
         return "CreateWindow";
     }
 
-    math::Vector2<int32> GetWindowSize() override {
+    math::Vector2<int32> getWindowSize() override {
         return {800, 600};
     }
 };
@@ -55,10 +55,10 @@ int main(int argc, char* argv[]) {
     CreateWindowApp app;
 
     Main engine(argc, argv);
-    engine.LoadPlugin(plugin);
-    engine.Initialize(&app);
-    engine.Run();
-    engine.Shutdown();
+    engine.loadPlugin(plugin);
+    engine.initialize(&app);
+    engine.run();
+    engine.shutdown();
 
     return 0;
 }

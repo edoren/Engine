@@ -33,48 +33,48 @@ public:
 
     ~Vk_RenderWindow();
 
-    bool Create(const String& name, const math::ivec2& size) override;
+    bool create(const String& name, const math::ivec2& size) override;
 
-    void Destroy(void) override;
+    void destroy(void) override;
 
-    void Resize(int width, int height) override;
+    void resize(int width, int height) override;
 
-    void SetFullScreen(bool fullscreen, bool is_fake) override;
+    void setFullScreen(bool fullscreen, bool is_fake) override;
 
-    void SetVSyncEnabled(bool vsync) override;
+    void setVSyncEnabled(bool vsync) override;
 
-    void SwapBuffers() override;  // RenderTarget
+    void swapBuffers() override;  // RenderTarget
 
-    void Clear(const Color& color) override;  // RenderTarget
+    void clear(const Color& color) override;  // RenderTarget
 
-    void AddCommandExecution(CommandType&& func);
+    void addCommandExecution(CommandType&& func);
 
-    void SubmitGraphicsCommand(Function<void(VkCommandBuffer&)>&& func);
+    void submitGraphicsCommand(Function<void(VkCommandBuffer&)>&& func);
 
 protected:
-    void UpdateProjectionMatrix() override;
+    void updateProjectionMatrix() override;
 
 private:
-    bool CheckWSISupport();
+    bool checkWsiSupport();
 
-    bool CreateVulkanRenderPass();
-    bool CreateVulkanPipeline();
+    bool createVulkanRenderPass();
+    bool createVulkanPipeline();
 
-    bool CreateVulkanSemaphore(VkSemaphore* semaphore);
-    bool CreateVulkanFence(VkFenceCreateFlags flags, VkFence* fence);
-    bool CreateRenderingResources();
+    bool createVulkanSemaphore(VkSemaphore* semaphore);
+    bool createVulkanFence(VkFenceCreateFlags flags, VkFence* fence);
+    bool createRenderingResources();
 
-    bool CreateVulkanFrameBuffer(VkFramebuffer& framebuffer, VkImageView& image_view);
-    bool PrepareFrame(VkCommandBuffer command_buffer, Vk_Image& image, VkFramebuffer& framebuffer);
+    bool createVulkanFrameBuffer(VkFramebuffer& framebuffer, VkImageView& image_view);
+    bool prepareFrame(VkCommandBuffer command_buffer, Vk_Image& image, VkFramebuffer& framebuffer);
 
-    bool CreateDepthResources();
+    bool createDepthResources();
 
-    void OnWindowResized(const math::ivec2& size) override;
+    void onWindowResized(const math::ivec2& size) override;
 
-    void OnAppWillEnterBackground() override;
-    void OnAppDidEnterBackground() override;
-    void OnAppWillEnterForeground() override;
-    void OnAppDidEnterForeground() override;
+    void onAppWillEnterBackground() override;
+    void onAppDidEnterBackground() override;
+    void onAppWillEnterForeground() override;
+    void onAppDidEnterForeground() override;
 
     Vk_Surface m_surface;
 

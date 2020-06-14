@@ -5,21 +5,21 @@ namespace engine {
 namespace math {
 
 BaseNoise::BaseNoise(int seed) : m_seed(seed) {
-    GeneratePermutationVector();
+    generatePermutationVector();
 }
 
 BaseNoise::~BaseNoise() {}
 
-int BaseNoise::GetSeed() const {
+int BaseNoise::getSeed() const {
     return m_seed;
 }
 
-void BaseNoise::SetSeed(int seed) {
+void BaseNoise::setSeed(int seed) {
     m_seed = seed;
-    GeneratePermutationVector();
+    generatePermutationVector();
 }
 
-void BaseNoise::GeneratePermutationVector() {
+void BaseNoise::generatePermutationVector() {
     m_perm.resize(512);
 
     // Fill p with values from 0 to 255
@@ -35,21 +35,21 @@ void BaseNoise::GeneratePermutationVector() {
     std::copy(m_perm.begin(), m_perm.begin() + 256, m_perm.begin() + 256);
 }
 
-float BaseNoise::CoherentNoise3D(float x, float y, float z) const {
+float BaseNoise::coherentNoise3D(float x, float y, float z) const {
     // Find the unit cube that contains the point
-    int X = FastFloor(x) & 255;
-    int Y = FastFloor(y) & 255;
-    int Z = FastFloor(z) & 255;
+    int X = fastFloor(x) & 255;
+    int Y = fastFloor(y) & 255;
+    int Z = fastFloor(z) & 255;
 
     // Find relative x, y, z of point in cube
-    x -= static_cast<float>(FastFloor(x));
-    y -= static_cast<float>(FastFloor(y));
-    z -= static_cast<float>(FastFloor(z));
+    x -= static_cast<float>(fastFloor(x));
+    y -= static_cast<float>(fastFloor(y));
+    z -= static_cast<float>(fastFloor(z));
 
     // Compute fade curves for each of x, y, z
-    float u = Fade(x);
-    float v = Fade(y);
-    float w = Fade(z);
+    float u = fade(x);
+    float v = fade(y);
+    float w = fade(z);
 
     // Hash coordinates of the 8 cube corners
     int AAA = m_perm[m_perm[m_perm[X] + Y] + Z];
@@ -62,34 +62,34 @@ float BaseNoise::CoherentNoise3D(float x, float y, float z) const {
     int BBB = m_perm[m_perm[m_perm[X + 1] + Y + 1] + Z + 1];
 
     // Calculate noise contributions from each of the eight corners
-    float n000 = Grad(AAA, x, y, z);
-    float n100 = Grad(BAA, x - 1, y, z);
-    float n010 = Grad(ABA, x, y - 1, z);
-    float n110 = Grad(BBA, x - 1, y - 1, z);
-    float n001 = Grad(AAB, x, y, z - 1);
-    float n101 = Grad(BAB, x - 1, y, z - 1);
-    float n011 = Grad(ABB, x, y - 1, z - 1);
-    float n111 = Grad(BBB, x - 1, y - 1, z - 1);
+    float n000 = grad(AAA, x, y, z);
+    float n100 = grad(BAA, x - 1, y, z);
+    float n010 = grad(ABA, x, y - 1, z);
+    float n110 = grad(BBA, x - 1, y - 1, z);
+    float n001 = grad(AAB, x, y, z - 1);
+    float n101 = grad(BAB, x - 1, y, z - 1);
+    float n011 = grad(ABB, x, y - 1, z - 1);
+    float n111 = grad(BBB, x - 1, y - 1, z - 1);
 
     // Add blended results from 8 corners of cube
 
     // Interpolate along x the contributions from each of the corners
-    float nx00 = Lerp(u, n000, n100);
-    float nx01 = Lerp(u, n001, n101);
-    float nx10 = Lerp(u, n010, n110);
-    float nx11 = Lerp(u, n011, n111);
+    float nx00 = lerp(u, n000, n100);
+    float nx01 = lerp(u, n001, n101);
+    float nx10 = lerp(u, n010, n110);
+    float nx11 = lerp(u, n011, n111);
 
     // Interpolate the four results along y
-    float nxy0 = Lerp(v, nx00, nx10);
-    float nxy1 = Lerp(v, nx01, nx11);
+    float nxy0 = lerp(v, nx00, nx10);
+    float nxy1 = lerp(v, nx01, nx11);
 
     // Interpolate the two last results along z
-    float nxyz = Lerp(w, nxy0, nxy1);
+    float nxyz = lerp(w, nxy0, nxy1);
 
     return std::min(1.F, std::max(-1.F, nxyz));
 }
 
-float BaseNoise::Grad(int hash, float x, float y, float z) const {
+float BaseNoise::grad(int hash, float x, float y, float z) const {
     switch (hash & 0xF) {
         case 0x0:
             return x + y;
@@ -128,15 +128,15 @@ float BaseNoise::Grad(int hash, float x, float y, float z) const {
     }
 }
 
-float BaseNoise::Fade(float t) const {
+float BaseNoise::fade(float t) const {
     return t * t * t * (t * (t * 6 - 15) + 10);
 }
 
-int BaseNoise::FastFloor(float x) const {
+int BaseNoise::fastFloor(float x) const {
     return x > 0.F ? static_cast<int>(x) : static_cast<int>(x - 1);
 }
 
-float BaseNoise::Lerp(float t, float a, float b) const {
+float BaseNoise::lerp(float t, float a, float b) const {
     return a + t * (b - a);
 }
 

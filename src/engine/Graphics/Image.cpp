@@ -5,15 +5,15 @@ namespace engine {
 
 Image::Image() : m_size(0, 0), m_pixels(0) {}
 
-bool Image::LoadFromFile(const String& filename) {
+bool Image::loadFromFile(const String& filename) {
     return io::ImageLoader::LoadFromFile(filename, m_pixels, m_size);
 }
 
-bool Image::LoadFromFileInMemory(const byte* buffer, uint32 len) {
+bool Image::loadFromFileInMemory(const byte* buffer, uint32 len) {
     return io::ImageLoader::LoadFromFileInMemory(buffer, len, m_pixels, m_size);
 }
 
-bool Image::LoadFromMemory(const Color32* color_map, uint32 width, uint32 height) {
+bool Image::loadFromMemory(const Color32* color_map, uint32 width, uint32 height) {
     m_size.x = width;
     m_size.y = height;
     const byte* data = reinterpret_cast<const byte*>(color_map);
@@ -21,25 +21,25 @@ bool Image::LoadFromMemory(const Color32* color_map, uint32 width, uint32 height
     return true;
 }
 
-void Image::Clear() {
+void Image::clear() {
     m_size.x = 0;
     m_size.y = 0;
     m_pixels.clear();
 }
 
-const math::uvec2& Image::GetSize() const {
+const math::uvec2& Image::getSize() const {
     return m_size;
 }
 
-byte* Image::GetData() {
+byte* Image::getData() {
     return m_pixels.data();
 }
 
-const byte* Image::GetData() const {
+const byte* Image::getData() const {
     return m_pixels.data();
 }
 
-size_t Image::GetDataSize() const {
+size_t Image::getDataSize() const {
     return m_size.x * m_size.y * sizeof(byte) * 4;
 }
 

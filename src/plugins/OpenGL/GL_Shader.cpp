@@ -49,8 +49,8 @@ GL_Shader::GL_Shader(GL_Shader&& other)
 }
 
 GL_Shader::~GL_Shader() {
-    if (!IsLinked()) {
-        CleanUpShaders();
+    if (!isLinked()) {
+        cleanUpShaders();
     }
     if (m_uniform_buffers._static) {
         GL_CALL(glDeleteBuffers(1, &m_uniform_buffers._static));
@@ -66,8 +66,8 @@ GL_Shader& GL_Shader::operator=(GL_Shader&& other) {
     return *this;
 }
 
-bool GL_Shader::LoadFromMemory(const byte* source, std::size_t source_size, ShaderType type) {
-    if (IsLinked()) {
+bool GL_Shader::loadFromMemory(const byte* source, std::size_t source_size, ShaderType type) {
+    if (isLinked()) {
         return false;
     }
 
@@ -83,7 +83,7 @@ bool GL_Shader::LoadFromMemory(const byte* source, std::size_t source_size, Shad
     source_complete +=
         String::FromUtf8(reinterpret_cast<const char8*>(source), reinterpret_cast<const char8*>(source) + source_size);
 
-    GLuint shader = Compile(source_complete.GetData(), source_complete.GetSize(), type);
+    GLuint shader = compile(source_complete.getData(), source_complete.getSize(), type);
     if (!shader) {
         return false;
     }
@@ -102,22 +102,22 @@ bool GL_Shader::LoadFromMemory(const byte* source, std::size_t source_size, Shad
     return true;
 }
 
-UniformBufferObject& GL_Shader::GetUBO() {
+UniformBufferObject& GL_Shader::getUbo() {
     return m_ubo;
 }
 
-UniformBufferObject& GL_Shader::GetUBODynamic() {
+UniformBufferObject& GL_Shader::getUboDynamic() {
     return m_ubo_dynamic;
 }
 
-bool GL_Shader::IsLinked() const {
+bool GL_Shader::isLinked() const {
     GLint success = GL_TRUE;
     GL_CALL(glGetProgramiv(m_program, GL_LINK_STATUS, &success));
     return success == GL_TRUE;
 }
 
-bool GL_Shader::Link() {
-    if (IsLinked()) {
+bool GL_Shader::link() {
+    if (isLinked()) {
         return true;
     }
 
@@ -136,18 +136,18 @@ bool GL_Shader::Link() {
     }
 
     // After the program is succesfully linked the shaders can be cleaned
-    CleanUpShaders();
+    cleanUpShaders();
 
     return true;
 }
 
-void GL_Shader::Use() {
-    if (Link()) {
+void GL_Shader::use() {
+    if (link()) {
         GL_CALL(glUseProgram(m_program));
     }
 }
 
-void GL_Shader::UploadUniformBuffers() {
+void GL_Shader::uploadUniformBuffers() {
     GLuint binding_point;
     GLuint block_index;
 
@@ -163,7 +163,7 @@ void GL_Shader::UploadUniformBuffers() {
     GL_CALL(glUniformBlockBinding(m_program, block_index, binding_point));
     GL_CALL(glBindBuffer(GL_UNIFORM_BUFFER, m_uniform_buffers._static));
 
-    GL_CALL(glBufferData(GL_UNIFORM_BUFFER, m_ubo.GetDataSize(), m_ubo.GetData(), GL_DYNAMIC_DRAW));
+    GL_CALL(glBufferData(GL_UNIFORM_BUFFER, m_ubo.getDataSize(), m_ubo.getData(), GL_DYNAMIC_DRAW));
     GL_CALL(glBindBufferBase(GL_UNIFORM_BUFFER, binding_point, m_uniform_buffers._static));
 
     // TODO: Automatically detect this using the descriptor
@@ -178,52 +178,52 @@ void GL_Shader::UploadUniformBuffers() {
     GL_CALL(glUniformBlockBinding(m_program, block_index, binding_point));
     GL_CALL(glBindBuffer(GL_UNIFORM_BUFFER, m_uniform_buffers._dynamic));
 
-    GL_CALL(glBufferData(GL_UNIFORM_BUFFER, m_ubo_dynamic.GetDataSize(), m_ubo_dynamic.GetData(), GL_DYNAMIC_DRAW));
+    GL_CALL(glBufferData(GL_UNIFORM_BUFFER, m_ubo_dynamic.getDataSize(), m_ubo_dynamic.getData(), GL_DYNAMIC_DRAW));
     GL_CALL(glBindBufferBase(GL_UNIFORM_BUFFER, binding_point, m_uniform_buffers._dynamic));
 }
 
-void GL_Shader::SetUniform(const String& name, float val) {
-    GLint location = GetUniformLocation(name);
+void GL_Shader::setUniform(const String& name, float val) {
+    GLint location = getUniformLocation(name);
     if (location != -1) GL_CALL(glUniform1f(location, val));
 }
 
-void GL_Shader::SetUniform(const String& name, int32 val) {
-    GLint location = GetUniformLocation(name);
+void GL_Shader::setUniform(const String& name, int32 val) {
+    GLint location = getUniformLocation(name);
     if (location != -1) GL_CALL(glUniform1i(location, val));
 }
 
-void GL_Shader::SetUniform(const String& name, uint32 val) {
-    GLint location = GetUniformLocation(name);
+void GL_Shader::setUniform(const String& name, uint32 val) {
+    GLint location = getUniformLocation(name);
     if (location != -1) GL_CALL(glUniform1ui(location, val));
 }
 
-void GL_Shader::SetUniform(const String& name, const math::mat4& val) {
-    GLint location = GetUniformLocation(name);
+void GL_Shader::setUniform(const String& name, const math::mat4& val) {
+    GLint location = getUniformLocation(name);
     if (location != -1) GL_CALL(glUniformMatrix4fv(location, 1, GL_FALSE, &val[0]));
 }
 
-void GL_Shader::SetUniform(const String& name, const math::mat3& val) {
-    GLint location = GetUniformLocation(name);
+void GL_Shader::setUniform(const String& name, const math::mat3& val) {
+    GLint location = getUniformLocation(name);
     if (location != -1) GL_CALL(glUniformMatrix3fv(location, 1, GL_FALSE, &val[0]));
 }
 
-void GL_Shader::SetUniform(const String& name, const math::mat2& val) {
-    GLint location = GetUniformLocation(name);
+void GL_Shader::setUniform(const String& name, const math::mat2& val) {
+    GLint location = getUniformLocation(name);
     if (location != -1) GL_CALL(glUniformMatrix2fv(location, 1, GL_FALSE, &val[0]));
 }
 
-void GL_Shader::SetUniform(const String& name, const math::vec4& val) {
-    GLint location = GetUniformLocation(name);
+void GL_Shader::setUniform(const String& name, const math::vec4& val) {
+    GLint location = getUniformLocation(name);
     if (location != -1) GL_CALL(glUniform4f(location, val[0], val[1], val[2], val[3]));
 }
 
-void GL_Shader::SetUniform(const String& name, const math::vec3& val) {
-    GLint location = GetUniformLocation(name);
+void GL_Shader::setUniform(const String& name, const math::vec3& val) {
+    GLint location = getUniformLocation(name);
     if (location != -1) GL_CALL(glUniform3f(location, val[0], val[1], val[2]));
 }
 
-void GL_Shader::SetUniform(const String& name, const math::vec2& val) {
-    GLint location = GetUniformLocation(name);
+void GL_Shader::setUniform(const String& name, const math::vec2& val) {
+    GLint location = getUniformLocation(name);
     if (location != -1) GL_CALL(glUniform2f(location, val[0], val[1]));
 }
 
@@ -231,31 +231,31 @@ const std::vector<const char*>& GL_Shader::GetRequiredExtensions() {
     return sRequiredExtensions;
 }
 
-void GL_Shader::SetDescriptor(json&& descriptor) {
+void GL_Shader::setDescriptor(json&& descriptor) {
     m_descriptor = std::move(descriptor);
 
     std::vector<UniformBufferObject::Item> attributes;
     for (auto& attribute : m_descriptor["uniform_buffer"]["attributes"]) {
         String name = attribute["name"];
         String type = attribute["type"];
-        attributes.push_back({name, GetUBODataTypeFromString(type)});
+        attributes.push_back({name, getUboDataTypeFromString(type)});
     }
-    m_ubo.SetAttributes(attributes);
+    m_ubo.setAttributes(attributes);
 
     attributes.clear();
     for (auto& attribute : m_descriptor["uniform_buffer_dynamic"]["attributes"]) {
         String name = attribute["name"];
         String type = attribute["type"];
-        attributes.push_back({name, GetUBODataTypeFromString(type)});
+        attributes.push_back({name, getUboDataTypeFromString(type)});
     }
-    m_ubo_dynamic.SetAttributes(attributes);
+    m_ubo_dynamic.setAttributes(attributes);
 }
 
-GLuint GL_Shader::Compile(const char8* source, size_t source_size, ShaderType type) {
-    return Compile(reinterpret_cast<const byte*>(source), source_size, type);
+GLuint GL_Shader::compile(const char8* source, size_t source_size, ShaderType type) {
+    return compile(reinterpret_cast<const byte*>(source), source_size, type);
 }
 
-GLuint GL_Shader::Compile(const byte* source, size_t source_size, ShaderType type) {
+GLuint GL_Shader::compile(const byte* source, size_t source_size, ShaderType type) {
     if (source == nullptr || source_size == 0) {
         return 0;
     }
@@ -283,7 +283,7 @@ GLuint GL_Shader::Compile(const byte* source, size_t source_size, ShaderType typ
     return shader;
 }
 
-void GL_Shader::CleanUpShaders() {
+void GL_Shader::cleanUpShaders() {
     for (size_t i = 0; i < m_shaders.size(); i++) {
         if (m_shaders[i]) {
             GL_CALL(glDetachShader(m_program, m_shaders[i]));
@@ -293,13 +293,13 @@ void GL_Shader::CleanUpShaders() {
     }
 }
 
-GLint GL_Shader::GetUniformLocation(const String& name) {
+GLint GL_Shader::getUniformLocation(const String& name) {
     const auto it = m_uniforms.find(name);
 
     if (it != m_uniforms.end()) {
         return it->second;
     }
-    GLint location = glGetUniformLocation(m_program, name.ToUtf8().c_str());
+    GLint location = glGetUniformLocation(m_program, name.toUtf8().c_str());
 
     m_uniforms.insert(std::make_pair(name, location));
 

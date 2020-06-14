@@ -54,7 +54,7 @@ Main::Main(int argc, char* argv[])
 }
 
 Main::~Main() {
-    Shutdown();
+    shutdown();
     m_async_task_runner.reset();
     m_scene_manager.reset();
     m_input_manager.reset();
@@ -63,8 +63,8 @@ Main::~Main() {
     m_log_manager.reset();
 }
 
-void Main::Initialize(App* app) {
-    SetActiveRenderer();  // TODO: Change this to a configurable way
+void Main::initialize(App* app) {
+    setActiveRenderer();  // TODO: Change this to a configurable way
 
     if (!m_active_renderer) {
         LogFatal(sTag, "Could not find an avaliable Renderer");
@@ -77,106 +77,106 @@ void Main::Initialize(App* app) {
         SDL_Init(0);
 
         // 2. Initialize the engine core subsystems
-        LogManager::GetInstance().Initialize();
-        FileSystem::GetInstance().Initialize();
-        SharedLibManager::GetInstance().Initialize();
-        InputManager::GetInstance().Initialize();
+        LogManager::GetInstance().initialize();
+        FileSystem::GetInstance().initialize();
+        SharedLibManager::GetInstance().initialize();
+        InputManager::GetInstance().initialize();
 
         // 3. Initialize plugins
-        InitializePlugins();
+        initializePlugins();
 
         // 4. Initialize the active Renderer
-        if (!m_active_renderer->Initialize()) {
+        if (!m_active_renderer->initialize()) {
             LogFatal(sTag, "Could not initialize the Renderer");
         }
 
         // 5. Create the render window using the active renderer
-        RenderWindow& window = m_active_renderer->GetRenderWindow();
-        if (!window.Create(app->GetName(), app->GetWindowSize())) {
+        RenderWindow& window = m_active_renderer->getRenderWindow();
+        if (!window.create(app->getName(), app->getWindowSize())) {
             LogFatal(sTag, "Could not create the RenderWindow");
         }
 
         // 6. Initialize the renderer subsystems
-        TextureManager::GetInstance().Initialize();
-        ShaderManager::GetInstance().Initialize();
-        ModelManager::GetInstance().Initialize();
-        SceneManager::GetInstance().Initialize();
+        TextureManager::GetInstance().initialize();
+        ShaderManager::GetInstance().initialize();
+        ModelManager::GetInstance().initialize();
+        SceneManager::GetInstance().initialize();
 
         // 7. Initialize the application
         m_app = app;
-        m_app->Initialize();
+        m_app->initialize();
     }
 }
 
-void Main::Run() {
+void Main::run() {
     if (m_app == nullptr) {
         LogError(sTag, "The Engine has not being initialized");
         return;
     }
 
-    RenderWindow& window = m_active_renderer->GetRenderWindow();
+    RenderWindow& window = m_active_renderer->getRenderWindow();
 
     Stopwatch timer;
-    timer.Start();
-    while (!m_input_manager->exit_requested()) {
-        m_app->m_delta_time = timer.GetElapsedTime();
-        timer.Restart();
+    timer.start();
+    while (!m_input_manager->exitRequested()) {
+        m_app->m_delta_time = timer.getElapsedTime();
+        timer.restart();
 
-        window.Clear(Color::sBlack);
+        window.clear(Color::sBlack);
 
-        m_app->Update();
+        m_app->update();
 
-        Scene* active_scene = SceneManager::GetInstance().GetActiveScene();
+        Scene* active_scene = SceneManager::GetInstance().getActiveScene();
         if (active_scene) {
-            active_scene->Draw(window);
+            active_scene->draw(window);
         }
 
-        m_input_manager->AdvanceFrame();
-        m_active_renderer->AdvanceFrame();
+        m_input_manager->advanceFrame();
+        m_active_renderer->advanceFrame();
     }
 }
 
-void Main::Shutdown() {
+void Main::shutdown() {
     if (m_app != nullptr) {
         LogInfo(sTag, "Stopping Engine");
 
         // 1. Shutdown the application
-        m_app->Shutdown();
+        m_app->shutdown();
         m_app = nullptr;
 
         // 2. Shutdown the renderer subsystems
-        SceneManager::GetInstance().Shutdown();
-        ModelManager::GetInstance().Shutdown();
-        TextureManager::GetInstance().Shutdown();
-        ShaderManager::GetInstance().Shutdown();
+        SceneManager::GetInstance().shutdown();
+        ModelManager::GetInstance().shutdown();
+        TextureManager::GetInstance().shutdown();
+        ShaderManager::GetInstance().shutdown();
 
         // 3. Shutdown the active Renderer
         // 4. Destroy the render window of the the active renderer
-        m_active_renderer->Shutdown();
+        m_active_renderer->shutdown();
         m_active_renderer = nullptr;
         m_renderers.clear();
 
         // 5. Shutdown plugins
-        ShutdownPlugins();
+        shutdownPlugins();
 
         // 6. Shutdown the engine core subsystems
-        LogManager::GetInstance().Shutdown();
-        FileSystem::GetInstance().Shutdown();
-        SharedLibManager::GetInstance().Shutdown();
-        InputManager::GetInstance().Shutdown();
+        LogManager::GetInstance().shutdown();
+        FileSystem::GetInstance().shutdown();
+        SharedLibManager::GetInstance().shutdown();
+        InputManager::GetInstance().shutdown();
 
         // 7. Shutdown dependencies
         SDL_Quit();
     }
 }
 
-void Main::SetActiveScene(const String& scene_name) {
+void Main::setActiveScene(const String& scene_name) {
     ENGINE_UNUSED(scene_name);
 }
 
-void Main::LoadPlugin(const String& name) {
+void Main::loadPlugin(const String& name) {
     // Load plugin library
-    SharedLibrary* lib = m_shared_lib_manager->Load(name);
+    SharedLibrary* lib = m_shared_lib_manager->load(name);
 
     // Check for existence
     auto it = std::find(m_plugin_libs.begin(), m_plugin_libs.end(), lib);
@@ -184,7 +184,7 @@ void Main::LoadPlugin(const String& name) {
         m_plugin_libs.push_back(lib);
 
         // Call startup function
-        PFN_START_PLUGIN pFunc = reinterpret_cast<PFN_START_PLUGIN>(lib->GetSymbol("StartPlugin"));
+        PFN_START_PLUGIN pFunc = reinterpret_cast<PFN_START_PLUGIN>(lib->getSymbol("StartPlugin"));
 
         if (!pFunc) {
             LogFatal(sTag, "Cannot find symbol StartPlugin in library: " + name);
@@ -195,15 +195,15 @@ void Main::LoadPlugin(const String& name) {
     }
 }
 
-void Main::UnloadPlugin(const String& pluginName) {
+void Main::unloadPlugin(const String& pluginName) {
     for (auto it = m_plugin_libs.begin(); it != m_plugin_libs.end(); it++) {
         SharedLibrary* shared_lib = *it;
-        if (shared_lib->GetName() == pluginName) {
+        if (shared_lib->getName() == pluginName) {
             // Call plugin shutdown
-            PFN_STOP_PLUGIN pFunc = (PFN_STOP_PLUGIN)shared_lib->GetSymbol("StopPlugin");
+            PFN_STOP_PLUGIN pFunc = (PFN_STOP_PLUGIN)shared_lib->getSymbol("StopPlugin");
 
             if (!pFunc) {
-                const String& name = shared_lib->GetName();
+                const String& name = shared_lib->getName();
                 LogFatal(sTag, "Cannot find symbol StopPlugin in library: " + name);
             }
 
@@ -211,36 +211,36 @@ void Main::UnloadPlugin(const String& pluginName) {
             pFunc();
 
             // Unload library (destroyed by SharedLibManager)
-            SharedLibManager::GetInstance().Unload(shared_lib);
+            SharedLibManager::GetInstance().unload(shared_lib);
             it = m_plugin_libs.erase(it);
             return;
         }
     }
 }
 
-void Main::InstallPlugin(Plugin* plugin) {
-    LogInfo(sTag, "Installing plugin: " + plugin->GetName());
+void Main::installPlugin(Plugin* plugin) {
+    LogInfo(sTag, "Installing plugin: " + plugin->getName());
 
     m_plugins.push_back(plugin);
-    plugin->Install();
+    plugin->install();
 
     // If the engine is already initialized, call the plugin init too
     if (m_app != nullptr) {
-        plugin->Initialize();
+        plugin->initialize();
     }
 
     LogInfo(sTag, "Plugin successfully installed");
 }
 
-void Main::UninstallPlugin(Plugin* plugin) {
-    LogInfo(sTag, "Uninstalling plugin: " + plugin->GetName());
+void Main::uninstallPlugin(Plugin* plugin) {
+    LogInfo(sTag, "Uninstalling plugin: " + plugin->getName());
 
     auto it = std::find(m_plugins.begin(), m_plugins.end(), plugin);
     if (it != m_plugins.end()) {
         if (m_app != nullptr) {
-            plugin->Shutdown();
+            plugin->shutdown();
         }
-        plugin->Uninstall();
+        plugin->uninstall();
         m_plugins.erase(it);
     }
 
@@ -248,37 +248,37 @@ void Main::UninstallPlugin(Plugin* plugin) {
 }
 
 // TODO: Remove Renderer from Main
-void Main::AddRenderer(std::unique_ptr<Renderer>&& new_renderer) {
+void Main::addRenderer(std::unique_ptr<Renderer>&& new_renderer) {
     m_renderers.push_back(std::move(new_renderer));
 }
 
-Renderer& Main::GetActiveRenderer() {
-    assert(GetActiveRendererPtr());
-    return *GetActiveRendererPtr();
+Renderer& Main::getActiveRenderer() {
+    assert(getActiveRendererPtr());
+    return *getActiveRendererPtr();
 }
 
-Renderer* Main::GetActiveRendererPtr() {
+Renderer* Main::getActiveRendererPtr() {
     return m_active_renderer;
 }
 
-void Main::ExecuteAsync(AsyncTaskRunner::Task&& task) {
-    m_async_task_runner->Execute(std::move(task));
+void Main::executeAsync(AsyncTaskRunner::Task&& task) {
+    m_async_task_runner->execute(std::move(task));
 }
 
-void Main::InitializePlugins() {
+void Main::initializePlugins() {
     for (auto& plugin : m_plugins) {
-        plugin->Initialize();
+        plugin->initialize();
     }
 }
 
-void Main::ShutdownPlugins() {
+void Main::shutdownPlugins() {
     // Unload all the Plugins loaded through shared libraries
     for (auto& plugin_lib : m_plugin_libs) {
         // Call plugin shutdown
-        PFN_STOP_PLUGIN pFunc = reinterpret_cast<PFN_STOP_PLUGIN>(plugin_lib->GetSymbol("StopPlugin"));
+        PFN_STOP_PLUGIN pFunc = reinterpret_cast<PFN_STOP_PLUGIN>(plugin_lib->getSymbol("StopPlugin"));
 
         if (!pFunc) {
-            const String& name = plugin_lib->GetName();
+            const String& name = plugin_lib->getName();
             LogFatal(sTag, "Cannot find symbol StopPlugin in library: " + name);
         }
 
@@ -286,7 +286,7 @@ void Main::ShutdownPlugins() {
         pFunc();
 
         // Unload library & destroy
-        SharedLibManager::GetInstance().Unload(plugin_lib);
+        SharedLibManager::GetInstance().unload(plugin_lib);
     }
     m_plugin_libs.clear();
 
@@ -295,12 +295,12 @@ void Main::ShutdownPlugins() {
     for (auto& plugin : m_plugins) {
         // Note this does NOT call uninstallPlugin - this shutdown is for
         // the detail objects
-        plugin->Uninstall();
+        plugin->uninstall();
     }
     m_plugins.clear();
 }
 
-void Main::SetActiveRenderer() {
+void Main::setActiveRenderer() {
     // TODO: Add a configurable way to select this
     m_active_renderer = !m_renderers.empty() ? m_renderers[0].get() : nullptr;
 }

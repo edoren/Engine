@@ -44,24 +44,24 @@ FileSystem::FileSystem() {
 
 FileSystem::~FileSystem() {}
 
-void FileSystem::Initialize() {}
+void FileSystem::initialize() {}
 
-void FileSystem::Shutdown() {}
+void FileSystem::shutdown() {}
 
-bool FileSystem::FileExists(const String& filename) const {
+bool FileSystem::fileExists(const String& filename) const {
     IOStream file;
     for (const String& path : m_search_paths) {
-        String file_path = Join(path, filename);
-        if (file.Open(file_path, "r")) {
+        String file_path = join(path, filename);
+        if (file.open(file_path, "r")) {
             return true;
         }
     }
     return false;
 }
 
-bool FileSystem::LoadFileData(const String& filename, String* dest) const {
+bool FileSystem::loadFileData(const String& filename, String* dest) const {
     std::vector<byte> out;
-    bool success = LoadFileData(filename, &out);
+    bool success = loadFileData(filename, &out);
     if (success) {
         char8* begin = reinterpret_cast<char8*>(out.data());
         *dest = String::FromUtf8(begin, begin + out.size());
@@ -69,31 +69,31 @@ bool FileSystem::LoadFileData(const String& filename, String* dest) const {
     return success;
 }
 
-bool FileSystem::LoadFileData(const String& filename, std::vector<byte>* dest) const {
+bool FileSystem::loadFileData(const String& filename, std::vector<byte>* dest) const {
     IOStream file;
 
     auto filename_cpy = filename;
-    filename_cpy.Replace('\\', GetOsSeparator());
-    filename_cpy.Replace('/', GetOsSeparator());
+    filename_cpy.replace('\\', getOsSeparator());
+    filename_cpy.replace('/', getOsSeparator());
 
     for (const String& path : m_search_paths) {
-        String file_path = Join(path, filename_cpy);
-        if (file.Open(file_path.GetData(), "rb")) {
+        String file_path = join(path, filename_cpy);
+        if (file.open(file_path.getData(), "rb")) {
             break;
         }
     }
-    if (!file.IsOpen()) {
+    if (!file.isOpen()) {
         LogError(sTag, "Error loading file: " + filename);
         return false;
     }
 
-    std::size_t len = file.GetSize();
+    std::size_t len = file.getSize();
     dest->resize(len);
-    std::size_t rlen = file.Read(dest->data(), 1, len);
+    std::size_t rlen = file.read(dest->data(), 1, len);
     return len == rlen && len > 0;
 }
 
-char8 FileSystem::GetOsSeparator() const {
+char8 FileSystem::getOsSeparator() const {
 #if PLATFORM_IS(PLATFORM_WINDOWS)
     return '\\';
 #else
@@ -101,7 +101,7 @@ char8 FileSystem::GetOsSeparator() const {
 #endif
 }
 
-String FileSystem::ExecutableDirectory() const {
+String FileSystem::executableDirectory() const {
     String ret;
     char* path = SDL_GetBasePath();
     if (path) {
@@ -111,7 +111,7 @@ String FileSystem::ExecutableDirectory() const {
     return ret;
 }
 
-String FileSystem::CurrentWorkingDirectory() const {
+String FileSystem::currentWorkingDirectory() const {
     String ret;
 #if PLATFORM_IS(PLATFORM_WINDOWS)
     DWORD buffer_length = PATH_MAX_LENGTH;
@@ -155,14 +155,14 @@ String FileSystem::CurrentWorkingDirectory() const {
     return ret;
 }
 
-String FileSystem::AbsolutePath(const String& /*path*/) const {
+String FileSystem::absolutePath(const String& /*path*/) const {
     String ret;
 
     return ret;
 }
 
-String FileSystem::NormalizePath(const String& path) const {
-    bool is_absolute = IsAbsolutePath(path);
+String FileSystem::normalizePath(const String& path) const {
+    bool is_absolute = isAbsolutePath(path);
     std::vector<std::pair<const char8*, const char8*>> path_comps;
 
     auto AddPathComponent = [&path_comps, is_absolute](const char8* begin, const char8* end) {
@@ -197,7 +197,7 @@ String FileSystem::NormalizePath(const String& path) const {
         path_comps.emplace_back(begin, end);
     };
 
-    const auto& internal = path.ToUtf8();
+    const auto& internal = path.toUtf8();
 
     // Get the path component without the drive on Windows
     size_t begin_offset = 0;
@@ -212,11 +212,11 @@ String FileSystem::NormalizePath(const String& path) const {
     const char8* pathc_end = pathc_start;
     while (*pathc_end != 0) {
         // Get the path component from the start and end iterators
-        if (*pathc_end == GetOsSeparator() && pathc_end > pathc_start) {
+        if (*pathc_end == getOsSeparator() && pathc_end > pathc_start) {
             AddPathComponent(pathc_start, pathc_end);
             pathc_start = pathc_end;
         }
-        if (*pathc_start == GetOsSeparator()) {
+        if (*pathc_start == getOsSeparator()) {
             pathc_start++;
         }
         pathc_end++;
@@ -242,7 +242,7 @@ String FileSystem::NormalizePath(const String& path) const {
     } else {
         for (size_t i = 0; i < path_comps.size(); i++) {
             if (i) {
-                ret += GetOsSeparator();
+                ret += getOsSeparator();
             }
             ret += String::FromUtf8(path_comps[i].first, path_comps[i].second);
         }
@@ -256,9 +256,9 @@ String FileSystem::NormalizePath(const String& path) const {
     return ret;
 }
 
-bool FileSystem::IsAbsolutePath(const String& path) const {
-    const auto& internal = path.ToUtf8();
-    if (path.IsEmpty()) {
+bool FileSystem::isAbsolutePath(const String& path) const {
+    const auto& internal = path.toUtf8();
+    if (path.isEmpty()) {
         return false;
     }
 #if PLATFORM_IS(PLATFORM_WINDOWS)
@@ -273,38 +273,38 @@ bool FileSystem::IsAbsolutePath(const String& path) const {
     return false;
 }
 
-String FileSystem::Join(const String& left, const String& right) const {
-    if (right.IsEmpty()) {
+String FileSystem::join(const String& left, const String& right) const {
+    if (right.isEmpty()) {
         return left;
     }
-    if (left.IsEmpty()) {
+    if (left.isEmpty()) {
         return right;
     }
 
-    if (IsAbsolutePath(right)) {
+    if (isAbsolutePath(right)) {
         return right;
     }
 
     String ret;
-    const auto& internal = left.ToUtf8();
+    const auto& internal = left.toUtf8();
     char8 last_character = internal[internal.size() - 1];
-    if (last_character == GetOsSeparator()) {
+    if (last_character == getOsSeparator()) {
         ret = left + right;
     } else {
-        ret = left + GetOsSeparator() + right;
+        ret = left + getOsSeparator() + right;
     }
     return ret;
 }
 
-void FileSystem::SetSearchPaths(std::vector<String> search_paths) {
+void FileSystem::setSearchPaths(std::vector<String> search_paths) {
     m_search_paths = search_paths;
 }
 
-const std::vector<String>& FileSystem::GetSearchPaths() const {
+const std::vector<String>& FileSystem::getSearchPaths() const {
     return m_search_paths;
 }
 
-void FileSystem::AddSearchPath(const String& path) {
+void FileSystem::addSearchPath(const String& path) {
     m_search_paths.push_back(path);
 }
 

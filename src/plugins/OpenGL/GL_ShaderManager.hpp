@@ -17,24 +17,24 @@ public:
 
     ~GL_ShaderManager();
 
-    GL_Shader* LoadFromFile(const String& basename);
+    GL_Shader* loadFromFile(const String& basename);
 
-    GL_Shader* LoadFromMemory(const String& name, std::map<ShaderType, String*> shader_data_map);
+    GL_Shader* loadFromMemory(const String& name, std::map<ShaderType, String*> shader_data_map);
 
-    GL_Shader* GetShader(const String& name);
+    GL_Shader* getShader(const String& name);
 
-    GL_Shader* GetActiveShader();
+    GL_Shader* getActiveShader();
 
     static GL_ShaderManager& GetInstance();
 
     static GL_ShaderManager* GetInstancePtr();
 
 protected:
-    std::unique_ptr<Shader> CreateShader() override;
+    std::unique_ptr<Shader> createShader() override;
 
-    void UseShader(Shader* shader) override;
+    void useShader(Shader* shader) override;
 
-    const String& GetShaderFolder() const override;
+    const String& getShaderFolder() const override;
 };
 
 }  // namespace engine

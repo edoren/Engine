@@ -15,13 +15,13 @@ Vk_Surface::Vk_Surface() : m_handle(VK_NULL_HANDLE) {}
 
 Vk_Surface::~Vk_Surface() {
     if (m_handle) {
-        Destroy();
+        destroy();
     }
 }
 
-bool Vk_Surface::Create(SDL_Window* window) {
+bool Vk_Surface::create(SDL_Window* window) {
     Vk_Context& context = Vk_Context::GetInstance();
-    VkInstance& instance = context.GetVulkanInstance();
+    VkInstance& instance = context.getVulkanInstance();
 
     SDL_bool result = SDL_Vulkan_CreateSurface(window, instance, &m_handle);
     if (!result) {
@@ -32,16 +32,16 @@ bool Vk_Surface::Create(SDL_Window* window) {
     return m_handle != VK_NULL_HANDLE;
 }
 
-void Vk_Surface::Destroy() {
+void Vk_Surface::destroy() {
     Vk_Context& context = Vk_Context::GetInstance();
-    VkInstance& instance = context.GetVulkanInstance();
+    VkInstance& instance = context.getVulkanInstance();
     if (instance && m_handle) {
         vkDestroySurfaceKHR(instance, m_handle, nullptr);
         m_handle = VK_NULL_HANDLE;
     }
 }
 
-VkSurfaceKHR& Vk_Surface::GetHandle() {
+VkSurfaceKHR& Vk_Surface::getHandle() {
     return m_handle;
 }
 

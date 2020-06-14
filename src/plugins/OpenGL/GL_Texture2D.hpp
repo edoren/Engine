@@ -14,9 +14,9 @@ public:
 
     ~GL_Texture2D() override;
 
-    bool LoadFromImage(const Image& img) override;
+    bool loadFromImage(const Image& img) override;
 
-    void Use() override;
+    void use() override;
 
 private:
     uint32 m_texture;

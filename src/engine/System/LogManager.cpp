@@ -33,8 +33,8 @@ String DefaultLogCallback(LogPriority priority, const String& tag, const String&
     std::tm* tm = std::localtime(&t);
 
     // Format the log message
-    return "[{:02d}:{:02d}:{:02d}] [{}/{}] : {}"_format(tm->tm_hour, tm->tm_min, tm->tm_sec, tag.GetData(),
-                                                        priority_name, message.GetData());
+    return "[{:02d}:{:02d}:{:02d}] [{}/{}] : {}"_format(tm->tm_hour, tm->tm_min, tm->tm_sec, tag.getData(),
+                                                        priority_name, message.getData());
 }
 
 }  // namespace
@@ -64,36 +64,36 @@ LogManager::LogManager(const String& app_name, const String& log_file)
 
 LogManager::~LogManager() {}
 
-void LogManager::Initialize() {}
+void LogManager::initialize() {}
 
-void LogManager::Shutdown() {}
+void LogManager::shutdown() {}
 
-void LogManager::Verbose(const String& tag, const String& message) {
-    LogMessage(LogPriority::VERBOSE, tag, message);
+void LogManager::verbose(const String& tag, const String& message) {
+    logMessage(LogPriority::VERBOSE, tag, message);
 }
 
-void LogManager::Debug(const String& tag, const String& message) {
-    LogMessage(LogPriority::DEBUG, tag, message);
+void LogManager::debug(const String& tag, const String& message) {
+    logMessage(LogPriority::DEBUG, tag, message);
 }
 
-void LogManager::Info(const String& tag, const String& message) {
-    LogMessage(LogPriority::INFO, tag, message);
+void LogManager::info(const String& tag, const String& message) {
+    logMessage(LogPriority::INFO, tag, message);
 }
 
-void LogManager::Warning(const String& tag, const String& message) {
-    LogMessage(LogPriority::WARN, tag, message);
+void LogManager::warning(const String& tag, const String& message) {
+    logMessage(LogPriority::WARN, tag, message);
 }
 
-void LogManager::Error(const String& tag, const String& message) {
-    LogMessage(LogPriority::ERROR, tag, message);
+void LogManager::error(const String& tag, const String& message) {
+    logMessage(LogPriority::ERROR, tag, message);
 }
 
-void LogManager::Fatal(const String& tag, const String& message) {
-    LogMessage(LogPriority::FATAL, tag, message);
+void LogManager::fatal(const String& tag, const String& message) {
+    logMessage(LogPriority::FATAL, tag, message);
     std::exit(1);  // TMP
 }
 
-void LogManager::LogMessage(LogPriority priority, const String& tag, const String& message) {
+void LogManager::logMessage(LogPriority priority, const String& tag, const String& message) {
 #ifndef ENGINE_DEBUG
     if (priority == LogPriority::DEBUG) return;
 #endif
@@ -102,8 +102,8 @@ void LogManager::LogMessage(LogPriority priority, const String& tag, const Strin
 
     // Write the log to the file
     if (m_file_logging_enable) {
-        if (SDL_RWops* pfile = SDL_RWFromFile(m_log_file.GetData(), "ab")) {
-            const std::string& str = log_message.ToUtf8();
+        if (SDL_RWops* pfile = SDL_RWFromFile(m_log_file.getData(), "ab")) {
+            const std::string& str = log_message.toUtf8();
             SDL_RWwrite(pfile, str.data(), 1, str.size());
             SDL_RWwrite(pfile, sLineEnding, 1, strlen(sLineEnding));
             SDL_RWclose(pfile);
@@ -113,20 +113,20 @@ void LogManager::LogMessage(LogPriority priority, const String& tag, const Strin
     // Write the log to console
     if (m_console_logging_enable) {
 #if PLATFORM_IS(PLATFORM_ANDROID)
-        __android_log_write(sAndroidLogPriorities[static_cast<int>(priority)], m_app_name.GetData(),
-                            log_message.GetData());
+        __android_log_write(sAndroidLogPriorities[static_cast<int>(priority)], m_app_name.getData(),
+                            log_message.getData());
 #else
-        fputs(log_message.GetData(), stdout);
+        fputs(log_message.getData(), stdout);
         fputs("\n", stdout);
 #endif
     }
 }
 
-void LogManager::EnableFileLogging(bool enable) {
+void LogManager::enableFileLogging(bool enable) {
     m_file_logging_enable = enable;
 }
 
-void LogManager::EnableConsoleLogging(bool enable) {
+void LogManager::enableConsoleLogging(bool enable) {
     m_console_logging_enable = enable;
 }
 

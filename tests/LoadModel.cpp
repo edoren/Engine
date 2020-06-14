@@ -35,19 +35,19 @@ public:
     LoadModelApp(const String& scene_name) : m_scene_name(scene_name), m_window_size(800, 600) {}
 
 protected:
-    bool Initialize() override {
+    bool initialize() override {
         Main& engine = Main::GetInstance();
 
         m_input = InputManager::GetInstancePtr();
         m_shader_manager = ShaderManager::GetInstancePtr();
-        m_render = engine.GetActiveRendererPtr();
-        m_window = m_render->GetRenderWindowPtr().get();
+        m_render = engine.getActiveRendererPtr();
+        m_window = m_render->getRenderWindowPtr().get();
 
-        m_shader_manager->LoadFromFile("model");
+        m_shader_manager->loadFromFile("model");
 
         SceneManager* scene_manager = SceneManager::GetInstancePtr();
         if (scene_manager) {
-            scene_manager->ChangeActiveScene(m_scene_name);
+            scene_manager->changeActiveScene(m_scene_name);
         }
 
         // Mouse& mouse = m_input->GetMouse();
@@ -55,20 +55,20 @@ protected:
         // mouse.HideCursor();
 
         m_camera = Camera({10, 10, 10});
-        m_camera.LookAt({0, 0, 0});
+        m_camera.lookAt({0, 0, 0});
         m_camera_speed = 2.5F;
         m_mouse_sensivity = 0.1F;
 
-        m_window->SetActiveCamera(&m_camera);
+        m_window->setActiveCamera(&m_camera);
 
         return true;
     }
 
-    void Update() override {
-        m_window_size = m_window->GetSize();
+    void update() override {
+        m_window_size = m_window->getSize();
 
         // Camera movement
-        const math::vec3& camera_front = m_camera.GetFrontVector();
+        const math::vec3& camera_front = m_camera.getFrontVector();
         math::vec3 camera_forward(camera_front.x, 0, camera_front.z);
         camera_forward = math::Normalize(camera_forward);
 
@@ -78,54 +78,52 @@ protected:
         // m_camera.Rotate(mouse_delta * m_mouse_sensivity);
 
         // Camera key movements
-        float delta_time = GetDeltaTime().AsSeconds();
+        float delta_time = getDeltaTime().asSeconds();
         float speed = m_camera_speed * delta_time;
-        if (m_input->GetButton(SDLK_w).IsDown()) {
-            m_camera.Move(speed * camera_forward);
+        if (m_input->getButton(SDLK_w).isDown()) {
+            m_camera.move(speed * camera_forward);
         }
-        if (m_input->GetButton(SDLK_s).IsDown()) {
-            m_camera.Move(speed * -camera_forward);
+        if (m_input->getButton(SDLK_s).isDown()) {
+            m_camera.move(speed * -camera_forward);
         }
-        if (m_input->GetButton(SDLK_d).IsDown()) {
-            m_camera.Move(speed * m_camera.GetRightVector());
+        if (m_input->getButton(SDLK_d).isDown()) {
+            m_camera.move(speed * m_camera.getRightVector());
         }
-        if (m_input->GetButton(SDLK_a).IsDown()) {
-            m_camera.Move(speed * -m_camera.GetRightVector());
-        }
-
-        if (m_input->GetButton(SDLK_SPACE).IsDown()) {
-            m_camera.Move(speed * Camera::WORLD_UP);
-        }
-        if (m_input->GetButton(SDLK_LSHIFT).IsDown()) {
-            m_camera.Move(speed * -Camera::WORLD_UP);
+        if (m_input->getButton(SDLK_a).isDown()) {
+            m_camera.move(speed * -m_camera.getRightVector());
         }
 
-        if (m_input->GetButton(SDLK_f).WentDown() ||
-            m_input->GetButton(SDLK_F11).WentDown()) {
-            if (m_window->IsFullScreen()) {
-                m_window->SetFullScreen(false, false);
-                m_window->Resize(800, 600);
+        if (m_input->getButton(SDLK_SPACE).isDown()) {
+            m_camera.move(speed * Camera::WORLD_UP);
+        }
+        if (m_input->getButton(SDLK_LSHIFT).isDown()) {
+            m_camera.move(speed * -Camera::WORLD_UP);
+        }
+
+        if (m_input->getButton(SDLK_f).wentDown() || m_input->getButton(SDLK_F11).wentDown()) {
+            if (m_window->isFullScreen()) {
+                m_window->setFullScreen(false, false);
+                m_window->resize(800, 600);
             } else {
-                m_window->SetFullScreen(true, true);
+                m_window->setFullScreen(true, true);
             }
         }
 
-        if (m_input->GetButton(SDLK_t).WentDown()) {
-            Main::GetInstance().ExecuteAsync([] {
-                LogInfo("LoadModel", "Hello Thread {}"_format(std::this_thread::get_id()));
-            });
+        if (m_input->getButton(SDLK_t).wentDown()) {
+            Main::GetInstance().executeAsync(
+                [] { LogInfo("LoadModel", "Hello Thread {}"_format(std::this_thread::get_id())); });
         }
 
-        m_shader_manager->SetActiveShader("model");
+        m_shader_manager->setActiveShader("model");
     }
 
-    void Shutdown() override {}
+    void shutdown() override {}
 
-    String GetName() override {
+    String getName() override {
         return "LoadModel";
     }
 
-    math::Vector2<int32> GetWindowSize() override {
+    math::Vector2<int32> getWindowSize() override {
         return m_window_size;
     }
 
@@ -165,10 +163,10 @@ int main(int argc, char* argv[]) {
     LoadModelApp app(scene_name);
 
     Main engine(argc, argv);
-    engine.LoadPlugin(plugin);
-    engine.Initialize(&app);
-    engine.Run();
-    engine.Shutdown();
+    engine.loadPlugin(plugin);
+    engine.initialize(&app);
+    engine.run();
+    engine.shutdown();
 
     return 0;
 }

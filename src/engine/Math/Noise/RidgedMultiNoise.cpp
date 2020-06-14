@@ -23,41 +23,41 @@ RidgedMultiNoise::RidgedMultiNoise(int seed)
         m_offset(sDefaultOffset),
         m_gain(sDefaultGain),
         m_exponent(sDefaultExponent) {
-    CalcSpectralWeights();
+    calcSpectralWeights();
 }
 
-int RidgedMultiNoise::GetOctaveCount() const {
+int RidgedMultiNoise::getOctaveCount() const {
     return m_octave_count;
 }
 
-float RidgedMultiNoise::GetFrequency() const {
+float RidgedMultiNoise::getFrequency() const {
     return m_frequency;
 }
 
-float RidgedMultiNoise::GetLacunarity() const {
+float RidgedMultiNoise::getLacunarity() const {
     return m_lacunarity;
 }
 
-float RidgedMultiNoise::GetOffset() const {
+float RidgedMultiNoise::getOffset() const {
     return m_offset;
 }
 
-float RidgedMultiNoise::GetGain() const {
+float RidgedMultiNoise::getGain() const {
     return m_gain;
 }
 
-float RidgedMultiNoise::GetExponent() const {
+float RidgedMultiNoise::getExponent() const {
     return m_exponent;
 }
 
-float RidgedMultiNoise::GetValue(float x, float y, float z) const {
+float RidgedMultiNoise::getValue(float x, float y, float z) const {
     float value = 0.F;
     float signal = 0.F;
     float frequency = m_frequency;
     float weight = 1.F;
 
     for (int current_octave = 0; current_octave < m_octave_count; current_octave++) {
-        signal = CoherentNoise3D(x * frequency, y * frequency, z * frequency);
+        signal = coherentNoise3D(x * frequency, y * frequency, z * frequency);
 
         signal = m_offset - std::abs(signal);
         signal *= signal;
@@ -74,34 +74,34 @@ float RidgedMultiNoise::GetValue(float x, float y, float z) const {
     return std::min(1.F, std::max(-1.F, (value * 1.25F) - 1.0F));
 }
 
-void RidgedMultiNoise::SetOctaveCount(int octave_count) {
+void RidgedMultiNoise::setOctaveCount(int octave_count) {
     m_octave_count = octave_count;
 }
 
-void RidgedMultiNoise::SetFrequency(float frequency) {
+void RidgedMultiNoise::setFrequency(float frequency) {
     m_frequency = frequency;
-    CalcSpectralWeights();
+    calcSpectralWeights();
 }
 
-void RidgedMultiNoise::SetLacunarity(float lacunarity) {
+void RidgedMultiNoise::setLacunarity(float lacunarity) {
     m_lacunarity = lacunarity;
-    CalcSpectralWeights();
+    calcSpectralWeights();
 }
 
-void RidgedMultiNoise::SetOffset(float offset) {
+void RidgedMultiNoise::setOffset(float offset) {
     m_offset = offset;
 }
 
-void RidgedMultiNoise::SetGain(float gain) {
+void RidgedMultiNoise::setGain(float gain) {
     m_gain = gain;
 }
 
-void RidgedMultiNoise::SetExponent(float exponent) {
+void RidgedMultiNoise::setExponent(float exponent) {
     m_exponent = exponent;
-    CalcSpectralWeights();
+    calcSpectralWeights();
 }
 
-void RidgedMultiNoise::CalcSpectralWeights() {
+void RidgedMultiNoise::calcSpectralWeights() {
     m_spectral_weights.clear();
     m_spectral_weights.reserve(sMaxOctaveCount);
 

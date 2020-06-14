@@ -163,42 +163,42 @@ String String::FromWide(const wchar* begin, const wchar* end) {
 }
 
 String::operator const char*() const {
-    return ToUtf8().data();
+    return toUtf8().data();
 }
 
 String::operator std::basic_string<char8>() const {
-    return ToUtf8();
+    return toUtf8();
 }
 
 String::operator std::basic_string<char16>() const {
-    return ToUtf16();
+    return toUtf16();
 }
 
 String::operator std::basic_string<char32>() const {
-    return ToUtf32();
+    return toUtf32();
 }
 
 String::operator std::basic_string<wchar>() const {
-    return ToWide();
+    return toWide();
 }
 
-const std::basic_string<char8>& String::ToUtf8() const {
+const std::basic_string<char8>& String::toUtf8() const {
     return m_string;
 }
 
-std::basic_string<char16> String::ToUtf16() const {
+std::basic_string<char16> String::toUtf16() const {
     std::basic_string<char16> output;
     utf8::utf8to16(m_string.cbegin(), m_string.cend(), std::back_inserter(output));
     return output;
 }
 
-std::basic_string<char32> String::ToUtf32() const {
+std::basic_string<char32> String::toUtf32() const {
     std::basic_string<char32> output;
     utf8::utf8to32(m_string.cbegin(), m_string.cend(), std::back_inserter(output));
     return output;
 }
 
-std::basic_string<wchar> String::ToWide() const {
+std::basic_string<wchar> String::toWide() const {
     std::basic_string<wchar> output;
 #if PLATFORM_IS(PLATFORM_WINDOWS)
     utf8::utf8to16(m_string.cbegin(), m_string.cend(), std::back_inserter(output));
@@ -248,19 +248,19 @@ char8& String::operator[](std::size_t index) {
     return m_string[index];
 }
 
-void String::Clear() {
+void String::clear() {
     m_string.clear();
 }
 
-std::size_t String::GetSize() const {
+std::size_t String::getSize() const {
     return utf8::distance(m_string.begin(), m_string.end());
 }
 
-bool String::IsEmpty() const {
+bool String::isEmpty() const {
     return m_string.empty();
 }
 
-void String::Erase(std::size_t position, std::size_t count) {
+void String::erase(std::size_t position, std::size_t count) {
     // Iterate to the start codepoint
     auto start_it(m_string.begin());
     for (std::size_t i = 0; i < position; i++) {
@@ -282,7 +282,7 @@ void String::Erase(std::size_t position, std::size_t count) {
     m_string.erase(start_it, end_it);
 }
 
-void String::Insert(std::size_t position, const String& str) {
+void String::insert(std::size_t position, const String& str) {
     // Iterate to the start codepoint
     auto start_it(m_string.begin());
     for (std::size_t i = 0; i < position; i++) {
@@ -296,7 +296,7 @@ void String::Insert(std::size_t position, const String& str) {
     m_string.insert(start_it, str.m_string.cbegin(), str.m_string.cend());
 }
 
-std::size_t String::Find(const String& str, std::size_t start) const {
+std::size_t String::find(const String& str, std::size_t start) const {
     // Iterate to the start codepoint
     auto start_it(m_string.cbegin());
     for (std::size_t i = 0; i < start; i++) {
@@ -310,8 +310,8 @@ std::size_t String::Find(const String& str, std::size_t start) const {
     return (find_it == m_string.cend()) ? sInvalidPos : utf8::distance(m_string.cbegin(), find_it);
 }
 
-std::size_t String::FindFirstOf(const String& str, std::size_t pos) const {
-    size_t str_size = GetSize();
+std::size_t String::findFirstOf(const String& str, std::size_t pos) const {
+    size_t str_size = getSize();
 
     if (pos >= str_size) {
         return sInvalidPos;
@@ -341,7 +341,7 @@ std::size_t String::FindFirstOf(const String& str, std::size_t pos) const {
     }
 }
 
-std::size_t String::FindLastOf(const String& str, std::size_t pos) const {
+std::size_t String::findLastOf(const String& str, std::size_t pos) const {
     // Iterate to the start codepoint
     auto start_it(m_string.cbegin());
     if (pos == sInvalidPos) {
@@ -372,7 +372,7 @@ std::size_t String::FindLastOf(const String& str, std::size_t pos) const {
     return sInvalidPos;
 }
 
-void String::Replace(std::size_t position, std::size_t length, const String& replaceWith) {
+void String::replace(std::size_t position, std::size_t length, const String& replaceWith) {
     // Iterate to the start codepoint
     auto start_it(m_string.begin());
     for (std::size_t i = 0; i < position; i++) {
@@ -394,7 +394,7 @@ void String::Replace(std::size_t position, std::size_t length, const String& rep
     m_string.replace(start_it, end_it, replaceWith.m_string);
 }
 
-void String::Replace(uint32 searchFor, uint32 replaceWith) {
+void String::replace(uint32 searchFor, uint32 replaceWith) {
     if (searchFor <= 0x7F && replaceWith <= 0x7F) {
         for (size_t i = 0; i < m_string.size(); i++) {
             if (m_string[i] == static_cast<char8>(searchFor)) {
@@ -406,11 +406,11 @@ void String::Replace(uint32 searchFor, uint32 replaceWith) {
         String replaceWithStr;
         utf8::append(searchFor, std::back_inserter(searchForStr.m_string));
         utf8::append(replaceWith, std::back_inserter(replaceWithStr.m_string));
-        return Replace(searchForStr, replaceWithStr);
+        return replace(searchForStr, replaceWithStr);
     }
 }
 
-void String::Replace(const String& searchFor, const String& replaceWith) {
+void String::replace(const String& searchFor, const String& replaceWith) {
     std::size_t step = replaceWith.m_string.size();
     std::size_t len = searchFor.m_string.size();
     // Start the iterator at the beginning of the sequence
@@ -435,7 +435,7 @@ void String::Replace(const String& searchFor, const String& replaceWith) {
     }
 }
 
-String String::SubString(std::size_t position, std::size_t length) const {
+String String::subString(std::size_t position, std::size_t length) const {
     // Iterate to the start codepoint
     auto start_it(m_string.begin());
     for (std::size_t i = 0; i < position; i++) {
@@ -457,25 +457,25 @@ String String::SubString(std::size_t position, std::size_t length) const {
     return String::FromUtf8(&(*start_it), &(*end_it));
 }
 
-const char8* String::GetData() const {
+const char8* String::getData() const {
     return m_string.data();
 }
 
 /////////////////////////// TODO
 
-String::iterator String::Begin() {
+String::iterator String::begin() {
     return m_string.begin();
 }
 
-String::const_iterator String::Begin() const {
+String::const_iterator String::begin() const {
     return m_string.begin();
 }
 
-String::iterator String::End() {
+String::iterator String::end() {
     return m_string.end();
 }
 
-String::const_iterator String::End() const {
+String::const_iterator String::end() const {
     return m_string.end();
 }
 
@@ -579,7 +579,7 @@ String operator+(char8 left, const String& right) {
 }
 
 std::ostream& operator<<(std::ostream& os, const String& str) {
-    return os << str.ToUtf8();
+    return os << str.toUtf8();
 }
 
 }  // namespace engine

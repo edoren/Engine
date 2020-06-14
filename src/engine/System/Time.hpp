@@ -36,17 +36,17 @@ public:
     ////////////////////////////////////////////////////////////
     /// Class methods
     ////////////////////////////////////////////////////////////
-    int64 AsNanoseconds() const;
+    int64 asNanoseconds() const;
 
-    int64 AsMicroseconds() const;
+    int64 asMicroseconds() const;
 
-    int64 AsMilliseconds() const;
+    int64 asMilliseconds() const;
 
-    float AsSeconds() const;
+    float asSeconds() const;
 
-    float AsMinutes() const;
+    float asMinutes() const;
 
-    float AsHours() const;
+    float asHours() const;
 
     ////////////////////////////////////////////////////////////
     /// Operator overload
@@ -79,12 +79,12 @@ public:
 
     template <typename T>
     friend Time operator*(Time left, T right) {
-        return Time::FromNanoseconds(static_cast<int64>(left.AsNanoseconds() * right));
+        return Time::FromNanoseconds(static_cast<int64>(left.asNanoseconds() * right));
     }
 
     template <typename T>
     friend Time operator*(T left, Time right) {
-        return Time::FromNanoseconds(static_cast<int64>(left * right.AsNanoseconds()));
+        return Time::FromNanoseconds(static_cast<int64>(left * right.asNanoseconds()));
     }
 
     template <typename T>
@@ -95,7 +95,7 @@ public:
 
     template <typename T>
     friend Time operator/(Time left, T right) {
-        return Time::FromNanoseconds(static_cast<int64>(left.AsNanoseconds() / right));
+        return Time::FromNanoseconds(static_cast<int64>(left.asNanoseconds() / right));
     }
 
     template <typename T>

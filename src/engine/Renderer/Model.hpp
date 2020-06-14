@@ -22,16 +22,16 @@ public:
     Model();
     virtual ~Model();
 
-    void SetTransform(const Transform& transform);
+    void setTransform(const Transform& transform);
 
-    virtual void Draw(RenderWindow& target, const RenderStates& states) const;
+    virtual void draw(RenderWindow& target, const RenderStates& states) const;
 
 private:
-    void LoadModel(const String& path);
+    void loadModel(const String& path);
 
-    void ProcessNode(aiNode* node, const aiScene* scene);
+    void processNode(aiNode* node, const aiScene* scene);
 
-    std::unique_ptr<Mesh> ProcessMesh(aiMesh* mesh, const aiScene* scene);
+    std::unique_ptr<Mesh> processMesh(aiMesh* mesh, const aiScene* scene);
 
     std::vector<std::unique_ptr<Mesh>> m_meshes;
     String m_relative_directory;

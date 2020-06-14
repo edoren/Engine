@@ -6,28 +6,28 @@ class SignalConnection::Reference {
 public:
     Reference(uint64_t count) : m_count(count), is_connected(true) {}
 
-    uint64_t Increase() {
+    uint64_t increase() {
         std::lock_guard<std::mutex> lock(m_ref_mutex);
         return ++m_count;
     }
 
-    uint64_t Decrease() {
+    uint64_t decrease() {
         std::lock_guard<std::mutex> lock(m_ref_mutex);
         return --m_count;
     }
 
-    uint64_t GetCount() const {
+    uint64_t getCount() const {
         return m_count;
     }
 
-    void Disconnect() {
-        if (IsConnected()) {
+    void disconnect() {
+        if (isConnected()) {
             std::lock_guard<std::mutex> lock(m_ref_mutex);
             is_connected = false;
         }
     }
 
-    bool IsConnected() const {
+    bool isConnected() const {
         return is_connected;
     }
 
@@ -43,7 +43,7 @@ SignalConnection::SignalConnection(uint64_t id, DisconnectCallbackType disconnec
       : m_id(id),
         m_reference(new Reference(0)),
         m_disconnect_callback(disconnect_callback) {
-    m_reference->Increase();
+    m_reference->increase();
 }
 
 SignalConnection::SignalConnection() : m_id(0), m_reference(nullptr), m_disconnect_callback(nullptr) {}
@@ -53,7 +53,7 @@ SignalConnection::SignalConnection(const SignalConnection& other)
         m_reference(other.m_reference),
         m_disconnect_callback(other.m_disconnect_callback) {
     if (m_reference) {
-        m_reference->Increase();
+        m_reference->increase();
     }
 }
 
@@ -67,9 +67,9 @@ SignalConnection::SignalConnection(SignalConnection&& other)
 }
 
 SignalConnection::~SignalConnection() {
-    if (m_reference && m_reference->GetCount() != 0) {
-        if (m_reference->Decrease() == 0) {
-            DisconnectWithCallback();
+    if (m_reference && m_reference->getCount() != 0) {
+        if (m_reference->decrease() == 0) {
+            disconnectWithCallback();
             delete m_reference;
             m_reference = nullptr;
         }
@@ -86,34 +86,34 @@ SignalConnection& SignalConnection::operator=(SignalConnection&& other) {
     return *this;
 }
 
-SignalConnection::IdType SignalConnection::GetId() const {
+SignalConnection::IdType SignalConnection::getId() const {
     return m_id;
 }
 
-void SignalConnection::Disconnect() {
-    DisconnectWithCallback();
+void SignalConnection::disconnect() {
+    disconnectWithCallback();
 }
 
-bool SignalConnection::IsConnected() {
+bool SignalConnection::isConnected() {
     if (m_reference) {
-        return m_reference->IsConnected();
+        return m_reference->isConnected();
     }
     return false;
 }
 
-void SignalConnection::DisconnectWithCallback() {
-    if (IsConnected()) {
+void SignalConnection::disconnectWithCallback() {
+    if (isConnected()) {
         if (m_disconnect_callback) {
             m_disconnect_callback(*this);
             m_disconnect_callback = nullptr;
         }
-        DisconnectWithoutCallback();
+        disconnectWithoutCallback();
     }
 }
 
-void SignalConnection::DisconnectWithoutCallback() {
+void SignalConnection::disconnectWithoutCallback() {
     if (m_reference) {
-        m_reference->Disconnect();
+        m_reference->disconnect();
     }
 }
 

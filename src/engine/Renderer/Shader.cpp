@@ -15,7 +15,7 @@ Shader::Shader() {}
 
 Shader::~Shader() {}
 
-UniformBufferObject::DataType Shader::GetUBODataTypeFromString(const String& str) {
+UniformBufferObject::DataType Shader::getUboDataTypeFromString(const String& str) {
     if (str == "mat4x4") {
         return UniformBufferObject::DataType::MATRIX4X4;
     }

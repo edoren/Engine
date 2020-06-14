@@ -16,20 +16,20 @@ class OPENGL_PLUGIN_API GL_Plugin : public Plugin {
 public:
     GL_Plugin();
 
-    /// @copydoc Plugin::GetName
-    const String& GetName() const;
+    /// @copydoc Plugin::getName
+    const String& getName() const;
 
-    /// @copydoc Plugin::Install
-    void Install();
+    /// @copydoc Plugin::install
+    void install();
 
-    /// @copydoc Plugin::Initialize
-    void Initialize();
+    /// @copydoc Plugin::initialize
+    void initialize();
 
-    /// @copydoc Plugin::Shutdown
-    void Shutdown();
+    /// @copydoc Plugin::shutdown
+    void shutdown();
 
-    /// @copydoc Plugin::Uninstall
-    void Uninstall();
+    /// @copydoc Plugin::uninstall
+    void uninstall();
 
 protected:
     GL_Renderer* m_renderer;

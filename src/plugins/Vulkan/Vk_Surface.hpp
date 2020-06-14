@@ -12,10 +12,10 @@ public:
     Vk_Surface();
     ~Vk_Surface();
 
-    bool Create(SDL_Window* window);
-    void Destroy();
+    bool create(SDL_Window* window);
+    void destroy();
 
-    VkSurfaceKHR& GetHandle();
+    VkSurfaceKHR& getHandle();
 
 private:
     VkSurfaceKHR m_handle;

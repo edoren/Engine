@@ -5,7 +5,7 @@
 namespace engine {
 
 void to_json(json& j, const String& str) {
-    j = str.ToUtf8();
+    j = str.toUtf8();
 }
 
 void from_json(const json& j, String& str) {

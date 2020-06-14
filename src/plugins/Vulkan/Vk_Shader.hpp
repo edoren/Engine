@@ -19,30 +19,30 @@ public:
 
     Vk_Shader& operator=(Vk_Shader&& other);
 
-    bool LoadFromMemory(const byte* source, std::size_t source_size, ShaderType type) override;
+    bool loadFromMemory(const byte* source, std::size_t source_size, ShaderType type) override;
 
-    UniformBufferObject& GetUBO();
-    UniformBufferObject& GetUBODynamic();
+    UniformBufferObject& getUbo();
+    UniformBufferObject& getUboDynamic();
 
-    const Vk_VertexLayout& GetVertexLayout() const;
+    const Vk_VertexLayout& getVertexLayout() const;
 
-    VkShaderModule& GetModule(ShaderType type);
+    VkShaderModule& getModule(ShaderType type);
 
-    VkDescriptorSet& GetUBODescriptorSet();
+    VkDescriptorSet& getUboDescriptorSet();
 
-    VkDescriptorSetLayout& GetUBODescriptorSetLayout();
+    VkDescriptorSetLayout& getUboDescriptorSetLayout();
 
-    bool UploadUniformBuffers();
+    bool uploadUniformBuffers();
 
 protected:
-    void SetDescriptor(json&& descriptor) override;
+    void setDescriptor(json&& descriptor) override;
 
 private:
-    bool CreateUBODescriptorSetLayout();
-    bool AllocateUBODescriptorSet();
-    bool UpdateUBODescriptorSet();
+    bool createUboDescriptorSetLayout();
+    bool allocateUboDescriptorSet();
+    bool updateUboDescriptorSet();
 
-    bool CreateUniformBuffers();
+    bool createUniformBuffers();
 
     json m_descriptor;
 

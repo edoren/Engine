@@ -12,11 +12,11 @@ std::unique_ptr<GL_Plugin> sPlugin;
 
 extern "C" void OPENGL_PLUGIN_API StartPlugin(void) {
     sPlugin = std::make_unique<GL_Plugin>();
-    Main::GetInstance().InstallPlugin(sPlugin.get());
+    Main::GetInstance().installPlugin(sPlugin.get());
 }
 
 extern "C" void OPENGL_PLUGIN_API StopPlugin(void) {
-    Main::GetInstance().UninstallPlugin(sPlugin.get());
+    Main::GetInstance().uninstallPlugin(sPlugin.get());
     sPlugin.reset();
 }
 

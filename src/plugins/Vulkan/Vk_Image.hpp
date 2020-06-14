@@ -16,17 +16,17 @@ public:
 
     ~Vk_Image();
 
-    bool CreateImage(const math::uvec2& size, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage);
+    bool createImage(const math::uvec2& size, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage);
 
-    bool CreateImageView(VkFormat format, VkImageAspectFlags aspectMask);
+    bool createImageView(VkFormat format, VkImageAspectFlags aspectMask);
 
-    bool AllocateMemory(const VkMemoryPropertyFlags& memory_properties);
+    bool allocateMemory(const VkMemoryPropertyFlags& memory_properties);
 
-    void Destroy();
+    void destroy();
 
-    VkImage& GetHandle();
+    VkImage& getHandle();
 
-    VkImageView& GetView();
+    VkImageView& getView();
 
 private:
     VkImage m_handle;

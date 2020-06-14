@@ -31,51 +31,51 @@ TextureManager::TextureManager() : m_active_texture(nullptr) {}
 
 TextureManager::~TextureManager() {}
 
-void TextureManager::Initialize() {
+void TextureManager::initialize() {
     math::uvec2 defaultTextureSize(300, 300);
 
     std::vector<Color32> defaultTextureData(defaultTextureSize.x * defaultTextureSize.y, Color32::sGray);
 
     Image defaultImage;
-    defaultImage.LoadFromMemory(defaultTextureData.data(), defaultTextureSize.x, defaultTextureSize.y);
+    defaultImage.loadFromMemory(defaultTextureData.data(), defaultTextureSize.x, defaultTextureSize.y);
 
-    LoadFromImage(sDefaultTextureId, defaultImage);
+    loadFromImage(sDefaultTextureId, defaultImage);
 }
 
-void TextureManager::Shutdown() {
+void TextureManager::shutdown() {
     m_textures.clear();
 }
 
-Texture2D* TextureManager::LoadFromFile(const String& basename) {
+Texture2D* TextureManager::loadFromFile(const String& basename) {
     FileSystem& fs = FileSystem::GetInstance();
 
-    String filename = fs.Join(sRootTextureFolder, basename);
+    String filename = fs.join(sRootTextureFolder, basename);
 
-    bool filename_exist = fs.FileExists(filename);
+    bool filename_exist = fs.fileExists(filename);
     if (filename_exist) {
         Image image;
-        if (!image.LoadFromFile(filename)) {
+        if (!image.loadFromFile(filename)) {
             LogDebug(sTag, "Could create Image from file: " + basename);
             return nullptr;
         }
-        return LoadFromImage(basename, image);
+        return loadFromImage(basename, image);
     }
     LogError(sTag,
              "Texture2D not loaded. File '{}' "
-             "not found."_format(filename.ToUtf8()));
+             "not found."_format(filename.toUtf8()));
     return nullptr;
 }
 
-Texture2D* TextureManager::LoadFromImage(const String& name, const Image& image) {
-    Texture2D* texture = GetTexture2D(name);
+Texture2D* TextureManager::loadFromImage(const String& name, const Image& image) {
+    Texture2D* texture = getTexture2D(name);
     if (texture != nullptr) {
         return texture;
     }
 
-    std::unique_ptr<Texture2D> new_texture = CreateTexture2D();
+    std::unique_ptr<Texture2D> new_texture = createTexture2D();
     if (new_texture != nullptr) {
         LogDebug(sTag, "Loading Texture: " + name);
-        if (!new_texture->LoadFromImage(image)) {
+        if (!new_texture->loadFromImage(image)) {
             LogDebug(sTag, "Could not load Texture: " + name);
             new_texture.reset();
         }
@@ -96,22 +96,22 @@ Texture2D* TextureManager::LoadFromImage(const String& name, const Image& image)
     return texture;
 }
 
-Texture2D* TextureManager::GetTexture2D(const String& name) {
+Texture2D* TextureManager::getTexture2D(const String& name) {
     auto it = m_textures.find(name);
     return (it != m_textures.end()) ? it->second.get() : nullptr;
 }
 
-void TextureManager::SetActiveTexture2D(const String& name) {
-    Texture2D* found_texture = GetTexture2D(name);
+void TextureManager::setActiveTexture2D(const String& name) {
+    Texture2D* found_texture = getTexture2D(name);
     if (found_texture != nullptr) {
         m_active_texture = found_texture;
-        UseTexture2D(m_active_texture);
+        useTexture2D(m_active_texture);
     } else {
-        LogError(sTag, "Could not find a Texture2D named: {}"_format(name.ToUtf8()));
+        LogError(sTag, "Could not find a Texture2D named: {}"_format(name.toUtf8()));
     }
 }
 
-Texture2D* TextureManager::GetActiveTexture2D() {
+Texture2D* TextureManager::getActiveTexture2D() {
     return m_active_texture;
 }
 

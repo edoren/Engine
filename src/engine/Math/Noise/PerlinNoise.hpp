@@ -21,23 +21,23 @@ public:
 
     PerlinNoise(int seed);
 
-    int GetOctaveCount() const;
+    int getOctaveCount() const;
 
-    float GetFrequency() const;
+    float getFrequency() const;
 
-    float GetLacunarity() const;
+    float getLacunarity() const;
 
-    float GetPersistence() const;
+    float getPersistence() const;
 
-    float GetValue(float x, float y, float z) const;
+    float getValue(float x, float y, float z) const;
 
-    void SetOctaveCount(int octave_count);
+    void setOctaveCount(int octave_count);
 
-    void SetFrequency(float frequency);
+    void setFrequency(float frequency);
 
-    void SetLacunarity(float lacunarity);
+    void setLacunarity(float lacunarity);
 
-    void SetPersistence(float persistence);
+    void setPersistence(float persistence);
 
 private:
     int m_octave_count;
