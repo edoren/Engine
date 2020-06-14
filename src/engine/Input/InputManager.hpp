@@ -76,14 +76,14 @@ public:
     ////////////////////////////////////////////////////////////
     static InputManager* GetInstancePtr();
 
-    Signal<const math::ivec2&> OnWindowResized;
-    Signal<> OnWindowMinimized;
-    Signal<> OnWindowRestored;
+    Signal<const math::ivec2&> on_window_resized;
+    Signal<> on_window_minimized;
+    Signal<> on_window_restored;
 
-    Signal<> OnAppWillEnterBackground;
-    Signal<> OnAppDidEnterBackground;
-    Signal<> OnAppWillEnterForeground;
-    Signal<> OnAppDidEnterForeground;
+    Signal<> on_app_will_enter_background;
+    Signal<> on_app_did_enter_background;
+    Signal<> on_app_will_enter_foreground;
+    Signal<> on_app_did_enter_foreground;
 
 private:
     bool m_exit_requested;

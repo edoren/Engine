@@ -22,7 +22,7 @@ public:
 private:
     void setupMesh();
 
-    unsigned int m_VAO, m_VBO, m_EBO;
+    unsigned int m_vao, m_vbo, m_ebo;
 };
 
 }  // namespace engine

@@ -86,34 +86,34 @@ void InputManager::advanceFrame() {
             case SDL_APP_LOWMEMORY:
                 break;
             case SDL_APP_WILLENTERBACKGROUND: {
-                OnAppWillEnterBackground.emit();
+                on_app_will_enter_background.emit();
                 break;
             }
             case SDL_APP_DIDENTERBACKGROUND: {
-                OnAppDidEnterBackground.emit();
+                on_app_did_enter_background.emit();
                 break;
             }
             case SDL_APP_WILLENTERFOREGROUND: {
-                OnAppWillEnterForeground.emit();
+                on_app_will_enter_foreground.emit();
                 break;
             }
             case SDL_APP_DIDENTERFOREGROUND: {
-                OnAppDidEnterForeground.emit();
+                on_app_did_enter_foreground.emit();
                 break;
             }
             case SDL_WINDOWEVENT: {
                 switch (event.window.event) {
                     case SDL_WINDOWEVENT_RESIZED: {
                         math::ivec2 window_size(event.window.data1, event.window.data2);
-                        OnWindowResized.emit(window_size);
+                        on_window_resized.emit(window_size);
                         break;
                     }
                     case SDL_WINDOWEVENT_MINIMIZED: {
-                        OnWindowMinimized.emit();
+                        on_window_minimized.emit();
                         break;
                     }
                     case SDL_WINDOWEVENT_RESTORED: {
-                        OnWindowRestored.emit();
+                        on_window_restored.emit();
                         break;
                     }
                 }

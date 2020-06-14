@@ -34,8 +34,8 @@ GL_Shader::GL_Shader() : m_program(glCreateProgram()) {
     for (size_t i = 0; i < m_shaders.size(); i++) {
         m_shaders[i] = 0;
     }
-    GL_CALL(glGenBuffers(1, &m_uniform_buffers._static));
-    GL_CALL(glGenBuffers(1, &m_uniform_buffers._dynamic));
+    GL_CALL(glGenBuffers(1, &m_uniform_buffers.m_static));
+    GL_CALL(glGenBuffers(1, &m_uniform_buffers.m_dynamic));
 }
 
 GL_Shader::GL_Shader(GL_Shader&& other)
@@ -52,11 +52,11 @@ GL_Shader::~GL_Shader() {
     if (!isLinked()) {
         cleanUpShaders();
     }
-    if (m_uniform_buffers._static) {
-        GL_CALL(glDeleteBuffers(1, &m_uniform_buffers._static));
+    if (m_uniform_buffers.m_static) {
+        GL_CALL(glDeleteBuffers(1, &m_uniform_buffers.m_static));
     }
-    if (m_uniform_buffers._dynamic) {
-        GL_CALL(glDeleteBuffers(1, &m_uniform_buffers._dynamic));
+    if (m_uniform_buffers.m_dynamic) {
+        GL_CALL(glDeleteBuffers(1, &m_uniform_buffers.m_dynamic));
     }
     GL_CALL(glDeleteProgram(m_program));
 }
@@ -161,10 +161,10 @@ void GL_Shader::uploadUniformBuffers() {
 
     // Load the static UBO
     GL_CALL(glUniformBlockBinding(m_program, block_index, binding_point));
-    GL_CALL(glBindBuffer(GL_UNIFORM_BUFFER, m_uniform_buffers._static));
+    GL_CALL(glBindBuffer(GL_UNIFORM_BUFFER, m_uniform_buffers.m_static));
 
     GL_CALL(glBufferData(GL_UNIFORM_BUFFER, m_ubo.getDataSize(), m_ubo.getData(), GL_DYNAMIC_DRAW));
-    GL_CALL(glBindBufferBase(GL_UNIFORM_BUFFER, binding_point, m_uniform_buffers._static));
+    GL_CALL(glBindBufferBase(GL_UNIFORM_BUFFER, binding_point, m_uniform_buffers.m_static));
 
     // TODO: Automatically detect this using the descriptor
     binding_point = 1;
@@ -176,10 +176,10 @@ void GL_Shader::uploadUniformBuffers() {
 
     // Load the dynamic UBO
     GL_CALL(glUniformBlockBinding(m_program, block_index, binding_point));
-    GL_CALL(glBindBuffer(GL_UNIFORM_BUFFER, m_uniform_buffers._dynamic));
+    GL_CALL(glBindBuffer(GL_UNIFORM_BUFFER, m_uniform_buffers.m_dynamic));
 
     GL_CALL(glBufferData(GL_UNIFORM_BUFFER, m_ubo_dynamic.getDataSize(), m_ubo_dynamic.getData(), GL_DYNAMIC_DRAW));
-    GL_CALL(glBindBufferBase(GL_UNIFORM_BUFFER, binding_point, m_uniform_buffers._dynamic));
+    GL_CALL(glBindBufferBase(GL_UNIFORM_BUFFER, binding_point, m_uniform_buffers.m_dynamic));
 }
 
 void GL_Shader::setUniform(const String& name, float val) {
