@@ -37,7 +37,7 @@ Vk_Shader::~Vk_Shader() {
         m_ubo_descriptor_set_layout = VK_NULL_HANDLE;
     }
 
-    m_uniform_buffers._static.destroy();
+    m_uniform_buffers.m_static.destroy();
 }
 
 Vk_Shader& Vk_Shader::operator=(Vk_Shader&& other) {
@@ -227,18 +227,18 @@ bool Vk_Shader::updateUboDescriptorSet() {
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.getVulkanDevice();
 
-    LogDebug(sTag, "Buffer UBO Dynamic Size: {}"_format(m_uniform_buffers._dynamic.getSize()));
+    LogDebug(sTag, "Buffer UBO Dynamic Size: {}"_format(m_uniform_buffers.m_dynamic.getSize()));
 
     std::array<VkDescriptorBufferInfo, 2> bufferInfos = {{
         {
-            m_uniform_buffers._static.getHandle(),  // buffer
+            m_uniform_buffers.m_static.getHandle(),  // buffer
             0,                                      // offset
             VK_WHOLE_SIZE                           // range
         },
         {
-            m_uniform_buffers._dynamic.getHandle(),  // buffer
-            0,                                       // offset
-            VK_WHOLE_SIZE                            // range
+            m_uniform_buffers.m_dynamic.getHandle(),  // buffer
+            0,                                      // offset
+            VK_WHOLE_SIZE                           // range
         },
     }};
 
@@ -291,7 +291,7 @@ bool Vk_Shader::createUniformBuffers() {
 
     // Static UBO memory buffer
     result &=
-        m_uniform_buffers._static.create(m_ubo.getDataSize(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+        m_uniform_buffers.m_static.create(m_ubo.getDataSize(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
                                          (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT));
 
     // Dynamic UBO memory buffer
@@ -300,15 +300,15 @@ bool Vk_Shader::createUniformBuffers() {
 
     m_ubo_dynamic.setBufferSize(50, minUboAlignment);  // TODO: CHANGE THIS
 
-    result &= m_uniform_buffers._dynamic.create(m_ubo_dynamic.getDataSize(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                                                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+    result &= m_uniform_buffers.m_dynamic.create(m_ubo_dynamic.getDataSize(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                                               VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
 
     return result;
 }
 
 bool Vk_Shader::uploadUniformBuffers() {
-    if (m_uniform_buffers._static.getHandle() == VK_NULL_HANDLE ||
-        m_uniform_buffers._dynamic.getHandle() == VK_NULL_HANDLE) {
+    if (m_uniform_buffers.m_static.getHandle() == VK_NULL_HANDLE ||
+        m_uniform_buffers.m_dynamic.getHandle() == VK_NULL_HANDLE) {
         return false;
     }
     Vk_Context& context = Vk_Context::GetInstance();
@@ -316,26 +316,26 @@ bool Vk_Shader::uploadUniformBuffers() {
 
     {
         void* data;
-        vkMapMemory(device, m_uniform_buffers._static.getMemory(), 0, m_ubo.getDataSize(), 0, &data);
+        vkMapMemory(device, m_uniform_buffers.m_static.getMemory(), 0, m_ubo.getDataSize(), 0, &data);
         std::memcpy(data, m_ubo.getData(), m_ubo.getDataSize());
-        vkUnmapMemory(device, m_uniform_buffers._static.getMemory());
+        vkUnmapMemory(device, m_uniform_buffers.m_static.getMemory());
     }
 
     {
         void* data;
-        vkMapMemory(device, m_uniform_buffers._dynamic.getMemory(), 0, m_ubo_dynamic.getDataSize(), 0, &data);
+        vkMapMemory(device, m_uniform_buffers.m_dynamic.getMemory(), 0, m_ubo_dynamic.getDataSize(), 0, &data);
         std::memcpy(data, m_ubo_dynamic.getData(), m_ubo_dynamic.getDataSize());
 
         VkMappedMemoryRange memoryRange = {
-            VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,   // sType;
-            nullptr,                                 // pNext;
-            m_uniform_buffers._dynamic.getMemory(),  // memory;
-            0,                                       // offset;
-            m_ubo_dynamic.getDataSize()              // size;
+            VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,  // sType;
+            nullptr,                                // pNext;
+            m_uniform_buffers.m_dynamic.getMemory(),  // memory;
+            0,                                      // offset;
+            m_ubo_dynamic.getDataSize()             // size;
         };
         vkFlushMappedMemoryRanges(device, 1, &memoryRange);
 
-        vkUnmapMemory(device, m_uniform_buffers._dynamic.getMemory());
+        vkUnmapMemory(device, m_uniform_buffers.m_dynamic.getMemory());
     }
 
     return true;

@@ -262,15 +262,12 @@ bool FileSystem::isAbsolutePath(const String& path) const {
         return false;
     }
 #if PLATFORM_IS(PLATFORM_WINDOWS)
-    if (internal.size() > 2 && internal[1] == ':' && internal[2] == '\\') {
-        return true;
-    }
+    return internal.size() > 2 && internal[1] == ':' && internal[2] == '\\';
 #elif PLATFORM_IS(PLATFORM_LINUX | PLATFORM_MACOS | PLATFORM_IOS | PLATFORM_ANDROID)
-    if (internal[0] == '/') {
-        return true;
-    }
-#endif
+    return internal[0] == '/';
+#else
     return false;
+#endif
 }
 
 String FileSystem::join(const String& left, const String& right) const {

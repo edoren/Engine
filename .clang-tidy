@@ -6,10 +6,8 @@ FormatStyle: file
 CheckOptions:
     # - key: readability-identifier-naming.ClassCase
     #   value: "CamelCase"
-    # - key: readability-identifier-naming.ClassMemberCase
-    #   value: "lower_case"
-    # - key: readability-identifier-naming.ClassMemberPrefix
-    #   value: "m_"
+    - key: readability-identifier-naming.MemberCase
+      value: "lower_case"
     - key: readability-identifier-naming.MethodCase
       value: "camelBack"
     - key: readability-identifier-naming.ClassMethodCase

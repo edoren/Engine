@@ -22,27 +22,27 @@ RenderWindow::RenderWindow()
         m_active_camera(nullptr) {
     auto& input = InputManager::GetInstance();
 
-    on_window_resize_connection = input.OnWindowResized.connect(*this, &RenderWindow::onWindowResizedPriv);
+    on_window_resize_connection = input.on_window_resized.connect(*this, &RenderWindow::onWindowResizedPriv);
 
     on_app_will_enter_background_connection =
-        input.OnAppWillEnterBackground.connect(*this, &RenderWindow::onAppWillEnterBackgroundPriv);
+        input.on_app_will_enter_background.connect(*this, &RenderWindow::onAppWillEnterBackgroundPriv);
     on_app_did_enter_background_connection =
-        input.OnAppDidEnterBackground.connect(*this, &RenderWindow::onAppDidEnterBackgroundPriv);
+        input.on_app_did_enter_background.connect(*this, &RenderWindow::onAppDidEnterBackgroundPriv);
     on_app_will_enter_foreground_connection =
-        input.OnAppWillEnterForeground.connect(*this, &RenderWindow::onAppWillEnterForegroundPriv);
+        input.on_app_will_enter_foreground.connect(*this, &RenderWindow::onAppWillEnterForegroundPriv);
     on_app_did_enter_foreground_connection =
-        input.OnAppDidEnterForeground.connect(*this, &RenderWindow::onAppDidEnterForegroundPriv);
+        input.on_app_did_enter_foreground.connect(*this, &RenderWindow::onAppDidEnterForegroundPriv);
 }
 
 RenderWindow::~RenderWindow() {
     auto& input = InputManager::GetInstance();
 
-    input.OnWindowResized.disconnect(on_window_resize_connection);
+    input.on_window_resized.disconnect(on_window_resize_connection);
 
-    input.OnAppWillEnterBackground.disconnect(on_app_will_enter_background_connection);
-    input.OnAppDidEnterBackground.disconnect(on_app_did_enter_background_connection);
-    input.OnAppWillEnterForeground.disconnect(on_app_will_enter_foreground_connection);
-    input.OnAppDidEnterForeground.disconnect(on_app_did_enter_foreground_connection);
+    input.on_app_will_enter_background.disconnect(on_app_will_enter_background_connection);
+    input.on_app_did_enter_background.disconnect(on_app_did_enter_background_connection);
+    input.on_app_will_enter_foreground.disconnect(on_app_will_enter_foreground_connection);
+    input.on_app_did_enter_foreground.disconnect(on_app_did_enter_foreground_connection);
 }
 
 bool RenderWindow::create(const String& name, const math::ivec2& size) {

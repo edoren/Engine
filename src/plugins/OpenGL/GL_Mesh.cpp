@@ -14,24 +14,24 @@
 
 namespace engine {
 
-GL_Mesh::GL_Mesh() : m_VAO(0), m_VBO(0), m_EBO(0) {}
+GL_Mesh::GL_Mesh() : m_vao(0), m_vbo(0), m_ebo(0) {}
 
 GL_Mesh::~GL_Mesh() {
     GL_CALL(glBindVertexArray(0));
 
-    if (m_EBO) {
-        GL_CALL(glDeleteBuffers(1, &m_EBO));
-        m_EBO = 0;
+    if (m_ebo) {
+        GL_CALL(glDeleteBuffers(1, &m_ebo));
+        m_ebo = 0;
     }
 
-    if (m_VBO) {
-        GL_CALL(glDeleteBuffers(1, &m_VBO));
-        m_VBO = 0;
+    if (m_vbo) {
+        GL_CALL(glDeleteBuffers(1, &m_vbo));
+        m_vbo = 0;
     }
 
-    if (m_VAO) {
-        GL_CALL(glDeleteVertexArrays(1, &m_VAO));
-        m_VAO = 0;
+    if (m_vao) {
+        GL_CALL(glDeleteVertexArrays(1, &m_vao));
+        m_vao = 0;
     }
 }
 
@@ -45,17 +45,17 @@ void GL_Mesh::loadFromData(std::vector<Vertex> vertices,
 }
 
 void GL_Mesh::setupMesh() {
-    GL_CALL(glGenVertexArrays(1, &m_VAO));
+    GL_CALL(glGenVertexArrays(1, &m_vao));
 
-    GL_CALL(glGenBuffers(1, &m_VBO));
-    GL_CALL(glGenBuffers(1, &m_EBO));
+    GL_CALL(glGenBuffers(1, &m_vbo));
+    GL_CALL(glGenBuffers(1, &m_ebo));
 
-    GL_CALL(glBindVertexArray(m_VAO));
+    GL_CALL(glBindVertexArray(m_vao));
 
-    GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, m_VBO));
+    GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, m_vbo));
     GL_CALL(glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex), m_vertices.data(), GL_STATIC_DRAW));
 
-    GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO));
+    GL_CALL(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ebo));
     GL_CALL(glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(uint32), m_indices.data(), GL_STATIC_DRAW));
 
     // Vertex positions
@@ -128,7 +128,7 @@ void GL_Mesh::draw(RenderWindow& target, const RenderStates& states) const {
 
     GL_CALL(glActiveTexture(GL_TEXTURE0));
 
-    GL_CALL(glBindVertexArray(m_VAO));
+    GL_CALL(glBindVertexArray(m_vao));
     GL_CALL(glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_indices.size()), GL_UNSIGNED_INT, 0));
     GL_CALL(glBindVertexArray(0));
 }
