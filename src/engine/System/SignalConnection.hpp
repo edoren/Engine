@@ -18,7 +18,7 @@ private:
 
     using DisconnectCallbackType = Function<void(SignalConnection&), LAMBDA_FUNCTION_SIZE(1)>;
 
-    SignalConnection(uint64_t id, DisconnectCallbackType disconnect_callback);
+    SignalConnection(uint64_t id, DisconnectCallbackType disconnectCallback);
 
 public:
     static const IdType sInvalidId;

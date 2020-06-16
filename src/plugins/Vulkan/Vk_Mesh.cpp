@@ -204,8 +204,8 @@ void Vk_Mesh::setupMesh() {
 void Vk_Mesh::draw(RenderWindow& target, const RenderStates& states) const {
     auto& window = static_cast<Vk_RenderWindow&>(target);
 
-    auto lambda = [this, &window, states](uint32 index, VkCommandBuffer& command_buffer,
-                                          VkPipelineLayout& pipeline_layout) {
+    auto lambda = [this, &window, states](uint32 index, VkCommandBuffer& commandBuffer,
+                                          VkPipelineLayout& pipelineLayout) {
         uint32 dynamic_offset = 0;
 
         Vk_Texture2D* texture = Vk_TextureManager::GetInstance().getActiveTexture2D();
@@ -250,17 +250,17 @@ void Vk_Mesh::draw(RenderWindow& target, const RenderStates& states) const {
         uint32 sVertexBufferBindId = 0;  // TODO: Change where this comes from
         if (m_vertexBuffer.getHandle() != VK_NULL_HANDLE) {
             VkDeviceSize offset = 0;
-            vkCmdBindVertexBuffers(command_buffer, sVertexBufferBindId, 1, &m_vertexBuffer.getHandle(), &offset);
+            vkCmdBindVertexBuffers(commandBuffer, sVertexBufferBindId, 1, &m_vertexBuffer.getHandle(), &offset);
         }
         if (m_indexBuffer.getHandle() != VK_NULL_HANDLE) {
-            vkCmdBindIndexBuffer(command_buffer, m_indexBuffer.getHandle(), 0, VK_INDEX_TYPE_UINT32);
+            vkCmdBindIndexBuffer(commandBuffer, m_indexBuffer.getHandle(), 0, VK_INDEX_TYPE_UINT32);
         }
 
-        vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_layout, 0,
+        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0,
                                 static_cast<uint32>(array_pos), descriptor_sets.data(), 1, &dynamic_offset);
 
         auto indices_size = static_cast<uint32>(m_indices.size());
-        vkCmdDrawIndexed(command_buffer, indices_size, 1, 0, 0, 0);
+        vkCmdDrawIndexed(commandBuffer, indices_size, 1, 0, 0, 0);
     };
 
     window.addCommandExecution(std::move(lambda));

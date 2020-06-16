@@ -25,7 +25,7 @@ public:
 
     virtual void resize(int width, int height);
 
-    virtual void setFullScreen(bool fullscreen, bool is_fake = false);
+    virtual void setFullScreen(bool fullscreen, bool isFake = false);
 
     virtual void setVSyncEnabled(bool vsync) = 0;
 

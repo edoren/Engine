@@ -71,12 +71,12 @@ private:
     bool createInstance();
     bool createDevice();
 
-    bool selectPhysicalDevice(VkPhysicalDevice& physical_device);
+    bool selectPhysicalDevice(VkPhysicalDevice& physicalDevice);
 
     bool checkValidationLayerSupport() const;
     bool checkInstanceExtensionsSupport() const;
 
-    bool createVulkanCommandPool(QueueParameters& queue, VkCommandPool* cmd_pool);
+    bool createVulkanCommandPool(QueueParameters& queue, VkCommandPool* cmdPool);
 
     bool createUboDescriptorPool();
 

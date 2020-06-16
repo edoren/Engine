@@ -56,9 +56,9 @@ LogManager::LogManager()
         m_fileLoggingEnable(true),
         m_consoleLoggingEnable(true) {}
 
-LogManager::LogManager(String app_name, String log_file)
-      : m_appName(std::move(app_name)),
-        m_logFile(std::move(log_file)),
+LogManager::LogManager(String appName, String logFile)
+      : m_appName(std::move(appName)),
+        m_logFile(std::move(logFile)),
         m_fileLoggingEnable(true),
         m_consoleLoggingEnable(true) {}
 

@@ -17,7 +17,7 @@ public:
     Transform& operator=(const Transform& other);
     Transform& operator=(Transform&& other) noexcept;
 
-    void rotate(const math::Vector3<float>& euler_angles);
+    void rotate(const math::Vector3<float>& eulerAngles);
     void scale(const math::Vector3<float>& scale);
     void translate(const math::Vector3<float>& translate);
 

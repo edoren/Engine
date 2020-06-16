@@ -169,8 +169,8 @@ void Main::shutdown() {
     }
 }
 
-void Main::setActiveScene(const String& scene_name) {
-    ENGINE_UNUSED(scene_name);
+void Main::setActiveScene(const String& sceneName) {
+    ENGINE_UNUSED(sceneName);
 }
 
 void Main::loadPlugin(const String& pluginName) {
@@ -247,8 +247,8 @@ void Main::uninstallPlugin(Plugin* plugin) {
 }
 
 // TODO: Remove Renderer from Main
-void Main::addRenderer(std::unique_ptr<Renderer>&& new_renderer) {
-    m_renderers.push_back(std::move(new_renderer));
+void Main::addRenderer(std::unique_ptr<Renderer>&& newRenderer) {
+    m_renderers.push_back(std::move(newRenderer));
 }
 
 Renderer& Main::getActiveRenderer() {

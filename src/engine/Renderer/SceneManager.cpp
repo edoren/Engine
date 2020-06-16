@@ -40,10 +40,10 @@ void SceneManager::shutdown() {
     m_scenes.clear();
 }
 
-void SceneManager::changeActiveScene(const String& scene_name_id) {
+void SceneManager::changeActiveScene(const String& sceneNameId) {
     FileSystem& fs = FileSystem::GetInstance();
 
-    String filename_noext = fs.join(sRootModelFolder, scene_name_id);
+    String filename_noext = fs.join(sRootModelFolder, sceneNameId);
 
     json json_object;
 
@@ -56,7 +56,7 @@ void SceneManager::changeActiveScene(const String& scene_name_id) {
             json_object = json::parse(json_data.begin(), json_data.end());
             LogInfo(sTag, "Loading scene: " + filename);
         } else {
-            LogError(sTag, "Error loading model: " + scene_name_id);
+            LogError(sTag, "Error loading model: " + sceneNameId);
         }
     }
 

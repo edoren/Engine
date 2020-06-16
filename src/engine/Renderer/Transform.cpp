@@ -29,8 +29,8 @@ math::Matrix4x4<float> Transform::getMatrix() const {
     return math::Translate(m_translate) * math::Scale(m_scale) * math::Rotate(m_rotate);
 }
 
-void Transform::rotate(const math::Vector3<float>& euler_angles) {
-    m_rotate += euler_angles;
+void Transform::rotate(const math::Vector3<float>& eulerAngles) {
+    m_rotate += eulerAngles;
 }
 
 void Transform::scale(const math::Vector3<float>& scale) {

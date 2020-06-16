@@ -134,8 +134,8 @@ void GL_RenderWindow::resize(int width, int height) {
     GL_CALL(glViewport(0, 0, m_size.x, m_size.y));
 }
 
-void GL_RenderWindow::setFullScreen(bool fullscreen, bool is_fake) {
-    RenderWindow::setFullScreen(fullscreen, is_fake);
+void GL_RenderWindow::setFullScreen(bool fullscreen, bool isFake) {
+    RenderWindow::setFullScreen(fullscreen, isFake);
     // TODO: TMP Update the ViewPort
     GL_CALL(glViewport(0, 0, m_size.x, m_size.y));
 }

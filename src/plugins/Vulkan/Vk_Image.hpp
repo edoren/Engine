@@ -20,7 +20,7 @@ public:
 
     bool createImageView(VkFormat format, VkImageAspectFlags aspectMask);
 
-    bool allocateMemory(const VkMemoryPropertyFlags& memory_properties);
+    bool allocateMemory(const VkMemoryPropertyFlags& memoryProperties);
 
     void destroy();
 

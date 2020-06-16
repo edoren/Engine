@@ -51,8 +51,8 @@ float PerlinNoise::getValue(float x, float y, float z) const {
     return std::min(1.F, std::max(-1.F, value));
 }
 
-void PerlinNoise::setOctaveCount(int octave_count) {
-    m_octaveCount = octave_count;
+void PerlinNoise::setOctaveCount(int octaveCount) {
+    m_octaveCount = octaveCount;
 }
 
 void PerlinNoise::setFrequency(float frequency) {

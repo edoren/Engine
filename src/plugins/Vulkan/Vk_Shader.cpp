@@ -45,8 +45,8 @@ Vk_Shader& Vk_Shader::operator=(Vk_Shader&& other) noexcept {
     return *this;
 }
 
-bool Vk_Shader::loadFromMemory(const byte* source, std::size_t source_size, ShaderType type) {
-    if (source_size == 0) {
+bool Vk_Shader::loadFromMemory(const byte* source, std::size_t sourceSize, ShaderType type) {
+    if (sourceSize == 0) {
         return false;
     }
 
@@ -56,7 +56,7 @@ bool Vk_Shader::loadFromMemory(const byte* source, std::size_t source_size, Shad
         VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,  // sType
         nullptr,                                      // pNext
         VkShaderModuleCreateFlags(),                  // flags
-        source_size,                                  // codeSize
+        sourceSize,                                   // codeSize
         reinterpret_cast<const uint32_t*>(source)     // pCode
     };
 

@@ -66,7 +66,7 @@ GL_Shader& GL_Shader::operator=(GL_Shader&& other) noexcept {
     return *this;
 }
 
-bool GL_Shader::loadFromMemory(const byte* source, std::size_t source_size, ShaderType type) {
+bool GL_Shader::loadFromMemory(const byte* source, std::size_t sourceSize, ShaderType type) {
     if (isLinked()) {
         return false;
     }
@@ -81,7 +81,7 @@ bool GL_Shader::loadFromMemory(const byte* source, std::size_t source_size, Shad
         source_complete += String("#extension ") + extension + " : enable\n";
     }
     source_complete +=
-        String::FromUtf8(reinterpret_cast<const char8*>(source), reinterpret_cast<const char8*>(source) + source_size);
+        String::FromUtf8(reinterpret_cast<const char8*>(source), reinterpret_cast<const char8*>(source) + sourceSize);
 
     GLuint shader = compile(source_complete.getData(), source_complete.getSize(), type);
     if (!shader) {
@@ -251,19 +251,19 @@ void GL_Shader::setDescriptor(json&& descriptor) {
     m_uboDynamic.setAttributes(attributes);
 }
 
-GLuint GL_Shader::compile(const char8* source, size_t source_size, ShaderType type) {
-    return compile(reinterpret_cast<const byte*>(source), source_size, type);
+GLuint GL_Shader::compile(const char8* source, size_t sourceSize, ShaderType type) {
+    return compile(reinterpret_cast<const byte*>(source), sourceSize, type);
 }
 
-GLuint GL_Shader::compile(const byte* source, size_t source_size, ShaderType type) {
-    if (source == nullptr || source_size == 0) {
+GLuint GL_Shader::compile(const byte* source, size_t sourceSize, ShaderType type) {
+    if (source == nullptr || sourceSize == 0) {
         return 0;
     }
 
     GLuint shader = glCreateShader(sGlShaderTypes[static_cast<int>(type)]);
 
     const char* source_str = reinterpret_cast<const char*>(source);
-    auto length = static_cast<GLint>(source_size);
+    auto length = static_cast<GLint>(sourceSize);
     GL_CALL(glShaderSource(shader, 1, &source_str, &length));
     GL_CALL(glCompileShader(shader));
 

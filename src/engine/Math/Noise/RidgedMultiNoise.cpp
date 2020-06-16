@@ -72,8 +72,8 @@ float RidgedMultiNoise::getValue(float x, float y, float z) const {
     return std::min(1.F, std::max(-1.F, (value * 1.25F) - 1.0F));
 }
 
-void RidgedMultiNoise::setOctaveCount(int octave_count) {
-    m_octaveCount = octave_count;
+void RidgedMultiNoise::setOctaveCount(int octaveCount) {
+    m_octaveCount = octaveCount;
 }
 
 void RidgedMultiNoise::setFrequency(float frequency) {

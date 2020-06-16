@@ -39,7 +39,7 @@ public:
 
     void resize(int width, int height) override;
 
-    void setFullScreen(bool fullscreen, bool is_fake) override;
+    void setFullScreen(bool fullscreen, bool isFake) override;
 
     void setVSyncEnabled(bool vsync) override;
 
@@ -64,8 +64,8 @@ private:
     bool createVulkanFence(VkFenceCreateFlags flags, VkFence* fence);
     bool createRenderingResources();
 
-    bool createVulkanFrameBuffer(VkFramebuffer& framebuffer, VkImageView& image_view);
-    bool prepareFrame(VkCommandBuffer command_buffer, Vk_Image& image, VkFramebuffer& framebuffer);
+    bool createVulkanFrameBuffer(VkFramebuffer& framebuffer, VkImageView& imageView);
+    bool prepareFrame(VkCommandBuffer commandBuffer, Vk_Image& image, VkFramebuffer& framebuffer);
 
     bool createDepthResources();
 

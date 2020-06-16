@@ -293,8 +293,8 @@ String FileSystem::join(const String& left, const String& right) const {
     return ret;
 }
 
-void FileSystem::setSearchPaths(std::vector<String> search_paths) {
-    m_searchPaths = std::move(search_paths);
+void FileSystem::setSearchPaths(std::vector<String> searchPaths) {
+    m_searchPaths = std::move(searchPaths);
 }
 
 const std::vector<String>& FileSystem::getSearchPaths() const {

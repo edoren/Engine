@@ -9,11 +9,11 @@ class VULKAN_PLUGIN_API Vk_Utilities {
 public:
     static bool AllocateBufferMemory(const VkBuffer& buffer,
                                      VkDeviceMemory* memory,
-                                     const VkMemoryPropertyFlags& memory_properties);
+                                     const VkMemoryPropertyFlags& memoryProperties);
     static bool AllocateMemory(VkDeviceMemory* memory,
-                               const VkMemoryPropertyFlags& memory_properties,
-                               const VkMemoryRequirements& memory_requirements);
-    static bool AllocateCommandBuffers(VkCommandPool& cmd_pool, uint32_t count, VkCommandBuffer* command_buffer);
+                               const VkMemoryPropertyFlags& memoryProperties,
+                               const VkMemoryRequirements& memoryRequirements);
+    static bool AllocateCommandBuffers(VkCommandPool& cmdPool, uint32_t count, VkCommandBuffer* commandBuffer);
 
     static bool CreateVulkanSemaphore(VkSemaphore* semaphore);
     static bool CreateVulkanFence(VkFenceCreateFlags flags, VkFence* fence);

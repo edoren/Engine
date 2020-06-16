@@ -228,68 +228,68 @@ std::vector<Vk_Image>& Vk_SwapChain::getImages() {
     return m_images;
 }
 
-uint32 Vk_SwapChain::getNumImages(const VkSurfaceCapabilitiesKHR& surface_capabilities) {
+uint32 Vk_SwapChain::getNumImages(const VkSurfaceCapabilitiesKHR& surfaceCapabilities) {
     // Set of images defined in a swap chain may not always be available for
     // application to render to:
     // One may be displayed and one may wait in a queue to be presented
     // If application wants to use more images at the same time it must ask
     // for more images
-    uint32 image_count = surface_capabilities.minImageCount + 1;
-    if (surface_capabilities.maxImageCount > 0 && image_count > surface_capabilities.maxImageCount) {
-        image_count = surface_capabilities.maxImageCount;
+    uint32 image_count = surfaceCapabilities.minImageCount + 1;
+    if (surfaceCapabilities.maxImageCount > 0 && image_count > surfaceCapabilities.maxImageCount) {
+        image_count = surfaceCapabilities.maxImageCount;
     }
     return image_count;
 }
 
-VkSurfaceFormatKHR Vk_SwapChain::getFormat(const std::vector<VkSurfaceFormatKHR>& surface_formats) {
+VkSurfaceFormatKHR Vk_SwapChain::getFormat(const std::vector<VkSurfaceFormatKHR>& surfaceFormats) {
     // If the list contains only one entry with undefined format
     // it means that there are no preferred surface formats and any can be
     // chosen
-    if (surface_formats.size() == 1 && surface_formats[0].format == VK_FORMAT_UNDEFINED) {
+    if (surfaceFormats.size() == 1 && surfaceFormats[0].format == VK_FORMAT_UNDEFINED) {
         return {VK_FORMAT_R8G8B8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR};
     }
 
     // Check if list contains most widely used R8 G8 B8 A8 format
     // with nonlinear color space
-    for (const VkSurfaceFormatKHR& surface_format : surface_formats) {
+    for (const VkSurfaceFormatKHR& surface_format : surfaceFormats) {
         if (surface_format.format == VK_FORMAT_R8G8B8A8_UNORM) {
             return surface_format;
         }
     }
 
     // Return the first format from the list
-    return surface_formats[0];
+    return surfaceFormats[0];
 }
 
-VkExtent2D Vk_SwapChain::getExtent(const VkSurfaceCapabilitiesKHR& surface_capabilities, uint32 width, uint32 height) {
+VkExtent2D Vk_SwapChain::getExtent(const VkSurfaceCapabilitiesKHR& surfaceCapabilities, uint32 width, uint32 height) {
     // Special value of surface extent is width == height == 0xFFFFFFFF
     // If this is so we define the size by ourselves but it must fit within
     // defined confines
-    if (surface_capabilities.currentExtent.width == 0xFFFFFFFF) {
+    if (surfaceCapabilities.currentExtent.width == 0xFFFFFFFF) {
         VkExtent2D swap_chain_extent = {width, height};
-        swap_chain_extent.width = math::Clamp(swap_chain_extent.width, surface_capabilities.minImageExtent.width,
-                                              surface_capabilities.maxImageExtent.width);
-        swap_chain_extent.height = math::Clamp(swap_chain_extent.height, surface_capabilities.minImageExtent.height,
-                                               surface_capabilities.maxImageExtent.height);
+        swap_chain_extent.width = math::Clamp(swap_chain_extent.width, surfaceCapabilities.minImageExtent.width,
+                                              surfaceCapabilities.maxImageExtent.width);
+        swap_chain_extent.height = math::Clamp(swap_chain_extent.height, surfaceCapabilities.minImageExtent.height,
+                                               surfaceCapabilities.maxImageExtent.height);
         return swap_chain_extent;
     }
 
     // Most of the cases we define size of the swap_chain images equal to
     // current window's size
-    return surface_capabilities.currentExtent;
+    return surfaceCapabilities.currentExtent;
 }
 
-VkImageUsageFlags Vk_SwapChain::getUsageFlags(const VkSurfaceCapabilitiesKHR& surface_capabilities) {
+VkImageUsageFlags Vk_SwapChain::getUsageFlags(const VkSurfaceCapabilitiesKHR& surfaceCapabilities) {
     // Color attachment flag must always be supported
     // We can define other usage flags but we always need to check if they
     // are supported
-    if (surface_capabilities.supportedUsageFlags & VK_IMAGE_USAGE_TRANSFER_DST_BIT) {
+    if (surfaceCapabilities.supportedUsageFlags & VK_IMAGE_USAGE_TRANSFER_DST_BIT) {
         return VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
     }
     return VkImageUsageFlags(static_cast<VkImageUsageFlagBits>(-1));
 }
 
-VkSurfaceTransformFlagBitsKHR Vk_SwapChain::getTransform(const VkSurfaceCapabilitiesKHR& surface_capabilities) {
+VkSurfaceTransformFlagBitsKHR Vk_SwapChain::getTransform(const VkSurfaceCapabilitiesKHR& surfaceCapabilities) {
     // Sometimes images must be transformed before they are presented (i.e.
     // due to device's orienation being other than default orientation)
     // If the specified transform is other than current transform,
@@ -299,14 +299,14 @@ VkSurfaceTransformFlagBitsKHR Vk_SwapChain::getTransform(const VkSurfaceCapabili
     // Here we don't want any transformations to occur so if the identity
     // transform is supported use it otherwise just use the same transform
     // as current transform
-    if (surface_capabilities.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR) {
+    if (surfaceCapabilities.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR) {
         return VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
     }
-    return surface_capabilities.currentTransform;
+    return surfaceCapabilities.currentTransform;
 }
 
-VkPresentModeKHR Vk_SwapChain::getPresentMode(const std::vector<VkPresentModeKHR>& present_modes) {
-    ENGINE_UNUSED(present_modes);
+VkPresentModeKHR Vk_SwapChain::getPresentMode(const std::vector<VkPresentModeKHR>& presentModes) {
+    ENGINE_UNUSED(presentModes);
     // MAILBOX is the lowest latency V-Sync enabled mode (something like
     // triple-buffering) so use it if available
     // for (const VkPresentModeKHR& present_mode : present_modes) {

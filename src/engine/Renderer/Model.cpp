@@ -283,8 +283,8 @@ std::unique_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 
     std::vector<std::pair<TextureType, String>> texture_filenames;
 
-    auto load_textures_from_material = [&texture_filenames, &fs, this](const json& json_material) {
-        const json& json_textures = json_material["textures"];
+    auto load_textures_from_material = [&texture_filenames, &fs, this](const json& jsonMaterial) {
+        const json& json_textures = jsonMaterial["textures"];
         for (const json& json_texture : json_textures) {
             const json& type = json_texture["type"];
             const json& name = json_texture["name"];

@@ -85,10 +85,10 @@ Vk_Context::Vk_Context()
 #ifdef ENGINE_DEBUG
         m_validationLayersEnabled(true) {
 #else
-        m_validationLayersEnabled(false) {
+        m_validationLayersEnabled(false){
 #endif
 
-}
+}  // namespace engine
 
 Vk_Context::~Vk_Context() {
     shutdown();
@@ -356,14 +356,14 @@ bool Vk_Context::createDevice() {
     return true;
 }
 
-bool Vk_Context::selectPhysicalDevice(VkPhysicalDevice& physical_device) {
+bool Vk_Context::selectPhysicalDevice(VkPhysicalDevice& physicalDevice) {
     VkResult result = VK_SUCCESS;
 
     // Check the PhysicalDevice properties and features
     VkPhysicalDeviceProperties properties;
     VkPhysicalDeviceFeatures features;
-    vkGetPhysicalDeviceProperties(physical_device, &properties);
-    vkGetPhysicalDeviceFeatures(physical_device, &features);
+    vkGetPhysicalDeviceProperties(physicalDevice, &properties);
+    vkGetPhysicalDeviceFeatures(physicalDevice, &features);
 
     uint32 major_version = VK_VERSION_MAJOR(properties.apiVersion);
     // uint32 minor_version = VK_VERSION_MINOR(properties.apiVersion);
@@ -380,11 +380,11 @@ bool Vk_Context::selectPhysicalDevice(VkPhysicalDevice& physical_device) {
     uint32 extensions_count = 0;
     std::vector<VkExtensionProperties> available_extensions;
 
-    result = vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extensions_count, nullptr);
+    result = vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensions_count, nullptr);
     if (result == VK_SUCCESS && extensions_count > 0) {
         available_extensions.resize(extensions_count);
         result =
-            vkEnumerateDeviceExtensionProperties(physical_device, nullptr, &extensions_count, &available_extensions[0]);
+            vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensions_count, &available_extensions[0]);
     }
 
     // Check that the avaliable extensions could be retreived
@@ -407,7 +407,7 @@ bool Vk_Context::selectPhysicalDevice(VkPhysicalDevice& physical_device) {
 
     // Retreive all the queue families properties
     uint32 queue_families_count = 0;
-    vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &queue_families_count, nullptr);
+    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queue_families_count, nullptr);
     if (queue_families_count == 0) {
         LogError(sTag,
                  "Physical device {} doesn't have any queue "
@@ -415,7 +415,7 @@ bool Vk_Context::selectPhysicalDevice(VkPhysicalDevice& physical_device) {
         return false;
     }
     std::vector<VkQueueFamilyProperties> queue_family_properties(queue_families_count);
-    vkGetPhysicalDeviceQueueFamilyProperties(physical_device, &queue_families_count, queue_family_properties.data());
+    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queue_families_count, queue_family_properties.data());
 
     // Find a queue family that supports graphics queue
     uint32 graphics_queue_family_index = UINT32_MAX;
@@ -437,7 +437,7 @@ bool Vk_Context::selectPhysicalDevice(VkPhysicalDevice& physical_device) {
     }
 
     // Set the PhysicalDeviceProperties
-    m_physicalDevice.handle = physical_device;
+    m_physicalDevice.handle = physicalDevice;
     m_physicalDevice.properties = properties;
     m_physicalDevice.features = features;
 
@@ -536,7 +536,7 @@ bool Vk_Context::checkInstanceExtensionsSupport() const {
     return all_extensions_found;
 }
 
-bool Vk_Context::createVulkanCommandPool(QueueParameters& queue, VkCommandPool* cmd_pool) {
+bool Vk_Context::createVulkanCommandPool(QueueParameters& queue, VkCommandPool* cmdPool) {
     VkResult result = VK_SUCCESS;
 
     // Create the pool for the command buffers
@@ -547,7 +547,7 @@ bool Vk_Context::createVulkanCommandPool(QueueParameters& queue, VkCommandPool* 
         queue.familyIndex                                                                          // queueFamilyIndex
     };
 
-    result = vkCreateCommandPool(m_device, &cmd_pool_create_info, nullptr, cmd_pool);
+    result = vkCreateCommandPool(m_device, &cmd_pool_create_info, nullptr, cmdPool);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Could not create a command pool");
         return false;

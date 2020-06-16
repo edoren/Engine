@@ -20,7 +20,7 @@ public:
 
     void resize(int width, int height) override;
 
-    void setFullScreen(bool fullscreen, bool is_fake) override;
+    void setFullScreen(bool fullscreen, bool isFake) override;
 
     void setVSyncEnabled(bool vsync) override;
 

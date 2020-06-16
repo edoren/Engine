@@ -32,7 +32,7 @@ public:
         DataType type;
     };
 
-    void setBufferSize(size_t num_ubo_instances, size_t min_ubo_alignment);
+    void setBufferSize(size_t numUboInstances, size_t minUboAlignment);
 
     void setAttributes(const std::vector<Item>& attributes);
 

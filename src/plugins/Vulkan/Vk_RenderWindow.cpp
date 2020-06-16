@@ -140,8 +140,8 @@ void Vk_RenderWindow::resize(int width, int height) {
     RenderWindow::resize(width, height);
 }
 
-void Vk_RenderWindow::setFullScreen(bool fullscreen, bool is_fake) {
-    RenderWindow::setFullScreen(fullscreen, is_fake);
+void Vk_RenderWindow::setFullScreen(bool fullscreen, bool isFake) {
+    RenderWindow::setFullScreen(fullscreen, isFake);
 }
 
 void Vk_RenderWindow::setVSyncEnabled(bool /*vsync*/) {
@@ -652,7 +652,7 @@ bool Vk_RenderWindow::createVulkanPipeline() {
     return true;
 }
 
-bool Vk_RenderWindow::createVulkanFrameBuffer(VkFramebuffer& framebuffer, VkImageView& image_view) {
+bool Vk_RenderWindow::createVulkanFrameBuffer(VkFramebuffer& framebuffer, VkImageView& imageView) {
     VkResult result = VK_SUCCESS;
 
     Vk_Context& context = Vk_Context::GetInstance();
@@ -663,7 +663,7 @@ bool Vk_RenderWindow::createVulkanFrameBuffer(VkFramebuffer& framebuffer, VkImag
     }
 
     std::array<VkImageView, 2> attachments = {
-        {image_view, m_depthImage.getView()},
+        {imageView, m_depthImage.getView()},
     };
 
     VkFramebufferCreateInfo framebuffer_create_info = {
@@ -687,7 +687,7 @@ bool Vk_RenderWindow::createVulkanFrameBuffer(VkFramebuffer& framebuffer, VkImag
     return true;
 }
 
-bool Vk_RenderWindow::prepareFrame(VkCommandBuffer command_buffer, Vk_Image& image, VkFramebuffer& framebuffer) {
+bool Vk_RenderWindow::prepareFrame(VkCommandBuffer commandBuffer, Vk_Image& image, VkFramebuffer& framebuffer) {
     VkResult result = VK_SUCCESS;
 
     if (!createVulkanFrameBuffer(framebuffer, image.getView())) {
@@ -701,7 +701,7 @@ bool Vk_RenderWindow::prepareFrame(VkCommandBuffer command_buffer, Vk_Image& ima
         nullptr                                       // pInheritanceInfo
     };
 
-    vkBeginCommandBuffer(command_buffer, &command_buffer_begin_info);
+    vkBeginCommandBuffer(commandBuffer, &command_buffer_begin_info);
 
     VkImageSubresourceRange image_subresource_range = {
         VK_IMAGE_ASPECT_COLOR_BIT,  // aspectMask
@@ -724,7 +724,7 @@ bool Vk_RenderWindow::prepareFrame(VkCommandBuffer command_buffer, Vk_Image& ima
             image.getHandle(),                       // image
             image_subresource_range                  // subresourceRange
         };
-        vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+        vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
                              VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, 0, 0, nullptr, 0, nullptr, 1,
                              &barrier_from_present_to_draw);
     }
@@ -755,7 +755,7 @@ bool Vk_RenderWindow::prepareFrame(VkCommandBuffer command_buffer, Vk_Image& ima
         clear_values.data()                          // pClearValues
     };
 
-    vkCmdBeginRenderPass(command_buffer, &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdBeginRenderPass(commandBuffer, &render_pass_begin_info, VK_SUBPASS_CONTENTS_INLINE);
 
     VkViewport viewport = {
         0.0F,                          // x
@@ -779,10 +779,10 @@ bool Vk_RenderWindow::prepareFrame(VkCommandBuffer command_buffer, Vk_Image& ima
         },
     };
 
-    vkCmdSetViewport(command_buffer, 0, 1, &viewport);
-    vkCmdSetScissor(command_buffer, 0, 1, &scissor);
+    vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+    vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-    vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphicsPipeline);
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphicsPipeline);
 
     Vk_Shader* shader = Vk_ShaderManager::GetInstance().getActiveShader();
 
@@ -805,12 +805,12 @@ bool Vk_RenderWindow::prepareFrame(VkCommandBuffer command_buffer, Vk_Image& ima
     uint32 index = 0;
     while (m_commandWorkQueue.getSize() > 0) {
         auto task = m_commandWorkQueue.pop();
-        task(index++, command_buffer, m_pipelineLayout);
+        task(index++, commandBuffer, m_pipelineLayout);
     }
 
     shader->uploadUniformBuffers();
 
-    vkCmdEndRenderPass(command_buffer);
+    vkCmdEndRenderPass(commandBuffer);
 
     if (m_graphicsQueue->getHandle() != m_presentQueue->getHandle()) {
         VkImageMemoryBarrier barrier_from_draw_to_present = {
@@ -825,12 +825,12 @@ bool Vk_RenderWindow::prepareFrame(VkCommandBuffer command_buffer, Vk_Image& ima
             image.getHandle(),                       // image
             image_subresource_range                  // subresourceRange
         };
-        vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+        vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
                              VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 0, 0, nullptr, 0, nullptr, 1,
                              &barrier_from_draw_to_present);
     }
 
-    result = vkEndCommandBuffer(command_buffer);
+    result = vkEndCommandBuffer(commandBuffer);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Could not record command buffer");
         return false;
@@ -893,7 +893,7 @@ bool Vk_RenderWindow::createDepthResources() {
         return false;
     }
 
-    submitGraphicsCommand([this](VkCommandBuffer& command_buffer) {
+    submitGraphicsCommand([this](VkCommandBuffer& commandBuffer) {
         bool has_stencil_component =
             (m_depthFormat == VK_FORMAT_D32_SFLOAT_S8_UINT || m_depthFormat == VK_FORMAT_D24_UNORM_S8_UINT);
 
@@ -922,7 +922,7 @@ bool Vk_RenderWindow::createDepthResources() {
             }                 // subresourceRange
         };
 
-        vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+        vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
                              VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT, 0, 0, nullptr, 0, nullptr, 1, &depth_barrier);
 
         LogInfo(sTag, "Depth resources created with dimensions [{}, {}]"_format(m_size.x, m_size.y));

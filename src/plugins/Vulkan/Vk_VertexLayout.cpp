@@ -10,7 +10,7 @@ namespace {
 const String sTag("Vk_VertexLayout");
 
 std::vector<VkVertexInputAttributeDescription> GetAttribDescription(const std::vector<VertexLayout::Component>& input,
-                                                                    uint32 buffer_bind_id) {
+                                                                    uint32 bufferBindId) {
     std::vector<VkVertexInputAttributeDescription> attribute_descriptions;
     uint32 location = 0;
     uint32 buffer_offset = 0;
@@ -35,10 +35,10 @@ std::vector<VkVertexInputAttributeDescription> GetAttribDescription(const std::v
                 break;
         }
         attribute_descriptions.push_back({
-            location++,      // location
-            buffer_bind_id,  // binding
-            format,          // format
-            buffer_offset    // offset
+            location++,    // location
+            bufferBindId,  // binding
+            format,        // format
+            buffer_offset  // offset
         });
         buffer_offset += size;
     }
@@ -55,8 +55,8 @@ Vk_VertexLayout::Vk_VertexLayout(std::vector<VertexLayout::Component>&& componen
       : VertexLayout(std::move(components)) {}
 
 std::vector<VkVertexInputAttributeDescription> Vk_VertexLayout::getVertexInputAttributeDescription(
-    uint32 buffer_bind_id) const {
-    return GetAttribDescription(m_vertexInput, buffer_bind_id);
+    uint32 bufferBindId) const {
+    return GetAttribDescription(m_vertexInput, bufferBindId);
 }
 
 }  // namespace engine

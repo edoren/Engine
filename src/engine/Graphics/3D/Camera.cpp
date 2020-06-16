@@ -16,13 +16,13 @@ void Camera::move(const math::vec3& direction) {
     position += direction;
 }
 
-void Camera::rotate(float yaw, float pitch, bool limit_pitch) {
+void Camera::rotate(float yaw, float pitch, bool limitPitch) {
     // Apply euler angles to rotate the pitch
     yaw += yaw;
     pitch -= pitch;
 
     // Limit the pitch movement to avoid strange behaviors
-    if (limit_pitch) {
+    if (limitPitch) {
         if (pitch > 89.9F) {
             pitch = 89.9F;
         }
@@ -34,8 +34,8 @@ void Camera::rotate(float yaw, float pitch, bool limit_pitch) {
     updateCameraVectors();
 }
 
-void Camera::rotate(const math::vec2& offset, bool limit_pitch) {
-    rotate(offset.x, offset.y, limit_pitch);
+void Camera::rotate(const math::vec2& offset, bool limitPitch) {
+    rotate(offset.x, offset.y, limitPitch);
 }
 
 void Camera::lookAt(const math::vec3& position) {

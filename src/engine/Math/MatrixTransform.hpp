@@ -175,11 +175,11 @@ inline Matrix4x4<T> Rotate(T angle, const Vector3<T>& v) {
 }
 
 template <typename T>
-inline Matrix4x4<T> RotateAxisX(const T euler_angle) {
+inline Matrix4x4<T> RotateAxisX(const T eulerAngle) {
     static_assert(std::numeric_limits<T>::is_iec559, "'Rotate' only accept floating-point inputs");
 
-    T c = static_cast<T>(cos(euler_angle));
-    T s = static_cast<T>(sin(euler_angle));
+    T c = static_cast<T>(cos(eulerAngle));
+    T s = static_cast<T>(sin(eulerAngle));
 
     // clang-format off
     return Matrix4x4<T>(
@@ -192,11 +192,11 @@ inline Matrix4x4<T> RotateAxisX(const T euler_angle) {
 }
 
 template <typename T>
-inline Matrix4x4<T> RotateAxisY(const T euler_angle) {
+inline Matrix4x4<T> RotateAxisY(const T eulerAngle) {
     static_assert(std::numeric_limits<T>::is_iec559, "'Rotate' only accept floating-point inputs");
 
-    T c = static_cast<T>(cos(euler_angle));
-    T s = static_cast<T>(sin(euler_angle));
+    T c = static_cast<T>(cos(eulerAngle));
+    T s = static_cast<T>(sin(eulerAngle));
 
     // clang-format off
     return Matrix4x4<T>(
@@ -209,11 +209,11 @@ inline Matrix4x4<T> RotateAxisY(const T euler_angle) {
 }
 
 template <typename T>
-inline Matrix4x4<T> RotateAxisZ(const T euler_angle) {
+inline Matrix4x4<T> RotateAxisZ(const T eulerAngle) {
     static_assert(std::numeric_limits<T>::is_iec559, "'Rotate' only accept floating-point inputs");
 
-    T c = static_cast<T>(cos(euler_angle));
-    T s = static_cast<T>(sin(euler_angle));
+    T c = static_cast<T>(cos(eulerAngle));
+    T s = static_cast<T>(sin(eulerAngle));
 
     // clang-format off
     return Matrix4x4<T>(
@@ -226,11 +226,11 @@ inline Matrix4x4<T> RotateAxisZ(const T euler_angle) {
 }
 
 template <typename T>
-inline Matrix4x4<T> Rotate(const Vector3<T>& euler_angles) {
+inline Matrix4x4<T> Rotate(const Vector3<T>& eulerAngles) {
     static_assert(std::numeric_limits<T>::is_iec559, "'Rotate' only accept floating-point inputs");
-    Matrix4x4<T> Rx = RotateAxisX(euler_angles.x);
-    Matrix4x4<T> Ry = RotateAxisX(euler_angles.y);
-    Matrix4x4<T> Rz = RotateAxisX(euler_angles.z);
+    Matrix4x4<T> Rx = RotateAxisX(eulerAngles.x);
+    Matrix4x4<T> Ry = RotateAxisX(eulerAngles.y);
+    Matrix4x4<T> Rz = RotateAxisX(eulerAngles.z);
     return Rz * Ry * Rx;
 }
 

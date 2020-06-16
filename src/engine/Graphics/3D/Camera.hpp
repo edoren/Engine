@@ -14,9 +14,9 @@ public:
 
     void move(const math::vec3& direction);
 
-    void rotate(float yaw, float pitch, bool limit_pitch = true);
+    void rotate(float yaw, float pitch, bool limitPitch = true);
 
-    void rotate(const math::vec2& offset, bool limit_pitch = true);
+    void rotate(const math::vec2& offset, bool limitPitch = true);
 
     void lookAt(const math::vec3& position);
 
