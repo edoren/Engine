@@ -335,12 +335,12 @@ std::unique_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
         TextureType type = pair.first;
         const String& filename = pair.second;
         Texture2D* texture = texture_manager.loadFromFile(filename);
-        textures.push_back(std::make_pair(texture, type));
+        textures.emplace_back(texture, type);
     }
 
     if (textures.empty()) {
         Texture2D* texture = texture_manager.getTexture2D(TextureManager::sDefaultTextureId);
-        textures.push_back(std::make_pair(texture, TextureType::DIFFUSE));
+        textures.emplace_back(texture, TextureType::DIFFUSE);
     }
 
     ModelManager& model_manager = ModelManager::GetInstance();
