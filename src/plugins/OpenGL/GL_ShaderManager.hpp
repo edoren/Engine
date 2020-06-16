@@ -15,7 +15,7 @@ class OPENGL_PLUGIN_API GL_ShaderManager : public ShaderManager {
 public:
     GL_ShaderManager();
 
-    ~GL_ShaderManager();
+    ~GL_ShaderManager() override;
 
     GL_Shader* loadFromFile(const String& basename);
 

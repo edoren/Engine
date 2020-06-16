@@ -29,7 +29,7 @@ public:
 
     float getPersistence() const;
 
-    float getValue(float x, float y, float z) const;
+    float getValue(float x, float y, float z) const override;
 
     void setOctaveCount(int octave_count);
 
