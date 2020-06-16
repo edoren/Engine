@@ -20,8 +20,8 @@ const String sTag("Main");
 
 }  // namespace
 
-typedef void (*PFN_START_PLUGIN)(void);
-typedef void (*PFN_STOP_PLUGIN)(void);
+typedef void (*PFN_START_PLUGIN)();
+typedef void (*PFN_STOP_PLUGIN)();
 
 template <>
 Main* Singleton<Main>::sInstance = nullptr;

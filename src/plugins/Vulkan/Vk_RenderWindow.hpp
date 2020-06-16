@@ -35,7 +35,7 @@ public:
 
     bool create(const String& name, const math::ivec2& size) override;
 
-    void destroy(void) override;
+    void destroy() override;
 
     void resize(int width, int height) override;
 
