@@ -202,7 +202,7 @@ class CMakeBuildGenerator:
             if gen_plat is None and platform.machine().endswith("64"):
                 self.cmake_args = ["-DCMAKE_GENERATOR_PLATFORM='x64'"] + self.cmake_args
             if gen is None:
-                self.cmake_args = ["-DCMAKE_GENERATOR='Visual Studio 15 2017'"] + self.cmake_args
+                self.cmake_args = ["-DCMAKE_GENERATOR='Visual Studio 16 2019'"] + self.cmake_args
 
     def create_build_script(self):
         print("Creating build script")

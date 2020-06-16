@@ -31,7 +31,8 @@ endif()
 
 # Windows, Linux and Mac implementation use GLEW
 if(OS_WINDOWS OR OS_LINUX OR OS_MACOS)
-    set(GLEW_SOURCES "${THIRD_PARTY_DIR}/src/GLEW/glew.c")
+    set(GLEW_SOURCES "${THIRD_PARTY_DIR}/src/GLEW/glew.c"
+                     "${THIRD_PARTY_DIR}/include/common/GL/glew.h")
     set(DEPENDENCY_SOURCES ${GLEW_SOURCES})
 endif()
 
@@ -42,14 +43,18 @@ else()
 endif()
 
 if (DEPENDENCY_SOURCES)
-    engine_add_library(TARGET Dependencies_Object
+    engine_add_library(TARGET OpenGL_Plugin_Dependencies
                        TYPE "OBJECT"
-                       SOURCES ${${DEPENDENCY_SOURCES}})
-    # set_target_properties(Dependencies_Object
+                       SOURCES ${DEPENDENCY_SOURCES})
+    # set_target_properties(OpenGL_Plugin_Dependencies
     #                       PROPERTIES CXX_CLANG_TIDY "")
-    target_include_directories(Dependencies_Object SYSTEM
-        PRIVATE ${DEPENDENCY_INCLUDE_DIRS}
-        PRIVATE ${ENGINE_INCLUDE_DIR}
+    if(OPENGL_PLUGIN_BUILD_STATIC)
+        target_compile_definitions(OpenGL_Plugin_Dependencies PUBLIC GLEW_STATIC=1)
+    else()
+        target_compile_definitions(OpenGL_Plugin_Dependencies PUBLIC GLEW_BUILD=1)
+    endif()
+    target_include_directories(OpenGL_Plugin_Dependencies SYSTEM
+        PRIVATE "${THIRD_PARTY_DIR}/include/common"
     )
 endif()
 
@@ -60,8 +65,8 @@ engine_add_library(TARGET OpenGL_Plugin
                    TYPE ${BUILD_TYPE_NAME}
                    SOURCES ${PLUGIN_SOURCES})
 
-if (Dependencies_Object)
-    target_sources(OpenGL_Plugin $<TARGET_OBJECTS:Dependencies_Object>)
+if (TARGET OpenGL_Plugin_Dependencies)
+    target_sources(OpenGL_Plugin PRIVATE $<TARGET_OBJECTS:OpenGL_Plugin_Dependencies>)
 endif()
 
 # GLEW should not export any symbols when compiled internally
