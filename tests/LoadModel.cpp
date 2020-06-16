@@ -33,7 +33,7 @@ struct Vertex {
 
 class LoadModelApp : public App {
 public:
-    LoadModelApp(const String& scene_name) : m_sceneName(scene_name), m_windowSize(800, 600) {}
+    LoadModelApp(String scene_name) : m_sceneName(std::move(scene_name)), m_windowSize(800, 600) {}
 
 protected:
     bool initialize() override {

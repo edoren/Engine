@@ -8,7 +8,7 @@ namespace engine {
 
 class ENGINE_API SharedLibrary : NonCopyable {
 public:
-    explicit SharedLibrary(const String& name);
+    explicit SharedLibrary(String name);
     SharedLibrary(SharedLibrary&& other);
     ~SharedLibrary();
 
