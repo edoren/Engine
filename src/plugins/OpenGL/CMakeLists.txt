@@ -41,12 +41,28 @@ else()
     set(BUILD_TYPE_NAME "SHARED")
 endif()
 
+if (DEPENDENCY_SOURCES)
+    engine_add_library(TARGET Dependencies_Object
+                       TYPE "OBJECT"
+                       SOURCES ${${DEPENDENCY_SOURCES}})
+    # set_target_properties(Dependencies_Object
+    #                       PROPERTIES CXX_CLANG_TIDY "")
+    target_include_directories(Dependencies_Object SYSTEM
+        PRIVATE ${DEPENDENCY_INCLUDE_DIRS}
+        PRIVATE ${ENGINE_INCLUDE_DIR}
+    )
+endif()
+
 engine_add_sources(TARGET PLUGIN_SOURCES
                    BASE_FOLDER "${ENGINE_PLUGINS_DIR}/OpenGL")
 
 engine_add_library(TARGET OpenGL_Plugin
                    TYPE ${BUILD_TYPE_NAME}
-                   SOURCES ${PLUGIN_SOURCES} ${DEPENDENCY_SOURCES})
+                   SOURCES ${PLUGIN_SOURCES})
+
+if (Dependencies_Object)
+    target_sources(OpenGL_Plugin $<TARGET_OBJECTS:Dependencies_Object>)
+endif()
 
 # GLEW should not export any symbols when compiled internally
 if(OPENGL_PLUGIN_BUILD_STATIC)

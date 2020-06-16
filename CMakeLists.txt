@@ -32,7 +32,7 @@ endif()
 set(CMAKE_MODULE_PATH "${ENGINE_DIR}/cmake/Modules")
 
 # Limit the build configurations
-set(CMAKE_CXX_CLANG_TIDY "clang-tidy")
+# set(CMAKE_CXX_CLANG_TIDY "clang-tidy" ${CLANG_TIDY_COMMANDS})
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Include the config and macros file
