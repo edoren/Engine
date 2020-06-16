@@ -42,7 +42,7 @@ const SignalConnection::IdType SignalConnection::sInvalidId(0);
 SignalConnection::SignalConnection(uint64_t id, DisconnectCallbackType disconnect_callback)
       : m_id(id),
         m_reference(new Reference(0)),
-        m_disconnectCallback(disconnect_callback) {
+        m_disconnectCallback(std::move(disconnect_callback)) {
     m_reference->increase();
 }
 

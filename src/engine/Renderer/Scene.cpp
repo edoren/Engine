@@ -14,7 +14,7 @@ namespace {
 const String sTag("Scene");
 }
 
-Scene::Scene(const json& data) : m_data(data) {}
+Scene::Scene(json data) : m_data(std::move(data)) {}
 
 Scene::~Scene() {
     unload();

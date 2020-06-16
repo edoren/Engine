@@ -18,7 +18,7 @@
 
 namespace engine {
 
-SharedLibrary::SharedLibrary(const String& name) : m_name(name), m_handle(nullptr) {}
+SharedLibrary::SharedLibrary(String name) : m_name(std::move(name)), m_handle(nullptr) {}
 
 SharedLibrary::SharedLibrary(SharedLibrary&& other) {
     m_name = other.m_name;

@@ -14,8 +14,7 @@ public:
     };
 
     VertexLayout();
-    VertexLayout(const std::vector<Component>& vertex_input);
-    VertexLayout(std::vector<Component>&& vertex_input);
+    VertexLayout(std::vector<Component> vertex_input);
 
 protected:
     std::vector<Component> m_vertexInput;

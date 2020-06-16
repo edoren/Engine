@@ -18,7 +18,7 @@ public:
     void draw(RenderWindow& target);
 
 private:
-    explicit Scene(const json& data);
+    explicit Scene(json data);
 
     bool load();
     bool unload();
