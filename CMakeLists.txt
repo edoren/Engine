@@ -105,7 +105,7 @@ if(OS_WINDOWS)
     set(CMAKE_C_FLAGS_DEBUG "/MD /Zi /Ob0 /Od /RTC1")
     set(CMAKE_CXX_FLAGS_DEBUG "/MD /Zi /Ob0 /Od /RTC1")
     set(SDL2MAIN_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/windows/Release/SDL2main.lib)
-    set(SDL2_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/windows/Release/SDL2.lib)
+    set(SDL2_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/windows/Release/SDL2.lib "setupapi")
     set(ASSIMP_LIBRARY ${THIRD_PARTY_DIR}/prebuilt/windows/Release/assimp.lib
                        ${THIRD_PARTY_DIR}/prebuilt/windows/Release/zlibstatic.lib
                        ${THIRD_PARTY_DIR}/prebuilt/windows/Release/IrrXML.lib)
