@@ -22,10 +22,10 @@
 using namespace engine;
 
 struct Vertex {
-    Vertex(const math::vec3& position, const math::vec3& normal, const math::vec2& tex_coords)
+    Vertex(const math::vec3& position, const math::vec3& normal, const math::vec2& texCoords)
           : position(position),
             normal(normal),
-            texCoords(tex_coords) {}
+            texCoords(texCoords) {}
     math::vec3 position;
     math::vec3 normal;
     math::vec2 texCoords;
@@ -33,7 +33,7 @@ struct Vertex {
 
 class LoadModelApp : public App {
 public:
-    LoadModelApp(String scene_name) : m_sceneName(std::move(scene_name)), m_windowSize(800, 600) {}
+    LoadModelApp(String sceneName) : m_sceneName(std::move(sceneName)), m_windowSize(800, 600) {}
 
 protected:
     bool initialize() override {

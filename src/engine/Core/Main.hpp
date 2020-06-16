@@ -29,7 +29,7 @@ public:
 
     void shutdown();
 
-    void setActiveScene(const String& scene_name);
+    void setActiveScene(const String& sceneName);
 
     void loadPlugin(const String& pluginName);
 
@@ -39,7 +39,7 @@ public:
 
     void uninstallPlugin(Plugin* plugin);
 
-    void addRenderer(std::unique_ptr<Renderer>&& new_renderer);
+    void addRenderer(std::unique_ptr<Renderer>&& newRenderer);
 
     Renderer& getActiveRenderer();
 

@@ -17,7 +17,7 @@ public:
 
     void shutdown();
 
-    void changeActiveScene(const String& scene_name);
+    void changeActiveScene(const String& sceneName);
 
     Scene* getActiveScene();
 

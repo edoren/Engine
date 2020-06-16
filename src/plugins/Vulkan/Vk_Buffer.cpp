@@ -20,7 +20,7 @@ Vk_Buffer::~Vk_Buffer() {
     }
 }
 
-bool Vk_Buffer::create(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags memory_properties) {
+bool Vk_Buffer::create(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags memoryProperties) {
     if (m_handle != VK_NULL_HANDLE) {
         destroy();
     }
@@ -47,7 +47,7 @@ bool Vk_Buffer::create(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryProp
         return false;
     }
 
-    if (!Vk_Utilities::AllocateBufferMemory(m_handle, &m_memory, memory_properties)) {
+    if (!Vk_Utilities::AllocateBufferMemory(m_handle, &m_memory, memoryProperties)) {
         LogError(sTag, "Could not allocate memory for a buffer");
         return false;
     }

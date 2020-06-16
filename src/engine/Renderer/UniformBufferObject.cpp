@@ -95,7 +95,7 @@ void UniformBufferObject::setAttributes(const std::vector<Item>& attributes) {
     m_attributes = attributes;
 }
 
-void UniformBufferObject::setBufferSize(size_t num_ubo_instances, size_t min_ubo_alignment) {
+void UniformBufferObject::setBufferSize(size_t numUboInstances, size_t minUboAlignment) {
     if (m_buffer != nullptr) {
         if (m_dynamicAlignment > 0) {
             aligned_free(m_buffer);
@@ -115,16 +115,16 @@ void UniformBufferObject::setBufferSize(size_t num_ubo_instances, size_t min_ubo
     m_dynamicAlignment = 1 << (i + 1);
 
     // Calculate the alignment based on the min required alignment
-    if (min_ubo_alignment > getSize() && is_power_of_two(min_ubo_alignment)) {
-        m_dynamicAlignment = min_ubo_alignment;
-    } else if (min_ubo_alignment > 0) {
-        m_dynamicAlignment = (m_dynamicAlignment + min_ubo_alignment - 1) & ~(min_ubo_alignment - 1);
+    if (minUboAlignment > getSize() && is_power_of_two(minUboAlignment)) {
+        m_dynamicAlignment = minUboAlignment;
+    } else if (minUboAlignment > 0) {
+        m_dynamicAlignment = (m_dynamicAlignment + minUboAlignment - 1) & ~(minUboAlignment - 1);
     }
 
-    size_t buffer_size = num_ubo_instances * m_dynamicAlignment;
+    size_t buffer_size = numUboInstances * m_dynamicAlignment;
 
     LogDebug(sTag, "UBO size: {} bytes"_format(getSize()));
-    LogDebug(sTag, "Minimum UBO alignment: {} bytes"_format(min_ubo_alignment));
+    LogDebug(sTag, "Minimum UBO alignment: {} bytes"_format(minUboAlignment));
     LogDebug(sTag, "Dynamic UBO alignment: {} bytes"_format(m_dynamicAlignment));
 
     m_buffer = (byte*)aligned_malloc(buffer_size, m_dynamicAlignment);

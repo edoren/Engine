@@ -119,23 +119,23 @@ Shader* ShaderManager::loadFromFile(const String& basename) {
     return new_shader;
 }
 
-Shader* ShaderManager::loadFromMemory(const String& name, const std::map<ShaderType, String*>& shader_data) {
+Shader* ShaderManager::loadFromMemory(const String& name, const std::map<ShaderType, String*>& shaderData) {
     if (getShader(name) != nullptr) {
         LogError(sTag, "Shader '{}' already loaded");
         return nullptr;
     }
 
     // Vertex and Fragment shaders are completly required
-    auto it_vertex = shader_data.find(ShaderType::VERTEX);
-    auto it_fragment = shader_data.find(ShaderType::FRAGMENT);
-    if (it_vertex == shader_data.end() || it_fragment == shader_data.end()) {
+    auto it_vertex = shaderData.find(ShaderType::VERTEX);
+    auto it_fragment = shaderData.find(ShaderType::FRAGMENT);
+    if (it_vertex == shaderData.end() || it_fragment == shaderData.end()) {
         LogDebug(sTag, "Vertex or Fragment shader not provided");
         return nullptr;
     }
 
     std::unique_ptr<Shader> new_shader = createShader();
 
-    for (const auto& shader_data_pair : shader_data) {
+    for (const auto& shader_data_pair : shaderData) {
         bool ok = true;
 
         ShaderType shader_type = shader_data_pair.first;

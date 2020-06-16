@@ -90,12 +90,12 @@ void RenderWindow::resize(int width, int height) {
     }
 }
 
-void RenderWindow::setFullScreen(bool fullscreen, bool is_fake) {
+void RenderWindow::setFullScreen(bool fullscreen, bool isFake) {
     // TODO: check errors
     if (auto* window = reinterpret_cast<SDL_Window*>(m_window)) {
         Uint32 flag = 0;
         if (fullscreen) {
-            flag = (is_fake) ? SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_FULLSCREEN;
+            flag = (isFake) ? SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_FULLSCREEN;
         }
         SDL_SetWindowFullscreen(window, flag);
 

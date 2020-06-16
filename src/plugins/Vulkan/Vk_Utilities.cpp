@@ -15,19 +15,19 @@ const String sTag("Vk_Utilities");
 
 bool Vk_Utilities::AllocateBufferMemory(const VkBuffer& buffer,
                                         VkDeviceMemory* memory,
-                                        const VkMemoryPropertyFlags& memory_properties) {
+                                        const VkMemoryPropertyFlags& memoryProperties) {
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.getVulkanDevice();
 
     VkMemoryRequirements buffer_memory_requirements;
     vkGetBufferMemoryRequirements(device, buffer, &buffer_memory_requirements);
 
-    return Vk_Utilities::AllocateMemory(memory, memory_properties, buffer_memory_requirements);
+    return Vk_Utilities::AllocateMemory(memory, memoryProperties, buffer_memory_requirements);
 }
 
 bool Vk_Utilities::AllocateMemory(VkDeviceMemory* memory,
-                                  const VkMemoryPropertyFlags& memory_properties,
-                                  const VkMemoryRequirements& memory_requirements) {
+                                  const VkMemoryPropertyFlags& memoryProperties,
+                                  const VkMemoryRequirements& memoryRequirements) {
     VkResult result = VK_SUCCESS;
 
     Vk_Context& context = Vk_Context::GetInstance();
@@ -38,12 +38,12 @@ bool Vk_Utilities::AllocateMemory(VkDeviceMemory* memory,
     vkGetPhysicalDeviceMemoryProperties(physical_device, &physical_memory_properties);
 
     for (uint32_t i = 0; i < physical_memory_properties.memoryTypeCount; i++) {
-        if ((memory_requirements.memoryTypeBits & (1 << i)) &&
-            (physical_memory_properties.memoryTypes[i].propertyFlags & memory_properties)) {
+        if ((memoryRequirements.memoryTypeBits & (1 << i)) &&
+            (physical_memory_properties.memoryTypes[i].propertyFlags & memoryProperties)) {
             VkMemoryAllocateInfo memory_allocate_info = {
                 VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,  // sType
                 nullptr,                                 // pNext
-                memory_requirements.size,                // allocationSize
+                memoryRequirements.size,                 // allocationSize
                 i                                        // memoryTypeIndex
             };
             result = vkAllocateMemory(device, &memory_allocate_info, nullptr, memory);
@@ -56,7 +56,7 @@ bool Vk_Utilities::AllocateMemory(VkDeviceMemory* memory,
     return false;
 }
 
-bool Vk_Utilities::AllocateCommandBuffers(VkCommandPool& cmd_pool, uint32_t count, VkCommandBuffer* command_buffer) {
+bool Vk_Utilities::AllocateCommandBuffers(VkCommandPool& cmdPool, uint32_t count, VkCommandBuffer* commandBuffer) {
     VkResult result = VK_SUCCESS;
 
     Vk_Context& context = Vk_Context::GetInstance();
@@ -66,11 +66,11 @@ bool Vk_Utilities::AllocateCommandBuffers(VkCommandPool& cmd_pool, uint32_t coun
     VkCommandBufferAllocateInfo cmd_buffer_allocate_info = {
         VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,  // sType
         nullptr,                                         // pNext
-        cmd_pool,                                        // commandPool
+        cmdPool,                                         // commandPool
         VK_COMMAND_BUFFER_LEVEL_PRIMARY,                 // level
         count                                            // bufferCount
     };
-    result = vkAllocateCommandBuffers(device, &cmd_buffer_allocate_info, command_buffer);
+    result = vkAllocateCommandBuffers(device, &cmd_buffer_allocate_info, commandBuffer);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Could not allocate command buffer");
         return false;

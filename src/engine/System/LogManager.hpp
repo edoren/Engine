@@ -18,7 +18,7 @@ enum class LogPriority {
 class ENGINE_API LogManager : public Singleton<LogManager> {
 public:
     LogManager();
-    LogManager(String app_name, String log_file);
+    LogManager(String appName, String logFile);
 
     ~LogManager();
 

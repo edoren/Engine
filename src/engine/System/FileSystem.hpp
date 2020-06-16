@@ -105,8 +105,8 @@ public:
     ///         components
     ////////////////////////////////////////////////////////////
     template <typename... Args>
-    String join(const String& left, const String& right, Args... Paths) const {
-        return join(join(left, right), Paths...);
+    String join(const String& left, const String& right, Args... paths) const {
+        return join(join(left, right), paths...);
     }
 
     ////////////////////////////////////////////////////////////
@@ -114,7 +114,7 @@ public:
     ///
     /// @param[in] search_paths Vector of new search paths
     ////////////////////////////////////////////////////////////
-    void setSearchPaths(std::vector<String> search_paths);
+    void setSearchPaths(std::vector<String> searchPaths);
 
     ////////////////////////////////////////////////////////////
     /// @brief Obtain the serch paths used to open files

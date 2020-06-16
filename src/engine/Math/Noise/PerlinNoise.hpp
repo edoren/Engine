@@ -31,7 +31,7 @@ public:
 
     float getValue(float x, float y, float z) const override;
 
-    void setOctaveCount(int octave_count);
+    void setOctaveCount(int octaveCount);
 
     void setFrequency(float frequency);
 

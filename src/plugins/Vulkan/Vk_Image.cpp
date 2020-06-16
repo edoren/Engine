@@ -95,14 +95,14 @@ bool Vk_Image::createImageView(VkFormat format, VkImageAspectFlags aspectMask) {
     return vkCreateImageView(device, &image_view_create_info, nullptr, &m_view) == VK_SUCCESS;
 }
 
-bool Vk_Image::allocateMemory(const VkMemoryPropertyFlags& memory_properties) {
+bool Vk_Image::allocateMemory(const VkMemoryPropertyFlags& memoryProperties) {
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.getVulkanDevice();
 
     VkMemoryRequirements image_memory_requirements;
     vkGetImageMemoryRequirements(device, m_handle, &image_memory_requirements);
 
-    if (!Vk_Utilities::AllocateMemory(&m_memory, memory_properties, image_memory_requirements)) {
+    if (!Vk_Utilities::AllocateMemory(&m_memory, memoryProperties, image_memory_requirements)) {
         return false;
     }
 

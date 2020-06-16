@@ -63,11 +63,10 @@ void ModelManager::unload(Model* model) {
 
         found_it->reset(nullptr);
 
+        LogDebug(sTag, "Unloading model: {}"_format(found_name_it->first));
         m_nameMap.erase(found_name_it->first);
         m_modelRefCount.erase(model);
         m_models.erase(found_it);
-
-        LogDebug(sTag, "Unloading model: {}"_format(found_name_it->first));
     }
 }
 

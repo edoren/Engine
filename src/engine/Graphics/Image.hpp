@@ -16,7 +16,7 @@ public:
 
     bool loadFromFileInMemory(const byte* buffer, uint32 len);
 
-    bool loadFromMemory(const Color32* color_map, uint32 width, uint32 height);
+    bool loadFromMemory(const Color32* colorMap, uint32 width, uint32 height);
 
     void clear();
 

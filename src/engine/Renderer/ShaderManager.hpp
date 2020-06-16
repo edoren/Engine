@@ -40,7 +40,7 @@ public:
     ///
     /// @return On success returns the Shader handler or nullptr on failure
     ////////////////////////////////////////////////////////////
-    Shader* loadFromMemory(const String& name, const std::map<ShaderType, String*>& shader_data_map);
+    Shader* loadFromMemory(const String& name, const std::map<ShaderType, String*>& shaderDataMap);
 
     Shader* getShader(const String& name);
 

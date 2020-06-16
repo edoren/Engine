@@ -13,10 +13,10 @@ bool Image::loadFromFileInMemory(const byte* buffer, uint32 len) {
     return io::ImageLoader::LoadFromFileInMemory(buffer, len, m_pixels, m_size);
 }
 
-bool Image::loadFromMemory(const Color32* color_map, uint32 width, uint32 height) {
+bool Image::loadFromMemory(const Color32* colorMap, uint32 width, uint32 height) {
     m_size.x = width;
     m_size.y = height;
-    const byte* data = reinterpret_cast<const byte*>(color_map);
+    const byte* data = reinterpret_cast<const byte*>(colorMap);
     m_pixels.assign(data, data + (width * height * 4));
     return true;
 }
