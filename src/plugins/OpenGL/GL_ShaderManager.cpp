@@ -1,4 +1,5 @@
 #include "GL_ShaderManager.hpp"
+
 #include "GL_Shader.hpp"
 
 namespace engine {
@@ -36,7 +37,7 @@ GL_Shader* GL_ShaderManager::loadFromFile(const String& basename) {
     return reinterpret_cast<GL_Shader*>(base_shader);
 }
 
-GL_Shader* GL_ShaderManager::loadFromMemory(const String& name, std::map<ShaderType, String*> shader_data_map) {
+GL_Shader* GL_ShaderManager::loadFromMemory(const String& name, const std::map<ShaderType, String*>& shader_data_map) {
     Shader* base_shader = ShaderManager::loadFromMemory(name, shader_data_map);
     return reinterpret_cast<GL_Shader*>(base_shader);
 }

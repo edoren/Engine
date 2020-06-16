@@ -12,7 +12,7 @@ class VULKAN_PLUGIN_API Vk_Image : private NonCopyable {
 public:
     Vk_Image();
 
-    Vk_Image(Vk_Image&& other);
+    Vk_Image(Vk_Image&& other) noexcept;
 
     ~Vk_Image();
 

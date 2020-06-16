@@ -78,12 +78,12 @@ public:
     friend ENGINE_API Time& operator%=(Time& left, const Time& right);
 
     template <typename T>
-    friend Time operator*(Time left, T right) {
+    friend Time operator*(const Time& left, T right) {
         return Time::FromNanoseconds(static_cast<int64>(left.asNanoseconds() * right));
     }
 
     template <typename T>
-    friend Time operator*(T left, Time right) {
+    friend Time operator*(T left, const Time& right) {
         return Time::FromNanoseconds(static_cast<int64>(left * right.asNanoseconds()));
     }
 
@@ -94,7 +94,7 @@ public:
     }
 
     template <typename T>
-    friend Time operator/(Time left, T right) {
+    friend Time operator/(const Time& left, T right) {
         return Time::FromNanoseconds(static_cast<int64>(left.asNanoseconds() / right));
     }
 

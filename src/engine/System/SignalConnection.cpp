@@ -57,7 +57,7 @@ SignalConnection::SignalConnection(const SignalConnection& other)
     }
 }
 
-SignalConnection::SignalConnection(SignalConnection&& other)
+SignalConnection::SignalConnection(SignalConnection&& other) noexcept
       : m_id(other.m_id),
         m_reference(other.m_reference),
         m_disconnectCallback(other.m_disconnectCallback) {
@@ -81,7 +81,7 @@ SignalConnection& SignalConnection::operator=(const SignalConnection& other) {
     return *this;
 }
 
-SignalConnection& SignalConnection::operator=(SignalConnection&& other) {
+SignalConnection& SignalConnection::operator=(SignalConnection&& other) noexcept {
     new (this) SignalConnection(std::move(other));
     return *this;
 }

@@ -128,7 +128,7 @@ String::String(const std::basic_string<wchar>& wideString) {
 
 String::String(const String& other) = default;
 
-String::String(String&& other) : m_string(std::move(other.m_string)) {}
+String::String(String&& other) noexcept : m_string(std::move(other.m_string)) {}
 
 String::~String() = default;
 
@@ -215,7 +215,7 @@ String& String::operator=(const char8* right) {
     return *this;
 }
 
-String& String::operator=(String&& right) {
+String& String::operator=(String&& right) noexcept {
     m_string = std::move(right.m_string);
     return *this;
 }

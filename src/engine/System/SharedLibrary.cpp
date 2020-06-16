@@ -20,7 +20,7 @@ namespace engine {
 
 SharedLibrary::SharedLibrary(String name) : m_name(std::move(name)), m_handle(nullptr) {}
 
-SharedLibrary::SharedLibrary(SharedLibrary&& other) {
+SharedLibrary::SharedLibrary(SharedLibrary&& other) noexcept {
     m_name = other.m_name;
     m_handle = other.m_handle;
     other.m_name.clear();

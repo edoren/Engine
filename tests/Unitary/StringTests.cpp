@@ -52,8 +52,8 @@ TEST_CASE("String to other encodings", "[String]") {
         REQUIRE(hello_wide == L"HELLO WORLD");
     }
     SECTION("to UTF-8 strings") {
-        std::string hello_utf8 = hello.toUtf8();
-        std::string smiley_utf8 = smiley.toUtf8();
+        const std::string& hello_utf8 = hello.toUtf8();
+        const std::string& smiley_utf8 = smiley.toUtf8();
         REQUIRE(hello_utf8 == u8"HELLO WORLD");
         REQUIRE(smiley_utf8 == u8"\U0001F60A");
     }

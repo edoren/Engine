@@ -18,7 +18,7 @@ Vk_Shader::Vk_Shader() {
     }
 }
 
-Vk_Shader::Vk_Shader(Vk_Shader&& other) : m_modules(std::move(other.m_modules)) {
+Vk_Shader::Vk_Shader(Vk_Shader&& other) noexcept : m_modules(other.m_modules) {
     for (auto& module : other.m_modules) {
         module = VK_NULL_HANDLE;
     }
@@ -40,7 +40,7 @@ Vk_Shader::~Vk_Shader() {
     m_uniformBuffers._static.destroy();
 }
 
-Vk_Shader& Vk_Shader::operator=(Vk_Shader&& other) {
+Vk_Shader& Vk_Shader::operator=(Vk_Shader&& other) noexcept {
     new (this) Vk_Shader(std::move(other));
     return *this;
 }

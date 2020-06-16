@@ -48,7 +48,7 @@ public:
         }
     }
 
-    Function(Function&& other)
+    Function(Function&& other) noexcept
           : m_data(std::move(other.m_data)),
             m_invoker(std::move(other.m_invoker)),
             m_manager(std::move(other.m_manager)) {
@@ -83,7 +83,7 @@ public:
         return *this;
     }
 
-    Function& operator=(Function&& other) {
+    Function& operator=(Function&& other) noexcept {
         Function(std::move(other)).Swap(*this);
         return *this;
     }

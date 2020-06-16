@@ -10,19 +10,17 @@ Transform::Transform(const Transform& other)
 
     = default;
 
-Transform::Transform(Transform&& other)
-      : m_scale(std::move(other.m_scale)),
-        m_rotate(std::move(other.m_rotate)),
-        m_translate(std::move(other.m_translate)) {}
-
-Transform::~Transform() = default;
+Transform::Transform(Transform&& other) noexcept
+      : m_scale(other.m_scale),
+        m_rotate(other.m_rotate),
+        m_translate(other.m_translate) {}
 
 Transform& Transform::operator=(const Transform& other) {
     new (this) Transform(other);
     return *this;
 }
 
-Transform& Transform::operator=(Transform&& other) {
+Transform& Transform::operator=(Transform&& other) noexcept {
     new (this) Transform(std::move(other));
     return *this;
 }

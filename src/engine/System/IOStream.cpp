@@ -7,7 +7,7 @@ namespace engine {
 
 IOStream::IOStream() : m_file(nullptr) {}
 
-IOStream::IOStream(IOStream&& other) : m_file(other.m_file), m_lastError(std::move(other.m_lastError)) {
+IOStream::IOStream(IOStream&& other) noexcept : m_file(other.m_file), m_lastError(std::move(other.m_lastError)) {
     other.m_file = nullptr;
     other.m_lastError.clear();
 }
@@ -19,7 +19,7 @@ IOStream::~IOStream() {
     }
 }
 
-IOStream& IOStream::operator=(IOStream&& other) {
+IOStream& IOStream::operator=(IOStream&& other) noexcept {
     new (this) IOStream(std::move(other));
     return *this;
 }

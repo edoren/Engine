@@ -17,11 +17,11 @@ public:
     };
 
     IOStream();
-    IOStream(IOStream&& other);
+    IOStream(IOStream&& other) noexcept;
 
     ~IOStream();
 
-    IOStream& operator=(IOStream&& other);
+    IOStream& operator=(IOStream&& other) noexcept;
 
     bool open(const String& filename, const char* mode);
     bool open(const char8* filename, const char* mode);

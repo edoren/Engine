@@ -13,7 +13,7 @@ Signal<Args...>::Signal(const Signal<Args...>& other) : m_currentId(0) {
 }
 
 template <typename... Args>
-Signal<Args...>::Signal(Signal<Args...>&& other) : m_currentId(other.m_currentId) {
+Signal<Args...>::Signal(Signal<Args...>&& other) noexcept : m_currentId(other.m_currentId) {
     std::lock_guard<std::mutex> lock(other.m_slotsMutex);
     m_slots = std::move(other.m_slots);
 }
@@ -30,7 +30,7 @@ Signal<Args...>& Signal<Args...>::operator=(const Signal<Args...>& other) {
 }
 
 template <typename... Args>
-Signal<Args...>& Signal<Args...>::operator=(Signal<Args...>&& other) {
+Signal<Args...>& Signal<Args...>::operator=(Signal<Args...>&& other) noexcept {
     new (this) Signal<Args...>(std::move(other));
     return *this;
 }

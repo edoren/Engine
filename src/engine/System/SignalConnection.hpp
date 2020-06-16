@@ -30,7 +30,7 @@ public:
     SignalConnection(const SignalConnection& other);
 
     // Move constructor
-    SignalConnection(SignalConnection&& other);
+    SignalConnection(SignalConnection&& other) noexcept;
 
     // Destructor
     ~SignalConnection();
@@ -39,7 +39,7 @@ public:
     SignalConnection& operator=(const SignalConnection& other);
 
     // Move assignment
-    SignalConnection& operator=(SignalConnection&& other);
+    SignalConnection& operator=(SignalConnection&& other) noexcept;
 
     IdType getId() const;
 

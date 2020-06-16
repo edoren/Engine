@@ -25,7 +25,7 @@ public:
     Signal(const Signal& other);
 
     // Move constructor
-    Signal(Signal&& other);
+    Signal(Signal&& other) noexcept;
 
     // Destructor
     ~Signal();
@@ -34,7 +34,7 @@ public:
     Signal& operator=(const Signal& other);
 
     // Move assignment
-    Signal& operator=(Signal&& other);
+    Signal& operator=(Signal&& other) noexcept;
 
     // Connects a member function to this Signal
     template <typename InstanceType, typename FMInstanceType>

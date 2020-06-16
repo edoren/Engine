@@ -14,10 +14,10 @@ namespace engine {
 class VULKAN_PLUGIN_API Vk_Shader : public Shader {
 public:
     Vk_Shader();
-    Vk_Shader(Vk_Shader&& other);
+    Vk_Shader(Vk_Shader&& other) noexcept;
     ~Vk_Shader() override;
 
-    Vk_Shader& operator=(Vk_Shader&& other);
+    Vk_Shader& operator=(Vk_Shader&& other) noexcept;
 
     bool loadFromMemory(const byte* source, std::size_t source_size, ShaderType type) override;
 
