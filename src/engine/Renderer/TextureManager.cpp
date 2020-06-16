@@ -101,13 +101,13 @@ Texture2D* TextureManager::getTexture2D(const String& name) {
     return (it != m_textures.end()) ? it->second.get() : nullptr;
 }
 
-void TextureManager::setActiveTexture2D(const String& name) {
-    Texture2D* found_texture = getTexture2D(name);
+void TextureManager::setActiveTexture2D(const String& basename) {
+    Texture2D* found_texture = getTexture2D(basename);
     if (found_texture != nullptr) {
         m_activeTexture = found_texture;
         useTexture2D(m_activeTexture);
     } else {
-        LogError(sTag, "Could not find a Texture2D named: {}"_format(name.toUtf8()));
+        LogError(sTag, "Could not find a Texture2D named: {}"_format(basename.toUtf8()));
     }
 }
 

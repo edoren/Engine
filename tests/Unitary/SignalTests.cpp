@@ -18,17 +18,17 @@ static const String gStaticFunctionStr = "[Static Function]";
 static const String gLambdaFunctionStr = "[Lambda Function]";
 
 struct MyBase {
-    virtual void VirtualMember() {
+    virtual void virtualMember() {
         gStream << gBaseMemberFunctionStr;
     }
 };
 
 struct MyClass : public MyBase {
-    void VirtualMember() override {
+    void virtualMember() {
         gStream << gDerivedMemberFunctionStr;
     }
 
-    void Member() {
+    void member() {
         gStream << gMemberFunctionStr;
     }
 
@@ -57,10 +57,10 @@ TEST_CASE("Signal creation", "[Signal]") {
         Signal<int, float, double> sig3;
         Signal<int, float, double, bool> sig4;
         sig1.emit(1);
-        sig2.emit(1, 5.5f);
-        sig3.emit(1, 5.5f, 0.1);
-        sig4.emit(1, 5.5f, 0.1, false);
-        REQUIRE(gStream.str() == std::string());
+        sig2.emit(1, 5.5F);
+        sig3.emit(1, 5.5F, 0.1);
+        sig4.emit(1, 5.5F, 0.1, false);
+        REQUIRE(gStream.str().empty());
     }
     SECTION("Copy constructor") {
         const String result = gStaticFunctionStr + gStaticFunctionStr;
@@ -103,7 +103,7 @@ TEST_CASE("Signal connection", "[Signal]") {
         const String result = gMemberFunctionStr;
         MyClass instance;
         Signal<> sig;
-        sig.connect(instance, &MyClass::Member);
+        sig.connect(instance, &MyClass::member);
         sig.emit();
         REQUIRE(gStream.str() == result);
     }
@@ -131,7 +131,7 @@ TEST_CASE("Signal emmition", "[Signal]") {
         const String result = "1 5.5 0.1 false";
         Signal<int, float, double, bool> sig;
         sig.connect(MutipleArgs);
-        sig.emit(1, 5.5f, 0.1, false);
+        sig.emit(1, 5.5F, 0.1, false);
         REQUIRE(gStream.str() == result);
     }
 }

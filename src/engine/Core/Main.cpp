@@ -173,9 +173,9 @@ void Main::setActiveScene(const String& scene_name) {
     ENGINE_UNUSED(scene_name);
 }
 
-void Main::loadPlugin(const String& name) {
+void Main::loadPlugin(const String& pluginName) {
     // Load plugin library
-    SharedLibrary* lib = m_sharedLibManager->load(name);
+    SharedLibrary* lib = m_sharedLibManager->load(pluginName);
 
     // Check for existence
     auto it = std::find(m_pluginLibs.begin(), m_pluginLibs.end(), lib);
@@ -186,7 +186,7 @@ void Main::loadPlugin(const String& name) {
         PFN_START_PLUGIN pFunc = reinterpret_cast<PFN_START_PLUGIN>(lib->getSymbol("StartPlugin"));
 
         if (!pFunc) {
-            LogFatal(sTag, "Cannot find symbol StartPlugin in library: " + name);
+            LogFatal(sTag, "Cannot find symbol StartPlugin in library: " + pluginName);
         }
 
         // This must call InstallPlugin
