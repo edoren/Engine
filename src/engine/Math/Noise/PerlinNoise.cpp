@@ -1,8 +1,6 @@
 #include <Math/Noise/PerlinNoise.hpp>
 
-namespace engine {
-
-namespace math {
+namespace engine::math {
 
 const int PerlinNoise::sDefaultSeed = 0;
 const int PerlinNoise::sDefaultOctaveCount = 6;
@@ -69,6 +67,4 @@ void PerlinNoise::setPersistence(float persistence) {
     m_persistence = persistence;
 }
 
-}  // namespace math
-
-}  // namespace engine
+}  // namespace engine::math
