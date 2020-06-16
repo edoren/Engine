@@ -396,9 +396,9 @@ void String::replace(std::size_t position, std::size_t length, const String& rep
 
 void String::replace(uint32 searchFor, uint32 replaceWith) {
     if (searchFor <= 0x7F && replaceWith <= 0x7F) {
-        for (size_t i = 0; i < m_string.size(); i++) {
-            if (m_string[i] == static_cast<char8>(searchFor)) {
-                m_string[i] = static_cast<char8>(replaceWith);
+        for (char& ch : m_string) {
+            if (ch == static_cast<char8>(searchFor)) {
+                ch = static_cast<char8>(replaceWith);
             }
         }
     } else {

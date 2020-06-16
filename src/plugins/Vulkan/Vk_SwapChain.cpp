@@ -166,12 +166,12 @@ bool Vk_SwapChain::create(Vk_Surface& surface, uint32 width, uint32 height) {
         m_images[i].getHandle() = swapchain_images[i];
     }
     // Create all the ImageViews
-    for (size_t i = 0; i < m_images.size(); i++) {
+    for (auto& image : m_images) {
         VkImageViewCreateInfo image_view_create_info = {
             VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,  // sType
             nullptr,                                   // pNext
             VkImageViewCreateFlags(),                  // flags
-            m_images[i].getHandle(),                   // image
+            image.getHandle(),                       // image
             VK_IMAGE_VIEW_TYPE_2D,                     // viewType
             m_format,                                  // format
             VkComponentMapping{
@@ -190,7 +190,7 @@ bool Vk_SwapChain::create(Vk_Surface& surface, uint32 width, uint32 height) {
             },
         };
 
-        result = vkCreateImageView(context.getVulkanDevice(), &image_view_create_info, nullptr, &m_images[i].getView());
+        result = vkCreateImageView(context.getVulkanDevice(), &image_view_create_info, nullptr, &image.getView());
         if (result != VK_SUCCESS) {
             LogError(sTag, "Could not create image view for framebuffer");
             return false;

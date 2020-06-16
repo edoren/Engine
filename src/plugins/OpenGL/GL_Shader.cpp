@@ -31,8 +31,8 @@ std::vector<const char*> sRequiredExtensions = {
 }  // namespace
 
 GL_Shader::GL_Shader() : m_program(glCreateProgram()) {
-    for (size_t i = 0; i < m_shaders.size(); i++) {
-        m_shaders[i] = 0;
+    for (unsigned int& shader : m_shaders) {
+        shader = 0;
     }
     GL_CALL(glGenBuffers(1, &m_uniformBuffers._static));
     GL_CALL(glGenBuffers(1, &m_uniformBuffers.dynamic));
@@ -43,8 +43,8 @@ GL_Shader::GL_Shader(GL_Shader&& other)
         m_shaders(std::move(other.m_shaders)),
         m_uniforms(std::move(other.m_uniforms)) {
     other.m_program = 0;
-    for (size_t i = 0; i < other.m_shaders.size(); i++) {
-        other.m_shaders[i] = 0;
+    for (unsigned int& shader : other.m_shaders) {
+        shader = 0;
     }
 }
 
@@ -284,11 +284,11 @@ GLuint GL_Shader::compile(const byte* source, size_t source_size, ShaderType typ
 }
 
 void GL_Shader::cleanUpShaders() {
-    for (size_t i = 0; i < m_shaders.size(); i++) {
-        if (m_shaders[i]) {
-            GL_CALL(glDetachShader(m_program, m_shaders[i]));
-            GL_CALL(glDeleteShader(m_shaders[i]));
-            m_shaders[i] = 0;
+    for (unsigned int& m_shader : m_shaders) {
+        if (m_shader) {
+            GL_CALL(glDetachShader(m_program, m_shader));
+            GL_CALL(glDeleteShader(m_shader));
+            m_shader = 0;
         }
     }
 }

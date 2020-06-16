@@ -24,8 +24,8 @@ SharedLibManager::SharedLibManager() {}
 
 SharedLibManager::~SharedLibManager() {
     // Unload & delete resources in turn
-    for (auto it = m_libraries.begin(); it != m_libraries.end(); it++) {
-        it->second.unload();
+    for (auto& m_librarie : m_libraries) {
+        m_librarie.second.unload();
     }
     m_libraries.clear();
 }
