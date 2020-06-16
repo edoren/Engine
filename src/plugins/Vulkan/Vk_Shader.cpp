@@ -13,22 +13,22 @@ const String sTag("Vk_Shader");
 }  // namespace
 
 Vk_Shader::Vk_Shader() {
-    for (size_t i = 0; i < m_modules.size(); i++) {
-        m_modules[i] = VK_NULL_HANDLE;
+    for (auto& module : m_modules) {
+        module = VK_NULL_HANDLE;
     }
 }
 
 Vk_Shader::Vk_Shader(Vk_Shader&& other) : m_modules(std::move(other.m_modules)) {
-    for (size_t i = 0; i < other.m_modules.size(); i++) {
-        other.m_modules[i] = VK_NULL_HANDLE;
+    for (auto& module : other.m_modules) {
+        module = VK_NULL_HANDLE;
     }
 }
 
 Vk_Shader::~Vk_Shader() {
     VkDevice& device = Vk_Context::GetInstance().getVulkanDevice();
-    for (size_t i = 0; i < m_modules.size(); i++) {
-        if (m_modules[i] != VK_NULL_HANDLE) {
-            vkDestroyShaderModule(device, m_modules[i], nullptr);
+    for (auto& module : m_modules) {
+        if (module != VK_NULL_HANDLE) {
+            vkDestroyShaderModule(device, module, nullptr);
         }
     }
 

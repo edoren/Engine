@@ -46,8 +46,8 @@ VKAPI_ATTR VkBool32 VKAPI_CALL DebugReportCallback(VkDebugReportFlagsEXT msgFlag
 }
 
 bool CheckExtensionAvailability(const char* str, const std::vector<VkExtensionProperties>& vec) {
-    for (size_t i = 0; i < vec.size(); i++) {
-        if (!strcmp(str, vec[i].extensionName)) {
+    for (const auto& property : vec) {
+        if (!strcmp(str, property.extensionName)) {
             return true;
         }
     }
@@ -55,8 +55,8 @@ bool CheckExtensionAvailability(const char* str, const std::vector<VkExtensionPr
 }
 
 bool CheckLayerAvailability(const char* str, const std::vector<VkLayerProperties>& vec) {
-    for (size_t i = 0; i < vec.size(); i++) {
-        if (!strcmp(str, vec[i].layerName)) {
+    for (const auto& property : vec) {
+        if (!strcmp(str, property.layerName)) {
             return true;
         }
     }
@@ -303,8 +303,8 @@ bool Vk_Context::createDevice() {
 
     // Check all the queried physical devices for one with the required
     // caracteristics and avaliable queues
-    for (size_t i = 0; i < physical_devices.size(); i++) {
-        if (selectPhysicalDevice(physical_devices[i])) {
+    for (auto& physical_device : physical_devices) {
+        if (selectPhysicalDevice(physical_device)) {
             break;
         }
     }
@@ -396,11 +396,11 @@ bool Vk_Context::selectPhysicalDevice(VkPhysicalDevice& physical_device) {
     }
 
     // Check that all the required device extensions exists
-    for (size_t i = 0; i < m_deviceExtensions.size(); i++) {
-        if (!CheckExtensionAvailability(m_deviceExtensions[i], available_extensions)) {
+    for (auto& m_deviceExtension : m_deviceExtensions) {
+        if (!CheckExtensionAvailability(m_deviceExtension, available_extensions)) {
             LogError(sTag,
                      "Physical device {} doesn't support extension "
-                     "named \"{}\""_format(properties.deviceName, m_deviceExtensions[i]));
+                     "named \"{}\""_format(properties.deviceName, m_deviceExtension));
             return false;
         }
     }
