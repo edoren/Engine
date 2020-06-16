@@ -6,26 +6,26 @@
 namespace engine {
 
 // Integer types
-typedef uint8_t uint8;
-typedef uint16_t uint16;
-typedef uint32_t uint32;
-typedef uint64_t uint64;
-typedef int8_t int8;
-typedef int16_t int16;
-typedef int32_t int32;
-typedef int64_t int64;
-typedef uintptr_t uintptr;
+using uint8 = uint8_t;
+using uint16 = uint16_t;
+using uint32 = uint32_t;
+using uint64 = uint64_t;
+using int8 = int8_t;
+using int16 = int16_t;
+using int32 = int32_t;
+using int64 = int64_t;
+using uintptr = uintptr_t;
 
 // Byte type
-typedef uint8 byte;
+using byte = uint8;
 
 // Char types for UTF-8, UTF-16 and UTF-32 respectively
-typedef char char8;
-typedef char16_t char16;
-typedef char32_t char32;
+using char8 = char;
+using char16 = char16_t;
+using char32 = char32_t;
 
 // This type represents a wide char, its size and encoding
 // varies depending on the platform
-typedef wchar_t wchar;
+using wchar = wchar_t;
 
 }  // namespace engine
