@@ -6,7 +6,7 @@ const Time Time::sZero = Time(0);
 
 Time::Time() : m_nanoseconds(0) {}
 
-Time::Time(const Time& other) : m_nanoseconds(other.m_nanoseconds) {}
+Time::Time(const Time& other) = default;
 
 Time::Time(int64 nanoseconds) : m_nanoseconds(nanoseconds) {}
 

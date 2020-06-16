@@ -29,7 +29,7 @@ TextureManager* TextureManager::GetInstancePtr() {
 
 TextureManager::TextureManager() : m_activeTexture(nullptr) {}
 
-TextureManager::~TextureManager() {}
+TextureManager::~TextureManager() = default;
 
 void TextureManager::initialize() {
     math::uvec2 defaultTextureSize(300, 300);

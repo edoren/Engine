@@ -20,7 +20,7 @@ SharedLibManager* SharedLibManager::GetInstancePtr() {
     return Singleton<SharedLibManager>::GetInstancePtr();
 }
 
-SharedLibManager::SharedLibManager() {}
+SharedLibManager::SharedLibManager() = default;
 
 SharedLibManager::~SharedLibManager() {
     // Unload & delete resources in turn

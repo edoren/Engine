@@ -23,7 +23,7 @@ Renderer::Renderer()
         m_textureManager(nullptr),
         m_modelManager(nullptr) {}
 
-Renderer::~Renderer() {}
+Renderer::~Renderer() = default;
 
 bool Renderer::initialize() {
     int code = SDL_InitSubSystem(SDL_INIT_VIDEO);

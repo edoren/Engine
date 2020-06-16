@@ -17,7 +17,7 @@ template <typename T>
 struct Vector2Packed {
     typedef mathfu::VectorPacked<T, 2> data_type;
 
-    Vector2Packed() {}
+    Vector2Packed() : data() {}
 
     explicit Vector2Packed(const Vector2<T>& vector) {
         vector.pack(this);
@@ -41,7 +41,7 @@ class Vector2 {
 public:
     typedef mathfu::Vector<T, 2> data_type;
 
-    inline Vector2() {}
+    inline Vector2() : data() {}
 
     explicit inline Vector2(const T& s) : data(s) {}
 

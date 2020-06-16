@@ -14,7 +14,7 @@ const String sTag("Vk_Texture2D");
 
 }  // namespace
 
-Vk_Texture2D::Vk_Texture2D() {}
+Vk_Texture2D::Vk_Texture2D() = default;
 
 Vk_Texture2D::~Vk_Texture2D() {
     Vk_Context& context = Vk_Context::GetInstance();

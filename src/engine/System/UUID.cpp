@@ -11,7 +11,7 @@ namespace engine {
 
 static_assert(sizeof(UUID) == 16, "UUID class size should be 16 bytes");
 
-UUID::UUID() {}
+UUID::UUID() = default;
 
 UUID UUID::UUID4() {
     static std::random_device sRd;

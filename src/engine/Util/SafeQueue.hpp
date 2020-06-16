@@ -7,7 +7,7 @@ namespace engine {
 template <typename T>
 class SafeQueue {
 public:
-    SafeQueue() {}
+    SafeQueue() = default;
 
     bool isEmpty() const {
         return m_impl.empty();

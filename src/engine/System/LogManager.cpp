@@ -23,7 +23,7 @@ android_LogPriority sAndroidLogPriorities[] = {ANDROID_LOG_UNKNOWN, ANDROID_LOG_
                                                ANDROID_LOG_FATAL};
 #endif
 
-const char* sLogPriorityNames[] = {NULL, "VERBOSE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"};
+const char* sLogPriorityNames[] = {nullptr, "VERBOSE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"};
 
 String DefaultLogCallback(LogPriority priority, const String& tag, const String& message) {
     const char* priority_name = sLogPriorityNames[static_cast<int>(priority)];
@@ -62,7 +62,7 @@ LogManager::LogManager(String app_name, String log_file)
         m_fileLoggingEnable(true),
         m_consoleLoggingEnable(true) {}
 
-LogManager::~LogManager() {}
+LogManager::~LogManager() = default;
 
 void LogManager::initialize() {}
 

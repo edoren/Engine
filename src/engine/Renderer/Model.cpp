@@ -77,9 +77,9 @@ private:
 
 class CustomAssimpIOSystem : public Assimp::IOSystem {
 public:
-    CustomAssimpIOSystem() {}
+    CustomAssimpIOSystem() = default;
 
-    ~CustomAssimpIOSystem() override {}
+    ~CustomAssimpIOSystem() override = default;
 
     bool Exists(const char* pFile) const override {
         return FileSystem::GetInstance().fileExists(pFile);
@@ -141,7 +141,7 @@ TextureType GetTextureTypeFromAiTextureType(aiTextureType type) {
 
 }  // namespace
 
-Model::Model() {}
+Model::Model() = default;
 
 Model::~Model() {
     for (auto& mesh : m_meshes) {

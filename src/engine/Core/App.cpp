@@ -10,7 +10,7 @@ const String sTag("App");
 
 App::App() : m_deltaTime(Time::sZero) {}
 
-App::~App() {}
+App::~App() = default;
 
 const Time& App::getDeltaTime() {
     return m_deltaTime;

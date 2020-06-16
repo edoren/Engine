@@ -16,7 +16,7 @@ using namespace engine;
 
 class CreateWindowApp : public App {
 public:
-    CreateWindowApp() {}
+    CreateWindowApp() = default;
 
 protected:
     bool initialize() override {

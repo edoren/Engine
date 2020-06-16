@@ -47,7 +47,7 @@ std::vector<VkVertexInputAttributeDescription> GetAttribDescription(const std::v
 
 }  // namespace
 
-Vk_VertexLayout::Vk_VertexLayout() {}
+Vk_VertexLayout::Vk_VertexLayout() = default;
 
 Vk_VertexLayout::Vk_VertexLayout(const std::vector<VertexLayout::Component>& components) : VertexLayout(components) {}
 

@@ -7,16 +7,15 @@ namespace engine {
 Transform::Transform() : m_scale(1, 1, 1), m_rotate(0, 0, 0), m_translate(0, 0, 0) {}
 
 Transform::Transform(const Transform& other)
-      : m_scale(other.m_scale),
-        m_rotate(other.m_rotate),
-        m_translate(other.m_translate) {}
+
+    = default;
 
 Transform::Transform(Transform&& other)
       : m_scale(std::move(other.m_scale)),
         m_rotate(std::move(other.m_rotate)),
         m_translate(std::move(other.m_translate)) {}
 
-Transform::~Transform() {}
+Transform::~Transform() = default;
 
 Transform& Transform::operator=(const Transform& other) {
     new (this) Transform(other);

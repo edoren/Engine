@@ -4,12 +4,11 @@ namespace engine {
 
 const RenderStates RenderStates::sDefault = RenderStates();
 
-RenderStates::RenderStates() {}
+RenderStates::RenderStates() = default;
 
 RenderStates::RenderStates(const RenderStates& other)
-      : transform(other.transform),
-        texture(other.texture),
-        shader(other.shader) {}
+
+    = default;
 
 RenderStates::RenderStates(RenderStates&& other)
       : transform(std::move(other.transform)),

@@ -28,9 +28,9 @@ SceneManager* SceneManager::GetInstancePtr() {
     return Singleton<SceneManager>::GetInstancePtr();
 }
 
-SceneManager::SceneManager() {}
+SceneManager::SceneManager() = default;
 
-SceneManager::~SceneManager() {}
+SceneManager::~SceneManager() = default;
 
 void SceneManager::initialize() {}
 

@@ -32,7 +32,7 @@ namespace engine {
 
 const std::size_t String::sInvalidPos = std::basic_string<char8>::npos;
 
-String::String() {}
+String::String() = default;
 
 String::String(char8 asciiChar) {
     m_string += asciiChar;
@@ -126,11 +126,11 @@ String::String(const std::basic_string<wchar>& wideString) {
     utf8::utf32to8(wideString.cbegin(), wideString.cend(), std::back_inserter(m_string));
 }
 
-String::String(const String& other) : m_string(other.m_string) {}
+String::String(const String& other) = default;
 
 String::String(String&& other) : m_string(std::move(other.m_string)) {}
 
-String::~String() {}
+String::~String() = default;
 
 String String::FromUtf8(const char8* begin, const char8* end) {
     String string;
@@ -208,10 +208,7 @@ std::basic_string<wchar> String::toWide() const {
     return output;
 }
 
-String& String::operator=(const String& right) {
-    m_string = right.m_string;
-    return *this;
-}
+String& String::operator=(const String& right) = default;
 
 String& String::operator=(const char8* right) {
     m_string = right;

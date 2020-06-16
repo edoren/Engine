@@ -8,7 +8,7 @@ BaseNoise::BaseNoise(int seed) : m_seed(seed) {
     generatePermutationVector();
 }
 
-BaseNoise::~BaseNoise() {}
+BaseNoise::~BaseNoise() = default;
 
 int BaseNoise::getSeed() const {
     return m_seed;

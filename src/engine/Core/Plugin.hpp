@@ -6,7 +6,7 @@ namespace engine {
 
 class ENGINE_API Plugin {
 public:
-    virtual ~Plugin() {}
+    virtual ~Plugin() = default;
 
     virtual const String& getName() const = 0;
 
