@@ -62,7 +62,7 @@ bool Vk_Shader::loadFromMemory(const byte* source, std::size_t source_size, Shad
 
     VkDevice& device = Vk_Context::GetInstance().getVulkanDevice();
 
-    size_t pos = static_cast<size_t>(type);
+    auto pos = static_cast<size_t>(type);
 
     if (m_modules[pos] != VK_NULL_HANDLE) {
         vkDestroyShaderModule(device, m_modules[pos], nullptr);
@@ -296,7 +296,7 @@ bool Vk_Shader::createUniformBuffers() {
 
     // Dynamic UBO memory buffer
     PhysicalDeviceParameters& physical_device = Vk_Context::GetInstance().getPhysicalDevice();
-    size_t minUboAlignment = static_cast<size_t>(physical_device.properties.limits.minUniformBufferOffsetAlignment);
+    auto minUboAlignment = static_cast<size_t>(physical_device.properties.limits.minUniformBufferOffsetAlignment);
 
     m_uboDynamic.setBufferSize(50, minUboAlignment);  // TODO: CHANGE THIS
 

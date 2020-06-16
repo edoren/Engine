@@ -55,7 +55,7 @@ std::unique_ptr<Shader> GL_ShaderManager::createShader() {
 }
 
 void GL_ShaderManager::useShader(Shader* shader) {
-    GL_Shader* casted_shader = reinterpret_cast<GL_Shader*>(shader);
+    auto* casted_shader = reinterpret_cast<GL_Shader*>(shader);
     casted_shader->use();
 }
 

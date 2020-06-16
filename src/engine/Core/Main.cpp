@@ -183,7 +183,7 @@ void Main::loadPlugin(const String& pluginName) {
         m_pluginLibs.push_back(lib);
 
         // Call startup function
-        PFN_START_PLUGIN pFunc = reinterpret_cast<PFN_START_PLUGIN>(lib->getSymbol("StartPlugin"));
+        auto pFunc = reinterpret_cast<PFN_START_PLUGIN>(lib->getSymbol("StartPlugin"));
 
         if (!pFunc) {
             LogFatal(sTag, "Cannot find symbol StartPlugin in library: " + pluginName);
@@ -199,7 +199,7 @@ void Main::unloadPlugin(const String& pluginName) {
         SharedLibrary* shared_lib = *it;
         if (shared_lib->getName() == pluginName) {
             // Call plugin shutdown
-            PFN_STOP_PLUGIN pFunc = (PFN_STOP_PLUGIN)shared_lib->getSymbol("StopPlugin");
+            auto pFunc = (PFN_STOP_PLUGIN)shared_lib->getSymbol("StopPlugin");
 
             if (!pFunc) {
                 const String& name = shared_lib->getName();
@@ -274,7 +274,7 @@ void Main::shutdownPlugins() {
     // Unload all the Plugins loaded through shared libraries
     for (auto& plugin_lib : m_pluginLibs) {
         // Call plugin shutdown
-        PFN_STOP_PLUGIN pFunc = reinterpret_cast<PFN_STOP_PLUGIN>(plugin_lib->getSymbol("StopPlugin"));
+        auto pFunc = reinterpret_cast<PFN_STOP_PLUGIN>(plugin_lib->getSymbol("StopPlugin"));
 
         if (!pFunc) {
             const String& name = plugin_lib->getName();

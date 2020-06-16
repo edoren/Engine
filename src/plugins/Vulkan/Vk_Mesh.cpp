@@ -202,7 +202,7 @@ void Vk_Mesh::setupMesh() {
 }
 
 void Vk_Mesh::draw(RenderWindow& target, const RenderStates& states) const {
-    Vk_RenderWindow& window = static_cast<Vk_RenderWindow&>(target);
+    auto& window = static_cast<Vk_RenderWindow&>(target);
 
     auto lambda = [this, &window, states](uint32 index, VkCommandBuffer& command_buffer,
                                           VkPipelineLayout& pipeline_layout) {
@@ -259,7 +259,7 @@ void Vk_Mesh::draw(RenderWindow& target, const RenderStates& states) const {
         vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_layout, 0,
                                 static_cast<uint32>(array_pos), descriptor_sets.data(), 1, &dynamic_offset);
 
-        uint32 indices_size = static_cast<uint32>(m_indices.size());
+        auto indices_size = static_cast<uint32>(m_indices.size());
         vkCmdDrawIndexed(command_buffer, indices_size, 1, 0, 0, 0);
     };
 
