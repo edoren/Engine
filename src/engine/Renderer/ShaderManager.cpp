@@ -34,7 +34,7 @@ ShaderManager* ShaderManager::GetInstancePtr() {
 
 ShaderManager::ShaderManager() : m_activeShader(nullptr) {}
 
-ShaderManager::~ShaderManager() {}
+ShaderManager::~ShaderManager() = default;
 
 void ShaderManager::initialize() {}
 

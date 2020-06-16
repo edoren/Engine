@@ -42,7 +42,7 @@ FileSystem::FileSystem() {
     };
 }
 
-FileSystem::~FileSystem() {}
+FileSystem::~FileSystem() = default;
 
 void FileSystem::initialize() {}
 

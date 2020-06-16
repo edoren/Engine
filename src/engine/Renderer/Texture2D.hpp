@@ -6,9 +6,9 @@ namespace engine {
 
 class ENGINE_API Texture2D : NonCopyable {
 public:
-    Texture2D() {}
+    Texture2D() = default;
 
-    virtual ~Texture2D() {}
+    virtual ~Texture2D() = default;
 
     virtual bool loadFromImage(const Image& img) = 0;
 

@@ -8,9 +8,9 @@ const String sTag("Mesh");
 
 }  // namespace
 
-Mesh::Mesh() {}
+Mesh::Mesh() = default;
 
-Mesh::~Mesh() {}
+Mesh::~Mesh() = default;
 
 const std::vector<Vertex>& Mesh::getVertices() {
     return m_vertices;

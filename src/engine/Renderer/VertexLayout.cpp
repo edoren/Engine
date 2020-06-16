@@ -5,7 +5,7 @@
 
 namespace engine {
 
-VertexLayout::VertexLayout() {}
+VertexLayout::VertexLayout() = default;
 
 VertexLayout::VertexLayout(std::vector<VertexLayout::Component> vertex_input)
       : m_vertexInput(std::move(vertex_input)) {}

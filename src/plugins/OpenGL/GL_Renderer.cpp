@@ -12,7 +12,7 @@ String sRendererName("OpenGL");
 
 }  // namespace
 
-GL_Renderer::GL_Renderer() {}
+GL_Renderer::GL_Renderer() = default;
 
 GL_Renderer::~GL_Renderer() {
     shutdown();

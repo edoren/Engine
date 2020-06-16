@@ -22,9 +22,9 @@ ModelManager* ModelManager::GetInstancePtr() {
     return Singleton<ModelManager>::GetInstancePtr();
 }
 
-ModelManager::ModelManager() {}
+ModelManager::ModelManager() = default;
 
-ModelManager::~ModelManager() {}
+ModelManager::~ModelManager() = default;
 
 void ModelManager::initialize() {}
 

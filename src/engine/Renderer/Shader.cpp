@@ -11,9 +11,9 @@ const String sTag("Shader");
 
 }  // namespace
 
-Shader::Shader() {}
+Shader::Shader() = default;
 
-Shader::~Shader() {}
+Shader::~Shader() = default;
 
 UniformBufferObject::DataType Shader::getUboDataTypeFromString(const String& str) {
     if (str == "mat4x4") {

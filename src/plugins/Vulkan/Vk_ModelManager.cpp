@@ -29,7 +29,7 @@ Vk_ModelManager::Vk_ModelManager() {
     sDerivedInstance = reinterpret_cast<Vk_ModelManager*>(&base_instance);
 }
 
-Vk_ModelManager::~Vk_ModelManager() {}
+Vk_ModelManager::~Vk_ModelManager() = default;
 
 std::unique_ptr<Model> Vk_ModelManager::createModel() {
     return std::make_unique<Model>();

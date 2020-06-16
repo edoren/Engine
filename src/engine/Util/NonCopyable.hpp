@@ -4,8 +4,8 @@ namespace engine {
 
 class ENGINE_API NonCopyable {
 protected:
-    NonCopyable() {}
-    ~NonCopyable() {}
+    NonCopyable() = default;
+    ~NonCopyable() = default;
 
 private:
     NonCopyable(const NonCopyable&) = delete;

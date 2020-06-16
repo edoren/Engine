@@ -23,7 +23,7 @@ const String sTag("Vk_Mesh");
 
 }  // namespace
 
-Vk_Mesh::Vk_Mesh() {}
+Vk_Mesh::Vk_Mesh() = default;
 
 Vk_Mesh::~Vk_Mesh() {
     Vk_Context& context = Vk_Context::GetInstance();

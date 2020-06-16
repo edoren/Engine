@@ -11,7 +11,7 @@ String sRendererName("Vulkan");
 
 }  // namespace
 
-Vk_Renderer::Vk_Renderer() {}
+Vk_Renderer::Vk_Renderer() = default;
 
 Vk_Renderer::~Vk_Renderer() {
     shutdown();
