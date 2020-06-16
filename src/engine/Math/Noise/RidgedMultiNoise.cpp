@@ -1,8 +1,6 @@
 #include <Math/Noise/RidgedMultiNoise.hpp>
 
-namespace engine {
-
-namespace math {
+namespace engine::math {
 
 const int RidgedMultiNoise::sDefaultSeed = 0;
 const int RidgedMultiNoise::sDefaultOctaveCount = 6;
@@ -112,6 +110,4 @@ void RidgedMultiNoise::calcSpectralWeights() {
     }
 }
 
-}  // namespace math
-
-}  // namespace engine
+}  // namespace engine::math

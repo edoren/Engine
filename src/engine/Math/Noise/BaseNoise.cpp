@@ -1,8 +1,6 @@
 #include <Math/Noise/BaseNoise.hpp>
 
-namespace engine {
-
-namespace math {
+namespace engine::math {
 
 BaseNoise::BaseNoise(int seed) : m_seed(seed) {
     generatePermutationVector();
@@ -140,6 +138,4 @@ float BaseNoise::lerp(float t, float a, float b) const {
     return a + t * (b - a);
 }
 
-}  // namespace math
-
-}  // namespace engine
+}  // namespace engine::math
