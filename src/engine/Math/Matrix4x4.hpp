@@ -11,12 +11,12 @@ namespace math {
 template <typename T>
 class Matrix4x4 {
 public:
-    typedef mathfu::Matrix<T, 4, 4> data_type;
-    typedef Vector4<T> col_type;
-    typedef Vector4<T> row_type;
-    typedef Matrix4x4<T> type;
-    typedef Matrix4x4<T> transpose_type;
-    typedef T value_type;
+    using data_type = mathfu::Matrix<T, 4, 4>;
+    using col_type = Vector4<T>;
+    using row_type = Vector4<T>;
+    using type = Matrix4x4<T>;
+    using transpose_type = Matrix4x4<T>;
+    using value_type = T;
 
     // Constructors
 

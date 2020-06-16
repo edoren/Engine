@@ -14,33 +14,33 @@ namespace engine {
 
 namespace math {
 
-typedef Vector2<bool> bvec2;
-typedef Vector3<bool> bvec3;
-typedef Vector4<bool> bvec4;
+using bvec2 = Vector2<bool>;
+using bvec3 = Vector3<bool>;
+using bvec4 = Vector4<bool>;
 
-typedef Vector2<int32> ivec2;
-typedef Vector3<int32> ivec3;
-typedef Vector4<int32> ivec4;
+using ivec2 = Vector2<int32>;
+using ivec3 = Vector3<int32>;
+using ivec4 = Vector4<int32>;
 
-typedef Vector2<uint32> uvec2;
-typedef Vector3<uint32> uvec3;
-typedef Vector4<uint32> uvec4;
+using uvec2 = Vector2<uint32>;
+using uvec3 = Vector3<uint32>;
+using uvec4 = Vector4<uint32>;
 
-typedef Vector2<float> vec2;
-typedef Vector3<float> vec3;
-typedef Vector4<float> vec4;
+using vec2 = Vector2<float>;
+using vec3 = Vector3<float>;
+using vec4 = Vector4<float>;
 
-typedef Vector2<double> dvec2;
-typedef Vector3<double> dvec3;
-typedef Vector4<double> dvec4;
+using dvec2 = Vector2<double>;
+using dvec3 = Vector3<double>;
+using dvec4 = Vector4<double>;
 
-typedef Matrix2x2<float> mat2;
-typedef Matrix3x3<float> mat3;
-typedef Matrix4x4<float> mat4;
+using mat2 = Matrix2x2<float>;
+using mat3 = Matrix3x3<float>;
+using mat4 = Matrix4x4<float>;
 
-typedef Matrix2x2<float> mat2x2;
-typedef Matrix3x3<float> mat3x3;
-typedef Matrix4x4<float> mat4x4;
+using mat2x2 = Matrix2x2<float>;
+using mat3x3 = Matrix3x3<float>;
+using mat4x4 = Matrix4x4<float>;
 
 }  // namespace math
 

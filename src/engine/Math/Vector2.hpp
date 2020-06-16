@@ -15,7 +15,7 @@ class Vector4;
 
 template <typename T>
 struct Vector2Packed {
-    typedef mathfu::VectorPacked<T, 2> data_type;
+    using data_type = mathfu::VectorPacked<T, 2>;
 
     Vector2Packed() : data() {}
 
@@ -39,7 +39,7 @@ struct Vector2Packed {
 template <typename T>
 class Vector2 {
 public:
-    typedef mathfu::Vector<T, 2> data_type;
+    using data_type = mathfu::Vector<T, 2>;
 
     inline Vector2() : data() {}
 

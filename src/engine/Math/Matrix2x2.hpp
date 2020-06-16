@@ -11,12 +11,12 @@ namespace math {
 template <typename T>
 class Matrix2x2 {
 public:
-    typedef mathfu::Matrix<T, 2, 2> data_type;
-    typedef Vector2<T> col_type;
-    typedef Vector2<T> row_type;
-    typedef Matrix2x2<T> type;
-    typedef Matrix2x2<T> transpose_type;
-    typedef T value_type;
+    using data_type = mathfu::Matrix<T, 2, 2>;
+    using col_type = Vector2<T>;
+    using row_type = Vector2<T>;
+    using type = Matrix2x2<T>;
+    using transpose_type = Matrix2x2<T>;
+    using value_type = T;
 
     inline Matrix2x2() : m_data(data_type::Identity()) {}
 

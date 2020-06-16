@@ -40,8 +40,8 @@ public:
     ////////////////////////////////////////////////////////////
     // Types
     ////////////////////////////////////////////////////////////
-    typedef std::basic_string<char8>::iterator iterator;              ///< Iterator type
-    typedef std::basic_string<char8>::const_iterator const_iterator;  ///< Read-only iterator type
+    using iterator = std::basic_string<char8>::iterator;              ///< Iterator type
+    using const_iterator = std::basic_string<char8>::const_iterator;  ///< Read-only iterator type
 
     ////////////////////////////////////////////////////////////
     // Static member data

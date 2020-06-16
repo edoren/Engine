@@ -26,11 +26,11 @@ public:
         return sInstance;
     }
 
-protected:
-    static T* sInstance;
-
     Singleton(const Singleton<T>&) = delete;
     Singleton<T>& operator=(const Singleton<T>&) = delete;
+
+protected:
+    static T* sInstance;
 };
 
 }  // namespace engine

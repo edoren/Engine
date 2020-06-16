@@ -14,12 +14,12 @@ class Matrix4x4;
 template <typename T>
 class Matrix3x3 {
 public:
-    typedef mathfu::Matrix<T, 3, 3> data_type;
-    typedef Vector3<T> col_type;
-    typedef Vector3<T> row_type;
-    typedef Matrix3x3<T> type;
-    typedef Matrix3x3<T> transpose_type;
-    typedef T value_type;
+    using data_type = mathfu::Matrix<T, 3, 3>;
+    using col_type = Vector3<T>;
+    using row_type = Vector3<T>;
+    using type = Matrix3x3<T>;
+    using transpose_type = Matrix3x3<T>;
+    using value_type = T;
 
     inline Matrix3x3() : m_data(data_type::Identity()) {}
 
