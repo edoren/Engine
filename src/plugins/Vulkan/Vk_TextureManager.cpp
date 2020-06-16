@@ -67,7 +67,7 @@ std::unique_ptr<Texture2D> Vk_TextureManager::createTexture2D() {
 }
 
 void Vk_TextureManager::useTexture2D(Texture2D* texture) {
-    Vk_Texture2D* casted_texture = reinterpret_cast<Vk_Texture2D*>(texture);
+    auto* casted_texture = reinterpret_cast<Vk_Texture2D*>(texture);
     casted_texture->use();
 }
 

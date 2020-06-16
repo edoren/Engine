@@ -63,7 +63,7 @@ bool FileSystem::loadFileData(const String& filename, String* dest) const {
     std::vector<byte> out;
     bool success = loadFileData(filename, &out);
     if (success) {
-        char8* begin = reinterpret_cast<char8*>(out.data());
+        auto* begin = reinterpret_cast<char8*>(out.data());
         *dest = String::FromUtf8(begin, begin + out.size());
     }
     return success;

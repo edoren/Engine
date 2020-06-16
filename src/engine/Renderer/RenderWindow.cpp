@@ -67,21 +67,21 @@ bool RenderWindow::create(const String& name, const math::ivec2& size) {
 }
 
 void RenderWindow::destroy() {
-    if (SDL_Window* window = reinterpret_cast<SDL_Window*>(m_window)) {
+    if (auto* window = reinterpret_cast<SDL_Window*>(m_window)) {
         SDL_DestroyWindow(window);
         m_window = nullptr;
     }
 }
 
 void RenderWindow::reposition(int left, int top) {
-    if (SDL_Window* window = reinterpret_cast<SDL_Window*>(m_window)) {
+    if (auto* window = reinterpret_cast<SDL_Window*>(m_window)) {
         SDL_SetWindowPosition(window, left, top);
     }
 }
 
 void RenderWindow::resize(int width, int height) {
     // TODO check errors
-    SDL_Window* window = reinterpret_cast<SDL_Window*>(m_window);
+    auto* window = reinterpret_cast<SDL_Window*>(m_window);
     if (window && !isFullScreen()) {
         SDL_SetWindowSize(window, width, height);
 
@@ -92,7 +92,7 @@ void RenderWindow::resize(int width, int height) {
 
 void RenderWindow::setFullScreen(bool fullscreen, bool is_fake) {
     // TODO: check errors
-    if (SDL_Window* window = reinterpret_cast<SDL_Window*>(m_window)) {
+    if (auto* window = reinterpret_cast<SDL_Window*>(m_window)) {
         Uint32 flag = 0;
         if (fullscreen) {
             flag = (is_fake) ? SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_FULLSCREEN;

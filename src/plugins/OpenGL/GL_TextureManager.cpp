@@ -34,7 +34,7 @@ std::unique_ptr<Texture2D> GL_TextureManager::createTexture2D() {
 }
 
 void GL_TextureManager::useTexture2D(Texture2D* texture) {
-    GL_Texture2D* casted_texture = reinterpret_cast<GL_Texture2D*>(texture);
+    auto* casted_texture = reinterpret_cast<GL_Texture2D*>(texture);
     casted_texture->use();
 }
 

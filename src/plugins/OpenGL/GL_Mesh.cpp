@@ -75,14 +75,14 @@ void GL_Mesh::setupMesh() {
 }
 
 void GL_Mesh::draw(RenderWindow& target, const RenderStates& states) const {
-    GL_RenderWindow& window = static_cast<GL_RenderWindow&>(target);
+    auto& window = static_cast<GL_RenderWindow&>(target);
     GL_Shader* shader = GL_ShaderManager::GetInstance().getActiveShader();
 
     uint32 diffuse_num = 1;
     uint32 specular_num = 1;
     for (size_t i = 0; i < m_textures.size(); i++) {
         const auto& pair = m_textures[i];
-        GL_Texture2D* current_texture = static_cast<GL_Texture2D*>(pair.first);
+        auto* current_texture = static_cast<GL_Texture2D*>(pair.first);
         TextureType current_texture_type = pair.second;
 
         String uniform_name;

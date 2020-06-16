@@ -20,7 +20,7 @@ UUID UUID::UUID4() {
 
     UUID output;
 
-    uint64* uint64_uuid = reinterpret_cast<uint64*>(&output.m_uuid);
+    auto* uint64_uuid = reinterpret_cast<uint64*>(&output.m_uuid);
     for (int i = 0; i < 2; i++) {
         uint64_uuid[i] = sDist(sRng);
     }

@@ -263,7 +263,7 @@ GLuint GL_Shader::compile(const byte* source, size_t source_size, ShaderType typ
     GLuint shader = glCreateShader(sGlShaderTypes[static_cast<int>(type)]);
 
     const char* source_str = reinterpret_cast<const char*>(source);
-    GLint length = static_cast<GLint>(source_size);
+    auto length = static_cast<GLint>(source_size);
     GL_CALL(glShaderSource(shader, 1, &source_str, &length));
     GL_CALL(glCompileShader(shader));
 
