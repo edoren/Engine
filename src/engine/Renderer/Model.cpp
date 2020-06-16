@@ -42,7 +42,7 @@ protected:
     }
 
 public:
-    ~CustomAssimpIOStream() {
+    ~CustomAssimpIOStream() override {
         m_file.close();
     }
 
@@ -79,7 +79,7 @@ class CustomAssimpIOSystem : public Assimp::IOSystem {
 public:
     CustomAssimpIOSystem() {}
 
-    ~CustomAssimpIOSystem() {}
+    ~CustomAssimpIOSystem() override {}
 
     bool Exists(const char* pFile) const override {
         return FileSystem::GetInstance().fileExists(pFile);

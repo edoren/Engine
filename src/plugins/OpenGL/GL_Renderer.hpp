@@ -10,15 +10,15 @@ class OPENGL_PLUGIN_API GL_Renderer : public Renderer {
 public:
     GL_Renderer();
 
-    ~GL_Renderer();
+    ~GL_Renderer() override;
 
-    bool initialize();
+    bool initialize() override;
 
-    void shutdown();
+    void shutdown() override;
 
-    void advanceFrame();
+    void advanceFrame() override;
 
-    const String& getName() const;
+    const String& getName() const override;
 };
 
 }  // namespace engine

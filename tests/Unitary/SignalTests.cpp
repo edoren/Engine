@@ -24,7 +24,7 @@ struct MyBase {
 };
 
 struct MyClass : public MyBase {
-    void virtualMember() {
+    void virtualMember() override {
         gStream << gDerivedMemberFunctionStr;
     }
 

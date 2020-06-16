@@ -12,7 +12,7 @@ namespace engine {
 class OPENGL_PLUGIN_API GL_RenderWindow : public RenderWindow {
 public:
     GL_RenderWindow();
-    ~GL_RenderWindow();
+    ~GL_RenderWindow() override;
 
     bool create(const String& name, const math::ivec2& size) override;
 

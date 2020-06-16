@@ -15,7 +15,7 @@ class VULKAN_PLUGIN_API Vk_ShaderManager : public ShaderManager {
 public:
     Vk_ShaderManager();
 
-    ~Vk_ShaderManager();
+    ~Vk_ShaderManager() override;
 
     Vk_Shader* loadFromFile(const String& basename);
 

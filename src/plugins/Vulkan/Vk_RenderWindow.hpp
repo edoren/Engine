@@ -31,7 +31,7 @@ class VULKAN_PLUGIN_API Vk_RenderWindow : public RenderWindow {
 public:
     Vk_RenderWindow();
 
-    ~Vk_RenderWindow();
+    ~Vk_RenderWindow() override;
 
     bool create(const String& name, const math::ivec2& size) override;
 

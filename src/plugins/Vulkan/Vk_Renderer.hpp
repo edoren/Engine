@@ -12,15 +12,15 @@ class VULKAN_PLUGIN_API Vk_Renderer : public Renderer {
 public:
     Vk_Renderer();
 
-    ~Vk_Renderer();
+    ~Vk_Renderer() override;
 
-    bool initialize();
+    bool initialize() override;
 
-    void shutdown();
+    void shutdown() override;
 
-    void advanceFrame();
+    void advanceFrame() override;
 
-    const String& getName() const;
+    const String& getName() const override;
 
 private:
     std::unique_ptr<Vk_Context> m_context;
