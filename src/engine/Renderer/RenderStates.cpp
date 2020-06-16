@@ -10,10 +10,10 @@ RenderStates::RenderStates(const RenderStates& other)
 
     = default;
 
-RenderStates::RenderStates(RenderStates&& other)
+RenderStates::RenderStates(RenderStates&& other) noexcept
       : transform(std::move(other.transform)),
-        texture(std::move(other.texture)),
-        shader(std::move(other.shader)) {
+        texture(other.texture),
+        shader(other.shader) {
     other.texture = nullptr;
     other.shader = nullptr;
 }
@@ -23,7 +23,7 @@ RenderStates& RenderStates::operator=(const RenderStates& other) {
     return *this;
 }
 
-RenderStates& RenderStates::operator=(RenderStates&& other) {
+RenderStates& RenderStates::operator=(RenderStates&& other) noexcept {
     new (this) RenderStates(std::move(other));
     return *this;
 }

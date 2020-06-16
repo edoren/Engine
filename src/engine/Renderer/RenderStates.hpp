@@ -13,10 +13,10 @@ class ENGINE_API RenderStates {
 public:
     RenderStates();
     RenderStates(const RenderStates& other);
-    RenderStates(RenderStates&& other);
+    RenderStates(RenderStates&& other) noexcept;
 
     RenderStates& operator=(const RenderStates& other);
-    RenderStates& operator=(RenderStates&& other);
+    RenderStates& operator=(RenderStates&& other) noexcept;
 
     // Static member data
     static const RenderStates sDefault;

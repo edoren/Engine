@@ -13,10 +13,10 @@ namespace engine {
 class OPENGL_PLUGIN_API GL_Shader : public Shader {
 public:
     GL_Shader();
-    GL_Shader(GL_Shader&& other);
+    GL_Shader(GL_Shader&& other) noexcept;
     ~GL_Shader() override;
 
-    GL_Shader& operator=(GL_Shader&& other);
+    GL_Shader& operator=(GL_Shader&& other) noexcept;
 
     bool loadFromMemory(const byte* source, std::size_t source_size, ShaderType type) override;
 

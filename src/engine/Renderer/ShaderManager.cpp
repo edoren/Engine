@@ -119,7 +119,7 @@ Shader* ShaderManager::loadFromFile(const String& basename) {
     return new_shader;
 }
 
-Shader* ShaderManager::loadFromMemory(const String& name, std::map<ShaderType, String*> shader_data) {
+Shader* ShaderManager::loadFromMemory(const String& name, const std::map<ShaderType, String*>& shader_data) {
     if (getShader(name) != nullptr) {
         LogError(sTag, "Shader '{}' already loaded");
         return nullptr;
@@ -135,7 +135,7 @@ Shader* ShaderManager::loadFromMemory(const String& name, std::map<ShaderType, S
 
     std::unique_ptr<Shader> new_shader = createShader();
 
-    for (auto& shader_data_pair : shader_data) {
+    for (const auto& shader_data_pair : shader_data) {
         bool ok = true;
 
         ShaderType shader_type = shader_data_pair.first;

@@ -151,7 +151,7 @@ public:
     ///
     /// @param other Instance to move
     ////////////////////////////////////////////////////////////
-    String(String&& other);
+    String(String&& other) noexcept;
 
     ////////////////////////////////////////////////////////////
     /// @brief Destructor
@@ -419,7 +419,7 @@ public:
     ///
     /// @return Reference to self
     ////////////////////////////////////////////////////////////
-    String& operator=(String&& right);
+    String& operator=(String&& right) noexcept;
 
     ////////////////////////////////////////////////////////////
     /// @brief Overload of += operator to append an UTF-8 string

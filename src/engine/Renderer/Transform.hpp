@@ -11,11 +11,11 @@ class ENGINE_API Transform {
 public:
     Transform();
     Transform(const Transform& other);
-    Transform(Transform&& other);
-    ~Transform();
+    Transform(Transform&& other) noexcept;
+    ~Transform() = default;
 
     Transform& operator=(const Transform& other);
-    Transform& operator=(Transform&& other);
+    Transform& operator=(Transform&& other) noexcept;
 
     void rotate(const math::Vector3<float>& euler_angles);
     void scale(const math::Vector3<float>& scale);

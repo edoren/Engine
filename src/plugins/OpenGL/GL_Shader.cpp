@@ -38,9 +38,9 @@ GL_Shader::GL_Shader() : m_program(glCreateProgram()) {
     GL_CALL(glGenBuffers(1, &m_uniformBuffers.dynamic));
 }
 
-GL_Shader::GL_Shader(GL_Shader&& other)
+GL_Shader::GL_Shader(GL_Shader&& other) noexcept
       : m_program(other.m_program),
-        m_shaders(std::move(other.m_shaders)),
+        m_shaders(other.m_shaders),
         m_uniforms(std::move(other.m_uniforms)) {
     other.m_program = 0;
     for (unsigned int& shader : other.m_shaders) {
@@ -61,7 +61,7 @@ GL_Shader::~GL_Shader() {
     GL_CALL(glDeleteProgram(m_program));
 }
 
-GL_Shader& GL_Shader::operator=(GL_Shader&& other) {
+GL_Shader& GL_Shader::operator=(GL_Shader&& other) noexcept {
     new (this) GL_Shader(std::move(other));
     return *this;
 }
