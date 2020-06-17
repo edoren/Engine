@@ -54,8 +54,8 @@ private:
     std::array<VkShaderModule, sShaderTypeCount> m_modules;
 
     struct {
-        Vk_Buffer _static;
-        Vk_Buffer dynamic;
+        Vk_Buffer staticBuffer;
+        Vk_Buffer dynamicBuffer;
     } m_uniformBuffers;
 
     VkDescriptorSetLayout m_uboDescriptorSetLayout;
