@@ -26,7 +26,11 @@
 
 #include <System/String.hpp>
 
+namespace {
+
 #include <utf8.h>
+
+}  // namespace
 
 namespace engine {
 

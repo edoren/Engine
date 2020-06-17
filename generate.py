@@ -197,7 +197,7 @@ class CMakeBuildGenerator:
         gen = self.get_cmake_argument("CMAKE_GENERATOR")
         gen_plat = self.get_cmake_argument("CMAKE_GENERATOR_PLATFORM")
         if self.app_platform == "macos" and gen is None:
-            self.cmake_args = ["-DCMAKE_GENERATOR='Xcode'"] + self.cmake_args
+            self.cmake_args = ["-DCMAKE_GENERATOR='Unix Makefiles'"] + self.cmake_args
         if self.app_platform == "windows":
             if gen_plat is None and platform.machine().endswith("64"):
                 self.cmake_args = ["-DCMAKE_GENERATOR_PLATFORM='x64'"] + self.cmake_args
