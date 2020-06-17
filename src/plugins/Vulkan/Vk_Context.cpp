@@ -46,7 +46,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL DebugReportCallback(VkDebugReportFlagsEXT msgFlag
     return VK_FALSE;
 }
 
-bool CheckExtensionAvailability(const char* str, const std::vector<VkExtensionProperties>& vec) {
+bool CheckExtensionAvailability(const char* str, const Vector<VkExtensionProperties>& vec) {
     for (const auto& property : vec) {
         if (!strcmp(str, property.extensionName)) {
             return true;
@@ -55,7 +55,7 @@ bool CheckExtensionAvailability(const char* str, const std::vector<VkExtensionPr
     return false;
 }
 
-bool CheckLayerAvailability(const char* str, const std::vector<VkLayerProperties>& vec) {
+bool CheckLayerAvailability(const char* str, const Vector<VkLayerProperties>& vec) {
     for (const auto& property : vec) {
         if (!strcmp(str, property.layerName)) {
             return true;
@@ -290,7 +290,7 @@ bool Vk_Context::createDevice() {
 
     // Query all the avaliable physical devices
     uint32 physical_devices_count = 0;
-    std::vector<VkPhysicalDevice> physical_devices;
+    Vector<VkPhysicalDevice> physical_devices;
 
     result = vkEnumeratePhysicalDevices(m_instance, &physical_devices_count, nullptr);
     if (physical_devices_count > 0 && result == VK_SUCCESS) {
@@ -315,8 +315,8 @@ bool Vk_Context::createDevice() {
     }
 
     // Define the queue families information
-    std::vector<float> queue_priorities = {1.0F};
-    std::vector<VkDeviceQueueCreateInfo> queue_create_infos;
+    Vector<float> queue_priorities = {1.0F};
+    Vector<VkDeviceQueueCreateInfo> queue_create_infos;
     queue_create_infos.push_back({
         VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,    // sType
         nullptr,                                       // pNext
@@ -379,7 +379,7 @@ bool Vk_Context::selectPhysicalDevice(VkPhysicalDevice& physicalDevice) {
 
     // Check if the physical device support the required extensions
     uint32 extensions_count = 0;
-    std::vector<VkExtensionProperties> available_extensions;
+    Vector<VkExtensionProperties> available_extensions;
 
     result = vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensions_count, nullptr);
     if (result == VK_SUCCESS && extensions_count > 0) {
@@ -415,7 +415,7 @@ bool Vk_Context::selectPhysicalDevice(VkPhysicalDevice& physicalDevice) {
                  "families"_format(properties.deviceName));
         return false;
     }
-    std::vector<VkQueueFamilyProperties> queue_family_properties(queue_families_count);
+    Vector<VkQueueFamilyProperties> queue_family_properties(queue_families_count);
     vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queue_families_count, queue_family_properties.data());
 
     // Find a queue family that supports graphics queue
@@ -467,8 +467,7 @@ bool Vk_Context::checkValidationLayerSupport() const {
         return false;
     }
 
-    std::vector<const char*> available_layer_list =
-        avaliable_layers.map([](const auto& layer) { return layer.layerName; });
+    Vector<const char*> available_layer_list = avaliable_layers.map([](const auto& layer) { return layer.layerName; });
     LogInfo(sTag, "Available Layers: {}"_format(available_layer_list));
 
     // Check that all the validation layers exists
@@ -487,7 +486,7 @@ bool Vk_Context::checkInstanceExtensionsSupport() const {
 
     // Get the avaliable extensions
     uint32 extensions_count = 0;
-    std::vector<VkExtensionProperties> available_extensions;
+    Vector<VkExtensionProperties> available_extensions;
     result = vkEnumerateInstanceExtensionProperties(nullptr, &extensions_count, nullptr);
     if (extensions_count > 0 && result == VK_SUCCESS) {
         available_extensions.resize(extensions_count);
