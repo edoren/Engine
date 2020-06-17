@@ -27,8 +27,8 @@ Vk_Mesh::Vk_Mesh() = default;
 
 Vk_Mesh::~Vk_Mesh() {
     Vk_Context& context = Vk_Context::GetInstance();
-    QueueParameters& graphics_queue = context.getGraphicsQueue();
-    vkQueueWaitIdle(graphics_queue.getHandle());
+    QueueParameters& graphicsQueue = context.getGraphicsQueue();
+    vkQueueWaitIdle(graphicsQueue.getHandle());
 
     m_vertexBuffer.destroy();
     m_indexBuffer.destroy();
@@ -46,59 +46,58 @@ void Vk_Mesh::loadFromData(std::vector<Vertex> vertices,
 void Vk_Mesh::setupMesh() {
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.getVulkanDevice();
-    QueueParameters& graphics_queue = context.getGraphicsQueue();
+    QueueParameters& graphicsQueue = context.getGraphicsQueue();
 
     VkResult result = VK_SUCCESS;
 
-    VkDeviceSize vertex_buffer_data_size = sizeof(Vertex) * m_vertices.size();
-    VkDeviceSize index_buffer_data_size = sizeof(uint32) * m_indices.size();
+    VkDeviceSize vertexBufferDataSize = sizeof(Vertex) * m_vertices.size();
+    VkDeviceSize indexBufferDataSize = sizeof(uint32) * m_indices.size();
 
-    if (!m_vertexBuffer.create(vertex_buffer_data_size,
+    if (!m_vertexBuffer.create(vertexBufferDataSize,
                                (VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT),
                                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)) {
         LogError(sTag, "Could not create Vertex Buffer");
         return;
     }
 
-    if (!m_indexBuffer.create(index_buffer_data_size,
+    if (!m_indexBuffer.create(indexBufferDataSize,
                               (VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT),
                               VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT)) {
         LogError(sTag, "Could not create Index Buffer");
         return;
     }
 
-    Vk_Buffer staging_buffer;
-    if (!staging_buffer.create(vertex_buffer_data_size + index_buffer_data_size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                               VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) {
+    Vk_Buffer stagingBuffer;
+    if (!stagingBuffer.create(vertexBufferDataSize + indexBufferDataSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                              VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) {
         LogError(sTag, "Could not create Staging Buffer");
         return;
     }
 
-    void* staging_buffer_memory_pointer;
-    result =
-        vkMapMemory(device, staging_buffer.getMemory(), 0, staging_buffer.getSize(), 0, &staging_buffer_memory_pointer);
+    void* stagingBufferMemoryPointer;
+    result = vkMapMemory(device, stagingBuffer.getMemory(), 0, stagingBuffer.getSize(), 0, &stagingBufferMemoryPointer);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Could not map memory and upload data to a vertex buffer");
         return;
     }
 
-    byte* vertex_start_position = reinterpret_cast<byte*>(staging_buffer_memory_pointer);
-    byte* index_start_position = vertex_start_position + vertex_buffer_data_size;
+    byte* vertexStartPosition = reinterpret_cast<byte*>(stagingBufferMemoryPointer);
+    byte* indexStartPosition = vertexStartPosition + vertexBufferDataSize;
 
-    std::memcpy(vertex_start_position, m_vertices.data(), vertex_buffer_data_size);
+    std::memcpy(vertexStartPosition, m_vertices.data(), vertexBufferDataSize);
 
-    std::memcpy(index_start_position, m_indices.data(), index_buffer_data_size);
+    std::memcpy(indexStartPosition, m_indices.data(), indexBufferDataSize);
 
-    VkMappedMemoryRange flush_range = {
+    VkMappedMemoryRange flushRange = {
         VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,  // sType
         nullptr,                                // pNext
-        staging_buffer.getMemory(),             // memory
+        stagingBuffer.getMemory(),              // memory
         0,                                      // offset
         VK_WHOLE_SIZE                           // size
     };
-    vkFlushMappedMemoryRanges(device, 1, &flush_range);
+    vkFlushMappedMemoryRanges(device, 1, &flushRange);
 
-    vkUnmapMemory(device, staging_buffer.getMemory());
+    vkUnmapMemory(device, stagingBuffer.getMemory());
 
     // Prepare command buffer to copy data from staging buffer to the vertex
     // and index buffer
@@ -110,23 +109,23 @@ void Vk_Mesh::setupMesh() {
         1                                                // commandBufferCount
     };
 
-    VkCommandBuffer command_buffer = VK_NULL_HANDLE;
-    result = vkAllocateCommandBuffers(device, &allocInfo, &command_buffer);
-    if (result != VK_SUCCESS || command_buffer == VK_NULL_HANDLE) {
+    VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
+    result = vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer);
+    if (result != VK_SUCCESS || commandBuffer == VK_NULL_HANDLE) {
         LogError(sTag, "Could not allocate command buffer");
         return;
     }
 
-    VkCommandBufferBeginInfo command_buffer_begin_info = {
+    VkCommandBufferBeginInfo commandBufferBeginInfo = {
         VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,  // sType
         nullptr,                                      // pNext
         VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,  // flags
         nullptr                                       // pInheritanceInfo
     };
 
-    vkBeginCommandBuffer(command_buffer, &command_buffer_begin_info);
+    vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo);
 
-    std::array<VkBufferCopy, 2> buffer_copy_infos = {{
+    std::array<VkBufferCopy, 2> bufferCopyInfos = {{
         // Vertex Buffer
         {
             0,                        // srcOffset
@@ -141,11 +140,11 @@ void Vk_Mesh::setupMesh() {
         },
     }};
 
-    vkCmdCopyBuffer(command_buffer, staging_buffer.getHandle(), m_vertexBuffer.getHandle(), 1, &buffer_copy_infos[0]);
+    vkCmdCopyBuffer(commandBuffer, stagingBuffer.getHandle(), m_vertexBuffer.getHandle(), 1, &bufferCopyInfos[0]);
 
-    vkCmdCopyBuffer(command_buffer, staging_buffer.getHandle(), m_indexBuffer.getHandle(), 1, &buffer_copy_infos[1]);
+    vkCmdCopyBuffer(commandBuffer, stagingBuffer.getHandle(), m_indexBuffer.getHandle(), 1, &bufferCopyInfos[1]);
 
-    std::array<VkBufferMemoryBarrier, 2> buffer_memory_barriers = {{
+    std::array<VkBufferMemoryBarrier, 2> bufferMemoryBarriers = {{
         {
             VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,  // sType;
             nullptr,                                  // pNext
@@ -170,35 +169,35 @@ void Vk_Mesh::setupMesh() {
         },
     }};
 
-    vkCmdPipelineBarrier(command_buffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, 0, 0,
-                         nullptr, static_cast<uint32_t>(buffer_memory_barriers.size()), buffer_memory_barriers.data(),
-                         0, nullptr);
+    vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_VERTEX_INPUT_BIT, 0, 0,
+                         nullptr, static_cast<uint32_t>(bufferMemoryBarriers.size()), bufferMemoryBarriers.data(), 0,
+                         nullptr);
 
-    vkEndCommandBuffer(command_buffer);
+    vkEndCommandBuffer(commandBuffer);
 
     // Submit command buffer and copy data from staging buffer to the vertex
     // and index buffer
-    VkSubmitInfo submit_info = {
+    VkSubmitInfo submitInfo = {
         VK_STRUCTURE_TYPE_SUBMIT_INFO,  // sType
         nullptr,                        // pNext
         0,                              // waitSemaphoreCount
         nullptr,                        // pWaitSemaphores
         nullptr,                        // pWaitDstStageMask;
         1,                              // commandBufferCount
-        &command_buffer,                // pCommandBuffers
+        &commandBuffer,                 // pCommandBuffers
         0,                              // signalSemaphoreCount
         nullptr                         // pSignalSemaphores
     };
 
-    result = vkQueueSubmit(graphics_queue.getHandle(), 1, &submit_info, VK_NULL_HANDLE);
+    result = vkQueueSubmit(graphicsQueue.getHandle(), 1, &submitInfo, VK_NULL_HANDLE);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Error copying the Mesh data to the Device");
         return;
     }
 
-    vkQueueWaitIdle(graphics_queue.getHandle());
+    vkQueueWaitIdle(graphicsQueue.getHandle());
 
-    staging_buffer.destroy();
+    stagingBuffer.destroy();
 }
 
 void Vk_Mesh::draw(RenderWindow& target, const RenderStates& states) const {
@@ -206,7 +205,7 @@ void Vk_Mesh::draw(RenderWindow& target, const RenderStates& states) const {
 
     auto lambda = [this, &window, states](uint32 index, VkCommandBuffer& commandBuffer,
                                           VkPipelineLayout& pipelineLayout) {
-        uint32 dynamic_offset = 0;
+        uint32 dynamicOffset = 0;
 
         Vk_Texture2D* texture = Vk_TextureManager::GetInstance().getActiveTexture2D();
         Vk_Shader* shader = Vk_ShaderManager::GetInstance().getActiveShader();
@@ -217,32 +216,32 @@ void Vk_Mesh::draw(RenderWindow& target, const RenderStates& states) const {
             }
         }
 
-        std::array<VkDescriptorSet, 2> descriptor_sets;
-        size_t array_pos = 0;
+        std::array<VkDescriptorSet, 2> descriptorSets;
+        size_t arrayPos = 0;
 
         if (shader) {
-            const Camera* active_camera = window.getActiveCamera();
+            const Camera* activeCamera = window.getActiveCamera();
 
-            math::mat4 model_matrix = states.transform.getMatrix();
-            math::mat4 view_matrix = (active_camera != nullptr) ? active_camera->getViewMatrix() : math::mat4();
-            const math::mat4& projection_matrix = window.getProjectionMatrix();
+            math::mat4 modelMatrix = states.transform.getMatrix();
+            math::mat4 viewMatrix = (activeCamera != nullptr) ? activeCamera->getViewMatrix() : math::mat4();
+            const math::mat4& projectionMatrix = window.getProjectionMatrix();
 
-            math::mat4 mvp_matrix = projection_matrix * view_matrix * model_matrix;
-            math::mat4 normal_matrix = model_matrix.inverse().transpose();
+            math::mat4 mvpMatrix = projectionMatrix * viewMatrix * modelMatrix;
+            math::mat4 normalMatrix = modelMatrix.inverse().transpose();
 
             UniformBufferObject& ubo = shader->getUboDynamic();
 
-            dynamic_offset = index * static_cast<uint32>(ubo.getDynamicAlignment());
+            dynamicOffset = index * static_cast<uint32>(ubo.getDynamicAlignment());
 
-            ubo.setAttributeValue("model", model_matrix, dynamic_offset);
-            ubo.setAttributeValue("normalMatrix", normal_matrix, dynamic_offset);
-            ubo.setAttributeValue("mvp", mvp_matrix, dynamic_offset);
+            ubo.setAttributeValue("model", modelMatrix, dynamicOffset);
+            ubo.setAttributeValue("normalMatrix", normalMatrix, dynamicOffset);
+            ubo.setAttributeValue("mvp", mvpMatrix, dynamicOffset);
 
-            descriptor_sets[array_pos++] = shader->getUboDescriptorSet();
+            descriptorSets[arrayPos++] = shader->getUboDescriptorSet();
         }
 
         if (texture) {
-            descriptor_sets[array_pos++] = texture->getDescriptorSet();
+            descriptorSets[arrayPos++] = texture->getDescriptorSet();
         } else {
             LogFatal(sTag, "Texture not found for Mesh");
         }
@@ -257,10 +256,10 @@ void Vk_Mesh::draw(RenderWindow& target, const RenderStates& states) const {
         }
 
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0,
-                                static_cast<uint32>(array_pos), descriptor_sets.data(), 1, &dynamic_offset);
+                                static_cast<uint32>(arrayPos), descriptorSets.data(), 1, &dynamicOffset);
 
-        auto indices_size = static_cast<uint32>(m_indices.size());
-        vkCmdDrawIndexed(commandBuffer, indices_size, 1, 0, 0, 0);
+        auto indicesSize = static_cast<uint32>(m_indices.size());
+        vkCmdDrawIndexed(commandBuffer, indicesSize, 1, 0, 0, 0);
     };
 
     window.addCommandExecution(std::move(lambda));

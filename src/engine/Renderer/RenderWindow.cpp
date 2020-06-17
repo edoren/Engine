@@ -49,10 +49,10 @@ bool RenderWindow::create(const String& name, const math::ivec2& size) {
 
     m_name = name;
 
-    math::ivec2 actual_size;
+    math::ivec2 actualSize;
     if (m_window) {
-        SDL_GetWindowSize(reinterpret_cast<SDL_Window*>(m_window), &actual_size.x, &actual_size.y);
-        m_size = actual_size;
+        SDL_GetWindowSize(reinterpret_cast<SDL_Window*>(m_window), &actualSize.x, &actualSize.y);
+        m_size = actualSize;
     } else {
         LogDebug(sTag, "m_window should be created before calling RenderWindow::Create");
         return false;
@@ -140,10 +140,10 @@ const math::mat4& RenderWindow::getProjectionMatrix() const {
 
 void RenderWindow::updateProjectionMatrix() {
     float fov = math::Radians(45.F);
-    float aspect_ratio = m_size.x / static_cast<float>(m_size.y);
-    float z_near = 0.1F;
-    float z_far = 100.0F;
-    m_projection = math::Perspective(fov, aspect_ratio, z_near, z_far);
+    float aspectRatio = m_size.x / static_cast<float>(m_size.y);
+    float zNear = 0.1F;
+    float zFar = 100.0F;
+    m_projection = math::Perspective(fov, aspectRatio, zNear, zFar);
 }
 
 void RenderWindow::onWindowResized(const math::ivec2& /*unused*/) {}
@@ -178,10 +178,10 @@ void RenderWindow::onWindowResizedPriv(const math::ivec2& size) {
     }
 
     // Get the new window size from the active window
-    math::ivec2 new_size;
-    SDL_GetWindowSize(reinterpret_cast<SDL_Window*>(m_window), &new_size.x, &new_size.y);
-    if (new_size != m_size) {
-        m_size = new_size;
+    math::ivec2 newSize;
+    SDL_GetWindowSize(reinterpret_cast<SDL_Window*>(m_window), &newSize.x, &newSize.y);
+    if (newSize != m_size) {
+        m_size = newSize;
         LogDebug(sTag, "OnWindowResized {}x{}"_format(m_size.x, m_size.y));
         updateProjectionMatrix();
         onWindowResized(m_size);

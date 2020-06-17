@@ -125,9 +125,9 @@ void Main::run() {
 
         m_app->update();
 
-        Scene* active_scene = SceneManager::GetInstance().getActiveScene();
-        if (active_scene) {
-            active_scene->draw(window);
+        Scene* activeScene = SceneManager::GetInstance().getActiveScene();
+        if (activeScene) {
+            activeScene->draw(window);
         }
 
         m_inputManager->advanceFrame();
@@ -196,13 +196,13 @@ void Main::loadPlugin(const String& pluginName) {
 
 void Main::unloadPlugin(const String& pluginName) {
     for (auto it = m_pluginLibs.begin(); it != m_pluginLibs.end(); it++) {
-        SharedLibrary* shared_lib = *it;
-        if (shared_lib->getName() == pluginName) {
+        SharedLibrary* sharedLib = *it;
+        if (sharedLib->getName() == pluginName) {
             // Call plugin shutdown
-            auto pFunc = (PFN_STOP_PLUGIN)shared_lib->getSymbol("StopPlugin");
+            auto pFunc = (PFN_STOP_PLUGIN)sharedLib->getSymbol("StopPlugin");
 
             if (!pFunc) {
-                const String& name = shared_lib->getName();
+                const String& name = sharedLib->getName();
                 LogFatal(sTag, "Cannot find symbol StopPlugin in library: " + name);
             }
 
@@ -210,7 +210,7 @@ void Main::unloadPlugin(const String& pluginName) {
             pFunc();
 
             // Unload library (destroyed by SharedLibManager)
-            SharedLibManager::GetInstance().unload(shared_lib);
+            SharedLibManager::GetInstance().unload(sharedLib);
             it = m_pluginLibs.erase(it);
             return;
         }
@@ -272,12 +272,12 @@ void Main::initializePlugins() {
 
 void Main::shutdownPlugins() {
     // Unload all the Plugins loaded through shared libraries
-    for (auto& plugin_lib : m_pluginLibs) {
+    for (auto& pluginLib : m_pluginLibs) {
         // Call plugin shutdown
-        auto pFunc = reinterpret_cast<PFN_STOP_PLUGIN>(plugin_lib->getSymbol("StopPlugin"));
+        auto pFunc = reinterpret_cast<PFN_STOP_PLUGIN>(pluginLib->getSymbol("StopPlugin"));
 
         if (!pFunc) {
-            const String& name = plugin_lib->getName();
+            const String& name = pluginLib->getName();
             LogFatal(sTag, "Cannot find symbol StopPlugin in library: " + name);
         }
 
@@ -285,7 +285,7 @@ void Main::shutdownPlugins() {
         pFunc();
 
         // Unload library & destroy
-        SharedLibManager::GetInstance().unload(plugin_lib);
+        SharedLibManager::GetInstance().unload(pluginLib);
     }
     m_pluginLibs.clear();
 

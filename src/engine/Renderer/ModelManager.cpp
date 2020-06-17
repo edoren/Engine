@@ -52,21 +52,21 @@ Model* ModelManager::loadFromFile(const String& basename) {
 }
 
 void ModelManager::unload(Model* model) {
-    auto& ref_count = m_modelRefCount[model];
-    ref_count -= 1;
+    auto& refCount = m_modelRefCount[model];
+    refCount -= 1;
 
-    if (ref_count == 0) {
-        auto found_it =
+    if (refCount == 0) {
+        auto foundIt =
             std::find_if(m_models.begin(), m_models.end(), [&model](auto& val) { return val.get() == model; });
-        auto found_name_it =
+        auto foundNameIt =
             std::find_if(m_nameMap.begin(), m_nameMap.end(), [&model](auto& pair) { return pair.second == model; });
 
-        found_it->reset(nullptr);
+        foundIt->reset(nullptr);
 
-        LogDebug(sTag, "Unloading model: {}"_format(found_name_it->first));
-        m_nameMap.erase(found_name_it->first);
+        LogDebug(sTag, "Unloading model: {}"_format(foundNameIt->first));
+        m_nameMap.erase(foundNameIt->first);
         m_modelRefCount.erase(model);
-        m_models.erase(found_it);
+        m_models.erase(foundIt);
     }
 }
 

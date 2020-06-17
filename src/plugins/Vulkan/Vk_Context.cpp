@@ -29,16 +29,16 @@ VKAPI_ATTR VkBool32 VKAPI_CALL DebugReportCallback(VkDebugReportFlagsEXT msgFlag
     ENGINE_UNUSED(pLayerPrefix);
     ENGINE_UNUSED(pUserData);
 
-    String output_msg("{} - Code: {}"_format(pMsg, msgCode));
+    String outputMsg("{} - Code: {}"_format(pMsg, msgCode));
 
     if (msgFlags & VK_DEBUG_REPORT_ERROR_BIT_EXT) {
-        LogError(sTagVkDebug, output_msg);
+        LogError(sTagVkDebug, outputMsg);
     } else if (msgFlags & VK_DEBUG_REPORT_WARNING_BIT_EXT || msgFlags & VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT) {
-        LogWarning(sTagVkDebug, output_msg);
+        LogWarning(sTagVkDebug, outputMsg);
     } else if (msgFlags & VK_DEBUG_REPORT_INFORMATION_BIT_EXT) {
-        LogInfo(sTagVkDebug, output_msg);
+        LogInfo(sTagVkDebug, outputMsg);
     } else if (msgFlags & VK_DEBUG_REPORT_DEBUG_BIT_EXT) {
-        LogDebug(sTagVkDebug, output_msg);
+        LogDebug(sTagVkDebug, outputMsg);
     }
 
     // Returning false tells the layer not to stop when the event occurs, so
@@ -160,7 +160,7 @@ bool Vk_Context::initialize() {
 
         // Create the debug callback with desired settings
         if (vkCreateDebugReportCallbackEXT) {
-            VkDebugReportCallbackCreateInfoEXT create_info = {
+            VkDebugReportCallbackCreateInfoEXT createInfo = {
                 VK_STRUCTURE_TYPE_DEBUG_REPORT_CREATE_INFO_EXT,  // sType
                 nullptr,                                         // pNext
                 (VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT |
@@ -169,7 +169,7 @@ bool Vk_Context::initialize() {
                 nullptr                                         // pUserData
             };
 
-            vkCreateDebugReportCallbackEXT(m_instance, &create_info, nullptr, &m_debugReportCallback);
+            vkCreateDebugReportCallbackEXT(m_instance, &createInfo, nullptr, &m_debugReportCallback);
         }
     }
 
@@ -264,7 +264,7 @@ bool Vk_Context::createInstance() {
     };
 
     // Define all the information for the instance
-    VkInstanceCreateInfo create_info = {
+    VkInstanceCreateInfo createInfo = {
         VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,            // sType
         nullptr,                                           // pNext
         VkInstanceCreateFlags(),                           //  flags
@@ -276,7 +276,7 @@ bool Vk_Context::createInstance() {
     };
 
     // Create the Vulkan instance based on the provided info
-    VkResult result = vkCreateInstance(&create_info, nullptr, &m_instance);
+    VkResult result = vkCreateInstance(&createInfo, nullptr, &m_instance);
     if (result != VK_SUCCESS) {
         LogFatal(sTag, "Failed to create Vulkan instance");
         return false;
@@ -289,23 +289,23 @@ bool Vk_Context::createDevice() {
     VkResult result = VK_SUCCESS;
 
     // Query all the avaliable physical devices
-    uint32 physical_devices_count = 0;
-    Vector<VkPhysicalDevice> physical_devices;
+    uint32 physicalDevicesCount = 0;
+    Vector<VkPhysicalDevice> physicalDevices;
 
-    result = vkEnumeratePhysicalDevices(m_instance, &physical_devices_count, nullptr);
-    if (physical_devices_count > 0 && result == VK_SUCCESS) {
-        physical_devices.resize(physical_devices_count);
-        result = vkEnumeratePhysicalDevices(m_instance, &physical_devices_count, physical_devices.data());
+    result = vkEnumeratePhysicalDevices(m_instance, &physicalDevicesCount, nullptr);
+    if (physicalDevicesCount > 0 && result == VK_SUCCESS) {
+        physicalDevices.resize(physicalDevicesCount);
+        result = vkEnumeratePhysicalDevices(m_instance, &physicalDevicesCount, physicalDevices.data());
     }
-    if (physical_devices_count == 0 || result != VK_SUCCESS) {
+    if (physicalDevicesCount == 0 || result != VK_SUCCESS) {
         LogFatal(sTag, "Error querying physical devices");
         return false;
     }
 
     // Check all the queried physical devices for one with the required
     // caracteristics and avaliable queues
-    for (auto& physical_device : physical_devices) {
-        if (selectPhysicalDevice(physical_device)) {
+    for (auto& physicalDevice : physicalDevices) {
+        if (selectPhysicalDevice(physicalDevice)) {
             break;
         }
     }
@@ -315,15 +315,15 @@ bool Vk_Context::createDevice() {
     }
 
     // Define the queue families information
-    Vector<float> queue_priorities = {1.0F};
-    Vector<VkDeviceQueueCreateInfo> queue_create_infos;
-    queue_create_infos.push_back({
-        VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,    // sType
-        nullptr,                                       // pNext
-        VkDeviceQueueCreateFlags(),                    // flags
-        m_graphicsQueue.familyIndex,                   // queueFamilyIndex
-        static_cast<uint32>(queue_priorities.size()),  // queueCount
-        queue_priorities.data()                        // pQueuePriorities
+    Vector<float> queuePriorities = {1.0F};
+    Vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+    queueCreateInfos.push_back({
+        VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,   // sType
+        nullptr,                                      // pNext
+        VkDeviceQueueCreateFlags(),                   // flags
+        m_graphicsQueue.familyIndex,                  // queueFamilyIndex
+        static_cast<uint32>(queuePriorities.size()),  // queueCount
+        queuePriorities.data()                        // pQueuePriorities
     });
 
     // TODO: Configure this in runtime
@@ -331,12 +331,12 @@ bool Vk_Context::createDevice() {
     m_enabledFeatures.samplerAnisotropy = m_physicalDevice.features.samplerAnisotropy;
 
     // Define all the information for the logical device
-    VkDeviceCreateInfo device_create_info = {
+    VkDeviceCreateInfo deviceCreateInfo = {
         VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,            // sType
         nullptr,                                         // pNext
         VkDeviceCreateFlags(),                           // flags
-        static_cast<uint32>(queue_create_infos.size()),  // queueCreateInfoCount
-        queue_create_infos.data(),                       // pQueueCreateInfos
+        static_cast<uint32>(queueCreateInfos.size()),    // queueCreateInfoCount
+        queueCreateInfos.data(),                         // pQueueCreateInfos
         static_cast<uint32>(m_validationLayers.size()),  // enabledLayerCount
         m_validationLayers.data(),                       // ppEnabledLayerNames
         static_cast<uint32>(m_deviceExtensions.size()),  // enabledExtensionCount
@@ -345,7 +345,7 @@ bool Vk_Context::createDevice() {
     };
 
     // Create the logical device based on the retrived info
-    result = vkCreateDevice(m_physicalDevice.handle, &device_create_info, nullptr, &m_device);
+    result = vkCreateDevice(m_physicalDevice.handle, &deviceCreateInfo, nullptr, &m_device);
     if (result != VK_SUCCESS) {
         LogFatal(sTag, "Could not create Vulkan device");
         return false;
@@ -366,11 +366,11 @@ bool Vk_Context::selectPhysicalDevice(VkPhysicalDevice& physicalDevice) {
     vkGetPhysicalDeviceProperties(physicalDevice, &properties);
     vkGetPhysicalDeviceFeatures(physicalDevice, &features);
 
-    uint32 major_version = VK_VERSION_MAJOR(properties.apiVersion);
+    uint32 majorVersion = VK_VERSION_MAJOR(properties.apiVersion);
     // uint32 minor_version = VK_VERSION_MINOR(properties.apiVersion);
     // uint32 patch_version = VK_VERSION_PATCH(properties.apiVersion);
 
-    if (major_version < 1 && properties.limits.maxImageDimension2D < 4096) {
+    if (majorVersion < 1 && properties.limits.maxImageDimension2D < 4096) {
         LogError(sTag,
                  "Physical device {} doesn't support required "
                  "parameters"_format(properties.deviceName));
@@ -378,18 +378,18 @@ bool Vk_Context::selectPhysicalDevice(VkPhysicalDevice& physicalDevice) {
     }
 
     // Check if the physical device support the required extensions
-    uint32 extensions_count = 0;
-    Vector<VkExtensionProperties> available_extensions;
+    uint32 extensionsCount = 0;
+    Vector<VkExtensionProperties> availableExtensions;
 
-    result = vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensions_count, nullptr);
-    if (result == VK_SUCCESS && extensions_count > 0) {
-        available_extensions.resize(extensions_count);
+    result = vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionsCount, nullptr);
+    if (result == VK_SUCCESS && extensionsCount > 0) {
+        availableExtensions.resize(extensionsCount);
         result =
-            vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensions_count, &available_extensions[0]);
+            vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionsCount, &availableExtensions[0]);
     }
 
     // Check that the avaliable extensions could be retreived
-    if (result != VK_SUCCESS || extensions_count == 0) {
+    if (result != VK_SUCCESS || extensionsCount == 0) {
         LogError(sTag,
                  "Error occurred during physical device {} extensions "
                  "enumeration"_format(properties.deviceName));
@@ -397,40 +397,39 @@ bool Vk_Context::selectPhysicalDevice(VkPhysicalDevice& physicalDevice) {
     }
 
     // Check that all the required device extensions exists
-    for (auto& m_deviceExtension : m_deviceExtensions) {
-        if (!CheckExtensionAvailability(m_deviceExtension, available_extensions)) {
+    for (auto& mDeviceExtension : m_deviceExtensions) {
+        if (!CheckExtensionAvailability(mDeviceExtension, availableExtensions)) {
             LogError(sTag,
                      "Physical device {} doesn't support extension "
-                     "named \"{}\""_format(properties.deviceName, m_deviceExtension));
+                     "named \"{}\""_format(properties.deviceName, mDeviceExtension));
             return false;
         }
     }
 
     // Retreive all the queue families properties
-    uint32 queue_families_count = 0;
-    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queue_families_count, nullptr);
-    if (queue_families_count == 0) {
+    uint32 queueFamiliesCount = 0;
+    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamiliesCount, nullptr);
+    if (queueFamiliesCount == 0) {
         LogError(sTag,
                  "Physical device {} doesn't have any queue "
                  "families"_format(properties.deviceName));
         return false;
     }
-    Vector<VkQueueFamilyProperties> queue_family_properties(queue_families_count);
-    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queue_families_count, queue_family_properties.data());
+    Vector<VkQueueFamilyProperties> queueFamilyProperties(queueFamiliesCount);
+    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamiliesCount, queueFamilyProperties.data());
 
     // Find a queue family that supports graphics queue
-    uint32 graphics_queue_family_index = UINT32_MAX;
-    for (uint32 i = 0; i < queue_families_count; i++) {
+    uint32 graphicsQueueFamilyIndex = UINT32_MAX;
+    for (uint32 i = 0; i < queueFamiliesCount; i++) {
         // Select first queue that supports graphics
-        if (queue_family_properties[i].queueCount > 0 &&
-            queue_family_properties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
-            graphics_queue_family_index = i;
+        if (queueFamilyProperties[i].queueCount > 0 && queueFamilyProperties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+            graphicsQueueFamilyIndex = i;
         }
     }
 
     // If this device doesn't support queues with graphics and present
     // capabilities don't use it
-    if (graphics_queue_family_index == UINT32_MAX) {
+    if (graphicsQueueFamilyIndex == UINT32_MAX) {
         LogError(sTag,
                  "Could not find queue family with required properties "
                  "on physical device: {}"_format(properties.deviceName));
@@ -443,8 +442,8 @@ bool Vk_Context::selectPhysicalDevice(VkPhysicalDevice& physicalDevice) {
     m_physicalDevice.features = features;
 
     // Set the graphical QueueProperties
-    m_graphicsQueue.familyIndex = graphics_queue_family_index;
-    m_graphicsQueue.properties = queue_family_properties[m_graphicsQueue.familyIndex];
+    m_graphicsQueue.familyIndex = graphicsQueueFamilyIndex;
+    m_graphicsQueue.properties = queueFamilyProperties[m_graphicsQueue.familyIndex];
 
     return true;
 }
@@ -453,27 +452,27 @@ bool Vk_Context::checkValidationLayerSupport() const {
     VkResult result = VK_SUCCESS;
 
     // Get the avaliable layers
-    uint32 layer_count = 0;
-    Vector<VkLayerProperties> avaliable_layers;
-    result = vkEnumerateInstanceLayerProperties(&layer_count, nullptr);
-    if (layer_count > 0 && result == VK_SUCCESS) {
-        avaliable_layers.resize(layer_count);
-        result = vkEnumerateInstanceLayerProperties(&layer_count, avaliable_layers.data());
+    uint32 layerCount = 0;
+    Vector<VkLayerProperties> avaliableLayers;
+    result = vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+    if (layerCount > 0 && result == VK_SUCCESS) {
+        avaliableLayers.resize(layerCount);
+        result = vkEnumerateInstanceLayerProperties(&layerCount, avaliableLayers.data());
     }
 
     // Check that the avaliable layers could be retreived
-    if (layer_count == 0 || result != VK_SUCCESS) {
+    if (layerCount == 0 || result != VK_SUCCESS) {
         LogError(sTag, "Error occurred during validation layers enumeration");
         return false;
     }
 
-    Vector<const char*> available_layer_list = avaliable_layers.map([](const auto& layer) { return layer.layerName; });
-    LogInfo(sTag, "Available Layers: {}"_format(available_layer_list));
+    Vector<const char*> availableLayerList = avaliableLayers.map([](const auto& layer) { return layer.layerName; });
+    LogInfo(sTag, "Available Layers: {}"_format(availableLayerList));
 
     // Check that all the validation layers exists
-    for (const auto& requested_layer : m_validationLayers) {
-        if (!CheckLayerAvailability(requested_layer, avaliable_layers)) {
-            LogError(sTag, "Could not find validation layer named: {}"_format(requested_layer));
+    for (const auto& requestedLayer : m_validationLayers) {
+        if (!CheckLayerAvailability(requestedLayer, avaliableLayers)) {
+            LogError(sTag, "Could not find validation layer named: {}"_format(requestedLayer));
             return false;
         }
     }
@@ -485,16 +484,16 @@ bool Vk_Context::checkInstanceExtensionsSupport() const {
     VkResult result = VK_SUCCESS;
 
     // Get the avaliable extensions
-    uint32 extensions_count = 0;
-    Vector<VkExtensionProperties> available_extensions;
-    result = vkEnumerateInstanceExtensionProperties(nullptr, &extensions_count, nullptr);
-    if (extensions_count > 0 && result == VK_SUCCESS) {
-        available_extensions.resize(extensions_count);
-        result = vkEnumerateInstanceExtensionProperties(nullptr, &extensions_count, available_extensions.data());
+    uint32 extensionsCount = 0;
+    Vector<VkExtensionProperties> availableExtensions;
+    result = vkEnumerateInstanceExtensionProperties(nullptr, &extensionsCount, nullptr);
+    if (extensionsCount > 0 && result == VK_SUCCESS) {
+        availableExtensions.resize(extensionsCount);
+        result = vkEnumerateInstanceExtensionProperties(nullptr, &extensionsCount, availableExtensions.data());
     }
 
     // Check that the avaliable extensions could be retreived
-    if (extensions_count == 0 || result != VK_SUCCESS) {
+    if (extensionsCount == 0 || result != VK_SUCCESS) {
         LogError(sTag, "Error occurred during instance extensions enumeration");
         return false;
     }
@@ -515,36 +514,36 @@ bool Vk_Context::checkInstanceExtensionsSupport() const {
 #endif
 
     // Check that all the required instance extensions exists
-    bool all_extensions_found = true;
-    for (const char* instance_extension : m_instanceExtensions) {
+    bool allExtensionsFound = true;
+    for (const char* instanceExtension : m_instanceExtensions) {
 #if defined(SDL_VIDEO_DRIVER_X11)
         if (!strcmp(x11_extension_to_ignore, instance_extension)) {
             continue;
         }
 #endif
-        if (!CheckExtensionAvailability(instance_extension, available_extensions)) {
+        if (!CheckExtensionAvailability(instanceExtension, availableExtensions)) {
             LogError(sTag,
                      "Could not find instance extension "
-                     "named: {}"_format(instance_extension));
-            all_extensions_found = false;
+                     "named: {}"_format(instanceExtension));
+            allExtensionsFound = false;
         }
     }
 
-    return all_extensions_found;
+    return allExtensionsFound;
 }
 
 bool Vk_Context::createVulkanCommandPool(QueueParameters& queue, VkCommandPool* cmdPool) {
     VkResult result = VK_SUCCESS;
 
     // Create the pool for the command buffers
-    VkCommandPoolCreateInfo cmd_pool_create_info = {
+    VkCommandPoolCreateInfo cmdPoolCreateInfo = {
         VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,                                                // sType
         nullptr,                                                                                   // pNext
         (VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT | VK_COMMAND_POOL_CREATE_TRANSIENT_BIT),  // flags
         queue.familyIndex                                                                          // queueFamilyIndex
     };
 
-    result = vkCreateCommandPool(m_device, &cmd_pool_create_info, nullptr, cmdPool);
+    result = vkCreateCommandPool(m_device, &cmdPoolCreateInfo, nullptr, cmdPool);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Could not create a command pool");
         return false;
@@ -556,7 +555,7 @@ bool Vk_Context::createVulkanCommandPool(QueueParameters& queue, VkCommandPool* 
 bool Vk_Context::createUboDescriptorPool() {
     VkResult result = VK_SUCCESS;
 
-    std::array<VkDescriptorPoolSize, 2> pool_sizes = {{
+    std::array<VkDescriptorPoolSize, 2> poolSizes = {{
         {
             VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,  // type
             sMaxUBODescriptorSets               // descriptorCount
@@ -567,21 +566,21 @@ bool Vk_Context::createUboDescriptorPool() {
         },
     }};
 
-    uint32 max_sets = 0;
-    for (VkDescriptorPoolSize& pool_size : pool_sizes) {
-        max_sets += pool_size.descriptorCount;
+    uint32 maxSets = 0;
+    for (VkDescriptorPoolSize& poolSize : poolSizes) {
+        maxSets += poolSize.descriptorCount;
     }
 
-    VkDescriptorPoolCreateInfo descriptor_pool_create_info = {
+    VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = {
         VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,  // sType
         nullptr,                                        // pNext
         0,                                              // flags
-        max_sets,                                       // maxSets
-        static_cast<uint32>(pool_sizes.size()),         // poolSizeCount
-        pool_sizes.data()                               // pPoolSizes
+        maxSets,                                        // maxSets
+        static_cast<uint32>(poolSizes.size()),          // poolSizeCount
+        poolSizes.data()                                // pPoolSizes
     };
 
-    result = vkCreateDescriptorPool(m_device, &descriptor_pool_create_info, nullptr, &m_uboDescriptorPool);
+    result = vkCreateDescriptorPool(m_device, &descriptorPoolCreateInfo, nullptr, &m_uboDescriptorPool);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Could not create descriptor pool");
         return false;

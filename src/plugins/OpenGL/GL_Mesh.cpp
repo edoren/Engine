@@ -78,20 +78,20 @@ void GL_Mesh::draw(RenderWindow& target, const RenderStates& states) const {
     auto& window = static_cast<GL_RenderWindow&>(target);
     GL_Shader* shader = GL_ShaderManager::GetInstance().getActiveShader();
 
-    uint32 diffuse_num = 1;
-    uint32 specular_num = 1;
+    uint32 diffuseNum = 1;
+    uint32 specularNum = 1;
     for (size_t i = 0; i < m_textures.size(); i++) {
         const auto& pair = m_textures[i];
-        auto* current_texture = static_cast<GL_Texture2D*>(pair.first);
-        TextureType current_texture_type = pair.second;
+        auto* currentTexture = static_cast<GL_Texture2D*>(pair.first);
+        TextureType currentTextureType = pair.second;
 
-        String uniform_name;
-        switch (current_texture_type) {
+        String uniformName;
+        switch (currentTextureType) {
             case TextureType::DIFFUSE:
-                uniform_name += "tex_diffuse" + String::FromValue(diffuse_num++);
+                uniformName += "tex_diffuse" + String::FromValue(diffuseNum++);
                 break;
             case TextureType::SPECULAR:
-                uniform_name += "tex_specular" + String::FromValue(specular_num++);
+                uniformName += "tex_specular" + String::FromValue(specularNum++);
                 break;
             default:
                 continue;
@@ -100,29 +100,29 @@ void GL_Mesh::draw(RenderWindow& target, const RenderStates& states) const {
         GL_CALL(glActiveTexture(static_cast<GLenum>(GL_TEXTURE0 + i)));
 
         if (shader != nullptr) {
-            shader->setUniform(uniform_name, static_cast<GLint>(i));
+            shader->setUniform(uniformName, static_cast<GLint>(i));
         }
 
-        if (current_texture) {
-            current_texture->use();
+        if (currentTexture) {
+            currentTexture->use();
         }
     }
 
     if (shader) {
-        const Camera* active_camera = window.getActiveCamera();
+        const Camera* activeCamera = window.getActiveCamera();
 
-        math::mat4 model_matrix = states.transform.getMatrix();
+        math::mat4 modelMatrix = states.transform.getMatrix();
 
-        math::mat4 view_matrix = (active_camera != nullptr) ? active_camera->getViewMatrix() : math::mat4();
-        const math::mat4& projection_matrix = window.getProjectionMatrix();
+        math::mat4 viewMatrix = (activeCamera != nullptr) ? activeCamera->getViewMatrix() : math::mat4();
+        const math::mat4& projectionMatrix = window.getProjectionMatrix();
 
-        math::mat4 mvp_matrix = projection_matrix * view_matrix * model_matrix;
-        math::mat4 normal_matrix = model_matrix.inverse().transpose();
+        math::mat4 mvpMatrix = projectionMatrix * viewMatrix * modelMatrix;
+        math::mat4 normalMatrix = modelMatrix.inverse().transpose();
 
-        UniformBufferObject& ubo_dynamic = shader->getUboDynamic();
-        ubo_dynamic.setAttributeValue("model", model_matrix);
-        ubo_dynamic.setAttributeValue("normalMatrix", normal_matrix);
-        ubo_dynamic.setAttributeValue("mvp", mvp_matrix);
+        UniformBufferObject& uboDynamic = shader->getUboDynamic();
+        uboDynamic.setAttributeValue("model", modelMatrix);
+        uboDynamic.setAttributeValue("normalMatrix", normalMatrix);
+        uboDynamic.setAttributeValue("mvp", mvpMatrix);
         shader->uploadUniformBuffers();
     }
 

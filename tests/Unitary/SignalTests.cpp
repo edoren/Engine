@@ -46,7 +46,7 @@ static void MutipleArgs(int a, float b, double c, bool d) {
     gStream << a << ' ' << b << ' ' << c << ' ' << d;
 }
 
-auto LambdaFunction = []() { gStream << gLambdaFunctionStr; };
+auto lambdaFunction = []() { gStream << gLambdaFunctionStr; };
 
 TEST_CASE("Signal creation", "[Signal]") {
     gStream.str(std::string());
@@ -95,7 +95,7 @@ TEST_CASE("Signal connection", "[Signal]") {
     SECTION("Connect to a lambda") {
         const String result = gLambdaFunctionStr;
         Signal<> sig;
-        sig.connect(LambdaFunction);
+        sig.connect(lambdaFunction);
         sig.emit();
         REQUIRE(gStream.str() == result);
     }

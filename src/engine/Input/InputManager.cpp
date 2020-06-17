@@ -104,8 +104,8 @@ void InputManager::advanceFrame() {
             case SDL_WINDOWEVENT: {
                 switch (event.window.event) {
                     case SDL_WINDOWEVENT_RESIZED: {
-                        math::ivec2 window_size(event.window.data1, event.window.data2);
-                        onWindowResized.emit(window_size);
+                        math::ivec2 windowSize(event.window.data1, event.window.data2);
+                        onWindowResized.emit(windowSize);
                         break;
                     }
                     case SDL_WINDOWEVENT_MINIMIZED: {

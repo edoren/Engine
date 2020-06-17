@@ -147,15 +147,15 @@ private:
 
     template <typename FunctionType>
     static void ManageFunction(void* dest, const void* src, Operation op) {
-        auto* dest_cast = static_cast<FunctionType*>(dest);
+        auto* destCast = static_cast<FunctionType*>(dest);
         switch (op) {
             case Operation::COPY: {
-                const auto* src_cast = static_cast<const FunctionType*>(src);
-                new (dest_cast) FunctionType(*src_cast);
+                const auto* srcCast = static_cast<const FunctionType*>(src);
+                new (destCast) FunctionType(*srcCast);
                 break;
             }
             case Operation::DESTROY:
-                dest_cast->~FunctionType();
+                destCast->~FunctionType();
                 break;
         }
     }

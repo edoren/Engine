@@ -32,7 +32,7 @@ private:
     void updateCameraVectors();
 
 public:
-    static math::vec3 WORLD_UP;
+    static const math::vec3 sWorldUp;
 
     // Camera vectors
     math::vec3 position;

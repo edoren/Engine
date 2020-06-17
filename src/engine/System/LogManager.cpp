@@ -27,7 +27,7 @@ android_LogPriority sAndroidLogPriorities[] = {ANDROID_LOG_UNKNOWN, ANDROID_LOG_
 const char* sLogPriorityNames[] = {nullptr, "VERBOSE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"};
 
 String DefaultLogCallback(LogPriority priority, const String& tag, const String& message) {
-    const char* priority_name = sLogPriorityNames[static_cast<int>(priority)];
+    const char* priorityName = sLogPriorityNames[static_cast<int>(priority)];
 
     // Get the current system hour
     std::time_t t = std::time(nullptr);
@@ -35,7 +35,7 @@ String DefaultLogCallback(LogPriority priority, const String& tag, const String&
 
     // Format the log message
     return "[{:02d}:{:02d}:{:02d}] [{}/{}] : {}"_format(tm->tm_hour, tm->tm_min, tm->tm_sec, tag.getData(),
-                                                        priority_name, message.getData());
+                                                        priorityName, message.getData());
 }
 
 }  // namespace
@@ -99,12 +99,12 @@ void LogManager::logMessage(LogPriority priority, const String& tag, const Strin
     if (priority == LogPriority::DEBUG) return;
 #endif
 
-    String log_message = DefaultLogCallback(priority, tag, message);
+    String logMessage = DefaultLogCallback(priority, tag, message);
 
     // Write the log to the file
     if (m_fileLoggingEnable) {
         if (SDL_RWops* pfile = SDL_RWFromFile(m_logFile.getData(), "ab")) {
-            const std::string& str = log_message.toUtf8();
+            const std::string& str = logMessage.toUtf8();
             SDL_RWwrite(pfile, str.data(), 1, str.size());
             SDL_RWwrite(pfile, sLineEnding, 1, strlen(sLineEnding));
             SDL_RWclose(pfile);
@@ -117,7 +117,7 @@ void LogManager::logMessage(LogPriority priority, const String& tag, const Strin
         __android_log_write(sAndroidLogPriorities[static_cast<int>(priority)], m_appName.getData(),
                             log_message.getData());
 #else
-        fputs(log_message.getData(), stdout);
+        fputs(logMessage.getData(), stdout);
         fputs("\n", stdout);
 #endif
     }

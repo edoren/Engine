@@ -21,8 +21,8 @@ GL_TextureManager* GL_TextureManager::GetInstancePtr() {
 }
 
 GL_TextureManager::GL_TextureManager() {
-    TextureManager& base_instance = TextureManager::GetInstance();
-    sDerivedInstance = reinterpret_cast<GL_TextureManager*>(&base_instance);
+    TextureManager& baseInstance = TextureManager::GetInstance();
+    sDerivedInstance = reinterpret_cast<GL_TextureManager*>(&baseInstance);
 }
 
 GL_TextureManager::~GL_TextureManager() {
@@ -34,8 +34,8 @@ std::unique_ptr<Texture2D> GL_TextureManager::createTexture2D() {
 }
 
 void GL_TextureManager::useTexture2D(Texture2D* texture) {
-    auto* casted_texture = reinterpret_cast<GL_Texture2D*>(texture);
-    casted_texture->use();
+    auto* castedTexture = reinterpret_cast<GL_Texture2D*>(texture);
+    castedTexture->use();
 }
 
 }  // namespace engine

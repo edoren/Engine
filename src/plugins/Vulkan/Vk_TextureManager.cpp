@@ -26,8 +26,8 @@ Vk_TextureManager* Vk_TextureManager::GetInstancePtr() {
 }
 
 Vk_TextureManager::Vk_TextureManager() : m_descriptorPool(VK_NULL_HANDLE), m_descriptorSetLayout(VK_NULL_HANDLE) {
-    TextureManager& base_instance = TextureManager::GetInstance();
-    sDerivedInstance = reinterpret_cast<Vk_TextureManager*>(&base_instance);
+    TextureManager& baseInstance = TextureManager::GetInstance();
+    sDerivedInstance = reinterpret_cast<Vk_TextureManager*>(&baseInstance);
 
     createDescriptorPool();
     createDescriptorSetLayout();
@@ -67,8 +67,8 @@ std::unique_ptr<Texture2D> Vk_TextureManager::createTexture2D() {
 }
 
 void Vk_TextureManager::useTexture2D(Texture2D* texture) {
-    auto* casted_texture = reinterpret_cast<Vk_Texture2D*>(texture);
-    casted_texture->use();
+    auto* castedTexture = reinterpret_cast<Vk_Texture2D*>(texture);
+    castedTexture->use();
 }
 
 bool Vk_TextureManager::createDescriptorPool() {
@@ -77,21 +77,21 @@ bool Vk_TextureManager::createDescriptorPool() {
 
     VkResult result = VK_SUCCESS;
 
-    VkDescriptorPoolSize pool_size = {
+    VkDescriptorPoolSize poolSize = {
         VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,  // type
         sMaxDescriptorSets                          // descriptorCount
     };
 
-    VkDescriptorPoolCreateInfo descriptor_pool_create_info = {
+    VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = {
         VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,  // sType
         nullptr,                                        // pNext
         0,                                              // flags
         sMaxDescriptorSets,                             // maxSets
         1,                                              // poolSizeCount
-        &pool_size                                      // pPoolSizes
+        &poolSize                                       // pPoolSizes
     };
 
-    result = vkCreateDescriptorPool(device, &descriptor_pool_create_info, nullptr, &m_descriptorPool);
+    result = vkCreateDescriptorPool(device, &descriptorPoolCreateInfo, nullptr, &m_descriptorPool);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Could not create descriptor pool");
         return false;
@@ -106,7 +106,7 @@ bool Vk_TextureManager::createDescriptorSetLayout() {
 
     VkResult result = VK_SUCCESS;
 
-    std::vector<VkDescriptorSetLayoutBinding> layout_bindings = {
+    std::vector<VkDescriptorSetLayoutBinding> layoutBindings = {
         // Diffuse texture
         {
             0,                                          // binding
@@ -117,15 +117,15 @@ bool Vk_TextureManager::createDescriptorSetLayout() {
         },
     };
 
-    VkDescriptorSetLayoutCreateInfo descriptor_set_layout_create_info = {
+    VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo = {
         VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,  // sType
         nullptr,                                              // pNext
         0,                                                    // flags
-        static_cast<uint32>(layout_bindings.size()),          // bindingCount
-        layout_bindings.data()                                // pBindings
+        static_cast<uint32>(layoutBindings.size()),           // bindingCount
+        layoutBindings.data()                                 // pBindings
     };
 
-    result = vkCreateDescriptorSetLayout(device, &descriptor_set_layout_create_info, nullptr, &m_descriptorSetLayout);
+    result = vkCreateDescriptorSetLayout(device, &descriptorSetLayoutCreateInfo, nullptr, &m_descriptorSetLayout);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Could not create descriptor set layout");
         return false;

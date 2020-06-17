@@ -48,26 +48,26 @@ TEST_CASE("String to other encodings", "[String]") {
     String smiley = u8"\U0001F60A";
 
     SECTION("to Wide strings") {
-        std::wstring hello_wide = hello.toWide();
-        REQUIRE(hello_wide == L"HELLO WORLD");
+        std::wstring helloWide = hello.toWide();
+        REQUIRE(helloWide == L"HELLO WORLD");
     }
     SECTION("to UTF-8 strings") {
-        const std::string& hello_utf8 = hello.toUtf8();
-        const std::string& smiley_utf8 = smiley.toUtf8();
-        REQUIRE(hello_utf8 == u8"HELLO WORLD");
-        REQUIRE(smiley_utf8 == u8"\U0001F60A");
+        const std::string& helloUtf8 = hello.toUtf8();
+        const std::string& smileyUtf8 = smiley.toUtf8();
+        REQUIRE(helloUtf8 == u8"HELLO WORLD");
+        REQUIRE(smileyUtf8 == u8"\U0001F60A");
     }
     SECTION("to UTF-16 strings") {
-        std::u16string hello_utf16 = hello.toUtf16();
-        std::u16string smiley_utf16 = smiley.toUtf16();
-        REQUIRE(hello_utf16 == u"HELLO WORLD");
-        REQUIRE(smiley_utf16 == u"\U0001F60A");
+        std::u16string helloUtf16 = hello.toUtf16();
+        std::u16string smileyUtf16 = smiley.toUtf16();
+        REQUIRE(helloUtf16 == u"HELLO WORLD");
+        REQUIRE(smileyUtf16 == u"\U0001F60A");
     }
     SECTION("to UTF-32 strings") {
-        std::u32string hello_utf32 = hello.toUtf32();
-        std::u32string smiley_utf32 = smiley.toUtf32();
-        REQUIRE(hello_utf32 == U"HELLO WORLD");
-        REQUIRE(smiley_utf32 == U"\U0001F60A");
+        std::u32string helloUtf32 = hello.toUtf32();
+        std::u32string smileyUtf32 = smiley.toUtf32();
+        REQUIRE(helloUtf32 == U"HELLO WORLD");
+        REQUIRE(smileyUtf32 == U"\U0001F60A");
     }
 }
 

@@ -52,7 +52,7 @@ bool Vk_Shader::loadFromMemory(const byte* source, std::size_t sourceSize, Shade
 
     VkResult result = VK_SUCCESS;
 
-    VkShaderModuleCreateInfo shader_module_create_info = {
+    VkShaderModuleCreateInfo shaderModuleCreateInfo = {
         VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,  // sType
         nullptr,                                      // pNext
         VkShaderModuleCreateFlags(),                  // flags
@@ -68,7 +68,7 @@ bool Vk_Shader::loadFromMemory(const byte* source, std::size_t sourceSize, Shade
         vkDestroyShaderModule(device, m_modules[pos], nullptr);
     }
 
-    result = vkCreateShaderModule(device, &shader_module_create_info, nullptr, &m_modules[pos]);
+    result = vkCreateShaderModule(device, &shaderModuleCreateInfo, nullptr, &m_modules[pos]);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Could not create shader module");
         return false;
@@ -92,7 +92,7 @@ VkDescriptorSetLayout& Vk_Shader::getUboDescriptorSetLayout() {
 void Vk_Shader::setDescriptor(json&& descriptor) {
     m_descriptor = std::move(descriptor);
 
-    String descriptor_name = m_descriptor["name"];
+    String descriptorName = m_descriptor["name"];
 
     std::vector<UniformBufferObject::Item> attributes;
     for (auto& attribute : m_descriptor["uniform_buffer"]["attributes"]) {
@@ -110,24 +110,24 @@ void Vk_Shader::setDescriptor(json&& descriptor) {
     }
     m_uboDynamic.setAttributes(attributes);
 
-    std::vector<VertexLayout::Component> vertex_inputs;
+    std::vector<VertexLayout::Component> vertexInputs;
     for (auto& component : m_descriptor["vertex_layout"]["vertex_input"]) {
         if (component == "position") {
-            vertex_inputs.push_back(VertexLayout::Component::POSITION);
+            vertexInputs.push_back(VertexLayout::Component::POSITION);
         } else if (component == "color") {
-            vertex_inputs.push_back(VertexLayout::Component::COLOR);
+            vertexInputs.push_back(VertexLayout::Component::COLOR);
         } else if (component == "normal") {
-            vertex_inputs.push_back(VertexLayout::Component::NORMAL);
+            vertexInputs.push_back(VertexLayout::Component::NORMAL);
         } else if (component == "uv") {
-            vertex_inputs.push_back(VertexLayout::Component::UV);
+            vertexInputs.push_back(VertexLayout::Component::UV);
         } else {
             LogFatal(sTag,
                      "Error invalid VertexLayout Component '{}', please check the vertex_layout "
-                     "in the '{}.json' shader descriptor"_format(component, descriptor_name));
+                     "in the '{}.json' shader descriptor"_format(component, descriptorName));
             return;
         }
     }
-    m_vertexLayout = std::move(vertex_inputs);
+    m_vertexLayout = std::move(vertexInputs);
 
     if (!createUniformBuffers()) {
         LogError(sTag, "Could not create the UBO buffer");
@@ -158,23 +158,23 @@ bool Vk_Shader::createUboDescriptorSetLayout() {
 
     const json& bindings = m_descriptor["renderer"]["vulkan"]["descriptor_set_layouts"]["bindings"];
 
-    std::vector<VkDescriptorSetLayoutBinding> layout_bindings;
+    std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
     for (const auto& binding : bindings) {
         const json& pos = binding["pos"];
         const json& type = binding["type"];
         if (pos.is_number_integer() && type.is_string()) {
-            uint32 ubo_binding_position = pos;
-            VkDescriptorType descriptor_type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            uint32 uboBindingPosition = pos;
+            VkDescriptorType descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 
             if (type == "uniform_buffer") {
-                descriptor_type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+                descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
             } else if (type == "uniform_buffer_dynamic") {
-                descriptor_type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+                descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
             }
 
-            layout_bindings.push_back({
-                ubo_binding_position,        // binding
-                descriptor_type,             // descriptorType
+            layoutBindings.push_back({
+                uboBindingPosition,          // binding
+                descriptorType,              // descriptorType
                 1,                           // descriptorCount
                 VK_SHADER_STAGE_VERTEX_BIT,  // stageFlags
                 nullptr                      // pImmutableSamplers
@@ -182,16 +182,15 @@ bool Vk_Shader::createUboDescriptorSetLayout() {
         }
     }
 
-    VkDescriptorSetLayoutCreateInfo descriptor_set_layout_create_info = {
+    VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo = {
         VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,  // sType
         nullptr,                                              // pNext
         0,                                                    // flags
-        static_cast<uint32>(layout_bindings.size()),          // bindingCount
-        layout_bindings.data()                                // pBindings
+        static_cast<uint32>(layoutBindings.size()),           // bindingCount
+        layoutBindings.data()                                 // pBindings
     };
 
-    result =
-        vkCreateDescriptorSetLayout(device, &descriptor_set_layout_create_info, nullptr, &m_uboDescriptorSetLayout);
+    result = vkCreateDescriptorSetLayout(device, &descriptorSetLayoutCreateInfo, nullptr, &m_uboDescriptorSetLayout);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Could not create descriptor set layout");
         return false;
@@ -206,7 +205,7 @@ bool Vk_Shader::allocateUboDescriptorSet() {
 
     VkResult result = VK_SUCCESS;
 
-    VkDescriptorSetAllocateInfo descriptor_set_allocate_info = {
+    VkDescriptorSetAllocateInfo descriptorSetAllocateInfo = {
         VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,  // sType
         nullptr,                                         // pNext
         context.getUboDescriptorPool(),                  // descriptorPool
@@ -214,7 +213,7 @@ bool Vk_Shader::allocateUboDescriptorSet() {
         &m_uboDescriptorSetLayout                        // pSetLayouts
     };
 
-    result = vkAllocateDescriptorSets(device, &descriptor_set_allocate_info, &m_uboDescriptorSet);
+    result = vkAllocateDescriptorSets(device, &descriptorSetAllocateInfo, &m_uboDescriptorSet);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Could not allocate descriptor set");
         return false;
@@ -242,7 +241,7 @@ bool Vk_Shader::updateUboDescriptorSet() {
         },
     }};
 
-    std::array<VkWriteDescriptorSet, 2> descriptor_writes = {{
+    std::array<VkWriteDescriptorSet, 2> descriptorWrites = {{
         {
             VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,  // sType
             nullptr,                                 // pNext
@@ -269,7 +268,7 @@ bool Vk_Shader::updateUboDescriptorSet() {
         },
     }};
 
-    vkUpdateDescriptorSets(device, static_cast<uint32>(descriptor_writes.size()), descriptor_writes.data(), 0, nullptr);
+    vkUpdateDescriptorSets(device, static_cast<uint32>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 
     return true;
 }
@@ -295,8 +294,8 @@ bool Vk_Shader::createUniformBuffers() {
                                         (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT));
 
     // Dynamic UBO memory buffer
-    PhysicalDeviceParameters& physical_device = Vk_Context::GetInstance().getPhysicalDevice();
-    auto minUboAlignment = static_cast<size_t>(physical_device.properties.limits.minUniformBufferOffsetAlignment);
+    PhysicalDeviceParameters& physicalDevice = Vk_Context::GetInstance().getPhysicalDevice();
+    auto minUboAlignment = static_cast<size_t>(physicalDevice.properties.limits.minUniformBufferOffsetAlignment);
 
     m_uboDynamic.setBufferSize(50, minUboAlignment);  // TODO: CHANGE THIS
 

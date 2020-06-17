@@ -33,41 +33,41 @@ void BaseNoise::generatePermutationVector() {
     std::copy(m_perm.begin(), m_perm.begin() + 256, m_perm.begin() + 256);
 }
 
-float BaseNoise::coherentNoise3D(float x, float y, float z) const {
+float BaseNoise::coherentNoise3D(float xCoord, float yCoord, float zCoord) const {
     // Find the unit cube that contains the point
-    int X = fastFloor(x) & 255;
-    int Y = fastFloor(y) & 255;
-    int Z = fastFloor(z) & 255;
+    int x = fastFloor(xCoord) & 255;
+    int y = fastFloor(yCoord) & 255;
+    int z = fastFloor(zCoord) & 255;
 
     // Find relative x, y, z of point in cube
-    x -= static_cast<float>(fastFloor(x));
-    y -= static_cast<float>(fastFloor(y));
-    z -= static_cast<float>(fastFloor(z));
+    xCoord -= static_cast<float>(fastFloor(xCoord));
+    yCoord -= static_cast<float>(fastFloor(yCoord));
+    zCoord -= static_cast<float>(fastFloor(zCoord));
 
     // Compute fade curves for each of x, y, z
-    float u = fade(x);
-    float v = fade(y);
-    float w = fade(z);
+    float u = fade(xCoord);
+    float v = fade(yCoord);
+    float w = fade(zCoord);
 
     // Hash coordinates of the 8 cube corners
-    int AAA = m_perm[m_perm[m_perm[X] + Y] + Z];
-    int ABA = m_perm[m_perm[m_perm[X] + Y + 1] + Z];
-    int AAB = m_perm[m_perm[m_perm[X] + Y] + Z + 1];
-    int ABB = m_perm[m_perm[m_perm[X] + Y + 1] + Z + 1];
-    int BAA = m_perm[m_perm[m_perm[X + 1] + Y] + Z];
-    int BBA = m_perm[m_perm[m_perm[X + 1] + Y + 1] + Z];
-    int BAB = m_perm[m_perm[m_perm[X + 1] + Y] + Z + 1];
-    int BBB = m_perm[m_perm[m_perm[X + 1] + Y + 1] + Z + 1];
+    int aaa = m_perm[m_perm[m_perm[x] + y] + z];
+    int aba = m_perm[m_perm[m_perm[x] + y + 1] + z];
+    int aab = m_perm[m_perm[m_perm[x] + y] + z + 1];
+    int abb = m_perm[m_perm[m_perm[x] + y + 1] + z + 1];
+    int baa = m_perm[m_perm[m_perm[x + 1] + y] + z];
+    int bba = m_perm[m_perm[m_perm[x + 1] + y + 1] + z];
+    int bab = m_perm[m_perm[m_perm[x + 1] + y] + z + 1];
+    int bbb = m_perm[m_perm[m_perm[x + 1] + y + 1] + z + 1];
 
     // Calculate noise contributions from each of the eight corners
-    float n000 = grad(AAA, x, y, z);
-    float n100 = grad(BAA, x - 1, y, z);
-    float n010 = grad(ABA, x, y - 1, z);
-    float n110 = grad(BBA, x - 1, y - 1, z);
-    float n001 = grad(AAB, x, y, z - 1);
-    float n101 = grad(BAB, x - 1, y, z - 1);
-    float n011 = grad(ABB, x, y - 1, z - 1);
-    float n111 = grad(BBB, x - 1, y - 1, z - 1);
+    float n000 = grad(aaa, xCoord, yCoord, zCoord);
+    float n100 = grad(baa, xCoord - 1, yCoord, zCoord);
+    float n010 = grad(aba, xCoord, yCoord - 1, zCoord);
+    float n110 = grad(bba, xCoord - 1, yCoord - 1, zCoord);
+    float n001 = grad(aab, xCoord, yCoord, zCoord - 1);
+    float n101 = grad(bab, xCoord - 1, yCoord, zCoord - 1);
+    float n011 = grad(abb, xCoord, yCoord - 1, zCoord - 1);
+    float n111 = grad(bbb, xCoord - 1, yCoord - 1, zCoord - 1);
 
     // Add blended results from 8 corners of cube
 
