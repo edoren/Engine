@@ -35,9 +35,9 @@ bool GL_RenderWindow::create(const String& name, const math::ivec2& size) {
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 #endif
 
-    math::ivec2 initial_pos(SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-    Uint32 window_flags(SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
-    m_window = SDL_CreateWindow(name.getData(), initial_pos.x, initial_pos.y, size.x, size.y, window_flags);
+    math::ivec2 initialPos(SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+    Uint32 windowFlags(SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+    m_window = SDL_CreateWindow(name.getData(), initialPos.x, initialPos.y, size.x, size.y, windowFlags);
     if (!m_window) {
         LogError(sTag, SDL_GetError());
         return false;
@@ -58,45 +58,45 @@ bool GL_RenderWindow::create(const String& name, const math::ivec2& size) {
     }
 #endif
 
-    const char* opengl_vendor = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
-    const char* opengl_renderer = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
-    const char* opengl_version = reinterpret_cast<const char*>(glGetString(GL_VERSION));
-    const char* glsl_version = reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION));
+    const char* openglVendor = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
+    const char* openglRenderer = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
+    const char* openglVersion = reinterpret_cast<const char*>(glGetString(GL_VERSION));
+    const char* glslVersion = reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION));
 
-    LogInfo(sTag, String("OpenGL Vendor: ") + opengl_vendor);
-    LogInfo(sTag, String("OpenGL Renderer: ") + opengl_renderer);
-    LogInfo(sTag, String("OpenGL Version: ") + opengl_version);
-    LogInfo(sTag, String("GLSL Version: ") + glsl_version);
+    LogInfo(sTag, String("OpenGL Vendor: ") + openglVendor);
+    LogInfo(sTag, String("OpenGL Renderer: ") + openglRenderer);
+    LogInfo(sTag, String("OpenGL Version: ") + openglVersion);
+    LogInfo(sTag, String("GLSL Version: ") + glslVersion);
 
-    GLint num_extensions = 0;
-    GL_CALL(glGetIntegerv(GL_NUM_EXTENSIONS, &num_extensions));
+    GLint numExtensions = 0;
+    GL_CALL(glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions));
 
-    LogInfo(sTag, "OpenGL Extensions: {}"_format(num_extensions));
-    std::vector<const char*> opengl_available_extensions;
-    opengl_available_extensions.reserve(num_extensions);
-    for (GLint i = 0; i < num_extensions; i++) {
+    LogInfo(sTag, "OpenGL Extensions: {}"_format(numExtensions));
+    std::vector<const char*> openglAvailableExtensions;
+    openglAvailableExtensions.reserve(numExtensions);
+    for (GLint i = 0; i < numExtensions; i++) {
         const char* extension = reinterpret_cast<const char*>(glGetStringi(GL_EXTENSIONS, i));
-        opengl_available_extensions.push_back(extension);
+        openglAvailableExtensions.push_back(extension);
         LogInfo(sTag, String("\t") + extension);
     }
 
     // Check that all the required extensions are available
-    bool all_extensions_found = true;
-    const auto& required_extensions = GL_Shader::GetRequiredExtensions();
-    for (const auto* required_extension : required_extensions) {
+    bool allExtensionsFound = true;
+    const auto& requiredExtensions = GL_Shader::GetRequiredExtensions();
+    for (const auto* requiredExtension : requiredExtensions) {
         bool found = false;
-        for (const char* extension : opengl_available_extensions) {
-            if (std::strcmp(required_extension, extension) == 0) {
+        for (const char* extension : openglAvailableExtensions) {
+            if (std::strcmp(requiredExtension, extension) == 0) {
                 found = true;
                 break;
             }
         }
         if (!found) {
-            LogError(sTag, "Extension '{}' not available"_format(required_extension));
-            all_extensions_found = false;
+            LogError(sTag, "Extension '{}' not available"_format(requiredExtension));
+            allExtensionsFound = false;
         }
     }
-    if (!all_extensions_found) {
+    if (!allExtensionsFound) {
         return false;
     }
 
@@ -151,19 +151,19 @@ void GL_RenderWindow::setVSyncEnabled(bool vsync) {
 void GL_RenderWindow::swapBuffers() {
     // Update static uniform buffer
     GL_Shader* shader = GL_ShaderManager::GetInstance().getActiveShader();
-    const Camera* active_camera = getActiveCamera();
+    const Camera* activeCamera = getActiveCamera();
 
-    math::vec3 front_vector;
-    math::vec3 light_position;  // TMP: Get this from other
-                                //      part a LightManager maybe?
-    if (active_camera != nullptr) {
-        front_vector = active_camera->getFrontVector();
-        light_position = active_camera->getPosition();
+    math::vec3 frontVector;
+    math::vec3 lightPosition;  // TMP: Get this from other
+                               //      part a LightManager maybe?
+    if (activeCamera != nullptr) {
+        frontVector = activeCamera->getFrontVector();
+        lightPosition = activeCamera->getPosition();
     }
 
     UniformBufferObject& ubo = shader->getUbo();
-    ubo.setAttributeValue("cameraFront", front_vector);
-    ubo.setAttributeValue("lightPosition", light_position);
+    ubo.setAttributeValue("cameraFront", frontVector);
+    ubo.setAttributeValue("lightPosition", lightPosition);
     ///
 
     SDL_GL_SwapWindow(reinterpret_cast<SDL_Window*>(m_window));

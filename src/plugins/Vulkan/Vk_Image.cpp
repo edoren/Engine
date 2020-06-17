@@ -36,7 +36,7 @@ bool Vk_Image::createImage(const math::uvec2& size, VkFormat format, VkImageTili
 
     VkResult result = VK_SUCCESS;
 
-    VkImageCreateInfo image_create_info = {
+    VkImageCreateInfo imageCreateInfo = {
         VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,  // sType;
         nullptr,                              // pNext
         0,                                    // flags
@@ -59,7 +59,7 @@ bool Vk_Image::createImage(const math::uvec2& size, VkFormat format, VkImageTili
         VK_IMAGE_LAYOUT_UNDEFINED   // initialLayout
     };
 
-    result = vkCreateImage(device, &image_create_info, nullptr, &m_handle);
+    result = vkCreateImage(device, &imageCreateInfo, nullptr, &m_handle);
 
     return result == VK_SUCCESS;
 }
@@ -68,7 +68,7 @@ bool Vk_Image::createImageView(VkFormat format, VkImageAspectFlags aspectMask) {
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.getVulkanDevice();
 
-    VkImageViewCreateInfo image_view_create_info = {
+    VkImageViewCreateInfo imageViewCreateInfo = {
         VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,  // sType
         nullptr,                                   // pNext
         0,                                         // flags
@@ -92,17 +92,17 @@ bool Vk_Image::createImageView(VkFormat format, VkImageAspectFlags aspectMask) {
         },
     };
 
-    return vkCreateImageView(device, &image_view_create_info, nullptr, &m_view) == VK_SUCCESS;
+    return vkCreateImageView(device, &imageViewCreateInfo, nullptr, &m_view) == VK_SUCCESS;
 }
 
 bool Vk_Image::allocateMemory(const VkMemoryPropertyFlags& memoryProperties) {
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.getVulkanDevice();
 
-    VkMemoryRequirements image_memory_requirements;
-    vkGetImageMemoryRequirements(device, m_handle, &image_memory_requirements);
+    VkMemoryRequirements imageMemoryRequirements;
+    vkGetImageMemoryRequirements(device, m_handle, &imageMemoryRequirements);
 
-    if (!Vk_Utilities::AllocateMemory(&m_memory, memoryProperties, image_memory_requirements)) {
+    if (!Vk_Utilities::AllocateMemory(&m_memory, memoryProperties, imageMemoryRequirements)) {
         return false;
     }
 
@@ -118,8 +118,8 @@ void Vk_Image::destroy() {
     VkDevice& device = context.getVulkanDevice();
 
     if (m_view != VK_NULL_HANDLE || m_handle != VK_NULL_HANDLE || m_memory != VK_NULL_HANDLE) {
-        QueueParameters& graphics_queue = context.getGraphicsQueue();
-        vkQueueWaitIdle(graphics_queue.handle);
+        QueueParameters& graphicsQueue = context.getGraphicsQueue();
+        vkQueueWaitIdle(graphicsQueue.handle);
 
         if (m_view != VK_NULL_HANDLE) {
             vkDestroyImageView(device, m_view, nullptr);

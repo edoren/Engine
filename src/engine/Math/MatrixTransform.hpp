@@ -43,12 +43,12 @@ inline Matrix4x4<T> PerspectiveLH(T fovy, T aspect, T zNear, T zFar) {
     T one = static_cast<T>(1);
     T two = static_cast<T>(2);
 
-    T const tan_half_fovy = static_cast<T>(std::tan(fovy / two));
+    T const tanHalfFovy = static_cast<T>(std::tan(fovy / two));
 
     // clang-format off
     return Matrix4x4<T>(
-        one / (aspect * tan_half_fovy), 0.F, 0.F, 0.F,
-        0.F, one / (tan_half_fovy), 0.F, 0.F,
+        one / (aspect * tanHalfFovy), 0.F, 0.F, 0.F,
+        0.F, one / (tanHalfFovy), 0.F, 0.F,
         0.F, 0.F, (zFar + zNear) / (zFar - zNear), one,
         0.F, 0.F, -(two * zFar * zNear) / (zFar - zNear), 0.F
     );
@@ -70,12 +70,12 @@ inline Matrix4x4<T> PerspectiveRH(T fovy, T aspect, T zNear, T zFar) {
     T one = static_cast<T>(1);
     T two = static_cast<T>(2);
 
-    T const tan_half_fovy = static_cast<T>(std::tan(fovy / two));
+    T const tanHalfFovy = static_cast<T>(std::tan(fovy / two));
 
     // clang-format off
     return Matrix4x4<T>(
-        one / (aspect * tan_half_fovy), 0.F, 0.F, 0.F,
-        0.F, one / (tan_half_fovy), 0.F, 0.F,
+        one / (aspect * tanHalfFovy), 0.F, 0.F, 0.F,
+        0.F, one / (tanHalfFovy), 0.F, 0.F,
         0.F, 0.F, -(zFar + zNear) / (zFar - zNear), -one,
         0.F, 0.F, -(two * zFar * zNear) / (zFar - zNear), 0.F
     );
@@ -228,10 +228,10 @@ inline Matrix4x4<T> RotateAxisZ(const T eulerAngle) {
 template <typename T>
 inline Matrix4x4<T> Rotate(const Vector3<T>& eulerAngles) {
     static_assert(std::numeric_limits<T>::is_iec559, "'Rotate' only accept floating-point inputs");
-    Matrix4x4<T> Rx = RotateAxisX(eulerAngles.x);
-    Matrix4x4<T> Ry = RotateAxisX(eulerAngles.y);
-    Matrix4x4<T> Rz = RotateAxisX(eulerAngles.z);
-    return Rz * Ry * Rx;
+    Matrix4x4<T> rx = RotateAxisX(eulerAngles.x);
+    Matrix4x4<T> ry = RotateAxisX(eulerAngles.y);
+    Matrix4x4<T> rz = RotateAxisX(eulerAngles.z);
+    return rz * ry * rx;
 }
 
 template <typename T>

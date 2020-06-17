@@ -31,8 +31,8 @@ protected:
     CustomAssimpIOStream(const char* pFile, const char* pMode) {
         FileSystem& fs = FileSystem::GetInstance();
         for (const String& path : fs.getSearchPaths()) {
-            String file_path = fs.join(path, pFile);
-            if (m_file.open(file_path.getData(), pMode)) {
+            String filePath = fs.join(path, pFile);
+            if (m_file.open(filePath.getData(), pMode)) {
                 break;
             }
         }
@@ -165,30 +165,30 @@ void Model::loadModel(const String& path) {
     FileSystem& fs = FileSystem::GetInstance();
     String filename = fs.join(sRootModelFolder, path);
 
-    String path_noext = path.subString(0, path.findLastOf("."));
-    String json_filename = fs.join(sRootModelFolder, path_noext + ".json");
-    if (fs.fileExists(json_filename)) {
-        std::vector<byte> json_data;
+    String pathNoext = path.subString(0, path.findLastOf("."));
+    String jsonFilename = fs.join(sRootModelFolder, pathNoext + ".json");
+    if (fs.fileExists(jsonFilename)) {
+        std::vector<byte> jsonData;
 
-        fs.loadFileData(json_filename, &json_data);
-        if (json::accept(json_data.begin(), json_data.end())) {
-            m_descriptor = json::parse(json_data.begin(), json_data.end());
-            LogDebug(sTag, "Loading descriptor: " + json_filename);
+        fs.loadFileData(jsonFilename, &jsonData);
+        if (json::accept(jsonData.begin(), jsonData.end())) {
+            m_descriptor = json::parse(jsonData.begin(), jsonData.end());
+            LogDebug(sTag, "Loading descriptor: " + jsonFilename);
         }
     }
 
     const json& properties = m_descriptor["properties"];
     if (!m_descriptor.is_null() && !properties.is_null()) {
-        Transform model_matrix;
+        Transform modelMatrix;
         const json& scale = properties["scale"];
         const json& rotation = properties["rotation"];
         if (!scale.is_null()) {
-            model_matrix.scale(math::vec3(float(scale)));
+            modelMatrix.scale(math::vec3(float(scale)));
         }
         if (!rotation.is_null()) {
-            model_matrix.rotate({float(rotation[0]), float(rotation[1]), float(rotation[2])});
+            modelMatrix.rotate({float(rotation[0]), float(rotation[1]), float(rotation[2])});
         }
-        m_transform = model_matrix;
+        m_transform = modelMatrix;
     }
 
     importer.SetIOHandler(new CustomAssimpIOSystem());
@@ -272,7 +272,7 @@ std::unique_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
     // Process material
     aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-    std::array<aiTextureType, 2> enabled_texture_types = {
+    std::array<aiTextureType, 2> enabledTextureTypes = {
         {
             aiTextureType_DIFFUSE,
             aiTextureType_SPECULAR,
@@ -281,70 +281,70 @@ std::unique_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 
     FileSystem& fs = FileSystem::GetInstance();
 
-    std::vector<std::pair<TextureType, String>> texture_filenames;
+    std::vector<std::pair<TextureType, String>> textureFilenames;
 
-    auto load_textures_from_material = [&texture_filenames, &fs, this](const json& jsonMaterial) {
-        const json& json_textures = jsonMaterial["textures"];
-        for (const json& json_texture : json_textures) {
-            const json& type = json_texture["type"];
-            const json& name = json_texture["name"];
+    auto loadTexturesFromMaterial = [&textureFilenames, &fs, this](const json& jsonMaterial) {
+        const json& jsonTextures = jsonMaterial["textures"];
+        for (const json& jsonTexture : jsonTextures) {
+            const json& type = jsonTexture["type"];
+            const json& name = jsonTexture["name"];
             if (type.is_string() && name.is_string()) {
-                texture_filenames.emplace_back(GetTextureTypeFromString(type), fs.join(m_relativeDirectory, name));
+                textureFilenames.emplace_back(GetTextureTypeFromString(type), fs.join(m_relativeDirectory, name));
             }
         }
     };
 
-    const json& json_materials = m_descriptor["materials"];
-    size_t materials_count = json_materials.size();
-    if (!m_descriptor.is_null() && !json_materials.is_null()) {
-        int32 material_id = -1;
+    const json& jsonMaterials = m_descriptor["materials"];
+    size_t materialsCount = jsonMaterials.size();
+    if (!m_descriptor.is_null() && !jsonMaterials.is_null()) {
+        int32 materialId = -1;
 
-        for (const json& json_mesh : m_descriptor["meshes"]) {
-            const json& name = json_mesh["name"];
+        for (const json& jsonMesh : m_descriptor["meshes"]) {
+            const json& name = jsonMesh["name"];
             if (name.is_string() && name == mesh->mName.C_Str()) {
-                material_id = json_mesh["material_id"];
+                materialId = jsonMesh["material_id"];
                 break;
             }
         }
 
-        if (materials_count == 1 && material_id < 0) {
-            load_textures_from_material(json_materials[0]);
+        if (materialsCount == 1 && materialId < 0) {
+            loadTexturesFromMaterial(jsonMaterials[0]);
         } else {
-            for (const json& json_material : json_materials) {
-                if (json_material["id"] == material_id) {
-                    load_textures_from_material(json_material);
+            for (const json& jsonMaterial : jsonMaterials) {
+                if (jsonMaterial["id"] == materialId) {
+                    loadTexturesFromMaterial(jsonMaterial);
                 }
             }
         }
     } else {
-        for (aiTextureType type : enabled_texture_types) {
-            unsigned int texture_count = material->GetTextureCount(type);
-            for (unsigned int i = 0; i < texture_count; i++) {
+        for (aiTextureType type : enabledTextureTypes) {
+            unsigned int textureCount = material->GetTextureCount(type);
+            for (unsigned int i = 0; i < textureCount; i++) {
                 aiString str;
                 material->GetTexture(type, i, &str);
 
-                texture_filenames.emplace_back(
+                textureFilenames.emplace_back(
                     std::make_pair(GetTextureTypeFromAiTextureType(type), fs.join(m_relativeDirectory, str.C_Str())));
             }
         }
     }
 
-    TextureManager& texture_manager = TextureManager::GetInstance();
+    TextureManager& textureManager = TextureManager::GetInstance();
 
-    for (auto& pair : texture_filenames) {
+    for (auto& pair : textureFilenames) {
         TextureType type = pair.first;
         const String& filename = pair.second;
-        Texture2D* texture = texture_manager.loadFromFile(filename);
+        Texture2D* texture = textureManager.loadFromFile(filename);
         textures.emplace_back(texture, type);
     }
 
     if (textures.empty()) {
-        Texture2D* texture = texture_manager.getTexture2D(TextureManager::sDefaultTextureId);
+        Texture2D* texture = textureManager.getTexture2D(TextureManager::sDefaultTextureId);
         textures.emplace_back(texture, TextureType::DIFFUSE);
     }
 
-    ModelManager& model_manager = ModelManager::GetInstance();
-    std::unique_ptr<Mesh> ret = model_manager.createMesh();
+    ModelManager& modelManager = ModelManager::GetInstance();
+    std::unique_ptr<Mesh> ret = modelManager.createMesh();
     ret->loadFromData(vertices, indices, textures);
 
     return ret;

@@ -46,9 +46,9 @@ protected:
 
         m_shaderManager->loadFromFile("model");
 
-        SceneManager* scene_manager = SceneManager::GetInstancePtr();
-        if (scene_manager) {
-            scene_manager->changeActiveScene(m_sceneName);
+        SceneManager* sceneManager = SceneManager::GetInstancePtr();
+        if (sceneManager) {
+            sceneManager->changeActiveScene(m_sceneName);
         }
 
         // Mouse& mouse = m_input->GetMouse();
@@ -69,9 +69,9 @@ protected:
         m_windowSize = m_window->getSize();
 
         // Camera movement
-        const math::vec3& camera_front = m_camera.getFrontVector();
-        math::vec3 camera_forward(camera_front.x, 0, camera_front.z);
-        camera_forward = math::Normalize(camera_forward);
+        const math::vec3& cameraFront = m_camera.getFrontVector();
+        math::vec3 cameraForward(cameraFront.x, 0, cameraFront.z);
+        cameraForward = math::Normalize(cameraForward);
 
         // Camera mouse movement
         // Mouse& mouse = m_input->GetMouse();
@@ -79,13 +79,13 @@ protected:
         // m_camera.Rotate(mouse_delta * m_mouse_sensivity);
 
         // Camera key movements
-        float delta_time = getDeltaTime().asSeconds();
-        float speed = m_cameraSpeed * delta_time;
+        float deltaTime = getDeltaTime().asSeconds();
+        float speed = m_cameraSpeed * deltaTime;
         if (m_input->getButton(SDLK_w).isDown()) {
-            m_camera.move(speed * camera_forward);
+            m_camera.move(speed * cameraForward);
         }
         if (m_input->getButton(SDLK_s).isDown()) {
-            m_camera.move(speed * -camera_forward);
+            m_camera.move(speed * -cameraForward);
         }
         if (m_input->getButton(SDLK_d).isDown()) {
             m_camera.move(speed * m_camera.getRightVector());
@@ -95,10 +95,10 @@ protected:
         }
 
         if (m_input->getButton(SDLK_SPACE).isDown()) {
-            m_camera.move(speed * Camera::WORLD_UP);
+            m_camera.move(speed * Camera::sWorldUp);
         }
         if (m_input->getButton(SDLK_LSHIFT).isDown()) {
-            m_camera.move(speed * -Camera::WORLD_UP);
+            m_camera.move(speed * -Camera::sWorldUp);
         }
 
         if (m_input->getButton(SDLK_f).wentDown() || m_input->getButton(SDLK_F11).wentDown()) {
@@ -150,7 +150,7 @@ int main(int argc, char* argv[]) {
     String renderer = (argc >= 2) ? argv[1] : "";
 #endif
 
-    String scene_name = (argc >= 3) ? argv[2] : "test2";
+    String sceneName = (argc >= 3) ? argv[2] : "test2";
 
     String plugin;
     if (renderer == "vulkan") {
@@ -161,7 +161,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    LoadModelApp app(scene_name);
+    LoadModelApp app(sceneName);
 
     Main engine(argc, argv);
     engine.loadPlugin(plugin);

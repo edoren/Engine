@@ -71,19 +71,19 @@ bool GL_Shader::loadFromMemory(const byte* source, std::size_t sourceSize, Shade
         return false;
     }
 
-    String source_complete = sShaderVersion + '\n';
+    String sourceComplete = sShaderVersion + '\n';
 #ifdef OPENGL_USE_GLES
     if (type == ShaderType::FRAGMENT) {
         source_complete += sFragmentPrecision + '\n';
     }
 #endif
     for (auto& extension : sRequiredExtensions) {
-        source_complete += String("#extension ") + extension + " : enable\n";
+        sourceComplete += String("#extension ") + extension + " : enable\n";
     }
-    source_complete +=
+    sourceComplete +=
         String::FromUtf8(reinterpret_cast<const char8*>(source), reinterpret_cast<const char8*>(source) + sourceSize);
 
-    GLuint shader = compile(source_complete.getData(), source_complete.getSize(), type);
+    GLuint shader = compile(sourceComplete.getData(), sourceComplete.getSize(), type);
     if (!shader) {
         return false;
     }
@@ -126,11 +126,11 @@ bool GL_Shader::link() {
     GLint success = GL_TRUE;
     GL_CALL(glGetProgramiv(m_program, GL_LINK_STATUS, &success));
     if (success == GL_FALSE) {
-        GLint log_size = 0;
-        GL_CALL(glGetProgramiv(m_program, GL_INFO_LOG_LENGTH, &log_size));
+        GLint logSize = 0;
+        GL_CALL(glGetProgramiv(m_program, GL_INFO_LOG_LENGTH, &logSize));
         std::string error;
-        error.resize(log_size);
-        GL_CALL(glGetProgramInfoLog(m_program, log_size, &log_size, const_cast<char*>(error.data())));
+        error.resize(logSize);
+        GL_CALL(glGetProgramInfoLog(m_program, logSize, &logSize, const_cast<char*>(error.data())));
         LogError(sTag, String("Error linking shader:\n") + error);
         return false;
     }
@@ -148,38 +148,38 @@ void GL_Shader::use() {
 }
 
 void GL_Shader::uploadUniformBuffers() {
-    GLuint binding_point;
-    GLuint block_index;
+    GLuint bindingPoint;
+    GLuint blockIndex;
 
     // TODO: Automatically detect this using the descriptor
-    binding_point = 0;
-    block_index = glGetUniformBlockIndex(m_program, "UniformBufferObject");
-    if (block_index == GL_INVALID_INDEX) {
+    bindingPoint = 0;
+    blockIndex = glGetUniformBlockIndex(m_program, "UniformBufferObject");
+    if (blockIndex == GL_INVALID_INDEX) {
         LogError(sTag, "Error finding the UniformBufferObject with binding 0");
         return;
     }
 
     // Load the static UBO
-    GL_CALL(glUniformBlockBinding(m_program, block_index, binding_point));
+    GL_CALL(glUniformBlockBinding(m_program, blockIndex, bindingPoint));
     GL_CALL(glBindBuffer(GL_UNIFORM_BUFFER, m_uniformBuffers.staticBuffer));
 
     GL_CALL(glBufferData(GL_UNIFORM_BUFFER, m_ubo.getDataSize(), m_ubo.getData(), GL_DYNAMIC_DRAW));
-    GL_CALL(glBindBufferBase(GL_UNIFORM_BUFFER, binding_point, m_uniformBuffers.staticBuffer));
+    GL_CALL(glBindBufferBase(GL_UNIFORM_BUFFER, bindingPoint, m_uniformBuffers.staticBuffer));
 
     // TODO: Automatically detect this using the descriptor
-    binding_point = 1;
-    block_index = glGetUniformBlockIndex(m_program, "UniformBufferObjectDynamic");
-    if (block_index == GL_INVALID_INDEX) {
+    bindingPoint = 1;
+    blockIndex = glGetUniformBlockIndex(m_program, "UniformBufferObjectDynamic");
+    if (blockIndex == GL_INVALID_INDEX) {
         LogError(sTag, "Error finding the UniformBufferObjectDynamic with binding 1");
         return;
     }
 
     // Load the dynamic UBO
-    GL_CALL(glUniformBlockBinding(m_program, block_index, binding_point));
+    GL_CALL(glUniformBlockBinding(m_program, blockIndex, bindingPoint));
     GL_CALL(glBindBuffer(GL_UNIFORM_BUFFER, m_uniformBuffers.dynamicBuffer));
 
     GL_CALL(glBufferData(GL_UNIFORM_BUFFER, m_uboDynamic.getDataSize(), m_uboDynamic.getData(), GL_DYNAMIC_DRAW));
-    GL_CALL(glBindBufferBase(GL_UNIFORM_BUFFER, binding_point, m_uniformBuffers.dynamicBuffer));
+    GL_CALL(glBindBufferBase(GL_UNIFORM_BUFFER, bindingPoint, m_uniformBuffers.dynamicBuffer));
 }
 
 void GL_Shader::setUniform(const String& name, float val) {
@@ -262,19 +262,19 @@ GLuint GL_Shader::compile(const byte* source, size_t sourceSize, ShaderType type
 
     GLuint shader = glCreateShader(sGlShaderTypes[static_cast<int>(type)]);
 
-    const char* source_str = reinterpret_cast<const char*>(source);
+    const char* sourceStr = reinterpret_cast<const char*>(source);
     auto length = static_cast<GLint>(sourceSize);
-    GL_CALL(glShaderSource(shader, 1, &source_str, &length));
+    GL_CALL(glShaderSource(shader, 1, &sourceStr, &length));
     GL_CALL(glCompileShader(shader));
 
     GLint success = 0;
     GL_CALL(glGetShaderiv(shader, GL_COMPILE_STATUS, &success));
     if (success == GL_FALSE) {
-        GLint log_size = 0;
-        GL_CALL(glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &log_size));
+        GLint logSize = 0;
+        GL_CALL(glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logSize));
         std::string error;
-        error.resize(log_size);
-        GL_CALL(glGetShaderInfoLog(shader, log_size, &log_size, const_cast<char*>(error.data())));
+        error.resize(logSize);
+        GL_CALL(glGetShaderInfoLog(shader, logSize, &logSize, const_cast<char*>(error.data())));
         LogError(sTag, String("Error compiling shader:\n") + error);
         GL_CALL(glDeleteShader(shader));
         return 0;
@@ -284,11 +284,11 @@ GLuint GL_Shader::compile(const byte* source, size_t sourceSize, ShaderType type
 }
 
 void GL_Shader::cleanUpShaders() {
-    for (unsigned int& m_shader : m_shaders) {
-        if (m_shader) {
-            GL_CALL(glDetachShader(m_program, m_shader));
-            GL_CALL(glDeleteShader(m_shader));
-            m_shader = 0;
+    for (unsigned int& mShader : m_shaders) {
+        if (mShader) {
+            GL_CALL(glDetachShader(m_program, mShader));
+            GL_CALL(glDeleteShader(mShader));
+            mShader = 0;
         }
     }
 }

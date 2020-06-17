@@ -22,9 +22,9 @@ AsyncTaskRunner::AsyncTaskRunner() : m_isRunning(true) {
             task();
         }
     };
-    auto max_threads = std::thread::hardware_concurrency();
-    m_workers.reserve(max_threads);
-    for (decltype(max_threads) i = 0; i < max_threads; i++) {
+    auto maxThreads = std::thread::hardware_concurrency();
+    m_workers.reserve(maxThreads);
+    for (decltype(maxThreads) i = 0; i < maxThreads; i++) {
         m_workers.emplace_back(job);
     }
 }

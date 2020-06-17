@@ -40,7 +40,7 @@ float PerlinNoise::getValue(float x, float y, float z) const {
     float frequency = m_frequency;
     float amplitude = 1.F;
 
-    for (int current_octave = 0; current_octave < m_octaveCount; current_octave++) {
+    for (int currentOctave = 0; currentOctave < m_octaveCount; currentOctave++) {
         signal = coherentNoise3D(x * frequency, y * frequency, z * frequency);
         value += signal * amplitude;
 

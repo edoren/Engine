@@ -65,11 +65,11 @@ size_t IOStream::getSize() const {
     if (!m_file) {
         return 0;
     }
-    int64 current_pos = SDL_RWtell(m_file);
+    int64 currentPos = SDL_RWtell(m_file);
     SDL_RWseek(m_file, 0, RW_SEEK_END);
-    int64 file_size = SDL_RWtell(m_file);
-    SDL_RWseek(m_file, current_pos, RW_SEEK_SET);
-    return static_cast<size_t>(file_size);
+    int64 fileSize = SDL_RWtell(m_file);
+    SDL_RWseek(m_file, currentPos, RW_SEEK_SET);
+    return static_cast<size_t>(fileSize);
 }
 
 bool IOStream::isOpen() const {

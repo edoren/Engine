@@ -51,8 +51,8 @@ Texture2D* TextureManager::loadFromFile(const String& basename) {
 
     String filename = fs.join(sRootTextureFolder, basename);
 
-    bool filename_exist = fs.fileExists(filename);
-    if (filename_exist) {
+    bool filenameExist = fs.fileExists(filename);
+    if (filenameExist) {
         Image image;
         if (!image.loadFromFile(filename)) {
             LogDebug(sTag, "Could create Image from file: " + basename);
@@ -72,20 +72,20 @@ Texture2D* TextureManager::loadFromImage(const String& name, const Image& image)
         return texture;
     }
 
-    std::unique_ptr<Texture2D> new_texture = createTexture2D();
-    if (new_texture != nullptr) {
+    std::unique_ptr<Texture2D> newTexture = createTexture2D();
+    if (newTexture != nullptr) {
         LogDebug(sTag, "Loading Texture: " + name);
-        if (!new_texture->loadFromImage(image)) {
+        if (!newTexture->loadFromImage(image)) {
             LogDebug(sTag, "Could not load Texture: " + name);
-            new_texture.reset();
+            newTexture.reset();
         }
     } else {
         LogError(sTag, "Texture2D could not be created");
     }
 
-    texture = new_texture.get();
-    if (new_texture != nullptr) {
-        m_textures[name] = std::move(new_texture);
+    texture = newTexture.get();
+    if (newTexture != nullptr) {
+        m_textures[name] = std::move(newTexture);
     }
 
     // TMP
@@ -102,9 +102,9 @@ Texture2D* TextureManager::getTexture2D(const String& name) {
 }
 
 void TextureManager::setActiveTexture2D(const String& basename) {
-    Texture2D* found_texture = getTexture2D(basename);
-    if (found_texture != nullptr) {
-        m_activeTexture = found_texture;
+    Texture2D* foundTexture = getTexture2D(basename);
+    if (foundTexture != nullptr) {
+        m_activeTexture = foundTexture;
         useTexture2D(m_activeTexture);
     } else {
         LogError(sTag, "Could not find a Texture2D named: {}"_format(basename.toUtf8()));

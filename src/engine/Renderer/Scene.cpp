@@ -26,46 +26,46 @@ bool Scene::load() {
         return false;
     }
 
-    const json& json_name = m_data["name"];
-    if (json_name.is_string()) {
-        m_name = json_name;
+    const json& jsonName = m_data["name"];
+    if (jsonName.is_string()) {
+        m_name = jsonName;
     } else {
         LogWarning(sTag, "Scene does not contain a name");
     }
 
-    auto& file_system = FileSystem::GetInstance();
+    auto& fileSystem = FileSystem::GetInstance();
 
-    const json& json_data = m_data["data"];
-    if (json_data.is_object()) {
-        const json& json_objects = json_data["objects"];
-        for (const json& json_object : json_objects) {
-            const json& model_json = json_object["model"];
-            const json& position_json = json_object["position"];
-            const json& rotation_json = json_object["rotation"];
-            const json& scale_json = json_object["scale"];
+    const json& jsonData = m_data["data"];
+    if (jsonData.is_object()) {
+        const json& jsonObjects = jsonData["objects"];
+        for (const json& jsonObject : jsonObjects) {
+            const json& modelJson = jsonObject["model"];
+            const json& positionJson = jsonObject["position"];
+            const json& rotationJson = jsonObject["rotation"];
+            const json& scaleJson = jsonObject["scale"];
 
-            Transform model_matrix;
-            if (!scale_json.is_null()) {
-                model_matrix.scale(math::vec3(float(scale_json)));
+            Transform modelMatrix;
+            if (!scaleJson.is_null()) {
+                modelMatrix.scale(math::vec3(float(scaleJson)));
             }
-            if (!rotation_json.is_null()) {
-                model_matrix.rotate({float(rotation_json[0]), float(rotation_json[1]), float(rotation_json[2])});
+            if (!rotationJson.is_null()) {
+                modelMatrix.rotate({float(rotationJson[0]), float(rotationJson[1]), float(rotationJson[2])});
             }
-            if (!position_json.is_null()) {
-                model_matrix.translate({float(position_json[0]), float(position_json[1]), float(position_json[2])});
+            if (!positionJson.is_null()) {
+                modelMatrix.translate({float(positionJson[0]), float(positionJson[1]), float(positionJson[2])});
             }
 
-            String normalized_path = file_system.normalizePath(model_json);
+            String normalizedPath = fileSystem.normalizePath(modelJson);
 
-            Model* model = ModelManager::GetInstance().loadFromFile(normalized_path);
+            Model* model = ModelManager::GetInstance().loadFromFile(normalizedPath);
             auto& transforms = m_models[model];
-            transforms.emplace_back(model_matrix);
+            transforms.emplace_back(modelMatrix);
 
-            auto found_it = m_numModelInstance.find(normalized_path);
-            if (found_it == m_numModelInstance.end()) {
-                m_numModelInstance.emplace(normalized_path, 1);
+            auto foundIt = m_numModelInstance.find(normalizedPath);
+            if (foundIt == m_numModelInstance.end()) {
+                m_numModelInstance.emplace(normalizedPath, 1);
             } else {
-                found_it->second += 1;
+                foundIt->second += 1;
             }
         }
     } else {
@@ -76,20 +76,20 @@ bool Scene::load() {
 }
 
 bool Scene::unload() {
-    for (auto& model_pair : m_models) {
-        Model* model = model_pair.first;
-        std::for_each(model_pair.second.cbegin(), model_pair.second.cend(),
+    for (auto& modelPair : m_models) {
+        Model* model = modelPair.first;
+        std::for_each(modelPair.second.cbegin(), modelPair.second.cend(),
                       [&model](auto& /*unused*/) { ModelManager::GetInstance().unload(model); });
     }
     return true;
 }
 
 void Scene::draw(RenderWindow& target) {
-    for (auto& model_pair : m_models) {
-        Model* model = model_pair.first;
+    for (auto& modelPair : m_models) {
+        Model* model = modelPair.first;
 
         RenderStates states;
-        for (auto& transform : model_pair.second) {
+        for (auto& transform : modelPair.second) {
             states.transform = transform;
             model->draw(target, states);
         }

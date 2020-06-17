@@ -11,9 +11,9 @@ const String sTag("Vk_VertexLayout");
 
 std::vector<VkVertexInputAttributeDescription> GetAttribDescription(const std::vector<VertexLayout::Component>& input,
                                                                     uint32 bufferBindId) {
-    std::vector<VkVertexInputAttributeDescription> attribute_descriptions;
+    std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
     uint32 location = 0;
-    uint32 buffer_offset = 0;
+    uint32 bufferOffset = 0;
     for (const auto& component : input) {
         VkFormat format;
         uint32 size;
@@ -34,15 +34,15 @@ std::vector<VkVertexInputAttributeDescription> GetAttribDescription(const std::v
             default:
                 continue;
         }
-        attribute_descriptions.push_back({
+        attributeDescriptions.push_back({
             location++,    // location
             bufferBindId,  // binding
             format,        // format
-            buffer_offset  // offset
+            bufferOffset   // offset
         });
-        buffer_offset += size;
+        bufferOffset += size;
     }
-    return attribute_descriptions;
+    return attributeDescriptions;
 }
 
 }  // namespace

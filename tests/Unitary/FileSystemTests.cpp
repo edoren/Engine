@@ -5,7 +5,7 @@
 
 using namespace engine;
 
-static FileSystem file_system;
+static FileSystem fileSystem;
 
 TEST_CASE("FileSystem::IsAbsolutePath", "[FileSystem]") {
     SECTION("true if the path is absolute, false otherwise") {
@@ -16,8 +16,8 @@ TEST_CASE("FileSystem::IsAbsolutePath", "[FileSystem]") {
         String absolute = "/hello";
         String relative = "hello/world";
 #endif
-        REQUIRE(file_system.isAbsolutePath(absolute) == true);
-        REQUIRE(file_system.isAbsolutePath(relative) == false);
+        REQUIRE(fileSystem.isAbsolutePath(absolute) == true);
+        REQUIRE(fileSystem.isAbsolutePath(relative) == false);
     }
 }
 
@@ -34,20 +34,20 @@ TEST_CASE("FileSystem::NormalizePath", "[FileSystem]") {
         String path3 = "hello/../world/../..";
         String path4 = "hello/../world/../../..";
 #endif
-        String path1_norm = file_system.normalizePath(path1);
-        String path2_norm = file_system.normalizePath(path2);
-        String path3_norm = file_system.normalizePath(path3);
-        String path4_norm = file_system.normalizePath(path4);
+        String path1Norm = fileSystem.normalizePath(path1);
+        String path2Norm = fileSystem.normalizePath(path2);
+        String path3Norm = fileSystem.normalizePath(path3);
+        String path4Norm = fileSystem.normalizePath(path4);
 #if PLATFORM_IS(PLATFORM_WINDOWS)
         REQUIRE(path1_norm == "hello");
         REQUIRE(path2_norm == ".");
         REQUIRE(path3_norm == "..");
         REQUIRE(path4_norm == "..\\..");
 #else
-        REQUIRE(path1_norm == "hello");
-        REQUIRE(path2_norm == ".");
-        REQUIRE(path3_norm == "..");
-        REQUIRE(path4_norm == "../..");
+        REQUIRE(path1Norm == "hello");
+        REQUIRE(path2Norm == ".");
+        REQUIRE(path3Norm == "..");
+        REQUIRE(path4Norm == "../..");
 #endif
     }
     SECTION("must resolve all the . directories") {
@@ -56,11 +56,11 @@ TEST_CASE("FileSystem::NormalizePath", "[FileSystem]") {
 #else
         String path = "hello/./world/././.";
 #endif
-        String path_norm = file_system.normalizePath(path);
+        String pathNorm = fileSystem.normalizePath(path);
 #if PLATFORM_IS(PLATFORM_WINDOWS)
         REQUIRE(path_norm == "hello\\world");
 #else
-        REQUIRE(path_norm == "hello/world");
+        REQUIRE(pathNorm == "hello/world");
 #endif
     }
     SECTION("must remove all the leftover separators") {
@@ -69,11 +69,11 @@ TEST_CASE("FileSystem::NormalizePath", "[FileSystem]") {
 #else
         String path1 = "hello//1234//world//.///";
 #endif
-        String path1_norm = file_system.normalizePath(path1);
+        String path1Norm = fileSystem.normalizePath(path1);
 #if PLATFORM_IS(PLATFORM_WINDOWS)
         REQUIRE(path1_norm == "hello\\1234\\world");
 #else
-        REQUIRE(path1_norm == "hello/1234/world");
+        REQUIRE(path1Norm == "hello/1234/world");
 #endif
     }
     SECTION("if absolute must keep the root component") {
@@ -86,17 +86,17 @@ TEST_CASE("FileSystem::NormalizePath", "[FileSystem]") {
         String path2 = "/hello/../..";
         String path3 = "/../..";
 #endif
-        String path1_norm = file_system.normalizePath(path1);
-        String path2_norm = file_system.normalizePath(path2);
-        String path3_norm = file_system.normalizePath(path3);
+        String path1Norm = fileSystem.normalizePath(path1);
+        String path2Norm = fileSystem.normalizePath(path2);
+        String path3Norm = fileSystem.normalizePath(path3);
 #if PLATFORM_IS(PLATFORM_WINDOWS)
         REQUIRE(path1_norm == "C:\\hello");
         REQUIRE(path2_norm == "C:\\");
         REQUIRE(path3_norm == "C:\\");
 #else
-        REQUIRE(path1_norm == "/hello");
-        REQUIRE(path2_norm == "/");
-        REQUIRE(path3_norm == "/");
+        REQUIRE(path1Norm == "/hello");
+        REQUIRE(path2Norm == "/");
+        REQUIRE(path3Norm == "/");
 #endif
     }
 #if PLATFORM_IS(PLATFORM_WINDOWS)
@@ -110,7 +110,7 @@ TEST_CASE("FileSystem::NormalizePath", "[FileSystem]") {
 
 TEST_CASE("FileSystem::Join", "[FileSystem]") {
     SECTION("must be able to join any number of paths") {
-        String joined = file_system.join("hello", "world", "1234");
+        String joined = fileSystem.join("hello", "world", "1234");
 #if PLATFORM_IS(PLATFORM_WINDOWS)
         REQUIRE(joined == "hello\\world\\1234");
 #else
@@ -118,7 +118,7 @@ TEST_CASE("FileSystem::Join", "[FileSystem]") {
 #endif
     }
     SECTION("if any of the provided paths is empty it must ignore it") {
-        String joined = file_system.join("hello", "", "1234");
+        String joined = fileSystem.join("hello", "", "1234");
 #if PLATFORM_IS(PLATFORM_WINDOWS)
         REQUIRE(joined == "hello\\1234");
 #else
@@ -132,7 +132,7 @@ TEST_CASE("FileSystem::Join", "[FileSystem]") {
 #else
         String right = "/world/1234";
 #endif
-        String joined = file_system.join(left, right);
+        String joined = fileSystem.join(left, right);
 #if PLATFORM_IS(PLATFORM_WINDOWS)
         REQUIRE(joined == "C:\\world\\1234");
 #else
@@ -148,8 +148,8 @@ TEST_CASE("FileSystem::Join", "[FileSystem]") {
         String left2 = "hello/";
 #endif
         String right = "world";
-        String joined1 = file_system.join(left1, right);
-        String joined2 = file_system.join(left2, right);
+        String joined1 = fileSystem.join(left1, right);
+        String joined2 = fileSystem.join(left2, right);
         REQUIRE(joined1 == joined2);
     }
 }

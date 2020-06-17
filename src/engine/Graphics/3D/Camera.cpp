@@ -2,7 +2,7 @@
 
 namespace engine {
 
-math::vec3 Camera::WORLD_UP(0.0F, 1.0F, 0.0F);
+const math::vec3 Camera::sWorldUp(0.0F, 1.0F, 0.0F);
 
 Camera::Camera() : position(0.0F, 0.0F, 0.0F), yaw(0.0F), pitch(0.0F), zoom(45.0F) {
     updateCameraVectors();
@@ -48,7 +48,7 @@ void Camera::lookAt(const math::vec3& newPosition) {
 }
 
 math::mat4 Camera::getViewMatrix() const {
-    return math::LookAt(position, position + front, WORLD_UP);
+    return math::LookAt(position, position + front, sWorldUp);
 }
 
 const math::vec3& Camera::getPosition() const {
@@ -68,13 +68,13 @@ const math::vec3& Camera::getFrontVector() const {
 }
 
 void Camera::updateCameraVectors() {
-    float sin_yaw = std::sin(math::Radians(yaw));
-    float cos_yaw = std::cos(math::Radians(yaw));
-    float sin_pitch = std::sin(math::Radians(pitch));
-    float cos_pitch = std::cos(math::Radians(pitch));
+    float sinYaw = std::sin(math::Radians(yaw));
+    float cosYaw = std::cos(math::Radians(yaw));
+    float sinPitch = std::sin(math::Radians(pitch));
+    float cosPitch = std::cos(math::Radians(pitch));
 
-    front = math::Normalize(math::vec3(cos_pitch * cos_yaw, sin_pitch, cos_pitch * sin_yaw));
-    right = math::Normalize(math::Cross(front, WORLD_UP));
+    front = math::Normalize(math::vec3(cosPitch * cosYaw, sinPitch, cosPitch * sinYaw));
+    right = math::Normalize(math::Cross(front, sWorldUp));
     up = math::Normalize(math::Cross(right, front));
 }
 

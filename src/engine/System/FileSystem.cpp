@@ -51,8 +51,8 @@ void FileSystem::shutdown() {}
 bool FileSystem::fileExists(const String& filename) const {
     IOStream file;
     for (const String& path : m_searchPaths) {
-        String file_path = join(path, filename);
-        if (file.open(file_path, "r")) {
+        String filePath = join(path, filename);
+        if (file.open(filePath, "r")) {
             return true;
         }
     }
@@ -72,13 +72,13 @@ bool FileSystem::loadFileData(const String& filename, String* dest) const {
 bool FileSystem::loadFileData(const String& filename, std::vector<byte>* dest) const {
     IOStream file;
 
-    auto filename_cpy = filename;
-    filename_cpy.replace('\\', getOsSeparator());
-    filename_cpy.replace('/', getOsSeparator());
+    auto filenameCpy = filename;
+    filenameCpy.replace('\\', getOsSeparator());
+    filenameCpy.replace('/', getOsSeparator());
 
     for (const String& path : m_searchPaths) {
-        String file_path = join(path, filename_cpy);
-        if (file.open(file_path.getData(), "rb")) {
+        String filePath = join(path, filenameCpy);
+        if (file.open(filePath.getData(), "rb")) {
             break;
         }
     }
@@ -132,24 +132,24 @@ String FileSystem::currentWorkingDirectory() const {
         buffer_length *= 2;
     }
 #elif PLATFORM_IS(PLATFORM_LINUX | PLATFORM_MACOS | PLATFORM_IOS | PLATFORM_ANDROID)
-    size_t buffer_length = PATH_MAX_LENGTH;
+    size_t bufferLength = PATH_MAX_LENGTH;
     std::vector<char8> buffer;
     while (true) {
-        buffer.resize(buffer_length + 1);
+        buffer.resize(bufferLength + 1);
         char8* result = nullptr;
-        result = getcwd(buffer.data(), buffer_length);
+        result = getcwd(buffer.data(), bufferLength);
         if (result != nullptr) {
-            size_t num_characters = strlen(result);
-            if (num_characters > 0 && buffer[num_characters - 1] != '/') {
-                buffer[num_characters++] = '/';
-                buffer[num_characters] = '\0';
+            size_t numCharacters = strlen(result);
+            if (numCharacters > 0 && buffer[numCharacters - 1] != '/') {
+                buffer[numCharacters++] = '/';
+                buffer[numCharacters] = '\0';
             }
-            ret = String::FromUtf8(buffer.data(), buffer.data() + num_characters);
+            ret = String::FromUtf8(buffer.data(), buffer.data() + numCharacters);
             buffer.clear();
             break;
         }
         buffer.clear();
-        buffer_length *= 2;
+        bufferLength *= 2;
     }
 #endif
     return ret;
@@ -162,45 +162,45 @@ String FileSystem::absolutePath(const String& /*path*/) const {
 }
 
 String FileSystem::normalizePath(const String& path) const {
-    bool is_absolute = isAbsolutePath(path);
-    std::vector<std::pair<const char8*, const char8*>> path_comps;
+    bool isAbsolute = isAbsolutePath(path);
+    std::vector<std::pair<const char8*, const char8*>> pathComps;
 
-    auto AddPathComponent = [&path_comps, is_absolute](const char8* begin, const char8* end) {
-        size_t seq_size = end - begin;
+    auto addPathComponent = [&pathComps, isAbsolute](const char8* begin, const char8* end) {
+        size_t seqSize = end - begin;
 
         // Ignore the component if the . directories
-        if (seq_size == 1 && std::memcmp(begin, ".", 1) == 0) {
+        if (seqSize == 1 && std::memcmp(begin, ".", 1) == 0) {
             return;
         }
 
         // If the component is a .. directory
-        if (seq_size == 2 && std::memcmp(begin, "..", 2) == 0) {
+        if (seqSize == 2 && std::memcmp(begin, "..", 2) == 0) {
             // Check if the path_comps is empty
-            if (!path_comps.empty()) {
+            if (!pathComps.empty()) {
                 // If the last element is a .. directory, append another one
                 // if not just pop_back the last component
-                auto& last = path_comps.back();
-                if (!is_absolute && (last.second - last.first) == 2 && std::memcmp(last.first, "..", 2) == 0) {
-                    path_comps.emplace_back(begin, end);
+                auto& last = pathComps.back();
+                if (!isAbsolute && (last.second - last.first) == 2 && std::memcmp(last.first, "..", 2) == 0) {
+                    pathComps.emplace_back(begin, end);
                 } else {
-                    path_comps.pop_back();
+                    pathComps.pop_back();
                 }
             }
             // Only add .. directories if the path is not absolute
-            else if (!is_absolute) {
-                path_comps.emplace_back(begin, end);
+            else if (!isAbsolute) {
+                pathComps.emplace_back(begin, end);
             }
             return;
         }
 
         // Add the path component
-        path_comps.emplace_back(begin, end);
+        pathComps.emplace_back(begin, end);
     };
 
     const auto& internal = path.toUtf8();
 
     // Get the path component without the drive on Windows
-    size_t begin_offset = 0;
+    size_t beginOffset = 0;
 #if PLATFORM_IS(PLATFORM_WINDOWS)
     if (is_absolute) {
         begin_offset = 2;
@@ -208,28 +208,28 @@ String FileSystem::normalizePath(const String& path) const {
 #endif
 
     // Split the string by the separator
-    const char8* pathc_start = internal.data() + begin_offset;
-    const char8* pathc_end = pathc_start;
-    while (*pathc_end != 0) {
+    const char8* pathcStart = internal.data() + beginOffset;
+    const char8* pathcEnd = pathcStart;
+    while (*pathcEnd != 0) {
         // Get the path component from the start and end iterators
-        if (*pathc_end == getOsSeparator() && pathc_end > pathc_start) {
-            AddPathComponent(pathc_start, pathc_end);
-            pathc_start = pathc_end;
+        if (*pathcEnd == getOsSeparator() && pathcEnd > pathcStart) {
+            addPathComponent(pathcStart, pathcEnd);
+            pathcStart = pathcEnd;
         }
-        if (*pathc_start == getOsSeparator()) {
-            pathc_start++;
+        if (*pathcStart == getOsSeparator()) {
+            pathcStart++;
         }
-        pathc_end++;
+        pathcEnd++;
     }
     // Get the last path component
     // (if the string does not finish in a separator)
-    if (pathc_start != pathc_end) {
-        AddPathComponent(pathc_start, pathc_end);
+    if (pathcStart != pathcEnd) {
+        addPathComponent(pathcStart, pathcEnd);
     }
 
     // Create the result normalized path
     String ret;
-    if (is_absolute) {
+    if (isAbsolute) {
 #if PLATFORM_IS(PLATFORM_WINDOWS)
         auto it = internal.cbegin();
         ret += String::FromUtf8(it, it + 2) + '\\';
@@ -237,14 +237,14 @@ String FileSystem::normalizePath(const String& path) const {
         ret += '/';
 #endif
     }
-    if (!is_absolute & path_comps.empty()) {
+    if (!isAbsolute & pathComps.empty()) {
         ret += '.';
     } else {
-        for (size_t i = 0; i < path_comps.size(); i++) {
+        for (size_t i = 0; i < pathComps.size(); i++) {
             if (i) {
                 ret += getOsSeparator();
             }
-            ret += String::FromUtf8(path_comps[i].first, path_comps[i].second);
+            ret += String::FromUtf8(pathComps[i].first, pathComps[i].second);
         }
     }
 
@@ -284,8 +284,8 @@ String FileSystem::join(const String& left, const String& right) const {
 
     String ret;
     const auto& internal = left.toUtf8();
-    char8 last_character = internal[internal.size() - 1];
-    if (last_character == getOsSeparator()) {
+    char8 lastCharacter = internal[internal.size() - 1];
+    if (lastCharacter == getOsSeparator()) {
         ret = left + right;
     } else {
         ret = left + getOsSeparator() + right;

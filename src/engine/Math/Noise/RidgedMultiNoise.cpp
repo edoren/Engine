@@ -54,7 +54,7 @@ float RidgedMultiNoise::getValue(float x, float y, float z) const {
     float frequency = m_frequency;
     float weight = 1.F;
 
-    for (int current_octave = 0; current_octave < m_octaveCount; current_octave++) {
+    for (int currentOctave = 0; currentOctave < m_octaveCount; currentOctave++) {
         signal = coherentNoise3D(x * frequency, y * frequency, z * frequency);
 
         signal = m_offset - std::abs(signal);
@@ -64,7 +64,7 @@ float RidgedMultiNoise::getValue(float x, float y, float z) const {
         weight = signal * m_gain;
         weight = std::max(0.F, std::min(1.F, weight));
 
-        value += signal * m_spectralWeights[current_octave];
+        value += signal * m_spectralWeights[currentOctave];
 
         frequency *= m_lacunarity;
     }

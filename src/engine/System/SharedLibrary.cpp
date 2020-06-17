@@ -37,16 +37,16 @@ bool SharedLibrary::load() {
         return false;
     }
 
-    String lib_name = LIBRARY_PREFIX + m_name + LIBRARY_EXTENSION;
+    String libName = LIBRARY_PREFIX + m_name + LIBRARY_EXTENSION;
 #if PLATFORM_IS(PLATFORM_WINDOWS)
     auto wide_string = lib_name.toWide();
     m_handle = LoadLibraryW(wide_string.data());
 #elif PLATFORM_IS(PLATFORM_LINUX | PLATFORM_MACOS | PLATFORM_IOS | PLATFORM_ANDROID)
-    auto utf8string = lib_name.toUtf8();
+    auto utf8string = libName.toUtf8();
     FileSystem& fs = FileSystem::GetInstance();
-    String lib_exe_dir = fs.join(fs.executableDirectory(), lib_name);
-    if (fs.fileExists(lib_exe_dir)) {
-        utf8string = lib_exe_dir.toUtf8();
+    String libExeDir = fs.join(fs.executableDirectory(), libName);
+    if (fs.fileExists(libExeDir)) {
+        utf8string = libExeDir.toUtf8();
     }
     m_handle = dlopen(utf8string.data(), RTLD_LAZY | RTLD_LOCAL);
 #endif

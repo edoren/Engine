@@ -30,7 +30,7 @@ bool Vk_Buffer::create(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryProp
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.getVulkanDevice();
 
-    VkBufferCreateInfo buffer_create_info = {
+    VkBufferCreateInfo bufferCreateInfo = {
         VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,  // sType
         nullptr,                               // pNext
         0,                                     // flags
@@ -41,7 +41,7 @@ bool Vk_Buffer::create(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryProp
         nullptr                                // pQueueFamilyIndices
     };
 
-    result = vkCreateBuffer(device, &buffer_create_info, nullptr, &m_handle);
+    result = vkCreateBuffer(device, &bufferCreateInfo, nullptr, &m_handle);
     if (result != VK_SUCCESS) {
         LogError(sTag, "Could not create buffer");
         return false;

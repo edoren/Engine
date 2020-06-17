@@ -20,9 +20,9 @@ UUID UUID::UUID4() {
 
     UUID output;
 
-    auto* uint64_uuid = reinterpret_cast<uint64*>(&output.m_uuid);
+    auto* uint64Uuid = reinterpret_cast<uint64*>(&output.m_uuid);
     for (int i = 0; i < 2; i++) {
-        uint64_uuid[i] = sDist(sRng);
+        uint64Uuid[i] = sDist(sRng);
     }
 
     output.m_uuid.clockSeqHiAndReserved = (output.m_uuid.clockSeqHiAndReserved & 0x3f) | 0x80;
@@ -35,13 +35,13 @@ UUID::operator String() {
     std::string output;
     output.reserve(36);
 
-    byte* byte_uuid = reinterpret_cast<byte*>(&m_uuid);
+    byte* byteUuid = reinterpret_cast<byte*>(&m_uuid);
     for (int i = 0; i < 16; i++) {
         if ((i == 4) | (i == 6) | (i == 8) | (i == 10)) {
             output.push_back('-');
         }
-        output.push_back(sHexdigits[(byte_uuid[i] & 0xf0) >> 4]);
-        output.push_back(sHexdigits[byte_uuid[i] & 0x0f]);
+        output.push_back(sHexdigits[(byteUuid[i] & 0xf0) >> 4]);
+        output.push_back(sHexdigits[byteUuid[i] & 0x0f]);
     }
 
     return String(std::move(output));

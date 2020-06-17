@@ -32,10 +32,10 @@ bool ImageLoader::LoadFromFileInMemory(const byte* buffer, uint32 len, std::vect
     byte* data = stbi_load_from_memory(buffer, len, &width, &height, &comp, STBI_rgb_alpha);
 
     if (data != nullptr) {
-        size_t num_pixels = width * height;
-        size_t data_size = (num_pixels * STBI_rgb_alpha);
-        byte* data_end = data + data_size;
-        pixels.assign(data, data_end);
+        size_t numPixels = width * height;
+        size_t dataSize = (numPixels * STBI_rgb_alpha);
+        byte* dataEnd = data + dataSize;
+        pixels.assign(data, dataEnd);
     } else {
         String error = String("STB_Image error: ") + stbi_failure_reason();
         LogError(sTag, error);
