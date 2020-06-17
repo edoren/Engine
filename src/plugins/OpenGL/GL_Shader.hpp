@@ -63,8 +63,8 @@ private:
     std::array<GLuint, sShaderTypeCount> m_shaders;
 
     struct {
-        GLuint _static;
-        GLuint dynamic;
+        GLuint staticBuffer;
+        GLuint dynamicBuffer;
     } m_uniformBuffers;
 
     std::map<String, GLint> m_uniforms;

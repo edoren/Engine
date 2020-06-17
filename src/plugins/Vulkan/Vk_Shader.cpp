@@ -37,7 +37,7 @@ Vk_Shader::~Vk_Shader() {
         m_uboDescriptorSetLayout = VK_NULL_HANDLE;
     }
 
-    m_uniformBuffers._static.destroy();
+    m_uniformBuffers.staticBuffer.destroy();
 }
 
 Vk_Shader& Vk_Shader::operator=(Vk_Shader&& other) noexcept {
@@ -227,16 +227,16 @@ bool Vk_Shader::updateUboDescriptorSet() {
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.getVulkanDevice();
 
-    LogDebug(sTag, "Buffer UBO Dynamic Size: {}"_format(m_uniformBuffers.dynamic.getSize()));
+    LogDebug(sTag, "Buffer UBO Dynamic Size: {}"_format(m_uniformBuffers.dynamicBuffer.getSize()));
 
     std::array<VkDescriptorBufferInfo, 2> bufferInfos = {{
         {
-            m_uniformBuffers._static.getHandle(),  // buffer
+            m_uniformBuffers.staticBuffer.getHandle(),  // buffer
             0,                                     // offset
             VK_WHOLE_SIZE                          // range
         },
         {
-            m_uniformBuffers.dynamic.getHandle(),  // buffer
+            m_uniformBuffers.dynamicBuffer.getHandle(),  // buffer
             0,                                     // offset
             VK_WHOLE_SIZE                          // range
         },
@@ -291,7 +291,7 @@ bool Vk_Shader::createUniformBuffers() {
 
     // Static UBO memory buffer
     result &=
-        m_uniformBuffers._static.create(m_ubo.getDataSize(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+        m_uniformBuffers.staticBuffer.create(m_ubo.getDataSize(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
                                         (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT));
 
     // Dynamic UBO memory buffer
@@ -300,15 +300,15 @@ bool Vk_Shader::createUniformBuffers() {
 
     m_uboDynamic.setBufferSize(50, minUboAlignment);  // TODO: CHANGE THIS
 
-    result &= m_uniformBuffers.dynamic.create(m_uboDynamic.getDataSize(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+    result &= m_uniformBuffers.dynamicBuffer.create(m_uboDynamic.getDataSize(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
                                               VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
 
     return result;
 }
 
 bool Vk_Shader::uploadUniformBuffers() {
-    if (m_uniformBuffers._static.getHandle() == VK_NULL_HANDLE ||
-        m_uniformBuffers.dynamic.getHandle() == VK_NULL_HANDLE) {
+    if (m_uniformBuffers.staticBuffer.getHandle() == VK_NULL_HANDLE ||
+        m_uniformBuffers.dynamicBuffer.getHandle() == VK_NULL_HANDLE) {
         return false;
     }
     Vk_Context& context = Vk_Context::GetInstance();
@@ -316,26 +316,26 @@ bool Vk_Shader::uploadUniformBuffers() {
 
     {
         void* data;
-        vkMapMemory(device, m_uniformBuffers._static.getMemory(), 0, m_ubo.getDataSize(), 0, &data);
+        vkMapMemory(device, m_uniformBuffers.staticBuffer.getMemory(), 0, m_ubo.getDataSize(), 0, &data);
         std::memcpy(data, m_ubo.getData(), m_ubo.getDataSize());
-        vkUnmapMemory(device, m_uniformBuffers._static.getMemory());
+        vkUnmapMemory(device, m_uniformBuffers.staticBuffer.getMemory());
     }
 
     {
         void* data;
-        vkMapMemory(device, m_uniformBuffers.dynamic.getMemory(), 0, m_uboDynamic.getDataSize(), 0, &data);
+        vkMapMemory(device, m_uniformBuffers.dynamicBuffer.getMemory(), 0, m_uboDynamic.getDataSize(), 0, &data);
         std::memcpy(data, m_uboDynamic.getData(), m_uboDynamic.getDataSize());
 
         VkMappedMemoryRange memoryRange = {
             VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,  // sType;
             nullptr,                                // pNext;
-            m_uniformBuffers.dynamic.getMemory(),   // memory;
+            m_uniformBuffers.dynamicBuffer.getMemory(),   // memory;
             0,                                      // offset;
             m_uboDynamic.getDataSize()              // size;
         };
         vkFlushMappedMemoryRanges(device, 1, &memoryRange);
 
-        vkUnmapMemory(device, m_uniformBuffers.dynamic.getMemory());
+        vkUnmapMemory(device, m_uniformBuffers.dynamicBuffer.getMemory());
     }
 
     return true;
