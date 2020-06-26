@@ -11,6 +11,25 @@ namespace {
 
 const String sTag("Vk_SwapChain");
 
+const char* GetPresentationModeString(VkPresentModeKHR mode) {
+    switch (mode) {
+        case VK_PRESENT_MODE_IMMEDIATE_KHR:
+            return "IMMEDIATE";
+        case VK_PRESENT_MODE_MAILBOX_KHR:
+            return "MAILBOX";
+        case VK_PRESENT_MODE_FIFO_KHR:
+            return "FIFO";
+        case VK_PRESENT_MODE_FIFO_RELAXED_KHR:
+            return "FIFO_RELAXED";
+        case VK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR:
+            return "SHARED_DEMAND_REFRESH";
+        case VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR:
+            return "SHARED_CONTINUOUS_REFRESH";
+        default:
+            return "UNKNOWN";
+    }
+}
+
 }  // namespace
 
 Vk_SwapChain::Vk_SwapChain() : m_handle(VK_NULL_HANDLE), m_format() {}
@@ -133,9 +152,10 @@ bool Vk_SwapChain::create(Vk_Surface& surface, uint32 width, uint32 height) {
         return false;
     }
 
+    const char* presentModeStr = GetPresentationModeString(desiredPresentMode);
     LogInfo(sTag,
             "SwapChain created with presentation mode "
-            "{} and dimensions [{}, {}]"_format(desiredPresentMode, desiredExtent.width, desiredExtent.height));
+            "{} and dimensions [{}, {}]"_format(presentModeStr, desiredExtent.width, desiredExtent.height));
 
     if (oldSwapChain) {
         vkDestroySwapchainKHR(device, oldSwapChain, nullptr);
