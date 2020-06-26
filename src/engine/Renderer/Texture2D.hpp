@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Graphics/Image.hpp>
+#include <Util/NonCopyable.hpp>
 
 namespace engine {
 

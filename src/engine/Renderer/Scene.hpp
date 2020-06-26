@@ -7,6 +7,7 @@
 #include <System/JSON.hpp>
 #include <System/String.hpp>
 #include <Util/Container/Vector.hpp>
+#include <Util/NonCopyable.hpp>
 
 #include <map>
 

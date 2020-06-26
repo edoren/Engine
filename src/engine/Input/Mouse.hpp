@@ -3,6 +3,7 @@
 #include <Util/Prerequisites.hpp>
 
 #include <Input/Pointer.hpp>
+#include <Util/NonCopyable.hpp>
 
 namespace engine {
 

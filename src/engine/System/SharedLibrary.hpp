@@ -3,6 +3,7 @@
 #include <Util/Prerequisites.hpp>
 
 #include <System/String.hpp>
+#include <Util/NonCopyable.hpp>
 
 namespace engine {
 
