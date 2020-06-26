@@ -1,5 +1,7 @@
 #include "Renderer/Mesh.hpp"
 
+#include <Util/Container/Vector.hpp>
+
 namespace engine {
 
 namespace {
@@ -12,11 +14,11 @@ Mesh::Mesh() = default;
 
 Mesh::~Mesh() = default;
 
-const std::vector<Vertex>& Mesh::getVertices() {
+const Vector<Vertex>& Mesh::getVertices() {
     return m_vertices;
 }
 
-const std::vector<uint32>& Mesh::getIndices() {
+const Vector<uint32>& Mesh::getIndices() {
     return m_indices;
 }
 

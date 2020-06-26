@@ -11,6 +11,8 @@
 #include <System/FileSystem.hpp>
 #include <System/LogManager.hpp>
 #include <System/String.hpp>
+#include <Util/Container/Vector.hpp>
+#include <Util/Singleton.hpp>
 
 #include <memory>
 
@@ -104,11 +106,11 @@ private:
     ////////////////////////////////////////////////////////////
     void setActiveRenderer();
 
-    std::vector<SharedLibrary*> m_pluginLibs;
-    std::vector<Plugin*> m_plugins;
+    Vector<SharedLibrary*> m_pluginLibs;
+    Vector<Plugin*> m_plugins;
 
     Renderer* m_activeRenderer;
-    std::vector<std::unique_ptr<Renderer>> m_renderers;
+    Vector<std::unique_ptr<Renderer>> m_renderers;
 
     App* m_app;
 

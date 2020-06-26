@@ -1,6 +1,7 @@
 #include <Graphics/3D/Camera.hpp>
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
+#include <Util/Container/Vector.hpp>
 
 #include "GL_RenderWindow.hpp"
 #include "GL_Shader.hpp"
@@ -72,7 +73,7 @@ bool GL_RenderWindow::create(const String& name, const math::ivec2& size) {
     GL_CALL(glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions));
 
     LogInfo(sTag, "OpenGL Extensions: {}"_format(numExtensions));
-    std::vector<const char*> openglAvailableExtensions;
+    Vector<const char*> openglAvailableExtensions;
     openglAvailableExtensions.reserve(numExtensions);
     for (GLint i = 0; i < numExtensions; i++) {
         const char* extension = reinterpret_cast<const char*>(glGetStringi(GL_EXTENSIONS, i));

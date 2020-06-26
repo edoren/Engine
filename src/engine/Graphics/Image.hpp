@@ -5,6 +5,7 @@
 #include <Graphics/Color32.hpp>
 #include <Math/Math.hpp>
 #include <System/String.hpp>
+#include <Util/Container/Vector.hpp>
 
 namespace engine {
 
@@ -29,7 +30,7 @@ public:
 
 private:
     math::Vector2<uint32> m_size;
-    std::vector<byte> m_pixels;
+    Vector<byte> m_pixels;
 };
 
 }  // namespace engine

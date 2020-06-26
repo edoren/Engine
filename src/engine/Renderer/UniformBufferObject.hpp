@@ -4,6 +4,7 @@
 
 #include <Math/Math.hpp>
 #include <System/String.hpp>
+#include <Util/Container/Vector.hpp>
 
 namespace engine {
 
@@ -34,7 +35,7 @@ public:
 
     void setBufferSize(size_t numUboInstances, size_t minUboAlignment);
 
-    void setAttributes(const std::vector<Item>& attributes);
+    void setAttributes(const Vector<Item>& attributes);
 
     void setAttributeValue(const String& name, const math::mat4& value, size_t offset = 0);
     void setAttributeValue(const String& name, const math::mat3& value, size_t offset = 0);
@@ -51,7 +52,7 @@ public:
     size_t getDataSize() const;
 
 private:
-    explicit UniformBufferObject(const std::vector<Item>& attributes);
+    explicit UniformBufferObject(const Vector<Item>& attributes);
 
     void setAttributeValue(const String& name, const void* value, size_t offset = 0);
 
@@ -69,8 +70,8 @@ private:
     size_t m_bufferSize;
     bool m_bufferChanged;
 
-    std::vector<Item> m_attributes;
-    std::vector<size_t> m_attributesAllignedOffset;
+    Vector<Item> m_attributes;
+    Vector<size_t> m_attributesAllignedOffset;
 };
 
 }  // namespace engine

@@ -4,6 +4,7 @@
 
 #include <System/SharedLibrary.hpp>
 #include <System/String.hpp>
+#include <Util/Singleton.hpp>
 
 #include <map>
 

@@ -1,6 +1,7 @@
 #include <Graphics/ImageLoader.hpp>
 #include <System/FileSystem.hpp>
 #include <System/LogManager.hpp>
+#include <Util/Container/Vector.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
@@ -15,8 +16,8 @@ const String sTag("ImageLoader");
 
 namespace io {
 
-bool ImageLoader::LoadFromFile(const String& filename, std::vector<byte>& pixels, math::uvec2& size) {
-    std::vector<byte> out;
+bool ImageLoader::LoadFromFile(const String& filename, Vector<byte>& pixels, math::uvec2& size) {
+    Vector<byte> out;
     FileSystem& fs = FileSystem::GetInstance();
     if (fs.loadFileData(filename, &out)) {
         return LoadFromFileInMemory(out.data(), static_cast<uint32>(out.size()), pixels, size);
@@ -24,7 +25,7 @@ bool ImageLoader::LoadFromFile(const String& filename, std::vector<byte>& pixels
     return false;
 }
 
-bool ImageLoader::LoadFromFileInMemory(const byte* buffer, uint32 len, std::vector<byte>& pixels, math::uvec2& size) {
+bool ImageLoader::LoadFromFileInMemory(const byte* buffer, uint32 len, Vector<byte>& pixels, math::uvec2& size) {
     int width;
     int height;
     int comp;

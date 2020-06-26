@@ -3,6 +3,7 @@
 #include <System/FileSystem.hpp>
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
+#include <Util/Container/Vector.hpp>
 
 #include <memory>
 
@@ -36,7 +37,7 @@ TextureManager::~TextureManager() = default;
 void TextureManager::initialize() {
     math::uvec2 defaultTextureSize(300, 300);
 
-    std::vector<Color32> defaultTextureData(defaultTextureSize.x * defaultTextureSize.y, Color32::sGray);
+    Vector<Color32> defaultTextureData(defaultTextureSize.x * defaultTextureSize.y, Color32::sGray);
 
     Image defaultImage;
     defaultImage.loadFromMemory(defaultTextureData.data(), defaultTextureSize.x, defaultTextureSize.y);

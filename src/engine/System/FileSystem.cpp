@@ -1,7 +1,7 @@
 #include <System/FileSystem.hpp>
 #include <System/IOStream.hpp>
 #include <System/LogManager.hpp>
-#include <Util/Prerequisites.hpp>
+#include <Util/Container/Vector.hpp>
 
 #include <SDL2.h>
 
@@ -62,7 +62,7 @@ bool FileSystem::fileExists(const String& filename) const {
 }
 
 bool FileSystem::loadFileData(const String& filename, String* dest) const {
-    std::vector<byte> out;
+    Vector<byte> out;
     bool success = loadFileData(filename, &out);
     if (success) {
         auto* begin = reinterpret_cast<char8*>(out.data());
@@ -71,7 +71,7 @@ bool FileSystem::loadFileData(const String& filename, String* dest) const {
     return success;
 }
 
-bool FileSystem::loadFileData(const String& filename, std::vector<byte>* dest) const {
+bool FileSystem::loadFileData(const String& filename, Vector<byte>* dest) const {
     IOStream file;
 
     auto filenameCpy = filename;
@@ -117,7 +117,7 @@ String FileSystem::currentWorkingDirectory() const {
     String ret;
 #if PLATFORM_IS(PLATFORM_WINDOWS)
     DWORD buffer_length = PATH_MAX_LENGTH;
-    std::vector<std::remove_pointer_t<LPWSTR>> buffer;
+    Vector<std::remove_pointer_t<LPWSTR>> buffer;
     while (true) {
         buffer.resize(buffer_length + 1);
         DWORD num_characters = GetCurrentDirectoryW(buffer_length, buffer.data());
@@ -135,7 +135,7 @@ String FileSystem::currentWorkingDirectory() const {
     }
 #elif PLATFORM_IS(PLATFORM_LINUX | PLATFORM_MACOS | PLATFORM_IOS | PLATFORM_ANDROID)
     size_t bufferLength = PATH_MAX_LENGTH;
-    std::vector<char8> buffer;
+    Vector<char8> buffer;
     while (true) {
         buffer.resize(bufferLength + 1);
         char8* result = nullptr;
@@ -165,7 +165,7 @@ String FileSystem::absolutePath(const String& /*path*/) const {
 
 String FileSystem::normalizePath(const String& path) const {
     bool isAbsolute = isAbsolutePath(path);
-    std::vector<std::pair<const char8*, const char8*>> pathComps;
+    Vector<std::pair<const char8*, const char8*>> pathComps;
 
     auto addPathComponent = [&pathComps, isAbsolute](const char8* begin, const char8* end) {
         size_t seqSize = end - begin;
@@ -295,11 +295,11 @@ String FileSystem::join(const String& left, const String& right) const {
     return ret;
 }
 
-void FileSystem::setSearchPaths(std::vector<String> searchPaths) {
+void FileSystem::setSearchPaths(Vector<String> searchPaths) {
     m_searchPaths = std::move(searchPaths);
 }
 
-const std::vector<String>& FileSystem::getSearchPaths() const {
+const Vector<String>& FileSystem::getSearchPaths() const {
     return m_searchPaths;
 }
 

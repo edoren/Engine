@@ -6,6 +6,7 @@
 #include <Renderer/TextureType.hpp>
 #include <Renderer/Transform.hpp>
 #include <Renderer/Vertex.hpp>
+#include <Util/Container/Vector.hpp>
 
 #include <map>
 #include <utility>
@@ -21,21 +22,21 @@ public:
 
     virtual ~Mesh();
 
-    virtual void loadFromData(std::vector<Vertex> vertices,
-                              std::vector<uint32> indices,
-                              std::vector<std::pair<Texture2D*, TextureType>> textures) = 0;
+    virtual void loadFromData(Vector<Vertex> vertices,
+                              Vector<uint32> indices,
+                              Vector<std::pair<Texture2D*, TextureType>> textures) = 0;
 
     virtual void draw(RenderWindow& target, const RenderStates& states) const = 0;
 
     void setTexture(TextureType type, Texture2D* texture);
 
-    const std::vector<Vertex>& getVertices();
-    const std::vector<uint32>& getIndices();
+    const Vector<Vertex>& getVertices();
+    const Vector<uint32>& getIndices();
 
 protected:
-    std::vector<Vertex> m_vertices;
-    std::vector<uint32> m_indices;
-    std::vector<std::pair<Texture2D*, TextureType>> m_textures;
+    Vector<Vertex> m_vertices;
+    Vector<uint32> m_indices;
+    Vector<std::pair<Texture2D*, TextureType>> m_textures;
     std::map<TextureType, Texture2D*> m_texturesMap;
 };
 

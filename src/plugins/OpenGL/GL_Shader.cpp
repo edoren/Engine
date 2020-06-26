@@ -2,6 +2,7 @@
 #include "GL_Utilities.hpp"
 
 #include <System/LogManager.hpp>
+#include <Util/Container/Vector.hpp>
 
 #include <array>
 #include <string>
@@ -25,7 +26,7 @@ const String sShaderVersion("#version 320 es");
 const String sFragmentPrecision("precision highp float;");
 #endif
 
-std::vector<const char*> sRequiredExtensions = {
+Vector<const char*> sRequiredExtensions = {
 #ifdef OPENGL_USE_GL
     {"GL_ARB_separate_shader_objects", "GL_ARB_shading_language_420pack"}
 #endif
@@ -230,14 +231,14 @@ void GL_Shader::setUniform(const String& name, const math::vec2& val) {
     if (location != -1) GL_CALL(glUniform2f(location, val[0], val[1]));
 }
 
-const std::vector<const char*>& GL_Shader::GetRequiredExtensions() {
+const Vector<const char*>& GL_Shader::GetRequiredExtensions() {
     return sRequiredExtensions;
 }
 
 void GL_Shader::setDescriptor(json&& descriptor) {
     m_descriptor = std::move(descriptor);
 
-    std::vector<UniformBufferObject::Item> attributes;
+    Vector<UniformBufferObject::Item> attributes;
     for (auto& attribute : m_descriptor["uniform_buffer"]["attributes"]) {
         String name = attribute["name"];
         String type = attribute["type"];

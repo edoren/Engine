@@ -3,6 +3,7 @@
 #include <Util/Prerequisites.hpp>
 
 #include <Renderer/Texture2D.hpp>
+#include <Util/Singleton.hpp>
 
 #include <map>
 #include <memory>

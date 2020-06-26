@@ -6,6 +6,7 @@
 #include <Renderer/Transform.hpp>
 #include <System/JSON.hpp>
 #include <System/String.hpp>
+#include <Util/Container/Vector.hpp>
 
 #include <memory>
 
@@ -36,7 +37,7 @@ private:
 
     std::unique_ptr<Mesh> processMesh(aiMesh* mesh, const aiScene* scene);
 
-    std::vector<std::unique_ptr<Mesh>> m_meshes;
+    Vector<std::unique_ptr<Mesh>> m_meshes;
     String m_relativeDirectory;
 
     Transform m_transform;

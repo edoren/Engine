@@ -1,5 +1,6 @@
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
+#include <Util/Container/Vector.hpp>
 
 #include "Vk_VertexLayout.hpp"
 
@@ -9,9 +10,9 @@ namespace {
 
 const String sTag("Vk_VertexLayout");
 
-std::vector<VkVertexInputAttributeDescription> GetAttribDescription(const std::vector<VertexLayout::Component>& input,
-                                                                    uint32 bufferBindId) {
-    std::vector<VkVertexInputAttributeDescription> attributeDescriptions;
+Vector<VkVertexInputAttributeDescription> GetAttribDescription(const Vector<VertexLayout::Component>& input,
+                                                               uint32 bufferBindId) {
+    Vector<VkVertexInputAttributeDescription> attributeDescriptions;
     uint32 location = 0;
     uint32 bufferOffset = 0;
     for (const auto& component : input) {
@@ -49,12 +50,11 @@ std::vector<VkVertexInputAttributeDescription> GetAttribDescription(const std::v
 
 Vk_VertexLayout::Vk_VertexLayout() = default;
 
-Vk_VertexLayout::Vk_VertexLayout(const std::vector<VertexLayout::Component>& components) : VertexLayout(components) {}
+Vk_VertexLayout::Vk_VertexLayout(const Vector<VertexLayout::Component>& components) : VertexLayout(components) {}
 
-Vk_VertexLayout::Vk_VertexLayout(std::vector<VertexLayout::Component>&& components)
-      : VertexLayout(std::move(components)) {}
+Vk_VertexLayout::Vk_VertexLayout(Vector<VertexLayout::Component>&& components) : VertexLayout(std::move(components)) {}
 
-std::vector<VkVertexInputAttributeDescription> Vk_VertexLayout::getVertexInputAttributeDescription(
+Vector<VkVertexInputAttributeDescription> Vk_VertexLayout::getVertexInputAttributeDescription(
     uint32 bufferBindId) const {
     return GetAttribDescription(m_vertexInput, bufferBindId);
 }

@@ -4,6 +4,7 @@
 #include <Renderer/Shader.hpp>
 #include <Renderer/UniformBufferObject.hpp>
 #include <System/String.hpp>
+#include <Util/Container/Vector.hpp>
 
 #include "GL_Config.hpp"
 #include "GL_Dependencies.hpp"
@@ -44,7 +45,7 @@ public:
     void setUniform(const String& name, const math::vec3& val);
     void setUniform(const String& name, const math::vec2& val);
 
-    static const std::vector<const char*>& GetRequiredExtensions();
+    static const Vector<const char*>& GetRequiredExtensions();
 
 protected:
     void setDescriptor(json&& descriptor) override;

@@ -4,6 +4,7 @@
 #include <System/FileSystem.hpp>
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
+#include <Util/Container/Vector.hpp>
 
 #include "Vk_RenderWindow.hpp"
 #include "Vk_Shader.hpp"
@@ -844,7 +845,7 @@ bool Vk_RenderWindow::createDepthResources() {
     Vk_Context& context = Vk_Context::GetInstance();
     PhysicalDeviceParameters& physicalDevice = context.getPhysicalDevice();
 
-    auto lFindSupportedFormat = [&physicalDevice](const std::vector<VkFormat>& candidates, VkImageTiling tiling,
+    auto lFindSupportedFormat = [&physicalDevice](const Vector<VkFormat>& candidates, VkImageTiling tiling,
                                                   VkFormatFeatureFlags features) -> VkFormat {
         for (VkFormat format : candidates) {
             VkFormatProperties properties = physicalDevice.getFormatProperties(format);

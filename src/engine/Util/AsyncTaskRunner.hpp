@@ -3,6 +3,7 @@
 #include <Util/Prerequisites.hpp>
 
 #include <Util/Container/SafeQueue.hpp>
+#include <Util/Container/Vector.hpp>
 #include <Util/Function.hpp>
 
 #include <condition_variable>
@@ -25,7 +26,7 @@ public:
 private:
     bool m_isRunning;
     SafeQueue<Task> m_workQueue;
-    std::vector<std::thread> m_workers;
+    Vector<std::thread> m_workers;
     std::condition_variable m_signaler;
     std::mutex m_mutex;
 };

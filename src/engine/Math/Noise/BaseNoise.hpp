@@ -2,6 +2,8 @@
 
 #include <Util/Prerequisites.hpp>
 
+#include <Util/Container/Vector.hpp>
+
 namespace engine {
 
 namespace math {
@@ -32,7 +34,7 @@ private:
     float lerp(float t, float a, float b) const;
 
     int m_seed;
-    std::vector<int> m_perm;
+    Vector<int> m_perm;
 };
 
 }  // namespace math
