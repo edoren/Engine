@@ -8,6 +8,9 @@
 
 #include <System/Signal.hpp>
 
+#include <map>
+#include <memory>
+
 union SDL_Event;
 
 namespace engine {

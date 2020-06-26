@@ -2,6 +2,8 @@
 
 #include "GL_Plugin.hpp"
 
+#include <memory>
+
 namespace engine {
 
 namespace {

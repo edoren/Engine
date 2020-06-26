@@ -28,6 +28,9 @@
 
 #include <Util/Prerequisites.hpp>
 
+#include <sstream>
+#include <string>
+
 namespace engine {
 
 ////////////////////////////////////////////////////////////

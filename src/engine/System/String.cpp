@@ -32,6 +32,8 @@ namespace {
 
 }  // namespace
 
+#include <algorithm>
+
 namespace engine {
 
 const std::size_t String::sInvalidPos = std::basic_string<char8>::npos;

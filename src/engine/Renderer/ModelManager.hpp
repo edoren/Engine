@@ -5,6 +5,9 @@
 #include <Renderer/Mesh.hpp>
 #include <Renderer/Model.hpp>
 
+#include <map>
+#include <memory>
+
 namespace engine {
 
 class Model;

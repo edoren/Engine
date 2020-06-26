@@ -15,6 +15,10 @@
 #include <assimp/IOSystem.hpp>
 #include <assimp/Importer.hpp>
 
+#include <array>
+#include <memory>
+#include <utility>
+
 namespace engine {
 
 namespace {

@@ -5,6 +5,9 @@
 #include "Vk_Config.hpp"
 #include "Vk_Dependencies.hpp"
 
+#include <map>
+#include <memory>
+
 namespace engine {
 
 class String;

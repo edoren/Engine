@@ -3,6 +3,10 @@
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
 
+#include <array>
+#include <map>
+#include <memory>
+
 namespace engine {
 
 namespace {

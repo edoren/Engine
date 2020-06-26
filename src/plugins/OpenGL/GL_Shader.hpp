@@ -8,6 +8,9 @@
 #include "GL_Config.hpp"
 #include "GL_Dependencies.hpp"
 
+#include <array>
+#include <map>
+
 namespace engine {
 
 class OPENGL_PLUGIN_API GL_Shader : public Shader {

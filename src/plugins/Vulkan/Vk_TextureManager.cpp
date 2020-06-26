@@ -4,6 +4,8 @@
 #include "Vk_Texture2D.hpp"
 #include "Vk_TextureManager.hpp"
 
+#include <memory>
+
 namespace engine {
 
 namespace {

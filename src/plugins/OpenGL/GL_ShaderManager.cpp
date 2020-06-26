@@ -2,6 +2,9 @@
 
 #include "GL_Shader.hpp"
 
+#include <map>
+#include <memory>
+
 namespace engine {
 
 namespace {

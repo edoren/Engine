@@ -1,6 +1,8 @@
 #include "GL_TextureManager.hpp"
 #include "GL_Texture2D.hpp"
 
+#include <memory>
+
 namespace engine {
 
 namespace {

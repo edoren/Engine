@@ -5,6 +5,8 @@
 
 #include "GL_Config.hpp"
 
+#include <utility>
+
 namespace engine {
 
 class OPENGL_PLUGIN_API GL_Mesh : public Mesh {

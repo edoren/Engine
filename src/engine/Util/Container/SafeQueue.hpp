@@ -2,6 +2,9 @@
 
 #include <Util/Prerequisites.hpp>
 
+#include <deque>
+#include <mutex>
+
 namespace engine {
 
 template <typename T>

@@ -1,5 +1,7 @@
 #include <Math/Noise/RidgedMultiNoise.hpp>
 
+#include <algorithm>
+
 namespace engine::math {
 
 const int RidgedMultiNoise::sDefaultSeed = 0;

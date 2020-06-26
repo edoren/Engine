@@ -7,6 +7,8 @@
 #include <System/JSON.hpp>
 #include <System/String.hpp>
 
+#include <memory>
+
 struct aiMesh;
 struct aiNode;
 struct aiScene;

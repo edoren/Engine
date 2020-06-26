@@ -2,8 +2,13 @@
 
 #include <Util/Prerequisites.hpp>
 
-#include <Util/Function.hpp>
 #include <Util/Container/SafeQueue.hpp>
+#include <Util/Function.hpp>
+
+#include <condition_variable>
+#include <mutex>
+#include <thread>
+#include <vector>
 
 namespace engine {
 

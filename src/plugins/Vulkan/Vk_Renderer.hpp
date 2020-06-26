@@ -6,6 +6,8 @@
 #include "Vk_Context.hpp"
 #include "Vk_RenderWindow.hpp"
 
+#include <memory>
+
 namespace engine {
 
 class VULKAN_PLUGIN_API Vk_Renderer : public Renderer {

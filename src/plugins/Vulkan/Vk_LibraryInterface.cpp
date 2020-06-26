@@ -2,6 +2,8 @@
 
 #include "Vk_Plugin.hpp"
 
+#include <memory>
+
 namespace engine {
 
 namespace {

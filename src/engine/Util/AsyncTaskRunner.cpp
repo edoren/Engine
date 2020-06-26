@@ -2,6 +2,9 @@
 
 #include <Util/AsyncTaskRunner.hpp>
 
+#include <mutex>
+#include <thread>
+
 namespace engine {
 
 AsyncTaskRunner::AsyncTaskRunner() : m_isRunning(true) {

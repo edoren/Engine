@@ -4,6 +4,8 @@
 #include "Vk_Context.hpp"
 #include "Vk_Shader.hpp"
 
+#include <array>
+
 namespace engine {
 
 namespace {

@@ -104,7 +104,7 @@ void LogManager::logMessage(LogPriority priority, const String& tag, const Strin
     // Write the log to the file
     if (m_fileLoggingEnable) {
         if (SDL_RWops* pfile = SDL_RWFromFile(m_logFile.getData(), "ab")) {
-            const std::string& str = logMessage.toUtf8();
+            auto str = logMessage.toUtf8();
             SDL_RWwrite(pfile, str.data(), 1, str.size());
             SDL_RWwrite(pfile, sLineEnding, 1, strlen(sLineEnding));
             SDL_RWclose(pfile);

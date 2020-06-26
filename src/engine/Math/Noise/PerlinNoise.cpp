@@ -1,5 +1,7 @@
 #include <Math/Noise/PerlinNoise.hpp>
 
+#include <algorithm>
+
 namespace engine::math {
 
 const int PerlinNoise::sDefaultSeed = 0;

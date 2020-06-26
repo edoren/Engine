@@ -4,6 +4,9 @@
 
 #include <Renderer/Texture2D.hpp>
 
+#include <map>
+#include <memory>
+
 namespace engine {
 
 class Texture2D;
