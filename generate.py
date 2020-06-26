@@ -8,6 +8,7 @@ import os.path
 import platform
 import re
 import stat
+import subprocess
 import sys
 
 from scripts.file_utils import FileUtils
@@ -58,6 +59,12 @@ parser.add_argument(
 
 args = parser.parse_args()
 
+cmake_path = FileUtils.which("cmake")
+
+if cmake_path is None:
+    print("Error: CMake not installed")
+    exit()
+
 
 class CMakeBuildGenerator:
     def __init__(self, args):
@@ -82,11 +89,10 @@ class CMakeBuildGenerator:
         }
 
         # Create the CMake commandline arguments
+        self.cmake_args = []
         cmake_args_dict = self.file_config.copy()
         cmake_args_dict.update([arg.split("=") for arg in args.cmake_args])
-        self.cmake_args = [
-            "-D{}='{}'".format(*arg) for arg in cmake_args_dict.items()
-        ]
+        self.add_cmake_args(cmake_args_dict)
 
     def configure_platform(self):
         print("==================================================")
@@ -100,7 +106,7 @@ class CMakeBuildGenerator:
             print("Could not create build directory")
             return
 
-        self.cmake_args.append("--no-warn-unused-cli")
+        self.add_cmake_arg("--no-warn-unused-cli")
 
         if self.app_platform in ["windows", "linux", "macos"]:
             self.configure_desktop()
@@ -170,7 +176,8 @@ class CMakeBuildGenerator:
                               if os.path.isdir(FileUtils.join(prebuilt_dir, o))]
         for arch_dir in prebuilt_archs_dir:
             jni_arch_dir = FileUtils.join(jniLibs_dir, arch_dir)
-            prebuilt_arch_dir = FileUtils.join(prebuilt_dir, arch_dir, "Release")
+            prebuilt_arch_dir = FileUtils.join(
+                prebuilt_dir, arch_dir, "Release")
             soLibs = FileUtils.glob(FileUtils.join(prebuilt_arch_dir, "*.so"))
             for soLib in soLibs:
                 FileUtils.cp(soLib, jni_arch_dir)
@@ -186,43 +193,38 @@ class CMakeBuildGenerator:
         toolchain_file = os.path.join(self.app_root_dir, "cmake", "Toolchains",
                                       "ios.toolchain.cmake")
         cmake_generator = [
-            "-DCMAKE_GENERATOR='Xcode'",
-            "-DCMAKE_TOOLCHAIN_FILE={}".format(toolchain_file),
-            "-DPLATFORM={}".format("OS64COMBINED"),
-            "-DDEPLOYMENT_TARGET=13.0"
+            ("CMAKE_GENERATOR", "Xcode"),
+            ("CMAKE_TOOLCHAIN_FILE", toolchain_file),
+            ("PLATFORM", "OS64COMBINED"),
+            ("DEPLOYMENT_TARGET", "13.0"),
         ]
-        self.cmake_args = cmake_generator + self.cmake_args
+        self.add_cmake_args(cmake_generator)
 
     def configure_desktop(self):
         gen = self.get_cmake_argument("CMAKE_GENERATOR")
         gen_plat = self.get_cmake_argument("CMAKE_GENERATOR_PLATFORM")
         if self.app_platform == "macos" and gen is None:
-            self.cmake_args = ["-DCMAKE_GENERATOR='Unix Makefiles'"] + self.cmake_args
+            self.add_cmake_arg("CMAKE_GENERATOR", "Unix Makefiles")
         if self.app_platform == "windows":
             if gen_plat is None and platform.machine().endswith("64"):
-                self.cmake_args = ["-DCMAKE_GENERATOR_PLATFORM='x64'"] + self.cmake_args
+                self.add_cmake_arg("CMAKE_GENERATOR_PLATFORM", "x64")
             if gen is None:
-                self.cmake_args = ["-DCMAKE_GENERATOR='Visual Studio 16 2019'"] + self.cmake_args
+                self.add_cmake_arg("CMAKE_GENERATOR", "Visual Studio 16 2019")
 
     def create_build_script(self):
-        print("Creating build script")
         build_file_path = FileUtils.join(self.app_build_dir, "build.py")
 
         if os.path.isfile(build_file_path):
             os.remove(build_file_path)
 
-        cmake_path = FileUtils.which("cmake")
-
-        if cmake_path is None:
-            print("Error: CMake not installed")
-            exit()
-
         if self.app_platform in ["windows", "linux", "macos", "ios"]:
+            command = [cmake_path, self.app_root_dir] + self.cmake_args
+            subprocess.run(command, cwd=self.app_build_dir, check=True)
             build_commands = [
-                [cmake_path, self.app_root_dir] + self.cmake_args,
                 [cmake_path, "--build", self.app_build_dir,
                  "--config", self.app_build_type]
             ]
+            print("==================================================")
         elif self.app_platform == "android":
             if platform.system() == "Windows":
                 gradle_executable = "gradlew.bat"
@@ -248,6 +250,20 @@ class CMakeBuildGenerator:
                 build_file.write(line + "\n")
 
         FileUtils.chmod("u+x", build_file_path)
+        print("Build script created in folder:", self.app_build_dir)
+
+    def add_cmake_args(self, args):
+        if type(args) == dict:
+            self.add_cmake_args(list(args.items()))
+        if type(args) == list:
+            for pair in reversed(args):
+                self.add_cmake_arg(pair[0], pair[1])
+
+    def add_cmake_arg(self, arg_name, value=None):
+        if value is None:
+            self.cmake_args.append(arg_name)
+        else:
+            self.cmake_args.insert(0, "-D{}='{}'".format(arg_name, value))
 
 
 if __name__ == "__main__":
