@@ -4,6 +4,7 @@
 
 #include <Renderer/UniformBufferObject.hpp>
 #include <System/JSON.hpp>
+#include <Util/NonCopyable.hpp>
 
 namespace engine {
 

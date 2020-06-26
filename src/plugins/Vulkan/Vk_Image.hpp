@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Math/Math.hpp>
+#include <Util/NonCopyable.hpp>
 
 #include "Vk_Config.hpp"
 #include "Vk_Dependencies.hpp"

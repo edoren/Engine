@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Util/Container/Vector.hpp>
+#include <Util/NonCopyable.hpp>
 
 #include "Vk_Config.hpp"
 #include "Vk_Dependencies.hpp"
