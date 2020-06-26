@@ -202,8 +202,8 @@ String FileSystem::normalizePath(const String& path) const {
     // Get the path component without the drive on Windows
     size_t beginOffset = 0;
 #if PLATFORM_IS(PLATFORM_WINDOWS)
-    if (is_absolute) {
-        begin_offset = 2;
+    if (isAbsolute) {
+        beginOffset = 2;
     }
 #endif
 
