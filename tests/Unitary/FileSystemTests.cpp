@@ -39,10 +39,10 @@ TEST_CASE("FileSystem::NormalizePath", "[FileSystem]") {
         String path3Norm = fileSystem.normalizePath(path3);
         String path4Norm = fileSystem.normalizePath(path4);
 #if PLATFORM_IS(PLATFORM_WINDOWS)
-        REQUIRE(path1_norm == "hello");
-        REQUIRE(path2_norm == ".");
-        REQUIRE(path3_norm == "..");
-        REQUIRE(path4_norm == "..\\..");
+        REQUIRE(path1Norm == "hello");
+        REQUIRE(path2Norm == ".");
+        REQUIRE(path3Norm == "..");
+        REQUIRE(path4Norm == "..\\..");
 #else
         REQUIRE(path1Norm == "hello");
         REQUIRE(path2Norm == ".");
@@ -58,7 +58,7 @@ TEST_CASE("FileSystem::NormalizePath", "[FileSystem]") {
 #endif
         String pathNorm = fileSystem.normalizePath(path);
 #if PLATFORM_IS(PLATFORM_WINDOWS)
-        REQUIRE(path_norm == "hello\\world");
+        REQUIRE(pathNorm == "hello\\world");
 #else
         REQUIRE(pathNorm == "hello/world");
 #endif
@@ -71,7 +71,7 @@ TEST_CASE("FileSystem::NormalizePath", "[FileSystem]") {
 #endif
         String path1Norm = fileSystem.normalizePath(path1);
 #if PLATFORM_IS(PLATFORM_WINDOWS)
-        REQUIRE(path1_norm == "hello\\1234\\world");
+        REQUIRE(path1Norm == "hello\\1234\\world");
 #else
         REQUIRE(path1Norm == "hello/1234/world");
 #endif
@@ -90,9 +90,9 @@ TEST_CASE("FileSystem::NormalizePath", "[FileSystem]") {
         String path2Norm = fileSystem.normalizePath(path2);
         String path3Norm = fileSystem.normalizePath(path3);
 #if PLATFORM_IS(PLATFORM_WINDOWS)
-        REQUIRE(path1_norm == "C:\\hello");
-        REQUIRE(path2_norm == "C:\\");
-        REQUIRE(path3_norm == "C:\\");
+        REQUIRE(path1Norm == "C:\\hello");
+        REQUIRE(path2Norm == "C:\\");
+        REQUIRE(path3Norm == "C:\\");
 #else
         REQUIRE(path1Norm == "/hello");
         REQUIRE(path2Norm == "/");
@@ -102,7 +102,7 @@ TEST_CASE("FileSystem::NormalizePath", "[FileSystem]") {
 #if PLATFORM_IS(PLATFORM_WINDOWS)
     SECTION("on Windows this should change any '/' separators to '\\'") {
         String path = "C:\\hello/world/1234";
-        String path_norm = file_system.normalizePath(path);
+        String path_norm = fileSystem.normalizePath(path);
         REQUIRE(path_norm == "C:\\hello\\world\\1234");
     }
 #endif
