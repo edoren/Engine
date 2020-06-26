@@ -3,6 +3,7 @@
 #include <Util/Prerequisites.hpp>
 
 #include <Math/Noise/BaseNoise.hpp>
+#include <Util/Container/Vector.hpp>
 
 namespace engine {
 
@@ -59,7 +60,7 @@ private:
     float m_gain;
     float m_exponent;
 
-    std::vector<float> m_spectralWeights;
+    Vector<float> m_spectralWeights;
 };
 
 }  // namespace math

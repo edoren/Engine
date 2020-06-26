@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Util/Platform.hpp>
-#include <Util/STLHeaders.hpp>
 #include <Util/Types.hpp>
 
 #include <vulkan/vulkan.h>

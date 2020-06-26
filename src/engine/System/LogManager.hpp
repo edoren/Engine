@@ -3,6 +3,7 @@
 #include <Util/Prerequisites.hpp>
 
 #include <System/String.hpp>
+#include <Util/Singleton.hpp>
 
 // On Windows undefine this anoying macro defined by windows.h
 #if PLATFORM_IS(PLATFORM_WINDOWS)

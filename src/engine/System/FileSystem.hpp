@@ -3,6 +3,8 @@
 #include <Util/Prerequisites.hpp>
 
 #include <System/String.hpp>
+#include <Util/Container/Vector.hpp>
+#include <Util/Singleton.hpp>
 
 namespace engine {
 
@@ -37,7 +39,7 @@ public:
     /// @return true if the file could be loaded, false
     ///         otherwise
     ////////////////////////////////////////////////////////////
-    bool loadFileData(const String& filename, std::vector<byte>* dest) const;
+    bool loadFileData(const String& filename, Vector<byte>* dest) const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Get the OS specific path separator
@@ -114,7 +116,7 @@ public:
     ///
     /// @param[in] search_paths Vector of new search paths
     ////////////////////////////////////////////////////////////
-    void setSearchPaths(std::vector<String> searchPaths);
+    void setSearchPaths(Vector<String> searchPaths);
 
     ////////////////////////////////////////////////////////////
     /// @brief Obtain the serch paths used to open files
@@ -122,7 +124,7 @@ public:
     /// @return A constant reference to the currently used search
     ///         paths
     ////////////////////////////////////////////////////////////
-    const std::vector<String>& getSearchPaths() const;
+    const Vector<String>& getSearchPaths() const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Add a path to the search paths used to open files
@@ -171,7 +173,7 @@ public:
     static FileSystem* GetInstancePtr();
 
 private:
-    std::vector<String> m_searchPaths;
+    Vector<String> m_searchPaths;
 };
 
 }  // namespace engine

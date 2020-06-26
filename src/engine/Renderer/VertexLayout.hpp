@@ -2,6 +2,8 @@
 
 #include <Util/Prerequisites.hpp>
 
+#include <Util/Container/Vector.hpp>
+
 namespace engine {
 
 class ENGINE_API VertexLayout {
@@ -14,11 +16,11 @@ public:
     };
 
     VertexLayout();
-    VertexLayout(std::vector<Component> vertexInput);
+    VertexLayout(Vector<Component> vertexInput);
 
 protected:
-    std::vector<Component> m_vertexInput;
-    std::vector<Component> m_instanceInput;
+    Vector<Component> m_vertexInput;
+    Vector<Component> m_instanceInput;
 };
 
 }  // namespace engine

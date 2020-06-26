@@ -2,6 +2,8 @@
 
 #include <algorithm>
 
+#include <cmath>
+
 namespace engine::math {
 
 const int RidgedMultiNoise::sDefaultSeed = 0;

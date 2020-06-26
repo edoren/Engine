@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Util/Container/Vector.hpp>
 #include <Util/Singleton.hpp>
 
 #include "Vk_Config.hpp"
@@ -95,10 +96,10 @@ private:
     VkDebugReportCallbackEXT m_debugReportCallback;
 
     bool m_validationLayersEnabled;
-    std::vector<const char*> m_validationLayers;
+    Vector<const char*> m_validationLayers;
 
-    std::vector<const char*> m_instanceExtensions;
-    std::vector<const char*> m_deviceExtensions;
+    Vector<const char*> m_instanceExtensions;
+    Vector<const char*> m_deviceExtensions;
 };
 
 }  // namespace engine

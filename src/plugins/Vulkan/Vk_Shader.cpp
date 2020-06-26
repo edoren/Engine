@@ -1,5 +1,6 @@
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
+#include <Util/Container/Vector.hpp>
 
 #include "Vk_Context.hpp"
 #include "Vk_Shader.hpp"
@@ -96,7 +97,7 @@ void Vk_Shader::setDescriptor(json&& descriptor) {
 
     String descriptorName = m_descriptor["name"];
 
-    std::vector<UniformBufferObject::Item> attributes;
+    Vector<UniformBufferObject::Item> attributes;
     for (auto& attribute : m_descriptor["uniform_buffer"]["attributes"]) {
         String name = attribute["name"];
         String type = attribute["type"];
@@ -112,7 +113,7 @@ void Vk_Shader::setDescriptor(json&& descriptor) {
     }
     m_uboDynamic.setAttributes(attributes);
 
-    std::vector<VertexLayout::Component> vertexInputs;
+    Vector<VertexLayout::Component> vertexInputs;
     for (auto& component : m_descriptor["vertex_layout"]["vertex_input"]) {
         if (component == "position") {
             vertexInputs.push_back(VertexLayout::Component::POSITION);
@@ -160,7 +161,7 @@ bool Vk_Shader::createUboDescriptorSetLayout() {
 
     const json& bindings = m_descriptor["renderer"]["vulkan"]["descriptor_set_layouts"]["bindings"];
 
-    std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
+    Vector<VkDescriptorSetLayoutBinding> layoutBindings;
     for (const auto& binding : bindings) {
         const json& pos = binding["pos"];
         const json& type = binding["type"];
@@ -233,13 +234,13 @@ bool Vk_Shader::updateUboDescriptorSet() {
     std::array<VkDescriptorBufferInfo, 2> bufferInfos = {{
         {
             m_uniformBuffers.staticBuffer.getHandle(),  // buffer
-            0,                                     // offset
-            VK_WHOLE_SIZE                          // range
+            0,                                          // offset
+            VK_WHOLE_SIZE                               // range
         },
         {
             m_uniformBuffers.dynamicBuffer.getHandle(),  // buffer
-            0,                                     // offset
-            VK_WHOLE_SIZE                          // range
+            0,                                           // offset
+            VK_WHOLE_SIZE                                // range
         },
     }};
 
@@ -291,9 +292,9 @@ bool Vk_Shader::createUniformBuffers() {
     bool result = true;
 
     // Static UBO memory buffer
-    result &=
-        m_uniformBuffers.staticBuffer.create(m_ubo.getDataSize(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                                        (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT));
+    result &= m_uniformBuffers.staticBuffer.create(
+        m_ubo.getDataSize(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+        (VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT));
 
     // Dynamic UBO memory buffer
     PhysicalDeviceParameters& physicalDevice = Vk_Context::GetInstance().getPhysicalDevice();
@@ -302,7 +303,7 @@ bool Vk_Shader::createUniformBuffers() {
     m_uboDynamic.setBufferSize(50, minUboAlignment);  // TODO: CHANGE THIS
 
     result &= m_uniformBuffers.dynamicBuffer.create(m_uboDynamic.getDataSize(), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                                              VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
+                                                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT);
 
     return result;
 }
@@ -328,11 +329,11 @@ bool Vk_Shader::uploadUniformBuffers() {
         std::memcpy(data, m_uboDynamic.getData(), m_uboDynamic.getDataSize());
 
         VkMappedMemoryRange memoryRange = {
-            VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,  // sType;
-            nullptr,                                // pNext;
-            m_uniformBuffers.dynamicBuffer.getMemory(),   // memory;
-            0,                                      // offset;
-            m_uboDynamic.getDataSize()              // size;
+            VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,       // sType;
+            nullptr,                                     // pNext;
+            m_uniformBuffers.dynamicBuffer.getMemory(),  // memory;
+            0,                                           // offset;
+            m_uboDynamic.getDataSize()                   // size;
         };
         vkFlushMappedMemoryRanges(device, 1, &memoryRange);
 

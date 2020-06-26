@@ -5,11 +5,11 @@
 #include <Renderer/RenderStates.hpp>
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
+#include <Util/Container/Vector.hpp>
 
 #include "Vk_Context.hpp"
 #include "Vk_Mesh.hpp"
 #include "Vk_RenderWindow.hpp"
-
 #include "Vk_Shader.hpp"
 #include "Vk_ShaderManager.hpp"
 #include "Vk_Texture2D.hpp"
@@ -37,9 +37,9 @@ Vk_Mesh::~Vk_Mesh() {
     m_indexBuffer.destroy();
 }
 
-void Vk_Mesh::loadFromData(std::vector<Vertex> vertices,
-                           std::vector<uint32> indices,
-                           std::vector<std::pair<Texture2D*, TextureType>> textures) {
+void Vk_Mesh::loadFromData(Vector<Vertex> vertices,
+                           Vector<uint32> indices,
+                           Vector<std::pair<Texture2D*, TextureType>> textures) {
     m_vertices = vertices;
     m_indices = indices;
     m_textures = textures;

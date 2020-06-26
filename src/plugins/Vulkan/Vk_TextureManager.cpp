@@ -1,4 +1,5 @@
 #include <System/LogManager.hpp>
+#include <Util/Container/Vector.hpp>
 
 #include "Vk_Context.hpp"
 #include "Vk_Texture2D.hpp"
@@ -108,7 +109,7 @@ bool Vk_TextureManager::createDescriptorSetLayout() {
 
     VkResult result = VK_SUCCESS;
 
-    std::vector<VkDescriptorSetLayoutBinding> layoutBindings = {
+    Vector<VkDescriptorSetLayoutBinding> layoutBindings = {
         // Diffuse texture
         {
             0,                                          // binding

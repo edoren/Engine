@@ -2,6 +2,7 @@
 #include <System/FileSystem.hpp>
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
+#include <Util/Container/Vector.hpp>
 
 #include <array>
 #include <map>
@@ -86,7 +87,7 @@ Shader* ShaderManager::loadFromFile(const String& basename) {
         }
 
         if (filenameExist) {
-            std::vector<byte> filenameData;
+            Vector<byte> filenameData;
             fs.loadFileData(filename, &filenameData);
             if (!shader->loadFromMemory(filenameData.data(), filenameData.size(), shaderType)) {
                 LogError(sTag, "Could not load shader: {}"_format(basename));
@@ -100,7 +101,7 @@ Shader* ShaderManager::loadFromFile(const String& basename) {
     }
 
     String filename = fs.join(shaderDescriptorFolder, basename + ".json");
-    std::vector<byte> jsonData;
+    Vector<byte> jsonData;
     fs.loadFileData(filename, &jsonData);
     bool isValidDescriptor = json::accept(jsonData.begin(), jsonData.end());
     if (isValidDescriptor) {

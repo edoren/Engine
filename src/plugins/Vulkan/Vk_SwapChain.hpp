@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Util/Container/Vector.hpp>
+
 #include "Vk_Config.hpp"
 #include "Vk_Dependencies.hpp"
 #include "Vk_Image.hpp"
@@ -17,19 +19,19 @@ public:
 
     VkSwapchainKHR& getHandle();
     VkFormat& getFormat();
-    std::vector<Vk_Image>& getImages();
+    Vector<Vk_Image>& getImages();
 
 private:
     uint32 getNumImages(const VkSurfaceCapabilitiesKHR& surfaceCapabilities);
-    VkSurfaceFormatKHR getFormat(const std::vector<VkSurfaceFormatKHR>& surfaceFormats);
+    VkSurfaceFormatKHR getFormat(const Vector<VkSurfaceFormatKHR>& surfaceFormats);
     VkExtent2D getExtent(const VkSurfaceCapabilitiesKHR& surfaceCapabilities, uint32 width, uint32 height);
     VkImageUsageFlags getUsageFlags(const VkSurfaceCapabilitiesKHR& surfaceCapabilities);
     VkSurfaceTransformFlagBitsKHR getTransform(const VkSurfaceCapabilitiesKHR& surfaceCapabilities);
-    VkPresentModeKHR getPresentMode(const std::vector<VkPresentModeKHR>& presentModes);
+    VkPresentModeKHR getPresentMode(const Vector<VkPresentModeKHR>& presentModes);
 
     VkSwapchainKHR m_handle;
     VkFormat m_format;
-    std::vector<Vk_Image> m_images;
+    Vector<Vk_Image> m_images;
 };
 
 }  // namespace engine

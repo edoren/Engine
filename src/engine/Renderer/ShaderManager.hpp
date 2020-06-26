@@ -4,6 +4,7 @@
 
 #include <Renderer/Shader.hpp>
 #include <System/String.hpp>
+#include <Util/Singleton.hpp>
 
 #include <memory>
 

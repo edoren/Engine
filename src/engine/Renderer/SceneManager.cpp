@@ -4,6 +4,7 @@
 #include <Renderer/Scene.hpp>
 #include <System/FileSystem.hpp>
 #include <System/LogManager.hpp>
+#include <Util/Container/Vector.hpp>
 
 namespace engine {
 
@@ -49,7 +50,7 @@ void SceneManager::changeActiveScene(const String& sceneNameId) {
 
     String filename = filenameNoext + ".json";
     if (fs.fileExists(filename)) {
-        std::vector<byte> jsonData;
+        Vector<byte> jsonData;
 
         fs.loadFileData(filename, &jsonData);
         if (json::accept(jsonData.begin(), jsonData.end())) {

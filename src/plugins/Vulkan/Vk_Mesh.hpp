@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Renderer/Mesh.hpp>
+#include <Util/Container/Vector.hpp>
 
 #include "Vk_Buffer.hpp"
 #include "Vk_Config.hpp"
@@ -16,9 +17,9 @@ public:
 
     ~Vk_Mesh() override;
 
-    void loadFromData(std::vector<Vertex> vertices,
-                      std::vector<uint32> indices,
-                      std::vector<std::pair<Texture2D*, TextureType>> textures) override;
+    void loadFromData(Vector<Vertex> vertices,
+                      Vector<uint32> indices,
+                      Vector<std::pair<Texture2D*, TextureType>> textures) override;
 
     void draw(RenderWindow& target, const RenderStates& states) const override;
 

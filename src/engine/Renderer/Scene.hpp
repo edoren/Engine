@@ -6,6 +6,7 @@
 #include <Renderer/Transform.hpp>
 #include <System/JSON.hpp>
 #include <System/String.hpp>
+#include <Util/Container/Vector.hpp>
 
 #include <map>
 
@@ -28,7 +29,7 @@ private:
     const String& getName();
 
     String m_name;
-    std::map<Model*, std::vector<Transform>> m_models;
+    std::map<Model*, Vector<Transform>> m_models;
     std::map<String, uint32> m_numModelInstance;
     json m_data;
 };

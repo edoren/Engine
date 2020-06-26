@@ -1,5 +1,6 @@
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
+#include <Util/Container/Vector.hpp>
 
 #include "UniformBufferObject.hpp"
 
@@ -58,7 +59,7 @@ UniformBufferObject::UniformBufferObject()
         m_bufferSize(0),
         m_bufferChanged(false) {}
 
-UniformBufferObject::UniformBufferObject(const std::vector<Item>& attributes) : UniformBufferObject() {
+UniformBufferObject::UniformBufferObject(const Vector<Item>& attributes) : UniformBufferObject() {
     setAttributes(attributes);
 }
 
@@ -70,7 +71,7 @@ UniformBufferObject::~UniformBufferObject() {
     }
 }
 
-void UniformBufferObject::setAttributes(const std::vector<Item>& attributes) {
+void UniformBufferObject::setAttributes(const Vector<Item>& attributes) {
     m_attributesAllignedOffset.clear();
 
     size_t currentAllignment = 0;

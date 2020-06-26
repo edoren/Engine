@@ -1,9 +1,10 @@
 #include "GL_Mesh.hpp"
 
 #include <Graphics/3D/Camera.hpp>
-#include <System/LogManager.hpp>
 #include <Renderer/RenderStates.hpp>
+#include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
+#include <Util/Container/Vector.hpp>
 
 #include "GL_Dependencies.hpp"
 #include "GL_RenderWindow.hpp"
@@ -37,9 +38,9 @@ GL_Mesh::~GL_Mesh() {
     }
 }
 
-void GL_Mesh::loadFromData(std::vector<Vertex> vertices,
-                           std::vector<uint32> indices,
-                           std::vector<std::pair<Texture2D*, TextureType>> textures) {
+void GL_Mesh::loadFromData(Vector<Vertex> vertices,
+                           Vector<uint32> indices,
+                           Vector<std::pair<Texture2D*, TextureType>> textures) {
     m_vertices = std::move(vertices);
     m_indices = std::move(indices);
     m_textures = std::move(textures);

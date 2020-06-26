@@ -1,10 +1,13 @@
 #pragma once
 
+#include <Util/Prerequisites.hpp>
+
 #include <Input/Button.hpp>
 #include <Input/Mouse.hpp>
 #include <Input/Pointer.hpp>
 #include <Math/Math.hpp>
-#include <Util/Prerequisites.hpp>
+#include <Util/Container/Vector.hpp>
+#include <Util/Singleton.hpp>
 
 #include <System/Signal.hpp>
 
@@ -90,7 +93,7 @@ public:
 
 private:
     bool m_exitRequested;
-    std::vector<Pointer> m_pointers;
+    Vector<Pointer> m_pointers;
     std::map<int, Button> m_buttonMap;
     math::ivec2 m_mousewheelDelta;
 };

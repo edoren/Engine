@@ -1,6 +1,7 @@
 #include <Math/Math.hpp>
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
+#include <Util/Container/Vector.hpp>
 
 #include "Vk_Context.hpp"
 #include "Vk_SwapChain.hpp"
@@ -71,7 +72,7 @@ bool Vk_SwapChain::create(Vk_Surface& surface, uint32 width, uint32 height) {
 
     // Query all the supported Surface formats
     uint32 formatsCount = 0;
-    std::vector<VkSurfaceFormatKHR> surfaceFormats;
+    Vector<VkSurfaceFormatKHR> surfaceFormats;
     result = vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface.getHandle(), &formatsCount, nullptr);
     if (formatsCount > 0 && result == VK_SUCCESS) {
         surfaceFormats.resize(formatsCount);
@@ -89,7 +90,7 @@ bool Vk_SwapChain::create(Vk_Surface& surface, uint32 width, uint32 height) {
 
     // Query all the supported Surface present modes
     uint32 presentModesCount = 0;
-    std::vector<VkPresentModeKHR> presentModes;
+    Vector<VkPresentModeKHR> presentModes;
 
     result =
         vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface.getHandle(), &presentModesCount, nullptr);
@@ -168,7 +169,7 @@ bool Vk_SwapChain::create(Vk_Surface& surface, uint32 width, uint32 height) {
 
     // Get the SwapChain images
     uint32 imageCount = 0;
-    std::vector<VkImage> swapchainImages;
+    Vector<VkImage> swapchainImages;
     result = vkGetSwapchainImagesKHR(device, m_handle, &imageCount, nullptr);
 
     if (imageCount > 0 && result == VK_SUCCESS) {
@@ -244,7 +245,7 @@ VkFormat& Vk_SwapChain::getFormat() {
     return m_format;
 }
 
-std::vector<Vk_Image>& Vk_SwapChain::getImages() {
+Vector<Vk_Image>& Vk_SwapChain::getImages() {
     return m_images;
 }
 
@@ -261,7 +262,7 @@ uint32 Vk_SwapChain::getNumImages(const VkSurfaceCapabilitiesKHR& surfaceCapabil
     return imageCount;
 }
 
-VkSurfaceFormatKHR Vk_SwapChain::getFormat(const std::vector<VkSurfaceFormatKHR>& surfaceFormats) {
+VkSurfaceFormatKHR Vk_SwapChain::getFormat(const Vector<VkSurfaceFormatKHR>& surfaceFormats) {
     // If the list contains only one entry with undefined format
     // it means that there are no preferred surface formats and any can be
     // chosen
@@ -325,7 +326,7 @@ VkSurfaceTransformFlagBitsKHR Vk_SwapChain::getTransform(const VkSurfaceCapabili
     return surfaceCapabilities.currentTransform;
 }
 
-VkPresentModeKHR Vk_SwapChain::getPresentMode(const std::vector<VkPresentModeKHR>& presentModes) {
+VkPresentModeKHR Vk_SwapChain::getPresentMode(const Vector<VkPresentModeKHR>& presentModes) {
     ENGINE_UNUSED(presentModes);
     // MAILBOX is the lowest latency V-Sync enabled mode (something like
     // triple-buffering) so use it if available

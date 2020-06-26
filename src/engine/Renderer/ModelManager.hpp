@@ -4,6 +4,8 @@
 
 #include <Renderer/Mesh.hpp>
 #include <Renderer/Model.hpp>
+#include <Util/Container/Vector.hpp>
+#include <Util/Singleton.hpp>
 
 #include <map>
 #include <memory>
@@ -37,7 +39,7 @@ protected:
 
     std::map<String, Model*> m_nameMap;
     std::map<Model*, uint32> m_modelRefCount;
-    std::vector<std::unique_ptr<Model>> m_models;
+    Vector<std::unique_ptr<Model>> m_models;
 };
 
 }  // namespace engine

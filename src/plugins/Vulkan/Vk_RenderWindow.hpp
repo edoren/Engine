@@ -6,8 +6,9 @@
 #include <Renderer/Model.hpp>
 #include <Renderer/RenderWindow.hpp>
 #include <Renderer/Vertex.hpp>
-#include <Util/Function.hpp>
 #include <Util/Container/SafeQueue.hpp>
+#include <Util/Container/Vector.hpp>
+#include <Util/Function.hpp>
 
 #include "Vk_Buffer.hpp"
 #include "Vk_Config.hpp"
@@ -93,7 +94,7 @@ private:
     Vk_Image m_depthImage;
     VkFormat m_depthFormat;
 
-    std::vector<Vk_RenderResource> m_renderResources;
+    Vector<Vk_RenderResource> m_renderResources;
 };
 
 }  // namespace engine

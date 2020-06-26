@@ -4,6 +4,8 @@
 
 #include <Renderer/Scene.hpp>
 #include <System/String.hpp>
+#include <Util/Container/Vector.hpp>
+#include <Util/Singleton.hpp>
 
 #include <map>
 #include <memory>
@@ -31,7 +33,7 @@ private:
     Scene* m_activeScene;
     std::map<String, Scene*> m_scenesNameMap;
     std::map<uint32, Scene*> m_scenesIndexMap;
-    std::vector<std::unique_ptr<Scene>> m_scenes;
+    Vector<std::unique_ptr<Scene>> m_scenes;
 };
 
 }  // namespace engine

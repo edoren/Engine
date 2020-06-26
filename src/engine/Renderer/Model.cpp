@@ -8,6 +8,7 @@
 #include <System/JSON.hpp>
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
+#include <Util/Container/Vector.hpp>
 
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
@@ -172,7 +173,7 @@ void Model::loadModel(const String& path) {
     String pathNoext = path.subString(0, path.findLastOf("."));
     String jsonFilename = fs.join(sRootModelFolder, pathNoext + ".json");
     if (fs.fileExists(jsonFilename)) {
-        std::vector<byte> jsonData;
+        Vector<byte> jsonData;
 
         fs.loadFileData(jsonFilename, &jsonData);
         if (json::accept(jsonData.begin(), jsonData.end())) {
@@ -222,9 +223,9 @@ void Model::processNode(aiNode* node, const aiScene* scene) {
 }
 
 std::unique_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
-    std::vector<Vertex> vertices;
-    std::vector<uint32> indices;
-    std::vector<std::pair<Texture2D*, TextureType>> textures;
+    Vector<Vertex> vertices;
+    Vector<uint32> indices;
+    Vector<std::pair<Texture2D*, TextureType>> textures;
 
     // Process vertices
     vertices.reserve(mesh->mNumVertices);
@@ -285,7 +286,7 @@ std::unique_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 
     FileSystem& fs = FileSystem::GetInstance();
 
-    std::vector<std::pair<TextureType, String>> textureFilenames;
+    Vector<std::pair<TextureType, String>> textureFilenames;
 
     auto loadTexturesFromMaterial = [&textureFilenames, &fs, this](const json& jsonMaterial) {
         const json& jsonTextures = jsonMaterial["textures"];
