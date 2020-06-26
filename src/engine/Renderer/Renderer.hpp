@@ -2,6 +2,8 @@
 
 #include <Util/Prerequisites.hpp>
 
+#include <memory>
+
 namespace engine {
 
 class RenderWindow;

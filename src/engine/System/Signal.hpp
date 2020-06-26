@@ -5,6 +5,10 @@
 #include <System/SignalConnection.hpp>
 #include <Util/Function.hpp>
 
+#include <map>
+#include <mutex>
+#include <utility>
+
 // A signal object may call multiple slots with the
 // same signature. You can connect functions to the signal
 // which will be called when the Emit() method on the

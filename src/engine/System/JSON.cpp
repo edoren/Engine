@@ -2,6 +2,8 @@
 
 #include <System/String.hpp>
 
+#include <string>
+
 namespace engine {
 
 void to_json(json& j, const String& str) {

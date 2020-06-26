@@ -5,6 +5,9 @@
 #include "GL_Config.hpp"
 #include "GL_Dependencies.hpp"
 
+#include <map>
+#include <memory>
+
 namespace engine {
 
 class String;

@@ -9,6 +9,8 @@
 #include "Vk_Dependencies.hpp"
 #include "Vk_VertexLayout.hpp"
 
+#include <array>
+
 namespace engine {
 
 class VULKAN_PLUGIN_API Vk_Shader : public Shader {

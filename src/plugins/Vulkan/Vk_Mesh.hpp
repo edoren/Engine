@@ -6,6 +6,8 @@
 #include "Vk_Config.hpp"
 #include "Vk_Dependencies.hpp"
 
+#include <utility>
+
 namespace engine {
 
 class VULKAN_PLUGIN_API Vk_Mesh : public Mesh {

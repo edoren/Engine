@@ -2,6 +2,9 @@
 
 #include <Util/Prerequisites.hpp>
 
+#include <optional>
+#include <vector>
+
 namespace engine {
 
 template <typename T, typename Allocator = std::allocator<T>>

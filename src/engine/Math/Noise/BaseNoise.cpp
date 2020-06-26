@@ -1,5 +1,8 @@
 #include <Math/Noise/BaseNoise.hpp>
 
+#include <numeric>
+#include <random>
+
 namespace engine::math {
 
 BaseNoise::BaseNoise(int seed) : m_seed(seed) {

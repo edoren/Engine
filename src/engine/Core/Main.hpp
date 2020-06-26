@@ -12,6 +12,8 @@
 #include <System/LogManager.hpp>
 #include <System/String.hpp>
 
+#include <memory>
+
 namespace engine {
 
 class App;

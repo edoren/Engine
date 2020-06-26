@@ -5,6 +5,8 @@
 #include <System/SharedLibrary.hpp>
 #include <System/String.hpp>
 
+#include <map>
+
 namespace engine {
 
 class ENGINE_API SharedLibManager : public Singleton<SharedLibManager> {

@@ -5,6 +5,9 @@
 #include <Renderer/Scene.hpp>
 #include <System/String.hpp>
 
+#include <map>
+#include <memory>
+
 namespace engine {
 
 class ENGINE_API SceneManager : public Singleton<SceneManager> {

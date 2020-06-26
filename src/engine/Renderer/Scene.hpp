@@ -7,6 +7,8 @@
 #include <System/JSON.hpp>
 #include <System/String.hpp>
 
+#include <map>
+
 namespace engine {
 
 class ENGINE_API Scene : NonCopyable {

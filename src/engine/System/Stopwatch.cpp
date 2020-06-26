@@ -1,5 +1,7 @@
 #include <System/Stopwatch.hpp>
 
+#include <chrono>
+
 namespace engine {
 
 Stopwatch::Stopwatch()

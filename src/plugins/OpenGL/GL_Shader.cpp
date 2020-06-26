@@ -3,6 +3,9 @@
 
 #include <System/LogManager.hpp>
 
+#include <array>
+#include <string>
+
 namespace engine {
 
 namespace {

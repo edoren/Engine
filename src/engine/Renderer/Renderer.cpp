@@ -9,6 +9,8 @@
 
 #include <SDL2.h>
 
+#include <memory>
+
 namespace engine {
 
 namespace {

@@ -5,6 +5,8 @@
 #include <Renderer/Shader.hpp>
 #include <System/String.hpp>
 
+#include <memory>
+
 namespace engine {
 
 class ENGINE_API ShaderManager : public Singleton<ShaderManager> {

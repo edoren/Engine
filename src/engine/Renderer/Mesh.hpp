@@ -7,6 +7,9 @@
 #include <Renderer/Transform.hpp>
 #include <Renderer/Vertex.hpp>
 
+#include <map>
+#include <utility>
+
 namespace engine {
 
 class Texture2D;

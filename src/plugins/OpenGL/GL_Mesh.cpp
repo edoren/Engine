@@ -12,6 +12,8 @@
 #include "GL_Texture2D.hpp"
 #include "GL_Utilities.hpp"
 
+#include <utility>
+
 namespace engine {
 
 GL_Mesh::GL_Mesh() : m_vao(0), m_vbo(0), m_ebo(0) {}

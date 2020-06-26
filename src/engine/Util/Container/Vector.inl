@@ -2,6 +2,8 @@
 
 #include <Util/Prerequisites.hpp>
 
+#include <optional>
+
 namespace engine {
 
 template <typename T, typename Allocator>

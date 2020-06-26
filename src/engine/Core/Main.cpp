@@ -7,10 +7,11 @@
 #include <Renderer/ShaderManager.hpp>
 #include <Renderer/TextureManager.hpp>
 #include <System/Stopwatch.hpp>
-
 #include <Util/AsyncTaskRunner.hpp>
 
 #include <SDL2.h>
+
+#include <memory>
 
 namespace engine {
 

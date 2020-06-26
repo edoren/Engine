@@ -4,6 +4,8 @@
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
 
+#include <memory>
+
 namespace engine {
 
 namespace {

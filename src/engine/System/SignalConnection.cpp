@@ -1,5 +1,8 @@
 #include <System/SignalConnection.hpp>
 
+#include <mutex>
+#include <thread>
+
 namespace engine {
 
 class SignalConnection::Reference {
