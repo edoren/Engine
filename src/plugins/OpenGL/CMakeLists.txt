@@ -31,9 +31,14 @@ endif()
 
 # Windows, Linux and Mac implementation use GLEW
 if(OS_WINDOWS OR OS_LINUX OR OS_MACOS)
-    set(GLEW_SOURCES "${THIRD_PARTY_DIR}/src/GLEW/glew.c"
-                     "${THIRD_PARTY_DIR}/include/common/GL/glew.h")
-    set(DEPENDENCY_SOURCES ${GLEW_SOURCES})
+    find_package(GLEW)
+    if(GLEW_FOUND AND TARGET GLEW::glew)
+        list(APPEND DEPENDENCY_LIBRARIES GLEW::glew)
+    else()
+        set(GLEW_SOURCES "${THIRD_PARTY_DIR}/src/GLEW/glew.c"
+                         "${THIRD_PARTY_DIR}/include/common/GL/glew.h")
+        set(DEPENDENCY_SOURCES ${GLEW_SOURCES})
+    endif()
 endif()
 
 if(OPENGL_PLUGIN_BUILD_STATIC)
