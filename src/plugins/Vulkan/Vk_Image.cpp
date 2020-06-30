@@ -2,6 +2,7 @@
 
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
+#include <System/StringView.hpp>
 
 #include "Vk_Context.hpp"
 #include "Vk_TextureManager.hpp"
@@ -11,7 +12,7 @@ namespace engine {
 
 namespace {
 
-const String sTag("Vk_Image");
+// const StringView sTag("Vk_Image");
 
 }  // namespace
 

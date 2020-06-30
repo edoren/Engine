@@ -1,4 +1,5 @@
 #include <System/LogManager.hpp>
+#include <System/StringView.hpp>
 
 #include "Vk_Context.hpp"
 #include "Vk_Surface.hpp"
@@ -7,7 +8,7 @@ namespace engine {
 
 namespace {
 
-const String sTag("Vk_Surface");
+const StringView sTag("Vk_Surface");
 
 }  // namespace
 

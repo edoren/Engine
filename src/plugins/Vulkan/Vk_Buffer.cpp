@@ -1,4 +1,5 @@
 #include <System/LogManager.hpp>
+#include <System/StringView.hpp>
 
 #include "Vk_Buffer.hpp"
 #include "Vk_Context.hpp"
@@ -8,7 +9,7 @@ namespace engine {
 
 namespace {
 
-const String sTag("Vk_Buffer");
+const StringView sTag("Vk_Buffer");
 
 }  // namespace
 

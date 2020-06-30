@@ -2,12 +2,13 @@
 #include "GL_Dependencies.hpp"
 
 #include <System/LogManager.hpp>
+#include <System/StringView.hpp>
 
 namespace engine {
 
 namespace {
 
-const String sTag("GL_Utilities");
+const StringView sTag("GL_Utilities");
 
 }  // namespace
 

@@ -1,6 +1,8 @@
 #include <Input/InputManager.hpp>
+
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
+#include <System/StringView.hpp>
 
 #include <SDL2.h>
 
@@ -8,7 +10,7 @@ namespace engine {
 
 namespace {
 
-const String sTag("InputManager");
+const StringView sTag("InputManager");
 
 int EngineEventFilter(void* userdata, SDL_Event* event) {
     ENGINE_UNUSED(userdata);
@@ -177,7 +179,7 @@ void InputManager::advanceFrame() {
             case SDL_USEREVENT:
                 break;
             default: {
-                LogDebug(sTag, "Unknown SDL Event ID: {}"_format(event.type));
+                LogDebug(sTag, "Unknown SDL Event ID: {}", event.type);
             }
         }
     }

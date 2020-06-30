@@ -1,6 +1,7 @@
 #include <System/SharedLibrary.hpp>
 
 #include <System/FileSystem.hpp>
+#include <System/StringFormat.hpp>
 
 #if PLATFORM_IS(PLATFORM_WINDOWS)
     #include <windows.h>
@@ -37,18 +38,16 @@ bool SharedLibrary::load() {
         return false;
     }
 
-    String libName = LIBRARY_PREFIX + m_name + LIBRARY_EXTENSION;
+    String libName = "{}{}{}"_format(LIBRARY_PREFIX, m_name, LIBRARY_EXTENSION);
 #if PLATFORM_IS(PLATFORM_WINDOWS)
     auto wideString = libName.toWide();
     m_handle = LoadLibraryW(wideString.data());
 #elif PLATFORM_IS(PLATFORM_LINUX | PLATFORM_MACOS | PLATFORM_IOS | PLATFORM_ANDROID)
-    auto utf8string = libName.toUtf8();
     FileSystem& fs = FileSystem::GetInstance();
     String libExeDir = fs.join(fs.executableDirectory(), libName);
     if (fs.fileExists(libExeDir)) {
-        utf8string = libExeDir.toUtf8();
+        m_handle = dlopen(libExeDir.getData(), RTLD_LAZY | RTLD_LOCAL);
     }
-    m_handle = dlopen(utf8string.data(), RTLD_LAZY | RTLD_LOCAL);
 #endif
     return (m_handle != nullptr);
 }

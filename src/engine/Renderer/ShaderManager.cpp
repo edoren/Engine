@@ -1,7 +1,9 @@
 #include <Renderer/ShaderManager.hpp>
+
 #include <System/FileSystem.hpp>
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
+#include <System/StringView.hpp>
 #include <Util/Container/Vector.hpp>
 
 #include <array>
@@ -12,7 +14,7 @@ namespace engine {
 
 namespace {
 
-const String sTag("ShaderManager");
+const StringView sTag("ShaderManager");
 
 const String sRootShaderFolder("shaders");
 
@@ -82,7 +84,7 @@ Shader* ShaderManager::loadFromFile(const String& basename) {
 
         // Vertex and Fragment shaders are completly required
         if (!filenameExist && (shaderType == ShaderType::VERTEX || shaderType == ShaderType::FRAGMENT)) {
-            LogError(sTag, "Could not find file: {}"_format(filename));
+            LogError(sTag, "Could not find file: {}", filename);
             ok = false;
         }
 
@@ -90,7 +92,7 @@ Shader* ShaderManager::loadFromFile(const String& basename) {
             Vector<byte> filenameData;
             fs.loadFileData(filename, &filenameData);
             if (!shader->loadFromMemory(filenameData.data(), filenameData.size(), shaderType)) {
-                LogError(sTag, "Could not load shader: {}"_format(basename));
+                LogError(sTag, "Could not load shader: {}", basename);
                 ok = false;
             }
         }
@@ -100,7 +102,7 @@ Shader* ShaderManager::loadFromFile(const String& basename) {
         }
     }
 
-    String filename = fs.join(shaderDescriptorFolder, basename + ".json");
+    String filename = fs.join(shaderDescriptorFolder, "{}.json"_format(basename));
     Vector<byte> jsonData;
     fs.loadFileData(filename, &jsonData);
     bool isValidDescriptor = json::accept(jsonData.begin(), jsonData.end());
@@ -108,7 +110,7 @@ Shader* ShaderManager::loadFromFile(const String& basename) {
         json j = json::parse(jsonData.begin(), jsonData.end());
         shader->setDescriptor(std::move(j));
     } else {
-        LogError(sTag, "Could not load shader descriptor: {}"_format(basename));
+        LogError(sTag, "Could not load shader descriptor: {}", basename);
         return nullptr;
     }
 
@@ -149,7 +151,7 @@ Shader* ShaderManager::loadFromMemory(const String& name, const std::map<ShaderT
         auto shaderSourceData = shaderSource->toUtf8();
         if (!newShader->loadFromMemory(reinterpret_cast<const byte*>(shaderSourceData.data()), shaderSourceData.size(),
                                        shaderType)) {
-            LogDebug(sTag, "Could not load shader: {}"_format(static_cast<int>(shaderType)));
+            LogDebug(sTag, "Could not load shader: {}", static_cast<int>(shaderType));
             ok = false;
         }
 
@@ -173,7 +175,7 @@ void ShaderManager::setActiveShader(const String& name) {
         m_activeShader = foundShader;
         useShader(m_activeShader);
     } else {
-        LogError(sTag, "Could not find a Shader named: {}"_format(name));
+        LogError(sTag, "Could not find a Shader named: {}", name);
     }
 }
 

@@ -91,10 +91,10 @@ void GL_Mesh::draw(RenderWindow& target, const RenderStates& states) const {
         String uniformName;
         switch (currentTextureType) {
             case TextureType::DIFFUSE:
-                uniformName += "tex_diffuse" + String::FromValue(diffuseNum++);
+                uniformName += "tex_diffuse{}"_format(diffuseNum++);
                 break;
             case TextureType::SPECULAR:
-                uniformName += "tex_specular" + String::FromValue(specularNum++);
+                uniformName += "tex_specular{}"_format(specularNum++);
                 break;
             default:
                 continue;

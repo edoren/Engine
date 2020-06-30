@@ -6,12 +6,13 @@
 #include <System/FileSystem.hpp>
 #include <System/JSON.hpp>
 #include <System/LogManager.hpp>
+#include <System/StringView.hpp>
 
 namespace engine {
 
 namespace {
 
-const String sTag("Scene");
+const StringView sTag("Scene");
 }
 
 Scene::Scene(json data) : m_data(std::move(data)) {}

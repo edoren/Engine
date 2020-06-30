@@ -1,8 +1,10 @@
+#include <Renderer/RenderWindow.hpp>
+
 #include <Input/InputManager.hpp>
 #include <Renderer/Mesh.hpp>
-#include <Renderer/RenderWindow.hpp>
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
+#include <System/StringView.hpp>
 
 #include <SDL2.h>
 
@@ -10,7 +12,7 @@ namespace engine {
 
 namespace {
 
-const String sTag("RenderWindow");
+const StringView sTag("RenderWindow");
 
 }  // namespace
 
@@ -58,7 +60,7 @@ bool RenderWindow::create(const String& name, const math::ivec2& size) {
         return false;
     }
 
-    LogInfo(sTag, "Created Window '{}' with size: [{}, {}]"_format(name, m_size.x, m_size.y));
+    LogInfo(sTag, "Created Window '{}' with size: [{}, {}]", name, m_size.x, m_size.y);
 
     // Update the base class attributes
     updateProjectionMatrix();
@@ -182,7 +184,7 @@ void RenderWindow::onWindowResizedPriv(const math::ivec2& size) {
     SDL_GetWindowSize(reinterpret_cast<SDL_Window*>(m_window), &newSize.x, &newSize.y);
     if (newSize != m_size) {
         m_size = newSize;
-        LogDebug(sTag, "OnWindowResized {}x{}"_format(m_size.x, m_size.y));
+        LogDebug(sTag, "OnWindowResized {}x{}", m_size.x, m_size.y);
         updateProjectionMatrix();
         onWindowResized(m_size);
     }

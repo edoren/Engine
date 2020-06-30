@@ -1,4 +1,5 @@
 #include <System/LogManager.hpp>
+#include <System/StringView.hpp>
 
 #include "Vk_Context.hpp"
 #include "Vk_Mesh.hpp"
@@ -11,7 +12,7 @@ namespace engine {
 
 namespace {
 
-const String sTag("Vk_ModelManager");
+// const StringView sTag("Vk_ModelManager");
 
 Vk_ModelManager* sDerivedInstance = nullptr;
 

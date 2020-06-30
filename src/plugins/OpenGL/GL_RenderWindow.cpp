@@ -1,6 +1,7 @@
 #include <Graphics/3D/Camera.hpp>
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
+#include <System/StringView.hpp>
 #include <Util/Container/Vector.hpp>
 
 #include "GL_RenderWindow.hpp"
@@ -12,7 +13,7 @@ namespace engine {
 
 namespace {
 
-const String sTag("GL_RenderWindow");
+const StringView sTag("GL_RenderWindow");
 
 }  // namespace
 
@@ -72,7 +73,7 @@ bool GL_RenderWindow::create(const String& name, const math::ivec2& size) {
     GLint numExtensions = 0;
     GL_CALL(glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions));
 
-    LogInfo(sTag, "OpenGL Extensions: {}"_format(numExtensions));
+    LogInfo(sTag, "OpenGL Extensions: {}", numExtensions);
     Vector<const char*> openglAvailableExtensions;
     openglAvailableExtensions.reserve(numExtensions);
     for (GLint i = 0; i < numExtensions; i++) {
@@ -93,7 +94,7 @@ bool GL_RenderWindow::create(const String& name, const math::ivec2& size) {
             }
         }
         if (!found) {
-            LogError(sTag, "Extension '{}' not available"_format(requiredExtension));
+            LogError(sTag, "Extension '{}' not available", requiredExtension);
             allExtensionsFound = false;
         }
     }

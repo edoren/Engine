@@ -3,6 +3,8 @@
 #include <Util/Prerequisites.hpp>
 
 #include <System/String.hpp>
+#include <System/StringFormat.hpp>
+#include <System/StringView.hpp>
 #include <Util/Singleton.hpp>
 
 // On Windows undefine this anoying macro defined by windows.h
@@ -29,17 +31,16 @@ public:
     ~LogManager();
 
     void initialize();
-
     void shutdown();
 
-    void verbose(const String& tag, const String& message);
-    void debug(const String& tag, const String& message);
-    void info(const String& tag, const String& message);
-    void warning(const String& tag, const String& message);
-    void error(const String& tag, const String& message);
-    void fatal(const String& tag, const String& message);
+    void verbose(const StringView& tag, const StringView& message);
+    void debug(const StringView& tag, const StringView& message);
+    void info(const StringView& tag, const StringView& message);
+    void warning(const StringView& tag, const StringView& message);
+    void error(const StringView& tag, const StringView& message);
+    void fatal(const StringView& tag, const StringView& message);
 
-    void logMessage(LogPriority priority, const String& tag, const String& message);
+    void logMessage(LogPriority priority, const StringView& tag, const StringView& message);
 
     void enableFileLogging(bool enable);
     void enableConsoleLogging(bool enable);
@@ -87,28 +88,64 @@ private:
     bool m_consoleLoggingEnable;
 };
 
-inline void LogVerbose(const String& tag, const String& message) {
+inline void LogVerbose(const StringView& tag, const StringView& message) {
     LogManager::GetInstance().verbose(tag, message);
 }
 
-inline void LogDebug(const String& tag, const String& message) {
+template <typename... Args>
+inline void LogVerbose(const StringView& tag, const StringView& message, Args&&... args) {
+    auto internalStringView = fmt::string_view(message.getData(), message.getSize());
+    LogVerbose(tag, String(std::move(fmt::format(internalStringView, std::forward<Args>(args)...))));
+}
+
+inline void LogDebug(const StringView& tag, const StringView& message) {
     LogManager::GetInstance().debug(tag, message);
 }
 
-inline void LogInfo(const String& tag, const String& message) {
+template <typename... Args>
+inline void LogDebug(const StringView& tag, const StringView& message, Args&&... args) {
+    auto internalStringView = fmt::string_view(message.getData(), message.getSize());
+    LogDebug(tag, String(std::move(fmt::format(internalStringView, std::forward<Args>(args)...))));
+}
+
+inline void LogInfo(const StringView& tag, const StringView& message) {
     LogManager::GetInstance().info(tag, message);
 }
 
-inline void LogWarning(const String& tag, const String& message) {
+template <typename... Args>
+inline void LogInfo(const StringView& tag, const StringView& message, Args&&... args) {
+    auto internalStringView = fmt::string_view(message.getData(), message.getSize());
+    LogInfo(tag, String(std::move(fmt::format(internalStringView, std::forward<Args>(args)...))));
+}
+
+inline void LogWarning(const StringView& tag, const StringView& message) {
     LogManager::GetInstance().warning(tag, message);
 }
 
-inline void LogError(const String& tag, const String& message) {
+template <typename... Args>
+inline void LogWarning(const StringView& tag, const StringView& message, Args&&... args) {
+    auto internalStringView = fmt::string_view(message.getData(), message.getSize());
+    LogWarning(tag, String(std::move(fmt::format(internalStringView, std::forward<Args>(args)...))));
+}
+
+inline void LogError(const StringView& tag, const StringView& message) {
     LogManager::GetInstance().error(tag, message);
 }
 
-inline void LogFatal(const String& tag, const String& message) {
+template <typename... Args>
+inline void LogError(const StringView& tag, const StringView& message, Args&&... args) {
+    auto internalStringView = fmt::string_view(message.getData(), message.getSize());
+    LogError(tag, String(std::move(fmt::format(internalStringView, std::forward<Args>(args)...))));
+}
+
+inline void LogFatal(const StringView& tag, const StringView& message) {
     LogManager::GetInstance().fatal(tag, message);
+}
+
+template <typename... Args>
+inline void LogFatal(const StringView& tag, const StringView& message, Args&&... args) {
+    auto internalStringView = fmt::string_view(message.getData(), message.getSize());
+    LogFatal(tag, String(std::move(fmt::format(internalStringView, std::forward<Args>(args)...))));
 }
 
 }  // namespace engine

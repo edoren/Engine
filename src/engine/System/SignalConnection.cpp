@@ -63,7 +63,7 @@ SignalConnection::SignalConnection(const SignalConnection& other)
 SignalConnection::SignalConnection(SignalConnection&& other) noexcept
       : m_id(other.m_id),
         m_reference(other.m_reference),
-        m_disconnectCallback(other.m_disconnectCallback) {
+        m_disconnectCallback(std::move(other.m_disconnectCallback)) {
     other.m_id = sInvalidId;
     other.m_reference = nullptr;
     other.m_disconnectCallback = nullptr;

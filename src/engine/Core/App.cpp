@@ -1,10 +1,12 @@
 #include <Core/App.hpp>
 
+#include <System/StringView.hpp>
+
 namespace engine {
 
 namespace {
 
-const String sTag("App");
+// const StringView sTag("App");
 
 }  // namespace
 

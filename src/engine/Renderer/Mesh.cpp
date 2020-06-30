@@ -1,12 +1,13 @@
 #include "Renderer/Mesh.hpp"
 
+#include <System/StringView.hpp>
 #include <Util/Container/Vector.hpp>
 
 namespace engine {
 
 namespace {
 
-const String sTag("Mesh");
+// const StringView sTag("Mesh");
 
 }  // namespace
 

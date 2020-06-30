@@ -1,8 +1,10 @@
-#include <Core/Main.hpp>
 #include <Renderer/TextureManager.hpp>
+
+#include <Core/Main.hpp>
 #include <System/FileSystem.hpp>
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
+#include <System/StringView.hpp>
 #include <Util/Container/Vector.hpp>
 
 #include <memory>
@@ -11,7 +13,7 @@ namespace engine {
 
 namespace {
 
-const String sTag("TextureManager");
+const StringView sTag("TextureManager");
 
 const String sRootTextureFolder("textures");
 
@@ -58,14 +60,12 @@ Texture2D* TextureManager::loadFromFile(const String& basename) {
     if (filenameExist) {
         Image image;
         if (!image.loadFromFile(filename)) {
-            LogDebug(sTag, "Could create Image from file: " + basename);
+            LogDebug(sTag, "Could create Image from file: {}", basename);
             return nullptr;
         }
         return loadFromImage(basename, image);
     }
-    LogError(sTag,
-             "Texture2D not loaded. File '{}' "
-             "not found."_format(filename.toUtf8()));
+    LogError(sTag, "Texture2D not loaded. File '{}' not found.", filename.toUtf8());
     return nullptr;
 }
 
@@ -77,9 +77,9 @@ Texture2D* TextureManager::loadFromImage(const String& name, const Image& image)
 
     std::unique_ptr<Texture2D> newTexture = createTexture2D();
     if (newTexture != nullptr) {
-        LogDebug(sTag, "Loading Texture: " + name);
+        LogDebug(sTag, "Loading Texture: {}", name);
         if (!newTexture->loadFromImage(image)) {
-            LogDebug(sTag, "Could not load Texture: " + name);
+            LogDebug(sTag, "Could not load Texture: {}", name);
             newTexture.reset();
         }
     } else {
@@ -110,7 +110,7 @@ void TextureManager::setActiveTexture2D(const String& basename) {
         m_activeTexture = foundTexture;
         useTexture2D(m_activeTexture);
     } else {
-        LogError(sTag, "Could not find a Texture2D named: {}"_format(basename.toUtf8()));
+        LogError(sTag, "Could not find a Texture2D named: {}", basename.toUtf8());
     }
 }
 

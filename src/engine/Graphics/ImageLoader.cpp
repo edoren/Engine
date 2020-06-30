@@ -1,6 +1,8 @@
 #include <Graphics/ImageLoader.hpp>
+
 #include <System/FileSystem.hpp>
 #include <System/LogManager.hpp>
+#include <System/StringView.hpp>
 #include <Util/Container/Vector.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -10,7 +12,7 @@ namespace engine {
 
 namespace {
 
-const String sTag("ImageLoader");
+const StringView sTag("ImageLoader");
 
 }  // namespace
 

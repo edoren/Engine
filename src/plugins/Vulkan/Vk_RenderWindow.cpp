@@ -5,6 +5,7 @@
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
 #include <Util/Container/Vector.hpp>
+#include <System/StringView.hpp>
 
 #include "Vk_RenderWindow.hpp"
 #include "Vk_Shader.hpp"
@@ -18,7 +19,7 @@ namespace engine {
 
 namespace {
 
-const String sTag("Vk_RenderWindow");
+const StringView sTag("Vk_RenderWindow");
 
 const uint32 sVertexBufferBindId(0);
 
@@ -52,7 +53,7 @@ bool Vk_RenderWindow::create(const String& name, const math::ivec2& size) {
 
     m_window = SDL_CreateWindow(name.getData(), initialPos.x, initialPos.y, size.x, size.y, windowFlags);
     if (!m_window) {
-        LogError(sTag, "SDL_CreateWindow fail: {}"_format(SDL_GetError()));
+        LogError(sTag, "SDL_CreateWindow fail: {}", SDL_GetError());
         return false;
     }
 
@@ -70,7 +71,7 @@ bool Vk_RenderWindow::create(const String& name, const math::ivec2& size) {
     }
     if (!checkWsiSupport()) {
         PhysicalDeviceParameters& physicalDevice = context.getPhysicalDevice();
-        LogError(sTag, "Physical device {} doesn't include WSI support"_format(physicalDevice.properties.deviceName));
+        LogError(sTag, "Physical device {} doesn't include WSI support", physicalDevice.properties.deviceName);
         return false;
     }
 
@@ -927,7 +928,7 @@ bool Vk_RenderWindow::createDepthResources() {
         vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
                              VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT, 0, 0, nullptr, 0, nullptr, 1, &depthBarrier);
 
-        LogInfo(sTag, "Depth resources created with dimensions [{}, {}]"_format(m_size.x, m_size.y));
+        LogInfo(sTag, "Depth resources created with dimensions [{}, {}]", m_size.x, m_size.y);
     });
 
     return true;
@@ -976,8 +977,7 @@ void Vk_RenderWindow::onAppDidEnterForeground() {
         if (!checkWsiSupport()) {
             PhysicalDeviceParameters& physicalDevice = context.getPhysicalDevice();
             LogFatal(sTag,
-                     "Physical device {} doesn't include WSI "
-                     "support"_format(physicalDevice.properties.deviceName));
+                     "Physical device {} doesn't include WSI support", physicalDevice.properties.deviceName);
             return;
         }
 

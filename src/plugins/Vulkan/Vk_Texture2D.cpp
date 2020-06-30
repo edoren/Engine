@@ -1,5 +1,6 @@
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
+#include <System/StringView.hpp>
 
 #include "Vk_Context.hpp"
 #include "Vk_Texture2D.hpp"
@@ -10,7 +11,7 @@ namespace engine {
 
 namespace {
 
-const String sTag("Vk_Texture2D");
+const StringView sTag("Vk_Texture2D");
 
 }  // namespace
 
@@ -118,9 +119,7 @@ bool Vk_Texture2D::copyTextureData(const Image& img) {
     void* stagingBufferMemoryPointer;
     result = vkMapMemory(device, m_stagingBuffer.getMemory(), 0, img.getDataSize(), 0, &stagingBufferMemoryPointer);
     if (result != VK_SUCCESS) {
-        LogError(sTag,
-                 "Could not map memory and upload "
-                 "texture data to a staging buffer");
+        LogError(sTag, "Could not map memory and upload texture data to a staging buffer");
         return false;
     }
 

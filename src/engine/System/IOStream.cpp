@@ -24,20 +24,15 @@ IOStream& IOStream::operator=(IOStream&& other) noexcept {
     return *this;
 }
 
-bool IOStream::open(const String& filename, const char* mode) {
+bool IOStream::open(const StringView& filename, const char* mode) {
     if (m_file) {
         close();
     }
     m_file = SDL_RWFromFile(filename.getData(), mode);
-    if (!m_file) {
-        m_lastError = SDL_GetError();
-        return false;
-    }
-    return true;
-}
-
-bool IOStream::open(const char* filename, const char* mode) {
-    return open(String(filename), mode);
+    // if (m_file == nullptr) {
+    //     m_lastError = SDL_GetError();
+    // }
+    return m_file != nullptr;
 }
 
 void IOStream::close() {

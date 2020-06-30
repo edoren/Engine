@@ -7,6 +7,7 @@
 #include <Renderer/ShaderManager.hpp>
 #include <Renderer/TextureManager.hpp>
 #include <System/Stopwatch.hpp>
+#include <System/StringView.hpp>
 #include <Util/AsyncTaskRunner.hpp>
 
 #include <SDL2.h>
@@ -17,7 +18,7 @@ namespace engine {
 
 namespace {
 
-const String sTag("Main");
+const StringView sTag("Main");
 
 }  // namespace
 
@@ -187,7 +188,7 @@ void Main::loadPlugin(const String& pluginName) {
         auto pFunc = reinterpret_cast<PFN_START_PLUGIN>(lib->getSymbol("StartPlugin"));
 
         if (!pFunc) {
-            LogFatal(sTag, "Cannot find symbol StartPlugin in library: " + pluginName);
+            LogFatal(sTag, "Cannot find symbol StartPlugin in library: {}", pluginName);
         }
 
         // This must call InstallPlugin
@@ -204,7 +205,7 @@ void Main::unloadPlugin(const String& pluginName) {
 
             if (!pFunc) {
                 const String& name = sharedLib->getName();
-                LogFatal(sTag, "Cannot find symbol StopPlugin in library: " + name);
+                LogFatal(sTag, "Cannot find symbol StopPlugin in library: {}", name);
             }
 
             // This must call UninstallPlugin
@@ -219,7 +220,7 @@ void Main::unloadPlugin(const String& pluginName) {
 }
 
 void Main::installPlugin(Plugin* plugin) {
-    LogInfo(sTag, "Installing plugin: " + plugin->getName());
+    LogInfo(sTag, "Installing plugin: {}", plugin->getName());
 
     m_plugins.push_back(plugin);
     plugin->install();
@@ -233,7 +234,7 @@ void Main::installPlugin(Plugin* plugin) {
 }
 
 void Main::uninstallPlugin(Plugin* plugin) {
-    LogInfo(sTag, "Uninstalling plugin: " + plugin->getName());
+    LogInfo(sTag, "Uninstalling plugin: {}", plugin->getName());
 
     auto it = std::find(m_plugins.begin(), m_plugins.end(), plugin);
     if (it != m_plugins.end()) {
@@ -279,7 +280,7 @@ void Main::shutdownPlugins() {
 
         if (!pFunc) {
             const String& name = pluginLib->getName();
-            LogFatal(sTag, "Cannot find symbol StopPlugin in library: " + name);
+            LogFatal(sTag, "Cannot find symbol StopPlugin in library: {}", name);
         }
 
         // This must call UninstallPlugin

@@ -1,6 +1,8 @@
 #include <System/FileSystem.hpp>
+
 #include <System/IOStream.hpp>
 #include <System/LogManager.hpp>
+#include <System/StringView.hpp>
 #include <Util/Container/Vector.hpp>
 
 #include <SDL2.h>
@@ -13,13 +15,16 @@
 
 #include <utility>
 
+#include <cstring>
+
 #define PATH_MAX_LENGTH 256
 
 namespace engine {
 
 namespace {
 
-String sTag("FileSystem");
+StringView sTag("FileSystem");
+String sExecutableDirectory;
 
 }  // namespace
 
@@ -50,12 +55,18 @@ void FileSystem::initialize() {}
 
 void FileSystem::shutdown() {}
 
-bool FileSystem::fileExists(const String& filename) const {
+bool FileSystem::fileExists(const StringView& filename) const {
     IOStream file;
-    for (const String& path : m_searchPaths) {
-        String filePath = join(path, filename);
-        if (file.open(filePath, "r")) {
+    if (isAbsolutePath(filename)) {
+        if (file.open(filename, "r")) {
             return true;
+        }
+    } else {
+        for (const String& path : m_searchPaths) {
+            String filePath = join(path, filename);
+            if (file.open(filePath, "r")) {
+                return true;
+            }
         }
     }
     return false;
@@ -80,12 +91,12 @@ bool FileSystem::loadFileData(const String& filename, Vector<byte>* dest) const 
 
     for (const String& path : m_searchPaths) {
         String filePath = join(path, filenameCpy);
-        if (file.open(filePath.getData(), "rb")) {
+        if (file.open(filePath, "rb")) {
             break;
         }
     }
     if (!file.isOpen()) {
-        LogError(sTag, "Error loading file: " + filename);
+        LogError(sTag, "Error loading file: {}", filename);
         return false;
     }
 
@@ -103,14 +114,15 @@ char8 FileSystem::getOsSeparator() const {
 #endif
 }
 
-String FileSystem::executableDirectory() const {
-    String ret;
-    char* path = SDL_GetBasePath();
-    if (path) {
-        ret = path;
-        SDL_free(path);
+const String& FileSystem::executableDirectory() const {
+    if (sExecutableDirectory.isEmpty()) {
+        char* path = SDL_GetBasePath();
+        if (path) {
+            sExecutableDirectory = path;
+            SDL_free(path);
+        }
     }
-    return ret;
+    return sExecutableDirectory;
 }
 
 String FileSystem::currentWorkingDirectory() const {
@@ -258,13 +270,13 @@ String FileSystem::normalizePath(const String& path) const {
     return ret;
 }
 
-bool FileSystem::isAbsolutePath(const String& path) const {
-    const auto& internal = path.toUtf8();
+bool FileSystem::isAbsolutePath(const StringView& path) const {
+    const auto& internal = path.getData();
     if (path.isEmpty()) {
         return false;
     }
 #if PLATFORM_IS(PLATFORM_WINDOWS)
-    return internal.size() > 2 && internal[1] == ':' && internal[2] == '\\';
+    return path.getSize() > 2 && internal[1] == ':' && internal[2] == '\\';
 #elif PLATFORM_IS(PLATFORM_LINUX | PLATFORM_MACOS | PLATFORM_IOS | PLATFORM_ANDROID)
     return internal[0] == '/';
 #else
@@ -272,25 +284,25 @@ bool FileSystem::isAbsolutePath(const String& path) const {
 #endif
 }
 
-String FileSystem::join(const String& left, const String& right) const {
+String FileSystem::join(const StringView& left, const StringView& right) const {
     if (right.isEmpty()) {
-        return left;
+        return String::FromUtf8(left.begin(), left.end());
     }
     if (left.isEmpty()) {
-        return right;
+        return String::FromUtf8(right.begin(), right.end());
     }
 
     if (isAbsolutePath(right)) {
-        return right;
+        return String::FromUtf8(right.begin(), right.end());
     }
 
     String ret;
-    const auto& internal = left.toUtf8();
-    char8 lastCharacter = internal[internal.size() - 1];
+    const auto& internal = left.getData();
+    char8 lastCharacter = internal[left.getSize() - 1];
     if (lastCharacter == getOsSeparator()) {
-        ret = left + right;
+        ret = "{}{}"_format(left, right);
     } else {
-        ret = left + getOsSeparator() + right;
+        ret = "{}{}{}"_format(left, getOsSeparator(), right);
     }
     return ret;
 }

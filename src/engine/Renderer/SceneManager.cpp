@@ -4,13 +4,14 @@
 #include <Renderer/Scene.hpp>
 #include <System/FileSystem.hpp>
 #include <System/LogManager.hpp>
+#include <System/StringView.hpp>
 #include <Util/Container/Vector.hpp>
 
 namespace engine {
 
 namespace {
 
-const String sTag("SceneManager");
+const StringView sTag("SceneManager");
 
 const String sRootModelFolder("scenes");
 
@@ -55,9 +56,9 @@ void SceneManager::changeActiveScene(const String& sceneNameId) {
         fs.loadFileData(filename, &jsonData);
         if (json::accept(jsonData.begin(), jsonData.end())) {
             jsonObject = json::parse(jsonData.begin(), jsonData.end());
-            LogInfo(sTag, "Loading scene: " + filename);
+            LogInfo(sTag, "Loading scene: {}", filename);
         } else {
-            LogError(sTag, "Error loading model: " + sceneNameId);
+            LogError(sTag, "Error loading model: {}", sceneNameId);
         }
     }
 
@@ -75,7 +76,7 @@ void SceneManager::changeActiveScene(const String& sceneNameId) {
         m_scenesIndexMap[sceneIndex] = scene;
     }
 
-    LogInfo(sTag, "Scene '{}' successfully loaded"_format(filename));
+    LogInfo(sTag, "Scene '{}' successfully loaded", filename);
 
     m_activeScene = scene;
 }

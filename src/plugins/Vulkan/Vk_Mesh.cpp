@@ -5,6 +5,7 @@
 #include <Renderer/RenderStates.hpp>
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
+#include <System/StringView.hpp>
 #include <Util/Container/Vector.hpp>
 
 #include "Vk_Context.hpp"
@@ -22,7 +23,7 @@ namespace engine {
 
 namespace {
 
-const String sTag("Vk_Mesh");
+const StringView sTag("Vk_Mesh");
 
 }  // namespace
 

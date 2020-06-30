@@ -1,5 +1,6 @@
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
+#include <System/StringView.hpp>
 #include <Util/Container/Vector.hpp>
 
 #include "Vk_VertexLayout.hpp"
@@ -8,7 +9,7 @@ namespace engine {
 
 namespace {
 
-const String sTag("Vk_VertexLayout");
+// const StringView sTag("Vk_VertexLayout");
 
 Vector<VkVertexInputAttributeDescription> GetAttribDescription(const Vector<VertexLayout::Component>& input,
                                                                uint32 bufferBindId) {
