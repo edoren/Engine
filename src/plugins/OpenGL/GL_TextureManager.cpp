@@ -1,13 +1,15 @@
 #include "GL_TextureManager.hpp"
 #include "GL_Texture2D.hpp"
 
+#include <System/StringView.hpp>
+
 #include <memory>
 
 namespace engine {
 
 namespace {
 
-const String sTag("GL_TextureManager");
+// const StringView sTag("GL_TextureManager");
 
 GL_TextureManager* sDerivedInstance = nullptr;
 

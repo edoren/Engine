@@ -2,6 +2,8 @@
 
 #include "Vk_Shader.hpp"
 
+#include <System/StringView.hpp>
+
 #include <map>
 #include <memory>
 
@@ -9,7 +11,7 @@ namespace engine {
 
 namespace {
 
-const String sTag("Vk_ShaderManager");
+// const StringView sTag("Vk_ShaderManager");
 
 const String sShaderFolder("spirv");
 

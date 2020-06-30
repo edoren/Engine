@@ -2,6 +2,8 @@
 
 #include "GL_Shader.hpp"
 
+#include <System/StringView.hpp>
+
 #include <map>
 #include <memory>
 
@@ -9,7 +11,7 @@ namespace engine {
 
 namespace {
 
-const String sTag("GL_ShaderManager");
+// const StringView sTag("GL_ShaderManager");
 
 const String sShaderFolder("glsl");
 

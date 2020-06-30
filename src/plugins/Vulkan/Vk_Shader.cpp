@@ -1,5 +1,6 @@
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
+#include <System/StringView.hpp>
 #include <Util/Container/Vector.hpp>
 
 #include "Vk_Context.hpp"
@@ -11,7 +12,7 @@ namespace engine {
 
 namespace {
 
-const String sTag("Vk_Shader");
+const StringView sTag("Vk_Shader");
 
 }  // namespace
 
@@ -125,8 +126,9 @@ void Vk_Shader::setDescriptor(json&& descriptor) {
             vertexInputs.push_back(VertexLayout::Component::UV);
         } else {
             LogFatal(sTag,
-                     "Error invalid VertexLayout Component '{}', please check the vertex_layout "
-                     "in the '{}.json' shader descriptor"_format(component, descriptorName));
+                     "Error invalid VertexLayout Component '{}', please check the vertex_layout in the '{}.json' "
+                     "shader descriptor",
+                     component, descriptorName);
             return;
         }
     }
@@ -229,7 +231,7 @@ bool Vk_Shader::updateUboDescriptorSet() {
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.getVulkanDevice();
 
-    LogDebug(sTag, "Buffer UBO Dynamic Size: {}"_format(m_uniformBuffers.dynamicBuffer.getSize()));
+    LogDebug(sTag, "Buffer UBO Dynamic Size: {}", m_uniformBuffers.dynamicBuffer.getSize());
 
     std::array<VkDescriptorBufferInfo, 2> bufferInfos = {{
         {

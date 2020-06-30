@@ -2,6 +2,7 @@
 
 #include <System/LogManager.hpp>
 #include <System/String.hpp>
+#include <System/StringView.hpp>
 
 #include "Vk_Context.hpp"
 
@@ -9,7 +10,7 @@ namespace engine {
 
 namespace {
 
-const String sTag("Vk_Utilities");
+const StringView sTag("Vk_Utilities");
 
 }  // namespace
 

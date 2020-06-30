@@ -1,11 +1,13 @@
+#include <Renderer/Renderer.hpp>
+
 #include <Renderer/ModelManager.hpp>
 #include <Renderer/RenderWindow.hpp>
-#include <Renderer/Renderer.hpp>
 #include <Renderer/ShaderManager.hpp>
 #include <Renderer/TextureManager.hpp>
 #include <System/LogManager.hpp>
 #include <System/String.hpp>
 #include <System/StringFormat.hpp>
+#include <System/StringView.hpp>
 
 #include <SDL2.h>
 
@@ -15,7 +17,7 @@ namespace engine {
 
 namespace {
 
-const String sTag("Renderer");
+const StringView sTag("Renderer");
 
 }  // namespace
 
@@ -29,7 +31,7 @@ Renderer::~Renderer() = default;
 
 bool Renderer::initialize() {
     int code = SDL_InitSubSystem(SDL_INIT_VIDEO);
-    LogInfo(sTag, "Current SDL video driver: {}"_format(SDL_GetCurrentVideoDriver()));
+    LogInfo(sTag, "Current SDL video driver: {}", SDL_GetCurrentVideoDriver());
     return code == 0;
 }
 

@@ -1,13 +1,14 @@
+#include "Shader.hpp"
+
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
-
-#include "Shader.hpp"
+#include <System/StringView.hpp>
 
 namespace engine {
 
 namespace {
 
-const String sTag("Shader");
+// const StringView sTag("Shader");
 
 }  // namespace
 

@@ -1,8 +1,9 @@
+#include <Renderer/UniformBufferObject.hpp>
+
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
+#include <System/StringView.hpp>
 #include <Util/Container/Vector.hpp>
-
-#include "UniformBufferObject.hpp"
 
 namespace engine {
 
@@ -16,7 +17,7 @@ bool operator==(const UniformBufferObject::Item& lhs, const String& rhs) {
 
 namespace {
 
-const String sTag("UniformBufferObject");
+const StringView sTag("UniformBufferObject");
 
 constexpr bool is_power_of_two(size_t num) {
     return (num & (num - 1)) == 0;
@@ -124,9 +125,9 @@ void UniformBufferObject::setBufferSize(size_t numUboInstances, size_t minUboAli
 
     size_t bufferSize = numUboInstances * m_dynamicAlignment;
 
-    LogDebug(sTag, "UBO size: {} bytes"_format(getSize()));
-    LogDebug(sTag, "Minimum UBO alignment: {} bytes"_format(minUboAlignment));
-    LogDebug(sTag, "Dynamic UBO alignment: {} bytes"_format(m_dynamicAlignment));
+    LogDebug(sTag, "UBO size: {} bytes", getSize());
+    LogDebug(sTag, "Minimum UBO alignment: {} bytes", minUboAlignment);
+    LogDebug(sTag, "Dynamic UBO alignment: {} bytes", m_dynamicAlignment);
 
     m_buffer = (byte*)aligned_malloc(bufferSize, m_dynamicAlignment);
     m_bufferSize = bufferSize;
@@ -148,7 +149,7 @@ void UniformBufferObject::setAttributeValue(const String& name, const math::mat4
             }
         }
     } else {
-        LogError(sTag, "Not a valid UBO attribute name: {}"_format(name));
+        LogError(sTag, "Not a valid UBO attribute name: {}", name);
     }
 }
 
@@ -168,7 +169,7 @@ void UniformBufferObject::setAttributeValue(const String& name, const math::mat3
             }
         }
     } else {
-        LogError(sTag, "Not a valid UBO attribute name: {}"_format(name));
+        LogError(sTag, "Not a valid UBO attribute name: {}", name);
     }
 }
 
@@ -188,7 +189,7 @@ void UniformBufferObject::setAttributeValue(const String& name, const math::mat2
             }
         }
     } else {
-        LogError(sTag, "Not a valid UBO attribute name: {}"_format(name));
+        LogError(sTag, "Not a valid UBO attribute name: {}", name);
     }
 }
 
@@ -200,7 +201,7 @@ void UniformBufferObject::setAttributeValue(const String& name, const math::vec4
         math::Vector4Packed<float> packedVector(value);
         setDataAtOffset(&packedVector, sizeof(packedVector), offset + attributeOffset);
     } else {
-        LogError(sTag, "Not a valid UBO attribute name: {}"_format(name));
+        LogError(sTag, "Not a valid UBO attribute name: {}", name);
     }
 }
 
@@ -212,7 +213,7 @@ void UniformBufferObject::setAttributeValue(const String& name, const math::vec3
         math::Vector3Packed<float> packedVector(value);
         setDataAtOffset(&packedVector, sizeof(packedVector), offset + attributeOffset);
     } else {
-        LogError(sTag, "Not a valid UBO attribute name: {}"_format(name));
+        LogError(sTag, "Not a valid UBO attribute name: {}", name);
     }
 }
 
@@ -224,7 +225,7 @@ void UniformBufferObject::setAttributeValue(const String& name, const math::vec2
         math::Vector2Packed<float> packedVector(value);
         setDataAtOffset(&packedVector, sizeof(packedVector), offset + attributeOffset);
     } else {
-        LogError(sTag, "Not a valid UBO attribute name: {}"_format(name));
+        LogError(sTag, "Not a valid UBO attribute name: {}", name);
     }
 }
 
@@ -243,11 +244,9 @@ void UniformBufferObject::setAttributeValue(const String& name, const void* valu
         ENGINE_UNUSED(value);
         ENGINE_UNUSED(offset);
         ENGINE_UNUSED(valueSize);
-        LogError(sTag,
-                 "SetAttributeValue(const String&, const void*) not "
-                 "implemented yet");
+        LogError(sTag, "SetAttributeValue(const String&, const void*) not implemented yet");
     } else {
-        LogError(sTag, "Not a valid UBO attribute name: {}"_format(name));
+        LogError(sTag, "Not a valid UBO attribute name: {}", name);
     }
 }
 

@@ -14,6 +14,6 @@ local.properties
 build
 .externalNativeBuild
 
-# Copied assets
+# Copied assets
 /assets
 /jniLibs

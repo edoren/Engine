@@ -1,8 +1,11 @@
-#include <System/StringFormat.hpp>
+#include <System/LogManager.hpp>
+
+#include <System/String.hpp>
+#include <System/StringView.hpp>
 
 #include <SDL2.h>
 
-#include <System/LogManager.hpp>
+#include <utility>
 
 #if PLATFORM_IS(PLATFORM_ANDROID)
     #include <android/log.h>
@@ -26,7 +29,7 @@ android_LogPriority sAndroidLogPriorities[] = {ANDROID_LOG_UNKNOWN, ANDROID_LOG_
 
 const char* sLogPriorityNames[] = {nullptr, "VERBOSE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"};
 
-String DefaultLogCallback(LogPriority priority, const String& tag, const String& message) {
+String DefaultLogCallback(LogPriority priority, const StringView& tag, const StringView& message) {
     const char* priorityName = sLogPriorityNames[static_cast<int>(priority)];
 
     // Get the current system hour
@@ -34,8 +37,10 @@ String DefaultLogCallback(LogPriority priority, const String& tag, const String&
     std::tm* tm = std::localtime(&t);
 
     // Format the log message
-    return "[{:02d}:{:02d}:{:02d}] [{}/{}] : {}"_format(tm->tm_hour, tm->tm_min, tm->tm_sec, tag.getData(),
-                                                        priorityName, message.getData());
+    fmt::string_view tagView(tag.getData(), tag.getSize());
+    fmt::string_view messageView(message.getData(), message.getSize());
+    return "[{:02d}:{:02d}:{:02d}] [{}/{}] : {}"_format(tm->tm_hour, tm->tm_min, tm->tm_sec, tagView,
+                                                        priorityName, messageView);
 }
 
 }  // namespace
@@ -69,34 +74,39 @@ void LogManager::initialize() {}
 
 void LogManager::shutdown() {}
 
-void LogManager::verbose(const String& tag, const String& message) {
+void LogManager::verbose(const StringView& tag, const StringView& message) {
     logMessage(LogPriority::VERBOSE, tag, message);
 }
 
-void LogManager::debug(const String& tag, const String& message) {
+void LogManager::debug(const StringView& tag, const StringView& message) {
     logMessage(LogPriority::DEBUG, tag, message);
 }
 
-void LogManager::info(const String& tag, const String& message) {
+void LogManager::info(const StringView& tag, const StringView& message) {
     logMessage(LogPriority::INFO, tag, message);
 }
 
-void LogManager::warning(const String& tag, const String& message) {
+void LogManager::warning(const StringView& tag, const StringView& message) {
     logMessage(LogPriority::WARN, tag, message);
 }
 
-void LogManager::error(const String& tag, const String& message) {
+void LogManager::error(const StringView& tag, const StringView& message) {
     logMessage(LogPriority::ERROR, tag, message);
 }
 
-void LogManager::fatal(const String& tag, const String& message) {
+void LogManager::fatal(const StringView& tag, const StringView& message) {
     logMessage(LogPriority::FATAL, tag, message);
-    std::exit(1);  // TMP
 }
 
-void LogManager::logMessage(LogPriority priority, const String& tag, const String& message) {
+void LogManager::logMessage(LogPriority priority, const StringView& tag, const StringView& message) {
+    if (!m_fileLoggingEnable && !m_consoleLoggingEnable) {
+        return;
+    }
+
 #ifndef ENGINE_DEBUG
-    if (priority == LogPriority::DEBUG) return;
+    if (priority == LogPriority::DEBUG) {
+        return;
+    }
 #endif
 
     String logMessage = DefaultLogCallback(priority, tag, message);
@@ -104,7 +114,7 @@ void LogManager::logMessage(LogPriority priority, const String& tag, const Strin
     // Write the log to the file
     if (m_fileLoggingEnable) {
         if (SDL_RWops* pfile = SDL_RWFromFile(m_logFile.getData(), "ab")) {
-            auto str = logMessage.toUtf8();
+            const auto& str = logMessage.toUtf8();
             SDL_RWwrite(pfile, str.data(), 1, str.size());
             SDL_RWwrite(pfile, sLineEnding, 1, strlen(sLineEnding));
             SDL_RWclose(pfile);
@@ -120,6 +130,10 @@ void LogManager::logMessage(LogPriority priority, const String& tag, const Strin
         fputs(logMessage.getData(), stdout);
         fputs("\n", stdout);
 #endif
+    }
+
+    if (priority == LogPriority::FATAL) {
+        std::exit(1);  // TMP
     }
 }
 

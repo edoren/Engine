@@ -143,7 +143,7 @@ class FileUtils:
             print(STRING_LN_VERBOSE.format(target, src))
 
     #######################
-    #  FileUtils from Ruby
+    #  FileUtils from Ruby
     #######################
 
     def cd(path, **options):

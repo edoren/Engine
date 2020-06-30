@@ -1,6 +1,7 @@
 #include <Math/Math.hpp>
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
+#include <System/StringView.hpp>
 #include <Util/Container/Vector.hpp>
 
 #include "Vk_Context.hpp"
@@ -10,7 +11,7 @@ namespace engine {
 
 namespace {
 
-const String sTag("Vk_SwapChain");
+const StringView sTag("Vk_SwapChain");
 
 const char* GetPresentationModeString(VkPresentModeKHR mode) {
     switch (mode) {
@@ -82,9 +83,7 @@ bool Vk_SwapChain::create(Vk_Surface& surface, uint32 width, uint32 height) {
 
     // Check that the surface formats where queried successfully
     if (formatsCount == 0 || result != VK_SUCCESS) {
-        LogError(sTag,
-                 "Error occurred during presentation surface formats "
-                 "enumeration");
+        LogError(sTag, "Error occurred during presentation surface formats enumeration");
         return false;
     }
 
@@ -102,9 +101,7 @@ bool Vk_SwapChain::create(Vk_Surface& surface, uint32 width, uint32 height) {
 
     // Check that the surface present modes where queried successfully
     if (presentModesCount == 0 || result != VK_SUCCESS) {
-        LogError(sTag,
-                 "Error occurred during presentation surface formats "
-                 "enumeration");
+        LogError(sTag, "Error occurred during presentation surface formats enumeration");
         return false;
     }
 
@@ -154,9 +151,8 @@ bool Vk_SwapChain::create(Vk_Surface& surface, uint32 width, uint32 height) {
     }
 
     const char* presentModeStr = GetPresentationModeString(desiredPresentMode);
-    LogInfo(sTag,
-            "SwapChain created with presentation mode "
-            "{} and dimensions [{}, {}]"_format(presentModeStr, desiredExtent.width, desiredExtent.height));
+    LogInfo(sTag, "SwapChain created with presentation mode {} and dimensions [{}, {}]", presentModeStr,
+            desiredExtent.width, desiredExtent.height);
 
     if (oldSwapChain) {
         vkDestroySwapchainKHR(device, oldSwapChain, nullptr);

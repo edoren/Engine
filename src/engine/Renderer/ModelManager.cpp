@@ -1,13 +1,15 @@
 #include <Renderer/ModelManager.hpp>
+
 #include <System/FileSystem.hpp>
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
+#include <System/StringView.hpp>
 
 namespace engine {
 
 namespace {
 
-const String sTag("ModelManager");
+const StringView sTag("ModelManager");
 
 }  // namespace
 
@@ -41,7 +43,7 @@ Model* ModelManager::loadFromFile(const String& basename) {
         return it->second;
     }
 
-    LogDebug(sTag, "Loading model: " + basename);
+    LogDebug(sTag, "Loading model: {}", basename);
 
     m_models.emplace_back(createModel());
     m_models.back()->loadModel(basename);
@@ -63,7 +65,7 @@ void ModelManager::unload(Model* model) {
 
         foundIt->reset(nullptr);
 
-        LogDebug(sTag, "Unloading model: {}"_format(foundNameIt->first));
+        LogDebug(sTag, "Unloading model: {}", foundNameIt->first);
         m_nameMap.erase(foundNameIt->first);
         m_modelRefCount.erase(model);
         m_models.erase(foundIt);

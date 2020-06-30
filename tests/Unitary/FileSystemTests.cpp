@@ -1,4 +1,4 @@
-#include "catch.hpp"
+#include <catch2/catch.hpp>
 
 #include <System/FileSystem.hpp>
 #include <System/String.hpp>
@@ -119,6 +119,7 @@ TEST_CASE("FileSystem::Join", "[FileSystem]") {
     }
     SECTION("if any of the provided paths is empty it must ignore it") {
         String joined = fileSystem.join("hello", "", "1234");
+        REQUIRE(joined.getSize() == 10);
 #if PLATFORM_IS(PLATFORM_WINDOWS)
         REQUIRE(joined == "hello\\1234");
 #else

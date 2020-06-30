@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cassert>
+
 // clang-format off
 
 #define ENGINE_UNUSED(var) (void)var
@@ -7,6 +9,9 @@
 #ifndef ENGINE_DEBUG
     #define ENGINE_NOEXCEPTION
 #endif
+
+// Use (void) to silent unused warnings.
+#define ENGINE_ASSERT(exp, msg) assert(((void)msg, exp))
 
 #if (defined(__cpp_exceptions) || \
      defined(__EXCEPTIONS) || \

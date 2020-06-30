@@ -1,5 +1,6 @@
-#include <Core/Main.hpp>
 #include <Renderer/Model.hpp>
+
+#include <Core/Main.hpp>
 #include <Renderer/RenderStates.hpp>
 #include <Renderer/Texture2D.hpp>
 #include <Renderer/TextureManager.hpp>
@@ -8,6 +9,7 @@
 #include <System/JSON.hpp>
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
+#include <System/StringView.hpp>
 #include <Util/Container/Vector.hpp>
 
 #include <assimp/postprocess.h>
@@ -24,7 +26,7 @@ namespace engine {
 
 namespace {
 
-const String sTag("Model");
+const StringView sTag("Model");
 
 const String sRootModelFolder("models");
 
@@ -42,7 +44,7 @@ protected:
             }
         }
         if (!m_file.isOpen()) {
-            LogError("CustomAssimpIOStream", String("Could not open file") + pFile);
+            LogError("CustomAssimpIOStream", "Could not open file {}", pFile);
         }
     }
 
@@ -171,14 +173,14 @@ void Model::loadModel(const String& path) {
     String filename = fs.join(sRootModelFolder, path);
 
     String pathNoext = path.subString(0, path.findLastOf("."));
-    String jsonFilename = fs.join(sRootModelFolder, pathNoext + ".json");
+    String jsonFilename = fs.join(sRootModelFolder, "{}.json"_format(pathNoext));
     if (fs.fileExists(jsonFilename)) {
         Vector<byte> jsonData;
 
         fs.loadFileData(jsonFilename, &jsonData);
         if (json::accept(jsonData.begin(), jsonData.end())) {
             m_descriptor = json::parse(jsonData.begin(), jsonData.end());
-            LogDebug(sTag, "Loading descriptor: " + jsonFilename);
+            LogDebug(sTag, "Loading descriptor: {}", jsonFilename);
         }
     }
 
@@ -198,7 +200,7 @@ void Model::loadModel(const String& path) {
 
     importer.SetIOHandler(new CustomAssimpIOSystem());
 
-    const aiScene* scene = importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_FlipUVs);
+    const aiScene* scene = importer.ReadFile(filename.getData(), aiProcess_Triangulate | aiProcess_FlipUVs);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         LogError("Model", String("ERROR::ASSIMP::") + importer.GetErrorString());
@@ -294,7 +296,8 @@ std::unique_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
             const json& type = jsonTexture["type"];
             const json& name = jsonTexture["name"];
             if (type.is_string() && name.is_string()) {
-                textureFilenames.emplace_back(GetTextureTypeFromString(type), fs.join(m_relativeDirectory, name));
+                textureFilenames.emplace_back(GetTextureTypeFromString(type),
+                                              fs.join(m_relativeDirectory, name.get<String>()));
             }
         }
     };

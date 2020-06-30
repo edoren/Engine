@@ -3,6 +3,7 @@
 #include <Util/Prerequisites.hpp>
 
 #include <System/String.hpp>
+#include <System/StringView.hpp>
 #include <Util/NonCopyable.hpp>
 
 struct SDL_RWops;
@@ -24,8 +25,7 @@ public:
 
     IOStream& operator=(IOStream&& other) noexcept;
 
-    bool open(const String& filename, const char* mode);
-    bool open(const char8* filename, const char* mode);
+    bool open(const StringView& filename, const char* mode);
 
     void close();
 

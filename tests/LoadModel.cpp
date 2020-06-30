@@ -10,11 +10,11 @@
 #include <SDL2/SDL.h>
 
 #ifdef ENGINE_DEBUG
-#define VULKAN_PLUGIN_NAME "vulkan-plugin-d"
-#define OPENGL_PLUGIN_NAME "opengl-plugin-d"
+    #define VULKAN_PLUGIN_NAME "vulkan-plugin-d"
+    #define OPENGL_PLUGIN_NAME "opengl-plugin-d"
 #else
-#define VULKAN_PLUGIN_NAME "vulkan-plugin"
-#define OPENGL_PLUGIN_NAME "opengl-plugin"
+    #define VULKAN_PLUGIN_NAME "vulkan-plugin"
+    #define OPENGL_PLUGIN_NAME "opengl-plugin"
 #endif
 
 #include <iostream>
@@ -113,7 +113,7 @@ protected:
 
         if (m_input->getButton(SDLK_t).wentDown()) {
             Main::GetInstance().executeAsync(
-                [] { LogInfo("LoadModel", "Hello Thread {}"_format(std::this_thread::get_id())); });
+                [] { LogInfo("LoadModel", "Hello Thread {}", std::this_thread::get_id()); });
         }
 
         m_shaderManager->setActiveShader("model");

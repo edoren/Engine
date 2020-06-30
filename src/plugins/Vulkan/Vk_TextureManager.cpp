@@ -1,5 +1,6 @@
 #include <System/LogManager.hpp>
 #include <Util/Container/Vector.hpp>
+#include <System/StringView.hpp>
 
 #include "Vk_Context.hpp"
 #include "Vk_Texture2D.hpp"
@@ -11,7 +12,7 @@ namespace engine {
 
 namespace {
 
-const String sTag("Vk_TextureManager");
+const StringView sTag("Vk_TextureManager");
 
 const uint32 sMaxDescriptorSets(256);
 

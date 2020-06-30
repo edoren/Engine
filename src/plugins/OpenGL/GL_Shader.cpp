@@ -3,6 +3,7 @@
 
 #include <System/LogManager.hpp>
 #include <Util/Container/Vector.hpp>
+#include <System/StringView.hpp>
 
 #include <array>
 #include <string>
@@ -11,7 +12,7 @@ namespace engine {
 
 namespace {
 
-const String sTag("GL_Shader");
+const StringView sTag("GL_Shader");
 
 const std::array<GLenum, 3> sGlShaderTypes = {{
     GL_VERTEX_SHADER,
@@ -308,7 +309,7 @@ GLint GL_Shader::getUniformLocation(const String& name) {
     m_uniforms.insert(std::make_pair(name, location));
 
     if (location == -1) {
-        LogError(sTag, "Parameter \"" + name + "\" not found in shader");
+        LogError(sTag, "Parameter \"{}\" not found in shader", name);
     }
 
     return location;

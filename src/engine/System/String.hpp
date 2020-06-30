@@ -28,6 +28,8 @@
 
 #include <Util/Prerequisites.hpp>
 
+#include <Util/UTFIterator.hpp>
+
 #include <sstream>
 #include <string>
 
@@ -43,13 +45,14 @@ public:
     ////////////////////////////////////////////////////////////
     // Types
     ////////////////////////////////////////////////////////////
-    using iterator = std::basic_string<char8>::iterator;              ///< Iterator type
-    using const_iterator = std::basic_string<char8>::const_iterator;  ///< Read-only iterator type
+    using size_type = std::size_t;                        ///< Size type
+    using const_iterator = UTFIterator<8, const char8*>;  ///< Read-only iterator type
+    using iterator = const_iterator;                      ///< Iterator type
 
     ////////////////////////////////////////////////////////////
     // Static member data
     ////////////////////////////////////////////////////////////
-    static const std::size_t sInvalidPos;  ///< Represents an invalid position in the string
+    static const size_type sInvalidPos;  ///< Represents an invalid position in the string
 
     ////////////////////////////////////////////////////////////
     /// @brief Default constructor
@@ -180,6 +183,20 @@ public:
     ////////////////////////////////////////////////////////////
     /// @brief Create a new String from a UTF-8 encoded string
     ///
+    /// @param begin Pointer to the beginning of the UTF-8 sequence
+    /// @param end   Pointer to the end of the UTF-8 sequence
+    ///
+    /// @return A String containing the source string
+    ///
+    /// @see FromUtf16, FromUtf32, FromWide
+    ////////////////////////////////////////////////////////////
+    static String FromUtf8(iterator begin, iterator end) {
+        return FromUtf8(begin->begin, end->end);
+    }
+
+    ////////////////////////////////////////////////////////////
+    /// @brief Create a new String from a UTF-8 encoded string
+    ///
     /// The iterators must point to an object of type char8
     ///
     /// @param begin Pointer to the beginning of the UTF-8 sequence
@@ -297,14 +314,6 @@ public:
     static String FromWide(Iterator begin, Iterator end) {
         return FromWide(const_cast<const wchar*>(&(*begin)), const_cast<const wchar*>(&(*end)));
     }
-
-    ////////////////////////////////////////////////////////////
-    /// @brief Implicit conversion operator to const char* (UTF-8 string)
-    ///
-    /// @return UTF-8 underlying data
-    ///
-    ////////////////////////////////////////////////////////////
-    operator const char*() const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Explicit conversion operator to std::basic_string<char8>
@@ -463,7 +472,7 @@ public:
     ///
     /// @return Character at position \a index
     ////////////////////////////////////////////////////////////
-    char operator[](std::size_t index) const;
+    char8 operator[](size_type index) const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Overload of [] operator to access a character by its position
@@ -475,7 +484,7 @@ public:
     ///
     /// @return Reference to the character at position \a index
     ////////////////////////////////////////////////////////////
-    char& operator[](std::size_t index);
+    char8& operator[](size_type index);
 
     ////////////////////////////////////////////////////////////
     /// @brief Clear the string
@@ -493,7 +502,7 @@ public:
     ///
     /// @see IsEmpty
     ////////////////////////////////////////////////////////////
-    std::size_t getSize() const;
+    size_type getSize() const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Check whether the string is empty or not
@@ -513,7 +522,7 @@ public:
     /// @param position Position of the first character to erase
     /// @param count    Number of characters to erase
     ////////////////////////////////////////////////////////////
-    void erase(std::size_t position, std::size_t count = 1);
+    void erase(size_type position, size_type count = 1);
 
     ////////////////////////////////////////////////////////////
     /// @brief Insert one or more characters into the string
@@ -524,7 +533,7 @@ public:
     /// @param position Position of insertion
     /// @param str      Characters to insert
     ////////////////////////////////////////////////////////////
-    void insert(std::size_t position, const String& str);
+    void insert(size_type position, const String& str);
 
     ////////////////////////////////////////////////////////////
     /// @brief Find a sequence of one or more characters in
@@ -539,7 +548,7 @@ public:
     /// @return Position of \a str in the string, or String::InvalidPos
     ///         if not found
     ////////////////////////////////////////////////////////////
-    std::size_t find(const String& str, std::size_t start = 0) const;
+    size_type find(const String& str, size_type start = 0) const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Finds the first character equal to one of the
@@ -556,7 +565,7 @@ public:
     ///         in the string, or String::InvalidPos if not found
     ///
     ////////////////////////////////////////////////////////////
-    std::size_t findFirstOf(const String& str, std::size_t pos = 0) const;
+    size_type findFirstOf(const String& str, size_type pos = 0) const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Finds the last character equal to one of the
@@ -573,7 +582,7 @@ public:
     ///         in the string, or String::InvalidPos if not found
     ///
     ////////////////////////////////////////////////////////////
-    std::size_t findLastOf(const String& str, std::size_t pos = sInvalidPos) const;
+    size_type findLastOf(const String& str, size_type pos = sInvalidPos) const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Replace a SubString with another string
@@ -587,7 +596,7 @@ public:
     ///                    end of the string.
     /// @param replaceWith String that replaces the given SubString.
     ////////////////////////////////////////////////////////////
-    void replace(std::size_t position, std::size_t length, const String& replaceWith);
+    void replace(size_type position, size_type length, const String& replaceWith);
 
     ////////////////////////////////////////////////////////////
     /// @brief Replace all occurrences of an Unicode code point with other
@@ -628,7 +637,7 @@ public:
     ///
     /// @return String object containing a SubString of this object
     ////////////////////////////////////////////////////////////
-    String subString(std::size_t position, std::size_t length = sInvalidPos) const;
+    String subString(size_type position, size_type length = sInvalidPos) const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Get a pointer to the C-style array of characters

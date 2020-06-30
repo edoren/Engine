@@ -1,5 +1,6 @@
 #include <System/LogManager.hpp>
 #include <System/StringFormat.hpp>
+#include <System/StringView.hpp>
 #include <Util/Container/Vector.hpp>
 #include <Util/Function.hpp>
 
@@ -11,8 +12,8 @@ namespace engine {
 
 namespace {
 
-const String sTag("Vk_Context");
-const String sTagVkDebug("Vk_ValidationLayers");
+const StringView sTag("Vk_Context");
+const StringView sTagVkDebug("Vk_ValidationLayers");
 
 const uint32 sMaxUBODescriptorSets(10);
 const uint32 sMaxUBODynamicDescriptorSets(10);
@@ -373,9 +374,7 @@ bool Vk_Context::selectPhysicalDevice(VkPhysicalDevice& physicalDevice) {
     // uint32 patch_version = VK_VERSION_PATCH(properties.apiVersion);
 
     if (majorVersion < 1 && properties.limits.maxImageDimension2D < 4096) {
-        LogError(sTag,
-                 "Physical device {} doesn't support required "
-                 "parameters"_format(properties.deviceName));
+        LogError(sTag, "Physical device {} doesn't support required parameters", properties.deviceName);
         return false;
     }
 
@@ -392,18 +391,15 @@ bool Vk_Context::selectPhysicalDevice(VkPhysicalDevice& physicalDevice) {
 
     // Check that the avaliable extensions could be retreived
     if (result != VK_SUCCESS || extensionsCount == 0) {
-        LogError(sTag,
-                 "Error occurred during physical device {} extensions "
-                 "enumeration"_format(properties.deviceName));
+        LogError(sTag, "Error occurred during physical device {} extensions enumeration", properties.deviceName);
         return false;
     }
 
     // Check that all the required device extensions exists
     for (auto& mDeviceExtension : m_deviceExtensions) {
         if (!CheckExtensionAvailability(mDeviceExtension, availableExtensions)) {
-            LogError(sTag,
-                     "Physical device {} doesn't support extension "
-                     "named \"{}\""_format(properties.deviceName, mDeviceExtension));
+            LogError(sTag, "Physical device {} doesn't support extension named \"{}\"", properties.deviceName,
+                     mDeviceExtension);
             return false;
         }
     }
@@ -412,9 +408,7 @@ bool Vk_Context::selectPhysicalDevice(VkPhysicalDevice& physicalDevice) {
     uint32 queueFamiliesCount = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamiliesCount, nullptr);
     if (queueFamiliesCount == 0) {
-        LogError(sTag,
-                 "Physical device {} doesn't have any queue "
-                 "families"_format(properties.deviceName));
+        LogError(sTag, "Physical device {} doesn't have any queue families", properties.deviceName);
         return false;
     }
     Vector<VkQueueFamilyProperties> queueFamilyProperties(queueFamiliesCount);
@@ -432,9 +426,8 @@ bool Vk_Context::selectPhysicalDevice(VkPhysicalDevice& physicalDevice) {
     // If this device doesn't support queues with graphics and present
     // capabilities don't use it
     if (graphicsQueueFamilyIndex == UINT32_MAX) {
-        LogError(sTag,
-                 "Could not find queue family with required properties "
-                 "on physical device: {}"_format(properties.deviceName));
+        LogError(sTag, "Could not find queue family with required properties on physical device: {}",
+                 properties.deviceName);
         return false;
     }
 
@@ -469,12 +462,12 @@ bool Vk_Context::checkValidationLayerSupport() const {
     }
 
     Vector<const char*> availableLayerList = avaliableLayers.map([](const auto& layer) { return layer.layerName; });
-    LogInfo(sTag, "Available Layers: {}"_format(availableLayerList));
+    LogInfo(sTag, "Available Layers: {}", availableLayerList);
 
     // Check that all the validation layers exists
     for (const auto& requestedLayer : m_validationLayers) {
         if (!CheckLayerAvailability(requestedLayer, avaliableLayers)) {
-            LogError(sTag, "Could not find validation layer named: {}"_format(requestedLayer));
+            LogError(sTag, "Could not find validation layer named: {}", requestedLayer);
             return false;
         }
     }
@@ -508,9 +501,8 @@ bool Vk_Context::checkInstanceExtensionsSupport() const {
         x11_extension_to_ignore = "VK_KHR_xlib_surface";
     } else {
         LogError(sTag,
-                 "Neither the 'VK_KHR_xlib_surface' extension nor the "
-                 "'VK_KHR_xcb_surface' extension are supported by the "
-                 "current system.");
+                 "Neither the 'VK_KHR_xlib_surface' extension nor the 'VK_KHR_xcb_surface' extension are supported by "
+                 "the current system.");
         return false;
     }
 #endif
@@ -524,9 +516,7 @@ bool Vk_Context::checkInstanceExtensionsSupport() const {
         }
 #endif
         if (!CheckExtensionAvailability(instanceExtension, availableExtensions)) {
-            LogError(sTag,
-                     "Could not find instance extension "
-                     "named: {}"_format(instanceExtension));
+            LogError(sTag, "Could not find instance extension named: {}", instanceExtension);
             allExtensionsFound = false;
         }
     }

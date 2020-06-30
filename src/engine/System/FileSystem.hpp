@@ -3,6 +3,7 @@
 #include <Util/Prerequisites.hpp>
 
 #include <System/String.hpp>
+#include <System/StringView.hpp>
 #include <Util/Container/Vector.hpp>
 #include <Util/Singleton.hpp>
 
@@ -23,7 +24,7 @@ public:
     ///
     /// @return true if the file exist, false otherwise
     ////////////////////////////////////////////////////////////
-    bool fileExists(const String& filename) const;
+    bool fileExists(const StringView& filename) const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Load a file to the memory
@@ -54,7 +55,7 @@ public:
     ///
     /// @return String containing the executable directory
     ////////////////////////////////////////////////////////////
-    String executableDirectory() const;
+    const String& executableDirectory() const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Return a string representing the current working
@@ -88,7 +89,7 @@ public:
     ///
     /// @return true if the path is absolute, false otherwise
     ////////////////////////////////////////////////////////////
-    bool isAbsolutePath(const String& path) const;
+    bool isAbsolutePath(const StringView& path) const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Join two path components. The return value is
@@ -97,7 +98,7 @@ public:
     ///
     /// @return String concatenating the two paths components
     ////////////////////////////////////////////////////////////
-    String join(const String& left, const String& right) const;
+    String join(const StringView& left, const StringView& right) const;
 
     ////////////////////////////////////////////////////////////
     /// @brief Variadic version of the Join function that
@@ -107,7 +108,7 @@ public:
     ///         components
     ////////////////////////////////////////////////////////////
     template <typename... Args>
-    String join(const String& left, const String& right, Args... paths) const {
+    String join(const StringView& left, const StringView& right, Args... paths) const {
         return join(join(left, right), paths...);
     }
 

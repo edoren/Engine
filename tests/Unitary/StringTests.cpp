@@ -1,4 +1,4 @@
-#include "catch.hpp"
+#include <catch2/catch.hpp>
 
 #include <System/String.hpp>
 
@@ -6,11 +6,12 @@ using namespace engine;
 
 TEST_CASE("String from other encodings", "[String]") {
     SECTION("from Wide strings") {
-        const wchar* hello = L"HELLO WORLD";
-        String a = String(hello);
-        String b = String(std::wstring(hello));
-        String c = String::FromWide(hello, hello + wcslen(hello));
-        REQUIRE(a == u8"HELLO WORLD");
+        const wchar* elements = L"水、火、地、風、空";
+        String a = String(elements);
+        String b = String(std::wstring(elements));
+        String c = String::FromWide(elements, elements + wcslen(elements));
+        REQUIRE(a.getSize() == 9);
+        REQUIRE(a == u8"水、火、地、風、空");
         REQUIRE(a == b);
         REQUIRE(b == c);
     }
@@ -44,29 +45,29 @@ TEST_CASE("String from other encodings", "[String]") {
 }
 
 TEST_CASE("String to other encodings", "[String]") {
-    String hello = "HELLO WORLD";
+    String hello = "مرحبا بالعالم";  // "Hello World" in Arabic
     String smiley = u8"\U0001F60A";
 
     SECTION("to Wide strings") {
         std::wstring helloWide = hello.toWide();
-        REQUIRE(helloWide == L"HELLO WORLD");
+        REQUIRE(helloWide == L"مرحبا بالعالم");
     }
     SECTION("to UTF-8 strings") {
         const std::string& helloUtf8 = hello.toUtf8();
         const std::string& smileyUtf8 = smiley.toUtf8();
-        REQUIRE(helloUtf8 == u8"HELLO WORLD");
+        REQUIRE(helloUtf8 == u8"مرحبا بالعالم");
         REQUIRE(smileyUtf8 == u8"\U0001F60A");
     }
     SECTION("to UTF-16 strings") {
         std::u16string helloUtf16 = hello.toUtf16();
         std::u16string smileyUtf16 = smiley.toUtf16();
-        REQUIRE(helloUtf16 == u"HELLO WORLD");
+        REQUIRE(helloUtf16 == u"مرحبا بالعالم");
         REQUIRE(smileyUtf16 == u"\U0001F60A");
     }
     SECTION("to UTF-32 strings") {
         std::u32string helloUtf32 = hello.toUtf32();
         std::u32string smileyUtf32 = smiley.toUtf32();
-        REQUIRE(helloUtf32 == U"HELLO WORLD");
+        REQUIRE(helloUtf32 == U"مرحبا بالعالم");
         REQUIRE(smileyUtf32 == U"\U0001F60A");
     }
 }
@@ -174,8 +175,8 @@ TEST_CASE("String::replace", "[String]") {
         REQUIRE(elements == "Water、火、Earth、風、Void");
     }
     SECTION("could replace the whole string") {
-        elements.replace(0, elements.getSize(), "Hello World");
-        REQUIRE(elements == "Hello World");
+        elements.replace(0, elements.getSize(), "مرحبا بالعالم");
+        REQUIRE(elements == "مرحبا بالعالم");
     }
     SECTION("must replace any Unicode code point with another") {
         // Replace U+3001 (、) with U+1F603 (😃)
@@ -187,5 +188,49 @@ TEST_CASE("String::replace", "[String]") {
         // Replace U+2D (-) with U+20 (Space)
         elements.replace('-', ' ');
         REQUIRE(elements == "水 火 地 風 空");
+    }
+}
+
+TEST_CASE("String::begin", "[String]") {
+    // "Water, Fire, Earth, Wind, Void"
+    String elements = "水、火、";
+    auto it0 = elements.begin();
+
+    SECTION("must be able to get the first character of the UTF-8 string") {
+        char32 codePoint0 = std::apply(utf::CodePointFromUTF<8, const char8*>, *it0);
+        REQUIRE(codePoint0 == 0x6C34);
+    }
+    SECTION("must be able to increment the UTF-8 iterator") {
+        auto it1 = it0++;
+        auto it2 = it0;
+        auto it3 = ++it0;
+        auto it4 = it0 + 1;
+        auto it5 = it0;
+        char32 codePoint1 = std::apply(utf::CodePointFromUTF<8, const char8*>, *it1);
+        char32 codePoint2 = std::apply(utf::CodePointFromUTF<8, const char8*>, *it2);
+        char32 codePoint3 = std::apply(utf::CodePointFromUTF<8, const char8*>, *it3);
+        char32 codePoint4 = std::invoke(utf::CodePointFromUTF<8, const char8*>, it4->begin, it4->end);
+        char32 codePoint5 = std::invoke(utf::CodePointFromUTF<8, const char8*>, it5->begin, it5->end);
+        REQUIRE(codePoint1 == 0x6C34);
+        REQUIRE(codePoint2 == 0x3001);
+        REQUIRE(codePoint3 == 0x706B);
+        REQUIRE(codePoint4 == 0x3001);
+        REQUIRE(codePoint5 == 0x706B);
+    }
+    SECTION("must be able to iterate correctly through the UTF-8 string") {
+        size_t count = 0;
+        for (const auto& utfIt : elements) {
+            char32 codePoint = std::apply(utf::CodePointFromUTF<8, const char8*>, utfIt);
+            if (count == 0) {
+                REQUIRE(codePoint == 0x6C34);
+            } else if (count == 1) {
+                REQUIRE(codePoint == 0x3001);
+            } else if (count == 2) {
+                REQUIRE(codePoint == 0x706B);
+            } else if (count == 3) {
+                REQUIRE(codePoint == 0x3001);
+            }
+            count++;
+        }
     }
 }

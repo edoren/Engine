@@ -175,19 +175,25 @@ foreach(PLUGIN ${ENGINE_PLUGINS})
 endforeach()
 
 ###############################################################################
-## Tests
+## Integration Tests
 
 if(ENGINE_BUILD_TESTS)
     add_subdirectory(${TESTS_DIR})
+    set(CMAKE_XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "${APP_PACKAGE}")
+    set(CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "$ENV{DEVELOPMENT_TEAM_ID}")
+    set_target_properties(
+        ${APP_NAME}
+        PROPERTIES
+            XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path @executable_path/Frameworks @loader_path/Frameworks"
+    )
 endif()
 
-set(CMAKE_XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "${APP_PACKAGE}")
-set(CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "$ENV{DEVELOPMENT_TEAM_ID}")
-set_target_properties(
-    ${APP_NAME}
-    PROPERTIES
-        XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path @executable_path/Frameworks @loader_path/Frameworks"
-)
+###############################################################################
+## Unitary Tests
+
+if(OS_WINDOWS OR OS_LINUX OR OS_MACOS)
+    add_subdirectory(${TESTS_DIR}/Unitary)
+endif()
 
 ###############################################################################
 ## Documentation

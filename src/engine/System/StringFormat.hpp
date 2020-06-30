@@ -1,6 +1,7 @@
 #pragma once
 
 #include <System/String.hpp>
+#include <System/StringView.hpp>
 #include <Util/Prerequisites.hpp>
 
 #define FMT_HEADER_ONLY
@@ -23,7 +24,7 @@ struct UdlStringFormatProxy {
 
     template <typename... Args>
     String operator()(Args&&... args) const {
-        return String(fmt::format(str, std::forward<Args>(args)...));
+        return String(std::move(fmt::format(str, std::forward<Args>(args)...)));
     }
 };
 

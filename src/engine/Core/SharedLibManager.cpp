@@ -1,11 +1,13 @@
 #include <Core/SharedLibManager.hpp>
+
 #include <System/LogManager.hpp>
+#include <System/StringView.hpp>
 
 namespace engine {
 
 namespace {
 
-const String sTag("SharedLibManager");
+const StringView sTag("SharedLibManager");
 
 }  // namespace
 
@@ -48,7 +50,7 @@ SharedLibrary* SharedLibManager::load(const String& name) {
         return result.second ? &(result.first->second) : nullptr;
     }
     LogError(sTag, lib.getErrorString());
-    LogFatal(sTag, "Could not load SharedLibrary: " + name);
+    LogFatal(sTag, "Could not load SharedLibrary: {}", name);
 
     return nullptr;
 }
