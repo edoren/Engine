@@ -16,19 +16,14 @@ class OPENGL_PLUGIN_API GL_Plugin : public Plugin {
 public:
     GL_Plugin();
 
-    /// @copydoc Plugin::getName
     const String& getName() const override;
 
-    /// @copydoc Plugin::install
     void install() override;
 
-    /// @copydoc Plugin::initialize
     void initialize() override;
 
-    /// @copydoc Plugin::shutdown
     void shutdown() override;
 
-    /// @copydoc Plugin::uninstall
     void uninstall() override;
 
 protected:

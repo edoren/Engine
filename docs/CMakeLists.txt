@@ -9,9 +9,14 @@ set(DOXYGEN_CONFIGURED_INPUT "${DOXYGEN_OUTPUT_DIR}/doxyfile")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/doxyfile.in"
                ${DOXYGEN_CONFIGURED_INPUT} @ONLY)
 
-# Create the target
-add_custom_target(Documentation ALL
+# Run the generator
+execute_process(COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_CONFIGURED_INPUT}
+                WORKING_DIRECTORY ${DOXYGEN_INPUT_DIR})
+
+# Create a custom target to rebuild the docs
+add_custom_target(Documentation
                   COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_CONFIGURED_INPUT}
                   WORKING_DIRECTORY ${DOXYGEN_INPUT_DIR})
+
 
 set_target_properties(Documentation PROPERTIES FOLDER "Documentation")

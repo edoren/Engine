@@ -18,9 +18,9 @@ public:
 
     Time(const Time& other);
 
-    ////////////////////////////////////////////////////////////
-    /// Static class methods
-    ////////////////////////////////////////////////////////////
+    /**
+     * Static class methods
+     */
     static Time FromNanoseconds(int64 nanoseconds);
 
     static Time FromMicroseconds(int64 microseconds);
@@ -33,9 +33,9 @@ public:
 
     static Time FromHours(float hours);
 
-    ////////////////////////////////////////////////////////////
-    /// Class methods
-    ////////////////////////////////////////////////////////////
+    /**
+     * Class methods
+     */
     int64 asNanoseconds() const;
 
     int64 asMicroseconds() const;
@@ -48,9 +48,9 @@ public:
 
     float asHours() const;
 
-    ////////////////////////////////////////////////////////////
-    /// Operator overload
-    ////////////////////////////////////////////////////////////
+    /**
+     * Operator overload
+     */
     friend ENGINE_API bool operator==(const Time& left, const Time& right);
 
     friend ENGINE_API bool operator!=(const Time& left, const Time& right);
