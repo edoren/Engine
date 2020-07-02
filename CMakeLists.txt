@@ -65,7 +65,8 @@ endif()
 set(ENGINE_NAME Engine)
 
 option(ENGINE_BUILD_STATIC "Build the Engine as an static library" OFF)
-option(ENGINE_BUILD_TESTS "Build the Engine test projects" ON)
+option(ENGINE_BUILD_INTEGRATION_TESTS "Build the Engine test projects" ON)
+option(ENGINE_BUILD_UNITARY_TESTS "Build the Engine test projects" ON)
 option(ENGINE_BUILD_DOCS "Build the Engine documentation (Requires Doxygen)" OFF)
 
 if(ENGINE_BUILD_STATIC)
@@ -177,7 +178,7 @@ endforeach()
 ###############################################################################
 ## Integration Tests
 
-if(ENGINE_BUILD_TESTS)
+if(ENGINE_BUILD_INTEGRATION_TESTS)
     add_subdirectory(${TESTS_DIR})
     set(CMAKE_XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "${APP_PACKAGE}")
     set(CMAKE_XCODE_ATTRIBUTE_DEVELOPMENT_TEAM "$ENV{DEVELOPMENT_TEAM_ID}")
@@ -191,8 +192,10 @@ endif()
 ###############################################################################
 ## Unitary Tests
 
-if(OS_WINDOWS OR OS_LINUX OR OS_MACOS)
-    add_subdirectory(${TESTS_DIR}/Unitary)
+if(ENGINE_BUILD_UNITARY_TESTS)
+    if(OS_WINDOWS OR OS_LINUX OR OS_MACOS)
+        add_subdirectory(${TESTS_DIR}/Unitary)
+    endif()
 endif()
 
 ###############################################################################
