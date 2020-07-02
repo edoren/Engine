@@ -17,8 +17,14 @@ public:
 
     ~GL_TextureManager() override;
 
+    /**
+     * @copydoc Main::GetInstance
+     */
     static GL_TextureManager& GetInstance();
 
+    /**
+     * @copydoc Main::GetInstance
+     */
     static GL_TextureManager* GetInstancePtr();
 
 protected:

@@ -28,8 +28,14 @@ public:
 
     Vk_Shader* getActiveShader();
 
+    /**
+     * @copydoc Main::GetInstance
+     */
     static Vk_ShaderManager& GetInstance();
 
+    /**
+     * @copydoc Main::GetInstance
+     */
     static Vk_ShaderManager* GetInstancePtr();
 
 protected:

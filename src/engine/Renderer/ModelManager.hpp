@@ -29,7 +29,14 @@ public:
     void unload(Model* model);
     void unloadFromFile(const String& basename);
 
+    /**
+     * @copydoc Main::GetInstance
+     */
     static ModelManager& GetInstance();
+
+    /**
+     * @copydoc Main::GetInstance
+     */
     static ModelManager* GetInstancePtr();
 
     virtual std::unique_ptr<Mesh> createMesh() = 0;  // TODO: protected

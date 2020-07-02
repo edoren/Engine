@@ -19,8 +19,14 @@ public:
 
     ~Vk_ModelManager() override;
 
+    /**
+     * @copydoc Main::GetInstance
+     */
     static Vk_ModelManager& GetInstance();
 
+    /**
+     * @copydoc Main::GetInstance
+     */
     static Vk_ModelManager* GetInstancePtr();
 
 protected:

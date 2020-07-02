@@ -28,8 +28,14 @@ public:
 
     GL_Shader* getActiveShader();
 
+    /**
+     * @copydoc Main::GetInstance
+     */
     static GL_ShaderManager& GetInstance();
 
+    /**
+     * @copydoc Main::GetInstance
+     */
     static GL_ShaderManager* GetInstancePtr();
 
 protected:

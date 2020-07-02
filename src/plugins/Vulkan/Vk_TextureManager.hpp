@@ -25,8 +25,14 @@ public:
 
     Vk_Texture2D* getActiveTexture2D();
 
+    /**
+     * @copydoc Main::GetInstance
+     */
     static Vk_TextureManager& GetInstance();
 
+    /**
+     * @copydoc Main::GetInstance
+     */
     static Vk_TextureManager* GetInstancePtr();
 
 protected:
