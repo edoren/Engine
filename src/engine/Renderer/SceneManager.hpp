@@ -26,7 +26,14 @@ public:
 
     Scene* getActiveScene();
 
+    /**
+     * @copydoc Main::GetInstance
+     */
     static SceneManager& GetInstance();
+
+    /**
+     * @copydoc Main::GetInstance
+     */
     static SceneManager* GetInstancePtr();
 
 private:
