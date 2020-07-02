@@ -148,6 +148,10 @@ String String::FromUtf8(const char8* begin, const char8* end) {
     return string;
 }
 
+String String::FromUtf8(iterator begin, iterator end) {
+    return FromUtf8(begin.getPtr(), end.getPtr());
+}
+
 String String::FromUtf16(const char16* begin, const char16* end) {
     String string;
     utf::UtfToUtf<16, 8>(begin, end, &string.m_string);
@@ -239,12 +243,18 @@ String& String::operator+=(char8 right) {
     return *this;
 }
 
-char8 String::operator[](std::size_t index) const {
-    return m_string[index];
+String& String::operator+=(const utf::CodeUnit<8>& right) {
+    // TODO: Missing test
+    m_string.reserve(m_string.size() + right.getSize());
+    for (auto data : right) {
+        m_string.push_back(static_cast<char8>(data));
+    }
+    return *this;
 }
 
-char8& String::operator[](std::size_t index) {
-    return m_string[index];
+utf::CodeUnit<8> String::operator[](std::size_t index) const {
+    // TODO: throw error
+    return (begin() + index)->getUnit();
 }
 
 void String::clear() {

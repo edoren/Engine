@@ -45,7 +45,7 @@ TEST_CASE("String from other encodings", "[String]") {
 }
 
 TEST_CASE("String to other encodings", "[String]") {
-    String hello = "مرحبا بالعالم";  // "Hello World" in Arabic
+    String hello = u8"مرحبا بالعالم";  // "Hello World" in Arabic
     String smiley = u8"\U0001F60A";
 
     SECTION("to Wide strings") {
@@ -191,13 +191,13 @@ TEST_CASE("String::replace", "[String]") {
     }
 }
 
-TEST_CASE("String::begin", "[String]") {
+TEST_CASE("String::iterator", "[String]") {
     // "Water, Fire, Earth, Wind, Void"
     String elements = "水、火、";
     auto it0 = elements.begin();
 
-    SECTION("must be able to get the first character of the UTF-8 string") {
-        char32 codePoint0 = std::apply(utf::CodePointFromUTF<8, const char8*>, *it0);
+    SECTION("begin() must be able to get the first character of the UTF-8 string") {
+        char32 codePoint0 = it0->getUnit().getCodePoint();
         REQUIRE(codePoint0 == 0x6C34);
     }
     SECTION("must be able to increment the UTF-8 iterator") {
@@ -206,21 +206,28 @@ TEST_CASE("String::begin", "[String]") {
         auto it3 = ++it0;
         auto it4 = it0 + 1;
         auto it5 = it0;
-        char32 codePoint1 = std::apply(utf::CodePointFromUTF<8, const char8*>, *it1);
-        char32 codePoint2 = std::apply(utf::CodePointFromUTF<8, const char8*>, *it2);
-        char32 codePoint3 = std::apply(utf::CodePointFromUTF<8, const char8*>, *it3);
-        char32 codePoint4 = std::invoke(utf::CodePointFromUTF<8, const char8*>, it4->begin, it4->end);
-        char32 codePoint5 = std::invoke(utf::CodePointFromUTF<8, const char8*>, it5->begin, it5->end);
-        REQUIRE(codePoint1 == 0x6C34);
-        REQUIRE(codePoint2 == 0x3001);
-        REQUIRE(codePoint3 == 0x706B);
-        REQUIRE(codePoint4 == 0x3001);
-        REQUIRE(codePoint5 == 0x706B);
+        auto codeUnit1 = it1->getUnit();
+        auto codeUnit2 = it2->getUnit();
+        auto codeUnit3 = it3->getUnit();
+        auto codeUnit4 = it4->getUnit();
+        auto codeUnit5 = it5->getUnit();
+        REQUIRE(codeUnit1.getCodePoint() == 0x6C34);
+        REQUIRE(codeUnit2.getCodePoint() == 0x3001);
+        REQUIRE(codeUnit3.getCodePoint() == 0x706B);
+        REQUIRE(codeUnit4.getCodePoint() == 0x3001);
+        REQUIRE(codeUnit5.getCodePoint() == 0x706B);
+    }
+    SECTION("must be able to increment the UTF-8 iterator") {
+        using data_type = std::decay_t<decltype(elements[0].getData())>;
+        REQUIRE(elements[0].getData() == data_type({0xE6, 0xB0, 0xB4}));
+        REQUIRE(elements[1].getData() == data_type({0xE3, 0x80, 0x81}));
+        REQUIRE(elements[2].getData() == data_type({0xE7, 0x81, 0xAB}));
+        REQUIRE(elements[3].getData() == data_type({0xE3, 0x80, 0x81}));
     }
     SECTION("must be able to iterate correctly through the UTF-8 string") {
         size_t count = 0;
         for (const auto& utfIt : elements) {
-            char32 codePoint = std::apply(utf::CodePointFromUTF<8, const char8*>, utfIt);
+            char32 codePoint = utfIt.getUnit().getCodePoint();
             if (count == 0) {
                 REQUIRE(codePoint == 0x6C34);
             } else if (count == 1) {
@@ -232,5 +239,17 @@ TEST_CASE("String::begin", "[String]") {
             }
             count++;
         }
+    }
+}
+
+TEST_CASE("String::operator[]", "[String]") {
+    // "Water, Fire, Earth, Wind, Void"
+    String elements = "水、火";
+
+    SECTION("must be able to access any code unit in the UTF-8 String") {
+        using data_type = std::decay_t<decltype(elements[0].getData())>;
+        REQUIRE(elements[0].getData() == data_type({0xE6, 0xB0, 0xB4}));
+        REQUIRE(elements[1].getData() == data_type({0xE3, 0x80, 0x81}));
+        REQUIRE(elements[2].getData() == data_type({0xE7, 0x81, 0xAB}));
     }
 }
