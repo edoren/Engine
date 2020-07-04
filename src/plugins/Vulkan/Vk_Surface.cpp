@@ -4,7 +4,7 @@
 #include "Vk_Context.hpp"
 #include "Vk_Surface.hpp"
 
-namespace engine {
+namespace engine::plugin::vulkan {
 
 namespace {
 
@@ -46,4 +46,4 @@ VkSurfaceKHR& Vk_Surface::getHandle() {
     return m_handle;
 }
 
-}  // namespace engine
+}  // namespace engine::plugin::vulkan

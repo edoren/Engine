@@ -14,14 +14,6 @@ const StringView sTag("SharedLibManager");
 template <>
 SharedLibManager* Singleton<SharedLibManager>::sInstance = nullptr;
 
-SharedLibManager& SharedLibManager::GetInstance() {
-    return Singleton<SharedLibManager>::GetInstance();
-}
-
-SharedLibManager* SharedLibManager::GetInstancePtr() {
-    return Singleton<SharedLibManager>::GetInstancePtr();
-}
-
 SharedLibManager::SharedLibManager() = default;
 
 SharedLibManager::~SharedLibManager() {

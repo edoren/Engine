@@ -7,7 +7,7 @@
 #include "Vk_Dependencies.hpp"
 #include "Vk_VulkanParameters.hpp"
 
-namespace engine {
+namespace engine::plugin::vulkan {
 
 class VULKAN_PLUGIN_API Vk_Context : public Singleton<Vk_Context> {
 public:
@@ -31,16 +31,6 @@ public:
     VkDescriptorPool& getUboDescriptorPool();
 
     const VkPhysicalDeviceFeatures& getEnabledFeatures();
-
-    /**
-     * @copydoc Main::GetInstance
-     */
-    static Vk_Context& GetInstance();
-
-    /**
-     * @copydoc Main::GetInstance
-     */
-    static Vk_Context* GetInstancePtr();
 
 private:
     bool createInstance();
@@ -76,4 +66,7 @@ private:
     Vector<const char*> m_deviceExtensions;
 };
 
-}  // namespace engine
+}  // namespace engine::plugin::vulkan
+
+template<>
+engine::plugin::vulkan::Vk_Context* engine::Singleton<engine::plugin::vulkan::Vk_Context>::sInstance;

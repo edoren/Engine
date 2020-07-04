@@ -9,7 +9,7 @@
 
 #include <utility>
 
-namespace engine {
+namespace engine::plugin::vulkan {
 
 class VULKAN_PLUGIN_API Vk_Mesh : public Mesh {
 public:
@@ -30,4 +30,4 @@ private:
     Vk_Buffer m_indexBuffer;
 };
 
-}  // namespace engine
+}  // namespace engine::plugin::vulkan

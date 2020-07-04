@@ -6,7 +6,7 @@
 
 #include "Vk_Context.hpp"
 
-namespace engine {
+namespace engine::plugin::vulkan {
 
 namespace {
 
@@ -120,4 +120,4 @@ bool Vk_Utilities::CreateVulkanFence(VkFenceCreateFlags flags, VkFence* fence) {
     return true;
 }
 
-}  // namespace engine
+}  // namespace engine::plugin::vulkan

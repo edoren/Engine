@@ -46,16 +46,6 @@ public:
 
     Texture2D* getActiveTexture2D();
 
-    /**
-     * @copydoc Main::GetInstance
-     */
-    static TextureManager& GetInstance();
-
-    /**
-     * @copydoc Main::GetInstance
-     */
-    static TextureManager* GetInstancePtr();
-
 protected:
     virtual std::unique_ptr<Texture2D> createTexture2D() = 0;
     virtual void useTexture2D(Texture2D* texture) = 0;
@@ -63,5 +53,8 @@ protected:
     Texture2D* m_activeTexture;
     std::map<String, std::unique_ptr<Texture2D>> m_textures;
 };
+
+template<>
+TextureManager* Singleton<TextureManager>::sInstance;
 
 }  // namespace engine

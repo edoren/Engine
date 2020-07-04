@@ -51,16 +51,6 @@ public:
 
     Shader* getActiveShader();
 
-    /**
-     * @copydoc Main::GetInstance
-     */
-    static ShaderManager& GetInstance();
-
-    /**
-     * @copydoc Main::GetInstance
-     */
-    static ShaderManager* GetInstancePtr();
-
 protected:
     virtual std::unique_ptr<Shader> createShader() = 0;
 
@@ -71,5 +61,8 @@ protected:
     Shader* m_activeShader;
     std::map<String, std::unique_ptr<Shader>> m_shaders;
 };
+
+template<>
+ShaderManager* Singleton<ShaderManager>::sInstance;
 
 }  // namespace engine

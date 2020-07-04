@@ -4,7 +4,7 @@
 
 #include <memory>
 
-namespace engine {
+namespace engine::plugin::opengl {
 
 namespace {
 
@@ -22,4 +22,4 @@ extern "C" void OPENGL_PLUGIN_API StopPlugin(void) {
     sPlugin.reset();
 }
 
-}  // namespace engine
+}  // namespace engine::plugin::opengl

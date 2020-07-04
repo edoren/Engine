@@ -46,16 +46,6 @@ public:
         return m_exitRequested;
     }
 
-    /**
-     * @copydoc Main::GetInstance
-     */
-    static InputManager& GetInstance();
-
-    /**
-     * @copydoc Main::GetInstance
-     */
-    static InputManager* GetInstancePtr();
-
     Signal<const math::ivec2&> onWindowResized;
     Signal<> onWindowMinimized;
     Signal<> onWindowRestored;
@@ -71,5 +61,8 @@ private:
     std::map<int, Button> m_buttonMap;
     math::ivec2 m_mousewheelDelta;
 };
+
+template<>
+InputManager* Singleton<InputManager>::sInstance;
 
 }  // namespace engine

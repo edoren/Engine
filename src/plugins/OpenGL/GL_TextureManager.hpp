@@ -7,9 +7,7 @@
 
 #include <memory>
 
-namespace engine {
-
-class String;
+namespace engine::plugin::opengl {
 
 class OPENGL_PLUGIN_API GL_TextureManager : public TextureManager {
 public:
@@ -18,12 +16,12 @@ public:
     ~GL_TextureManager() override;
 
     /**
-     * @copydoc Main::GetInstance
+     * @copydoc TextureManager::GetInstance
      */
     static GL_TextureManager& GetInstance();
 
     /**
-     * @copydoc Main::GetInstance
+     * @copydoc TextureManager::GetInstance
      */
     static GL_TextureManager* GetInstancePtr();
 
@@ -32,4 +30,4 @@ protected:
     void useTexture2D(Texture2D* texture) override;
 };
 
-}  // namespace engine
+}  // namespace engine::plugin::opengl

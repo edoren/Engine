@@ -13,3 +13,8 @@
 #else
     #define OPENGL_USE_GL
 #endif
+
+/**
+ * @brief Namespace that contains the OpenGL renderer plugin
+ */
+namespace engine::plugin::opengl {}

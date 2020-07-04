@@ -6,7 +6,7 @@
 #include "Vk_Config.hpp"
 #include "Vk_Dependencies.hpp"
 
-namespace engine {
+namespace engine::plugin::vulkan {
 
 class VULKAN_PLUGIN_API Vk_VertexLayout : public VertexLayout {
 public:
@@ -17,4 +17,4 @@ public:
     Vector<VkVertexInputAttributeDescription> getVertexInputAttributeDescription(uint32 bufferBindId) const;
 };
 
-}  // namespace engine
+}  // namespace engine::plugin::vulkan

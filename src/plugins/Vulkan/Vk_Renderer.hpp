@@ -8,7 +8,7 @@
 
 #include <memory>
 
-namespace engine {
+namespace engine::plugin::vulkan {
 
 class VULKAN_PLUGIN_API Vk_Renderer : public Renderer {
 public:
@@ -28,4 +28,4 @@ private:
     std::unique_ptr<Vk_Context> m_context;
 };
 
-}  // namespace engine
+}  // namespace engine::plugin::vulkan

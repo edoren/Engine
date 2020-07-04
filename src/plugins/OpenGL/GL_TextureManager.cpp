@@ -5,7 +5,7 @@
 
 #include <memory>
 
-namespace engine {
+namespace engine::plugin::opengl {
 
 namespace {
 
@@ -42,4 +42,4 @@ void GL_TextureManager::useTexture2D(Texture2D* texture) {
     castedTexture->use();
 }
 
-}  // namespace engine
+}  // namespace engine::plugin::opengl

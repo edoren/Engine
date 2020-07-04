@@ -5,7 +5,7 @@
 
 #include "Vk_VulkanParameters.hpp"
 
-namespace engine {
+namespace engine::plugin::vulkan {
 
 class VULKAN_PLUGIN_API Vk_Surface {
 public:
@@ -21,4 +21,4 @@ private:
     VkSurfaceKHR m_handle;
 };
 
-}  // namespace engine
+}  // namespace engine::plugin::vulkan

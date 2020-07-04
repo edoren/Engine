@@ -7,3 +7,8 @@
 #else
     #define VULKAN_PLUGIN_API ENGINE_SYMBOL_IMPORTS
 #endif
+
+/**
+ * @brief Namespace that contains the Vulkan renderer plugin
+ */
+namespace engine::plugin::vulkan {}

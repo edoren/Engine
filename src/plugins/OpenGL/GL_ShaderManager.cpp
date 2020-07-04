@@ -7,7 +7,7 @@
 #include <map>
 #include <memory>
 
-namespace engine {
+namespace engine::plugin::opengl {
 
 namespace {
 
@@ -69,4 +69,4 @@ const String& GL_ShaderManager::getShaderFolder() const {
     return sShaderFolder;
 }
 
-}  // namespace engine
+}  // namespace engine::plugin::opengl

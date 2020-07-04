@@ -8,9 +8,7 @@
 #include <map>
 #include <memory>
 
-namespace engine {
-
-class String;
+namespace engine::plugin::vulkan {
 
 class Vk_Shader;
 
@@ -29,12 +27,12 @@ public:
     Vk_Shader* getActiveShader();
 
     /**
-     * @copydoc Main::GetInstance
+     * @copydoc ShaderManager::GetInstance
      */
     static Vk_ShaderManager& GetInstance();
 
     /**
-     * @copydoc Main::GetInstance
+     * @copydoc ShaderManager::GetInstance
      */
     static Vk_ShaderManager* GetInstancePtr();
 
@@ -46,4 +44,4 @@ protected:
     const String& getShaderFolder() const override;
 };
 
-}  // namespace engine
+}  // namespace engine::plugin::vulkan

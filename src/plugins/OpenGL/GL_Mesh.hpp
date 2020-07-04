@@ -9,7 +9,7 @@
 
 #include <utility>
 
-namespace engine {
+namespace engine::plugin::opengl {
 
 class OPENGL_PLUGIN_API GL_Mesh : public Mesh {
 public:
@@ -29,4 +29,4 @@ private:
     unsigned int m_vao, m_vbo, m_ebo;
 };
 
-}  // namespace engine
+}  // namespace engine::plugin::opengl

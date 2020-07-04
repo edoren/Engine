@@ -8,7 +8,7 @@
 #include <array>
 #include <string>
 
-namespace engine {
+namespace engine::plugin::opengl {
 
 namespace {
 
@@ -315,4 +315,4 @@ GLint GL_Shader::getUniformLocation(const String& name) {
     return location;
 }
 
-}  // namespace engine
+}  // namespace engine::plugin::opengl

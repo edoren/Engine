@@ -1,6 +1,6 @@
 #pragma once
 
-namespace engine {
+namespace engine::plugin::opengl {
 
 // The error checking function used by the GL_CALL macro above,
 // uses glGetError() to check for errors.
@@ -23,4 +23,4 @@ void LogGLError(const char* file, int line, const char* call);
     #define GL_CALL(call) call
 #endif
 
-}  // namespace engine
+}  // namespace engine::plugin::opengl

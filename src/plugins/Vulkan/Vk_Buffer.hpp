@@ -5,7 +5,7 @@
 #include "Vk_Config.hpp"
 #include "Vk_Dependencies.hpp"
 
-namespace engine {
+namespace engine::plugin::vulkan {
 
 class VULKAN_PLUGIN_API Vk_Buffer {
 public:
@@ -27,4 +27,4 @@ private:
     VkDeviceSize m_size;
 };
 
-}  // namespace engine
+}  // namespace engine::plugin::vulkan

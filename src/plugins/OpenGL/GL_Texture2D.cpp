@@ -1,7 +1,7 @@
 #include "GL_Texture2D.hpp"
 #include "GL_Utilities.hpp"
 
-namespace engine {
+namespace engine::plugin::opengl {
 
 GL_Texture2D::GL_Texture2D() : m_texture(0) {
     GL_CALL(glGenTextures(1, &m_texture));
@@ -36,4 +36,4 @@ void GL_Texture2D::use() {
     GL_CALL(glBindTexture(GL_TEXTURE_2D, m_texture));
 }
 
-}  // namespace engine
+}  // namespace engine::plugin::opengl

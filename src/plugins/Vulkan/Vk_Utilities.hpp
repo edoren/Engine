@@ -3,7 +3,7 @@
 #include "Vk_Config.hpp"
 #include "Vk_Dependencies.hpp"
 
-namespace engine {
+namespace engine::plugin::vulkan {
 
 class VULKAN_PLUGIN_API Vk_Utilities {
 public:
@@ -19,4 +19,4 @@ public:
     static bool CreateVulkanFence(VkFenceCreateFlags flags, VkFence* fence);
 };
 
-}  // namespace engine
+}  // namespace engine::plugin::vulkan

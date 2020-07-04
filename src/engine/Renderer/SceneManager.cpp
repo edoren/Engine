@@ -22,14 +22,6 @@ uint32 sSceneIndex(0);
 template <>
 SceneManager* Singleton<SceneManager>::sInstance = nullptr;
 
-SceneManager& SceneManager::GetInstance() {
-    return Singleton<SceneManager>::GetInstance();
-}
-
-SceneManager* SceneManager::GetInstancePtr() {
-    return Singleton<SceneManager>::GetInstancePtr();
-}
-
 SceneManager::SceneManager() = default;
 
 SceneManager::~SceneManager() = default;

@@ -4,7 +4,7 @@
 #include <Core/Main.hpp>
 #include <System/String.hpp>
 
-namespace engine {
+namespace engine::plugin::vulkan {
 
 namespace {
 
@@ -32,4 +32,4 @@ void Vk_Plugin::uninstall() {
     m_renderer = nullptr;
 }
 
-}  // namespace engine
+}  // namespace engine::plugin::vulkan

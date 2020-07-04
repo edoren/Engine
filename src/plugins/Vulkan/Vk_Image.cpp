@@ -8,7 +8,7 @@
 #include "Vk_TextureManager.hpp"
 #include "Vk_Utilities.hpp"
 
-namespace engine {
+namespace engine::plugin::vulkan {
 
 namespace {
 
@@ -147,4 +147,4 @@ VkImageView& Vk_Image::getView() {
     return m_view;
 }
 
-}  // namespace engine
+}  // namespace engine::plugin::vulkan

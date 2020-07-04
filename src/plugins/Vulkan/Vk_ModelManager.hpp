@@ -7,9 +7,7 @@
 
 #include <memory>
 
-namespace engine {
-
-class String;
+namespace engine::plugin::vulkan {
 
 class Vk_Texture2D;
 
@@ -20,12 +18,12 @@ public:
     ~Vk_ModelManager() override;
 
     /**
-     * @copydoc Main::GetInstance
+     * @copydoc ModelManager::GetInstance
      */
     static Vk_ModelManager& GetInstance();
 
     /**
-     * @copydoc Main::GetInstance
+     * @copydoc ModelManager::GetInstance
      */
     static Vk_ModelManager* GetInstancePtr();
 
@@ -34,4 +32,4 @@ protected:
     std::unique_ptr<Mesh> createMesh() override;
 };
 
-}  // namespace engine
+}  // namespace engine::plugin::vulkan

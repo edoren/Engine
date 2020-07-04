@@ -29,7 +29,7 @@ protected:
      *
      * @remark This is called each frame
      *
-     * @see GetDeltaTime
+     * @see getDeltaTime
      */
     virtual void update() = 0;
 

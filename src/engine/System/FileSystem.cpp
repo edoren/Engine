@@ -31,14 +31,6 @@ String sExecutableDirectory;
 template <>
 FileSystem* Singleton<FileSystem>::sInstance = nullptr;
 
-FileSystem& FileSystem::GetInstance() {
-    return Singleton<FileSystem>::GetInstance();
-}
-
-FileSystem* FileSystem::GetInstancePtr() {
-    return Singleton<FileSystem>::GetInstancePtr();
-}
-
 FileSystem::FileSystem() {
     m_searchPaths = {
 #if PLATFORM_IS(PLATFORM_ANDROID)

@@ -7,9 +7,7 @@
 
 #include <memory>
 
-namespace engine {
-
-class String;
+namespace engine::plugin::vulkan {
 
 class Vk_Texture2D;
 
@@ -26,12 +24,12 @@ public:
     Vk_Texture2D* getActiveTexture2D();
 
     /**
-     * @copydoc Main::GetInstance
+     * @copydoc TextureManager::GetInstance
      */
     static Vk_TextureManager& GetInstance();
 
     /**
-     * @copydoc Main::GetInstance
+     * @copydoc TextureManager::GetInstance
      */
     static Vk_TextureManager* GetInstancePtr();
 
@@ -47,4 +45,4 @@ private:
     VkDescriptorSetLayout m_descriptorSetLayout;
 };
 
-}  // namespace engine
+}  // namespace engine::plugin::vulkan

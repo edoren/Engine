@@ -5,7 +5,7 @@
 namespace engine {
 
 /**
- * @brief Plugin class to load component to the engine
+ * @brief Class to load component to the engine
  */
 class ENGINE_API Plugin {
 public:

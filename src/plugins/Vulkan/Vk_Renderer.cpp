@@ -3,7 +3,7 @@
 #include "Vk_ShaderManager.hpp"
 #include "Vk_TextureManager.hpp"
 
-namespace engine {
+namespace engine::plugin::vulkan {
 
 namespace {
 
@@ -52,4 +52,4 @@ const String& Vk_Renderer::getName() const {
     return sRendererName;
 }
 
-}  // namespace engine
+}  // namespace engine::plugin::vulkan

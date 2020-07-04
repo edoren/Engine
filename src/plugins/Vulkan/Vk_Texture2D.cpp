@@ -7,7 +7,7 @@
 #include "Vk_TextureManager.hpp"
 #include "Vk_Utilities.hpp"
 
-namespace engine {
+namespace engine::plugin::vulkan {
 
 namespace {
 
@@ -310,4 +310,4 @@ bool Vk_Texture2D::updateDescriptorSet() {
     return true;
 }
 
-}  // namespace engine
+}  // namespace engine::plugin::vulkan

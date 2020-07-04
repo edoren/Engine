@@ -8,7 +8,7 @@
 
 #include <memory>
 
-namespace engine {
+namespace engine::plugin::vulkan {
 
 namespace {
 
@@ -42,4 +42,4 @@ std::unique_ptr<Mesh> Vk_ModelManager::createMesh() {
     return std::make_unique<Vk_Mesh>();
 }
 
-}  // namespace engine
+}  // namespace engine::plugin::vulkan

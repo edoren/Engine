@@ -4,12 +4,13 @@
 
 #include "Vk_Config.hpp"
 
-namespace engine {
-
-class String;
+namespace engine::plugin::vulkan {
 
 class Vk_Renderer;
 
+/**
+ * @brief Vulkan plugin class
+ */
 class VULKAN_PLUGIN_API Vk_Plugin : public Plugin {
 public:
     Vk_Plugin();
@@ -28,4 +29,4 @@ protected:
     Vk_Renderer* m_renderer;
 };
 
-}  // namespace engine
+}  // namespace engine::plugin::vulkan

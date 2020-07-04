@@ -26,21 +26,14 @@ public:
 
     Scene* getActiveScene();
 
-    /**
-     * @copydoc Main::GetInstance
-     */
-    static SceneManager& GetInstance();
-
-    /**
-     * @copydoc Main::GetInstance
-     */
-    static SceneManager* GetInstancePtr();
-
 private:
     Scene* m_activeScene;
     std::map<String, Scene*> m_scenesNameMap;
     std::map<uint32, Scene*> m_scenesIndexMap;
     Vector<std::unique_ptr<Scene>> m_scenes;
 };
+
+template<>
+SceneManager* Singleton<SceneManager>::sInstance;
 
 }  // namespace engine

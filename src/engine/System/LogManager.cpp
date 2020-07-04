@@ -48,14 +48,6 @@ String DefaultLogCallback(LogPriority priority, const StringView& tag, const Str
 template <>
 LogManager* Singleton<LogManager>::sInstance = nullptr;
 
-LogManager& LogManager::GetInstance() {
-    return Singleton<LogManager>::GetInstance();
-}
-
-LogManager* LogManager::GetInstancePtr() {
-    return Singleton<LogManager>::GetInstancePtr();
-}
-
 LogManager::LogManager()
       : m_appName("Engine"),
         m_logFile("engine.log"),

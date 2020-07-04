@@ -7,7 +7,7 @@
 #include "Vk_Dependencies.hpp"
 #include "Vk_VulkanParameters.hpp"
 
-namespace engine {
+namespace engine::plugin::vulkan {
 
 class VULKAN_PLUGIN_API Vk_Image : private NonCopyable {
 public:
@@ -35,4 +35,4 @@ private:
     VkDeviceMemory m_memory;
 };
 
-}  // namespace engine
+}  // namespace engine::plugin::vulkan
