@@ -186,6 +186,7 @@ constexpr T NextUTF8(T begin, T end) {
         // 4-byte UTF-8 code point (began with 0b11110xxx)
         return s + 4;
     }
+
     if ((*s & 0xF0) == 0xE0) {
         // Verify out of range
         if ((s + 3) > end) {
@@ -210,6 +211,7 @@ constexpr T NextUTF8(T begin, T end) {
         // 3-byte UTF-8 code point (began with 0b1110xxxx)
         return s + 3;
     }
+
     if ((*s & 0xE0) == 0xC0) {
         // Verify out of range
         if ((s + 2) > end) {
@@ -237,10 +239,15 @@ constexpr T NextUTF8(T begin, T end) {
         // 2-byte UTF-8 code point (began with 0b110xxxxx)
         return s + 2;
     }
+
+    // 1-byte ascii (began with 0b0xxxxxxx)
     if ((*s & 0x80) == 0x00) {
-        // 1-byte ascii (began with 0b0xxxxxxx)
+        if ((s + 1) > end) {  // Verify out of range
+            return s;
+        }
         return s + 1;
     }
+
     // We have an invalid 0b1xxxxxxx UTF-8 code point entry
     return s;
 }
@@ -254,25 +261,30 @@ constexpr T NextUTF16(T begin, T end) {
                   "Iterator internal type has an invalid size");
 
     T s = begin;
+
+    // Check the range is between 0x0000 to 0xD7FF and 0xE000 to 0xFFFF
     if ((*s >= 0x0000 && *s <= 0xD7FF) || (*s >= 0xE000 && *s <= 0xFFFF)) {
+        if ((s + 1) > end) {  // Verify out of range
+            return s;
+        }
         return s + 1;
     }
+
     // Check the first 16 bit code unit to be 0b110110yyyyyyyyyy
     // Check the second 16 bit code unit to be 0b110111xxxxxxxxxx
     if ((*s & 0xFC00) == 0xD800 && (*(s + 1) & 0xFC00) == 0xDC00) {
-        // Verify out of range
-        if ((s + 2) > end) {
+        if ((s + 2) > end) {  // Verify out of range
             return s;
         }
-
         return s + 2;
     }
-    // We have an invalid UTF-16 code point ent
+
+    // We have an invalid UTF-16 code point entry
     return s;
 }
 
 template <typename T>
-constexpr T NextUTF32(T begin, T /*end*/) {
+constexpr T NextUTF32(T begin, T end) {
     static_assert(type::is_forward_iterator<T>::value, "Value should be a forward iterator");
     static_assert(std::is_integral<type::iterator_underlying_type_t<T>>::value,
                   "Iterator internal type should be an integer");
@@ -280,10 +292,17 @@ constexpr T NextUTF32(T begin, T /*end*/) {
                   "Iterator internal type has an invalid size");
 
     T s = begin;
+
     // Check that the first 11 bits are zero. 0b00000000000xxxxxxxxxxxxxxxxxxxxx
     if ((*s & 0xFFE00000) != 0) {
         return s;
     }
+
+    // Verify out of range
+    if ((s + 1) > end) {
+        return s;
+    }
+
     return s + 1;
 }
 
@@ -309,7 +328,7 @@ constexpr T PriorUTF8(T end, T begin) {
         }
     }
 
-    return begin;
+    return end;
 }
 
 template <typename T>
@@ -330,7 +349,7 @@ constexpr T PriorUTF16(T end, T begin) {
         return it - 1;
     }
 
-    return begin;
+    return end;
 }
 
 template <typename T>
@@ -348,31 +367,125 @@ constexpr T PriorUTF32(T end, T begin) {
 
 }  // namespace internal
 
-template <size_t Base, typename T, typename Ret, typename>
-constexpr void AppendToUtf(T codePoint, std::basic_string<Ret>* result) {
-    auto codeUnit = CodePointToUTF<Base>(codePoint);
-    result->reserve(result->size() + codeUnit.getSize());
-    for (auto val : codeUnit) {
-        *result += val;
+template <size_t Base>
+constexpr CodeUnit<Base>::CodeUnit(data_type data) : m_unit(std::move(data)) {}
+
+template <size_t Base>
+template <typename T, typename>
+constexpr CodeUnit<Base>::CodeUnit(T codePoint) : m_unit() {
+    if constexpr (Base == 8) {
+        *this = std::move(internal::CodePointToUTF8(codePoint));
+    } else if constexpr (Base == 16) {
+        *this = std::move(internal::CodePointToUTF16(codePoint));
+    } else if constexpr (Base == 32) {
+        *this = std::move(internal::CodePointToUTF32(codePoint));
+    } else {
+        static_assert((Base == 8) || (Base == 16) || (Base == 32),
+                      "Error invalid Base, it should be either 8, 16 or 32");
     }
+}
+
+template <size_t Base>
+template <typename T>
+constexpr CodeUnit<Base>::CodeUnit(const T* begin, const T* end) : CodeUnit(begin, (end - begin)) {}
+
+template <size_t Base>
+template <typename T>
+constexpr CodeUnit<Base>::CodeUnit(const T* begin, const size_t size) {
+    static_assert(sizeof(T) * 8 == Base, "Error invalid value, it should has the same value in bits as Base");
+
+    ENGINE_ASSERT(IsValidUTF<Base>(begin, begin + size), "Invalid UTF code unit");
+
+    if constexpr (Base == 8) {
+        ENGINE_ASSERT(size <= 4, "UTF-8 should have at least four 8 bit values");
+    } else if constexpr (Base == 16) {
+        ENGINE_ASSERT(size <= 2, "UTF-16 should have at least two 16 bit values");
+    } else if constexpr (Base == 32) {
+        ENGINE_ASSERT(size <= 1, "UTF-32 should have at least one 32 bit value");
+    }
+
+    m_unit.fill(0x0);
+    if (size != 0) {
+        std::memcpy(m_unit.data(), begin, sizeof(CodeUnit::value_type) * size);
+    }
+}
+
+template <size_t Base>
+constexpr char32 CodeUnit<Base>::getCodePoint() const {
+    const auto* begin = m_unit.data();
+    const auto* end = m_unit.data() + getSize();
+    return utf::CodePointFromUTF<Base>(begin, end);
+}
+
+template <size_t Base>
+constexpr const typename CodeUnit<Base>::value_type* CodeUnit<Base>::begin() const {
+    return m_unit.data();
+}
+
+template <size_t Base>
+constexpr const typename CodeUnit<Base>::value_type* CodeUnit<Base>::end() const {
+    return begin() + getSize();
+}
+
+template <size_t Base>
+constexpr const typename CodeUnit<Base>::data_type& CodeUnit<Base>::getData() const {
+    return m_unit;
+}
+
+template <size_t Base>
+constexpr size_t CodeUnit<Base>::getSize() const {
+    if constexpr (Base == 8) {
+        if ((m_unit[0] & 0x80) == 0x00) {
+            return 1;
+        }
+        if ((m_unit[0] & 0xE0) == 0xC0) {
+            return 2;
+        }
+        if ((m_unit[0] & 0xF0) == 0xE0) {
+            return 3;
+        }
+        ENGINE_ASSERT((m_unit[0] & 0xF8) == 0xF0, "Error getting UTF-8 size");
+        return 4;
+    } else if constexpr (Base == 16) {
+        if ((m_unit[0] & 0xFC00) == 0xD800) {
+            return 2;
+        }
+        return 1;
+    } else if constexpr (Base == 32) {
+        return m_unit.size();
+    }
+}
+
+template <size_t Base>
+constexpr bool CodeUnit<Base>::operator==(const CodeUnit& right) const {
+    return operator==(right.m_unit);
+}
+
+template <size_t Base>
+constexpr bool CodeUnit<Base>::operator==(const data_type& right) const {
+    return std::memcmp(m_unit.data(), right.data(), 4) == 0;
+}
+
+template <size_t Base>
+constexpr bool CodeUnit<Base>::operator==(char8 right) const {
+    return m_unit[0] == right;
 }
 
 template <size_t BaseFrom, size_t BaseTo, typename T, typename Ret, typename>
 constexpr void UtfToUtf(T begin, T end, std::basic_string<Ret>* result) {
     size_t sizeBytes = 0;
-    result->clear();
 
     ForEachUTF<BaseFrom>(begin, end, [&sizeBytes](auto codeUnitBegin, auto codeUnitEnd) {
         auto codePoint = CodePointFromUTF<BaseFrom>(codeUnitBegin, codeUnitEnd);
-        auto codeUnit = CodePointToUTF<BaseTo>(codePoint);
+        auto codeUnit = CodeUnit<BaseTo>(codePoint);
         sizeBytes += codeUnit.getSize();
     });
 
-    result->reserve(sizeBytes);
+    result->reserve(result->size() + sizeBytes);
 
     ForEachUTF<BaseFrom>(begin, end, [&result](auto codeUnitBegin, auto codeUnitEnd) {
         auto codePoint = CodePointFromUTF<BaseFrom>(codeUnitBegin, codeUnitEnd);
-        auto codeUnit = CodePointToUTF<BaseTo>(codePoint);
+        auto codeUnit = CodeUnit<BaseTo>(codePoint);
         for (auto val : codeUnit) {
             *result += val;
         }
@@ -394,20 +507,6 @@ constexpr char32 CodePointFromUTF(T begin, T end) {
 }
 
 template <size_t Base, typename T>
-constexpr CodeUnit<Base> CodePointToUTF(T codePoint) {
-    if constexpr (Base == 8) {
-        return internal::CodePointToUTF8(codePoint);
-    } else if constexpr (Base == 16) {
-        return internal::CodePointToUTF16(codePoint);
-    } else if constexpr (Base == 32) {
-        return internal::CodePointToUTF32(codePoint);
-    } else {
-        static_assert((Base == 8) || (Base == 16) || (Base == 32),
-                      "Error invalid Base, it should be either 8, 16 or 32");
-    }
-}
-
-template <size_t Base, typename T>
 constexpr T NextUTF(T begin, T end) {
     if constexpr (Base == 8) {
         return internal::NextUTF8(begin, end);
@@ -422,13 +521,13 @@ constexpr T NextUTF(T begin, T end) {
 }
 
 template <size_t Base, typename T>
-constexpr T PriorUTF(T begin, T end) {
+constexpr T PriorUTF(T end, T begin) {
     if constexpr (Base == 8) {
-        return internal::PriorUTF8(begin, end);
+        return internal::PriorUTF8(end, begin);
     } else if constexpr (Base == 16) {
-        return internal::PriorUTF16(begin, end);
+        return internal::PriorUTF16(end, begin);
     } else if constexpr (Base == 32) {
-        return internal::PriorUTF32(begin, end);
+        return internal::PriorUTF32(end, begin);
     } else {
         static_assert((Base == 8) || (Base == 16) || (Base == 32),
                       "Error invalid Base, it should be either 8, 16 or 32");
@@ -467,86 +566,11 @@ constexpr bool IsValidUTF(T begin, T end) {
     return ForEachUTF<Base>(begin, end, [](auto /*unused*/, auto /*unused*/) {}) == end;
 }
 
-template <size_t Base>
-template <typename T>
-constexpr CodeUnit<Base>::CodeUnit(const T* begin, const T* end) : CodeUnit(begin, (end - begin)) {}
-
-template <size_t Base>
-template <typename T>
-constexpr CodeUnit<Base>::CodeUnit(const T* begin, const size_t size) {
-    static_assert(sizeof(T) * 8 == Base, "Error invalid value, it should has the same value in bits as Base");
-
-    ENGINE_ASSERT(IsValidUTF<Base>(begin, begin + size), "Invalid UTF code unit");
-
-    if constexpr (Base == 8) {
-        ENGINE_ASSERT(size > 0 && size <= 4, "UTF-8 should have at least four 8 bit values");
-    } else if constexpr (Base == 16) {
-        ENGINE_ASSERT(size > 0 && size <= 2, "UTF-16 should have at least two 16 bit values");
-    } else if constexpr (Base == 32) {
-        ENGINE_ASSERT(size > 0 && size <= 1, "UTF-32 should have at least one 32 bit value");
-    }
-
-    unit.fill(0x0);
-    std::memcpy(unit.data(), begin, sizeof(CodeUnit::value_type) * size);
-}
-
-template <size_t Base>
-constexpr char32 CodeUnit<Base>::getCodePoint() const {
-    const auto* begin = unit.data();
-    const auto* end = unit.data() + getSize();
-    return utf::CodePointFromUTF<Base>(begin, end);
-}
-
-template <size_t Base>
-constexpr const typename CodeUnit<Base>::value_type* CodeUnit<Base>::begin() const {
-    return unit.data();
-}
-
-template <size_t Base>
-constexpr const typename CodeUnit<Base>::value_type* CodeUnit<Base>::end() const {
-    return begin() + getSize();
-}
-
-template <size_t Base>
-constexpr const typename CodeUnit<Base>::data_type& CodeUnit<Base>::getData() const {
-    return unit;
-}
-
-template <size_t Base>
-constexpr size_t CodeUnit<Base>::getSize() const {
-    for (size_t i = 0; i < unit.size(); i++) {
-        if (unit[i] == 0x0) {
-            return i;
-        }
-    }
-    return unit.size();
-}
-
-template <size_t Base>
-constexpr bool CodeUnit<Base>::operator==(const CodeUnit& right) const {
-    return operator==(right.unit);
-}
-
-template <size_t Base>
-constexpr bool CodeUnit<Base>::operator==(const data_type& right) const {
-    return std::memcmp(unit.data(), right.data(), 4) == 0;
-}
-
-template <size_t Base>
-constexpr bool CodeUnit<Base>::operator==(char8 right) const {
-    return unit[0] == right;
-}
-
-template <size_t Base>
-constexpr bool CodeUnit<Base>::operator!=(const CodeUnit& right) const {
-    return !(*this == right);
-}
-
 }  // namespace utf
 
 }  // namespace engine
 
-namespace std {
+// namespace std {
 
 // template <typename Func, size_t Base, typename T>
 // constexpr decltype(auto) apply(Func&& func, engine::utf::CodeUnit<Base> t) {
@@ -554,4 +578,4 @@ namespace std {
 //     return std::invoke(std::move(func), begin, end);
 // }
 
-}  // namespace std
+// }  // namespace std

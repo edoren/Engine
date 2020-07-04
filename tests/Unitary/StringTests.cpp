@@ -74,7 +74,7 @@ TEST_CASE("String to other encodings", "[String]") {
 
 TEST_CASE("String::find", "[String]") {
     // "Water, Fire, Earth, Wind, Void"
-    String elements = "水、火、地、風、空";
+    String elements = u8"水、火、地、風、空";
 
     SECTION("must be able to find any UTF-8 string") {
         size_t location = elements.find("風", 0);
@@ -100,7 +100,7 @@ TEST_CASE("String::find", "[String]") {
 
 TEST_CASE("String::findFirstOf", "[String]") {
     // "Water, Fire, Earth, Wind, Void"
-    String elements = "水、火、地、風、空";
+    String elements = u8"水、火、地、風、空";
 
     SECTION("must be able to find any of the specified UTF-8 codepoints") {
         size_t location = elements.findFirstOf("火ñ地", 0);
@@ -116,9 +116,7 @@ TEST_CASE("String::findFirstOf", "[String]") {
         REQUIRE(location1 == 2);
         REQUIRE(location2 == 4);
     }
-    SECTION(
-        "if the any of the UTF-8 characters are not found "
-        "it returns String::sInvalidPos") {
+    SECTION("if the any of the UTF-8 characters are not found it returns String::sInvalidPos") {
         size_t location1 = elements.findFirstOf("A", 0);
         size_t location2 = elements.findFirstOf("#空ñ、風");
         REQUIRE(location1 == String::sInvalidPos);
@@ -128,7 +126,7 @@ TEST_CASE("String::findFirstOf", "[String]") {
 
 TEST_CASE("String::findLastOf", "[String]") {
     // "Water, Fire, Earth, Wind, Void"
-    String elements = "水、火、地、風、空";
+    String elements = u8"水、火、地、風、空";
 
     SECTION("must be able to find any of the specified UTF-8 codepoints") {
         size_t location = elements.findLastOf("火、地", elements.getSize() - 1);
@@ -144,9 +142,7 @@ TEST_CASE("String::findLastOf", "[String]") {
         REQUIRE(location1 == 2);
         REQUIRE(location2 == 3);
     }
-    SECTION(
-        "if the any of the UTF-8 characters are not found "
-        "it returns String::sInvalidPos") {
+    SECTION("if the any of the UTF-8 characters are not found it returns String::sInvalidPos") {
         size_t location1 = elements.findLastOf("A");
         size_t location2 = elements.findLastOf("#空ñ、風");
         REQUIRE(location1 == String::sInvalidPos);
@@ -156,44 +152,43 @@ TEST_CASE("String::findLastOf", "[String]") {
 
 TEST_CASE("String::replace", "[String]") {
     // "Water, Fire, Earth, Wind, Void"
-    String elements = "水、火、地、風、空";
+    String elements = u8"水、火、地、風、空";
 
     SECTION("must be able to replace any UTF-8 string") {
         elements.replace("水", "Water");
         elements.replace("地", "Earth");
         elements.replace("空", "Void");
-        REQUIRE(elements == "Water、火、Earth、風、Void");
+        REQUIRE(elements == u8"Water、火、Earth、風、Void");
     }
     SECTION("must replace all the ocurrences of the provided string") {
         elements.replace("、", ", ");
-        REQUIRE(elements == "水, 火, 地, 風, 空");
+        REQUIRE(elements == u8"水, 火, 地, 風, 空");
     }
     SECTION("could replace any element given a range") {
         elements.replace(4, 1, "Earth");
         elements.replace(0, 1, "Water");
         elements.replace(16, 1, "Void");
-        REQUIRE(elements == "Water、火、Earth、風、Void");
+        REQUIRE(elements == u8"Water、火、Earth、風、Void");
     }
     SECTION("could replace the whole string") {
-        elements.replace(0, elements.getSize(), "مرحبا بالعالم");
-        REQUIRE(elements == "مرحبا بالعالم");
+        elements.replace(0, elements.getSize(), u8"مرحبا بالعالم");
+        REQUIRE(elements == u8"مرحبا بالعالم");
     }
     SECTION("must replace any Unicode code point with another") {
         // Replace U+3001 (、) with U+1F603 (😃)
         elements.replace(0x3001, 0x1F603);
-        REQUIRE(elements == "水😃火😃地😃風😃空");
+        REQUIRE(elements == u8"水😃火😃地😃風😃空");
         // Replace U+1F603 (😃) with U+2D (-)
         elements.replace(0x1F603, '-');
-        REQUIRE(elements == "水-火-地-風-空");
+        REQUIRE(elements == u8"水-火-地-風-空");
         // Replace U+2D (-) with U+20 (Space)
         elements.replace('-', ' ');
-        REQUIRE(elements == "水 火 地 風 空");
+        REQUIRE(elements == u8"水 火 地 風 空");
     }
 }
 
-TEST_CASE("String::iterator", "[String]") {
-    // "Water, Fire, Earth, Wind, Void"
-    String elements = "水、火、";
+TEST_CASE("String::iterator forward", "[String]") {
+    String elements = u8"水、火、";
     auto it0 = elements.begin();
 
     SECTION("begin() must be able to get the first character of the UTF-8 string") {
@@ -218,11 +213,10 @@ TEST_CASE("String::iterator", "[String]") {
         REQUIRE(codeUnit5.getCodePoint() == 0x706B);
     }
     SECTION("must be able to increment the UTF-8 iterator") {
-        using data_type = std::decay_t<decltype(elements[0].getData())>;
-        REQUIRE(elements[0].getData() == data_type({0xE6, 0xB0, 0xB4}));
-        REQUIRE(elements[1].getData() == data_type({0xE3, 0x80, 0x81}));
-        REQUIRE(elements[2].getData() == data_type({0xE7, 0x81, 0xAB}));
-        REQUIRE(elements[3].getData() == data_type({0xE3, 0x80, 0x81}));
+        REQUIRE(elements[0] == utf::CodeUnit<8>({0xE6, 0xB0, 0xB4}));
+        REQUIRE(elements[1] == utf::CodeUnit<8>({0xE3, 0x80, 0x81}));
+        REQUIRE(elements[2] == utf::CodeUnit<8>({0xE7, 0x81, 0xAB}));
+        REQUIRE(elements[3] == utf::CodeUnit<8>({0xE3, 0x80, 0x81}));
     }
     SECTION("must be able to iterate correctly through the UTF-8 string") {
         size_t count = 0;
@@ -239,17 +233,106 @@ TEST_CASE("String::iterator", "[String]") {
             }
             count++;
         }
+        count = 0;
+        for (auto it = elements.begin(); it != elements.end(); ++it) {
+            char32 codePoint = it->getUnit().getCodePoint();
+            if (count == 0) {
+                REQUIRE(codePoint == 0x6C34);
+            } else if (count == 1) {
+                REQUIRE(codePoint == 0x3001);
+            } else if (count == 2) {
+                REQUIRE(codePoint == 0x706B);
+            } else if (count == 3) {
+                REQUIRE(codePoint == 0x3001);
+            }
+            count++;
+        }
+    }
+}
+
+TEST_CASE("String::iterator reverse", "[String]") {
+    String elements = u8"水、火、";
+    auto it0 = elements.end();
+
+    SECTION("end() should return an invalid interator which will hold always null") {
+        char32 codePoint0 = it0->getUnit().getCodePoint();
+        REQUIRE(codePoint0 == 0x0);
+    }
+    SECTION("must be able to decrement the UTF-8 iterator") {
+        auto it1 = --it0;
+        auto it2 = it0--;
+        auto it3 = it0;
+        auto it4 = --it0;
+        auto it5 = it0 - 1;
+        auto it6 = it0;
+        auto codeUnit1 = it1->getUnit();
+        auto codeUnit2 = it2->getUnit();
+        auto codeUnit3 = it3->getUnit();
+        auto codeUnit4 = it4->getUnit();
+        auto codeUnit5 = it5->getUnit();
+        auto codeUnit6 = it6->getUnit();
+        REQUIRE(codeUnit1.getCodePoint() == 0x3001);
+        REQUIRE(codeUnit2.getCodePoint() == 0x3001);
+        REQUIRE(codeUnit3.getCodePoint() == 0x706B);
+        REQUIRE(codeUnit4.getCodePoint() == 0x3001);
+        REQUIRE(codeUnit5.getCodePoint() == 0x6C34);
+        REQUIRE(codeUnit6.getCodePoint() == 0x3001);
+    }
+    SECTION("must be able to increment the UTF-8 iterator") {
+        REQUIRE(elements[0] == utf::CodeUnit<8>({0xE6, 0xB0, 0xB4}));
+        REQUIRE(elements[1] == utf::CodeUnit<8>({0xE3, 0x80, 0x81}));
+        REQUIRE(elements[2] == utf::CodeUnit<8>({0xE7, 0x81, 0xAB}));
+        REQUIRE(elements[3] == utf::CodeUnit<8>({0xE3, 0x80, 0x81}));
+    }
+    SECTION("must be able to iterate backwards correctly through the UTF-8 string") {
+        size_t count = 0;
+        for (auto it = elements.rbegin(); it != elements.rend(); ++it) {
+            char32 codePoint = it->getUnit().getCodePoint();
+            if (count == 0) {
+                REQUIRE(codePoint == 0x3001);
+            } else if (count == 1) {
+                REQUIRE(codePoint == 0x706B);
+            } else if (count == 2) {
+                REQUIRE(codePoint == 0x3001);
+            } else if (count == 3) {
+                REQUIRE(codePoint == 0x6C34);
+            }
+            count++;
+        }
     }
 }
 
 TEST_CASE("String::operator[]", "[String]") {
-    // "Water, Fire, Earth, Wind, Void"
-    String elements = "水、火";
+    String elements = u8"水、火";
 
     SECTION("must be able to access any code unit in the UTF-8 String") {
-        using data_type = std::decay_t<decltype(elements[0].getData())>;
-        REQUIRE(elements[0].getData() == data_type({0xE6, 0xB0, 0xB4}));
-        REQUIRE(elements[1].getData() == data_type({0xE3, 0x80, 0x81}));
-        REQUIRE(elements[2].getData() == data_type({0xE7, 0x81, 0xAB}));
+        REQUIRE(elements[0] == utf::CodeUnit<8>({0xE6, 0xB0, 0xB4}));
+        REQUIRE(elements[1] == utf::CodeUnit<8>({0xE3, 0x80, 0x81}));
+        REQUIRE(elements[2] == utf::CodeUnit<8>({0xE7, 0x81, 0xAB}));
+    }
+}
+
+TEST_CASE("String::operator+=", "[String]") {
+    String elements;
+
+    SECTION("must be able to append a ASCII value") {
+        elements += 'A';
+        REQUIRE(elements == u8"A");
+    }
+    SECTION("must be able to append an UTF-32 value") {
+        elements += char32(0x6C34);
+        REQUIRE(elements == u8"水");
+    }
+    SECTION("must be able to append another String") {
+        elements += String(u8"Love 地");
+        REQUIRE(elements == u8"Love 地");
+    }
+    SECTION("must be able to append a CodeUnit") {
+        elements += utf::CodeUnit<8>({0xE6, 0xB0, 0xB4});
+        REQUIRE(elements == u8"水");
+    }
+    SECTION("must be able to append a raw UTF-8 string") {
+        elements += u8"水、火、地、風、空";
+        REQUIRE(elements == u8"水、火、地、風、空");
     }
 }

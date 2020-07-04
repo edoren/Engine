@@ -9,10 +9,11 @@
 namespace engine {
 
 template <size_t Base, typename T>
-constexpr UTFIterator<Base, T>::ValueRef::ValueRef(std::pair<T, T>&& value) : m_value(value) {}
+constexpr UTFIterator<Base, T>::CodeUnitRange::CodeUnitRange(std::pair<pointed_type, pointed_type>&& value)
+      : m_value(value) {}
 
 template <size_t Base, typename T>
-constexpr utf::CodeUnit<Base> UTFIterator<Base, T>::ValueRef::getUnit() const {
+constexpr utf::CodeUnit<Base> UTFIterator<Base, T>::CodeUnitRange::getUnit() const {
     return utf::CodeUnit<Base>(m_value.first, m_value.second);
 }
 
@@ -35,7 +36,7 @@ constexpr UTFIterator<Base, T> UTFIterator<Base, T>::operator+(uint32 num) {
         auto it = utf::NextUTF<Base>(newBegin, m_maxRange.second);
         if (it == newBegin) {
             // Error getting next
-            return UTFIterator(m_maxRange, m_maxRange.second);
+            return UTFIterator(m_maxRange, m_maxRange.second + 1);
         }
         newBegin = it;
     }
@@ -61,6 +62,60 @@ constexpr UTFIterator<Base, T> UTFIterator<Base, T>::operator++(int) {
 }
 
 template <size_t Base, typename T>
+constexpr UTFIterator<Base, T> UTFIterator<Base, T>::operator-(uint32 num) {
+    // TODO: Improve this iteration for edge cases
+    // Check if already on the end
+    auto newBegin = m_ref.m_value.first;
+    for (uint32 i = 0; i < num; i++) {
+        auto it = utf::PriorUTF<Base>(newBegin, m_maxRange.first);
+        if (it == newBegin) {
+            // Error getting next
+            return UTFIterator(m_maxRange, m_maxRange.first);
+        }
+        newBegin = it;
+    }
+    return UTFIterator(m_maxRange, newBegin);
+}
+
+template <size_t Base, typename T>
+constexpr UTFIterator<Base, T>& UTFIterator<Base, T>::operator-=(uint32 num) {
+    *this = *this - num;
+    return *this;
+}
+
+template <size_t Base, typename T>
+constexpr UTFIterator<Base, T>& UTFIterator<Base, T>::operator--() {
+    return *this -= 1;
+}
+
+template <size_t Base, typename T>
+constexpr UTFIterator<Base, T> UTFIterator<Base, T>::operator--(int) {
+    UTFIterator temp(*this);
+    *this -= 1;
+    return temp;
+}
+
+template <size_t Base, typename T>
+constexpr bool UTFIterator<Base, T>::operator<(const UTFIterator& other) const {
+    return m_ref.m_value < other.m_ref.m_value;
+}
+
+template <size_t Base, typename T>
+constexpr bool UTFIterator<Base, T>::operator>(const UTFIterator& other) const {
+    return m_ref.m_value > other.m_ref.m_value;
+}
+
+template <size_t Base, typename T>
+constexpr bool UTFIterator<Base, T>::operator<=(const UTFIterator& other) const {
+    return *this < other || *this == other;
+}
+
+template <size_t Base, typename T>
+constexpr bool UTFIterator<Base, T>::operator>=(const UTFIterator& other) const {
+    return *this > other || *this == other;
+}
+
+template <size_t Base, typename T>
 constexpr bool UTFIterator<Base, T>::operator==(const UTFIterator& other) const {
     return m_ref.m_value == other.m_ref.m_value && m_maxRange == other.m_maxRange;
 }
@@ -71,21 +126,23 @@ constexpr bool UTFIterator<Base, T>::operator!=(const UTFIterator& other) const 
 }
 
 template <size_t Base, typename T>
-constexpr void UTFIterator<Base, T>::swap(UTFIterator& other) {
-    std::swap(m_maxRange, other.m_maxRange);
-    std::swap(m_ref.m_value, other.m_ref.m_value);
-}
-
-template <size_t Base, typename T>
-constexpr T UTFIterator<Base, T>::getPtr() const {
+constexpr typename UTFIterator<Base, T>::pointed_type UTFIterator<Base, T>::getPtr() const {
     return m_ref.m_value.first;
 }
 
 template <size_t Base, typename T>
-constexpr UTFIterator<Base, T>::UTFIterator(std::pair<T, T> maxRange, T begin)
+constexpr UTFIterator<Base, T>::UTFIterator(std::pair<pointed_type, pointed_type> maxRange, pointed_type begin)
       : m_maxRange(std::move(maxRange)),
         m_ref(std::make_pair(begin, begin)) {
-    if (maxRange.second == begin) {  // End of iterator
+    // Post end iterator
+    if (begin >= maxRange.second) {
+        m_ref = std::make_pair(maxRange.second, maxRange.second + 1);
+        return;
+    }
+
+    // Prior begin iterator
+    if (begin < maxRange.first) {  // End of iterator
+        m_ref = std::make_pair(maxRange.first - 1, maxRange.first);
         return;
     }
 
