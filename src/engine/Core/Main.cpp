@@ -28,14 +28,6 @@ using PFN_STOP_PLUGIN = void (*)();
 template <>
 Main* Singleton<Main>::sInstance = nullptr;
 
-Main& Main::GetInstance() {
-    return Singleton<Main>::GetInstance();
-}
-
-Main* Main::GetInstancePtr() {
-    return Singleton<Main>::GetInstancePtr();
-}
-
 Main::Main(int argc, char* argv[])
       : m_activeRenderer(nullptr),
         m_app(nullptr),

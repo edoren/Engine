@@ -7,7 +7,7 @@
 #include "GL_Config.hpp"
 #include "GL_Dependencies.hpp"
 
-namespace engine {
+namespace engine::plugin::opengl {
 
 class OPENGL_PLUGIN_API GL_RenderWindow : public RenderWindow {
 public:
@@ -35,4 +35,4 @@ private:
     SDL_GLContext m_context;
 };
 
-}  // namespace engine
+}  // namespace engine::plugin::opengl

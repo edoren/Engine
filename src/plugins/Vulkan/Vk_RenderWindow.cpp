@@ -15,7 +15,7 @@
 
 #include <array>
 
-namespace engine {
+namespace engine::plugin::vulkan {
 
 namespace {
 
@@ -1001,4 +1001,4 @@ void Vk_RenderWindow::onAppDidEnterForeground() {
     }
 }
 
-}  // namespace engine
+}  // namespace engine::plugin::vulkan

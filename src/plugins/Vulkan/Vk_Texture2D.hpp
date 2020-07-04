@@ -7,11 +7,9 @@
 #include "Vk_Dependencies.hpp"
 #include "Vk_Image.hpp"
 
-namespace engine {
+namespace engine::plugin::vulkan {
 
 class Vk_TextureManager;
-
-class Image;
 
 class Vk_Texture2D : public Texture2D {
 public:
@@ -39,4 +37,4 @@ private:
     VkDescriptorSet m_descriptorSet;
 };
 
-}  // namespace engine
+}  // namespace engine::plugin::vulkan

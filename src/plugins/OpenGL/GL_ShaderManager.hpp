@@ -8,9 +8,7 @@
 #include <map>
 #include <memory>
 
-namespace engine {
-
-class String;
+namespace engine::plugin::opengl {
 
 class GL_Shader;
 
@@ -29,12 +27,12 @@ public:
     GL_Shader* getActiveShader();
 
     /**
-     * @copydoc Main::GetInstance
+     * @copydoc ShaderManager::GetInstance
      */
     static GL_ShaderManager& GetInstance();
 
     /**
-     * @copydoc Main::GetInstance
+     * @copydoc ShaderManager::GetInstance
      */
     static GL_ShaderManager* GetInstancePtr();
 
@@ -46,4 +44,4 @@ protected:
     const String& getShaderFolder() const override;
 };
 
-}  // namespace engine
+}  // namespace engine::plugin::opengl

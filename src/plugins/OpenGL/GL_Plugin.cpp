@@ -3,7 +3,7 @@
 
 #include <Core/Main.hpp>
 
-namespace engine {
+namespace engine::plugin::opengl {
 
 namespace {
 
@@ -31,4 +31,4 @@ void GL_Plugin::uninstall() {
     m_renderer = nullptr;
 }
 
-}  // namespace engine
+}  // namespace engine::plugin::opengl

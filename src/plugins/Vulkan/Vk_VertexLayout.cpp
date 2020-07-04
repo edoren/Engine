@@ -5,7 +5,7 @@
 
 #include "Vk_VertexLayout.hpp"
 
-namespace engine {
+namespace engine::plugin::vulkan {
 
 namespace {
 
@@ -60,4 +60,4 @@ Vector<VkVertexInputAttributeDescription> Vk_VertexLayout::getVertexInputAttribu
     return GetAttribDescription(m_vertexInput, bufferBindId);
 }
 
-}  // namespace engine
+}  // namespace engine::plugin::vulkan

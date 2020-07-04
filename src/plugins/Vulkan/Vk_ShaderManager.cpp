@@ -7,7 +7,7 @@
 #include <map>
 #include <memory>
 
-namespace engine {
+namespace engine::plugin::vulkan {
 
 namespace {
 
@@ -68,4 +68,4 @@ const String& Vk_ShaderManager::getShaderFolder() const {
     return sShaderFolder;
 }
 
-}  // namespace engine
+}  // namespace engine::plugin::vulkan

@@ -19,7 +19,7 @@
 #include <array>
 #include <utility>
 
-namespace engine {
+namespace engine::plugin::vulkan {
 
 namespace {
 
@@ -269,4 +269,4 @@ void Vk_Mesh::draw(RenderWindow& target, const RenderStates& states) const {
     window.addCommandExecution(std::move(lambda));
 }
 
-}  // namespace engine
+}  // namespace engine::plugin::vulkan

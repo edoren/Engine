@@ -3,7 +3,7 @@
 #include "Vk_Context.hpp"
 #include "Vk_Utilities.hpp"
 
-namespace engine {
+namespace engine::plugin::vulkan {
 
 Vk_RenderResource::Vk_RenderResource()
       : framebuffer(VK_NULL_HANDLE),
@@ -46,4 +46,4 @@ void Vk_RenderResource::destroy() {
     }
 }
 
-}  // namespace engine
+}  // namespace engine::plugin::vulkan

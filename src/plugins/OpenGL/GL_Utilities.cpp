@@ -4,7 +4,7 @@
 #include <System/LogManager.hpp>
 #include <System/StringView.hpp>
 
-namespace engine {
+namespace engine::plugin::opengl {
 
 namespace {
 
@@ -43,4 +43,4 @@ void LogGLError(const char* file, int line, const char* call) {
     assert(0);
 };
 
-}  // namespace engine
+}  // namespace engine::plugin::opengl

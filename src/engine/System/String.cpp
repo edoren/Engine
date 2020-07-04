@@ -243,6 +243,11 @@ String& String::operator+=(char8 right) {
     return *this;
 }
 
+String& String::operator+=(char32 right) {
+    utf::UtfToUtf<32, 8>(&right, &right + 1, &m_string);
+    return *this;
+}
+
 String& String::operator+=(const utf::CodeUnit<8>& right) {
     // TODO: Missing test
     m_string.reserve(m_string.size() + right.getSize());
@@ -254,7 +259,7 @@ String& String::operator+=(const utf::CodeUnit<8>& right) {
 
 utf::CodeUnit<8> String::operator[](std::size_t index) const {
     // TODO: throw error
-    return (begin() + index)->getUnit();
+    return (cbegin() + index)->getUnit();
 }
 
 void String::clear() {
@@ -411,10 +416,8 @@ void String::replace(uint32 searchFor, uint32 replaceWith) {
             }
         }
     } else {
-        String searchForStr;
-        String replaceWithStr;
-        utf::AppendToUtf<8>(searchFor, &searchForStr.m_string);
-        utf::AppendToUtf<8>(replaceWith, &replaceWithStr.m_string);
+        String searchForStr(static_cast<char32>(searchFor));
+        String replaceWithStr(static_cast<char32>(replaceWith));
         replace(searchForStr, replaceWithStr);
     }
 }
@@ -470,21 +473,39 @@ const char8* String::getData() const {
 }
 
 String::iterator String::begin() {
-    return String::iterator(std::make_pair(m_string.data(), m_string.data() + m_string.size()), m_string.data());
+    auto maxRange = std::make_pair(m_string.data(), m_string.data() + m_string.size());
+    return String::iterator(maxRange, maxRange.first);
 }
 
-String::const_iterator String::begin() const {
-    return String::const_iterator(std::make_pair(m_string.data(), m_string.data() + m_string.size()), m_string.data());
+String::const_iterator String::cbegin() const {
+    auto maxRange = std::make_pair(m_string.data(), m_string.data() + m_string.size());
+    return String::const_iterator(maxRange, maxRange.first);
 }
 
 String::iterator String::end() {
-    return String::iterator(std::make_pair(m_string.data(), m_string.data() + m_string.size()),
-                            m_string.data() + m_string.size());
+    auto maxRange = std::make_pair(m_string.data(), m_string.data() + m_string.size());
+    return String::iterator(maxRange, maxRange.second);
 }
 
-String::const_iterator String::end() const {
-    return String::const_iterator(std::make_pair(m_string.data(), m_string.data() + m_string.size()),
-                                  m_string.data() + m_string.size());
+String::const_iterator String::cend() const {
+    auto maxRange = std::make_pair(m_string.data(), m_string.data() + m_string.size());
+    return String::const_iterator(maxRange, maxRange.second);
+}
+
+String::reverse_iterator String::rbegin() {
+    return std::reverse_iterator(end());
+}
+
+String::const_reverse_iterator String::crbegin() const {
+    return std::reverse_iterator(cend());
+}
+
+String::reverse_iterator String::rend() {
+    return std::reverse_iterator(begin());
+}
+
+String::const_reverse_iterator String::crend() const {
+    return std::reverse_iterator(cbegin());
 }
 
 bool operator==(const String& left, const String& right) {

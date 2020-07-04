@@ -7,7 +7,7 @@
 #include "Vk_Context.hpp"
 #include "Vk_SwapChain.hpp"
 
-namespace engine {
+namespace engine::plugin::vulkan {
 
 namespace {
 
@@ -336,4 +336,4 @@ VkPresentModeKHR Vk_SwapChain::getPresentMode(const Vector<VkPresentModeKHR>& pr
     return VK_PRESENT_MODE_FIFO_KHR;
 }
 
-}  // namespace engine
+}  // namespace engine::plugin::vulkan

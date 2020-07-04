@@ -9,7 +9,7 @@
 #include "GL_ShaderManager.hpp"
 #include "GL_Utilities.hpp"
 
-namespace engine {
+namespace engine::plugin::opengl {
 
 namespace {
 
@@ -180,4 +180,4 @@ void GL_RenderWindow::clear(const Color& color) {  // RenderTarget
     GL_CALL(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }
 
-}  // namespace engine
+}  // namespace engine::plugin::opengl

@@ -45,22 +45,15 @@ public:
     void enableFileLogging(bool enable);
     void enableConsoleLogging(bool enable);
 
-    /**
-     * @copydoc Main::GetInstance
-     */
-    static LogManager& GetInstance();
-
-    /**
-     * @copydoc Main::GetInstance
-     */
-    static LogManager* GetInstancePtr();
-
 private:
     String m_appName;
     String m_logFile;
     bool m_fileLoggingEnable;
     bool m_consoleLoggingEnable;
 };
+
+template<>
+LogManager* Singleton<LogManager>::sInstance;
 
 inline void LogVerbose(const StringView& tag, const StringView& message) {
     LogManager::GetInstance().verbose(tag, message);

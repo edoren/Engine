@@ -24,14 +24,6 @@ const String TextureManager::sDefaultTextureId("DEFAULT");
 template <>
 TextureManager* Singleton<TextureManager>::sInstance = nullptr;
 
-TextureManager& TextureManager::GetInstance() {
-    return Singleton<TextureManager>::GetInstance();
-}
-
-TextureManager* TextureManager::GetInstancePtr() {
-    return Singleton<TextureManager>::GetInstancePtr();
-}
-
 TextureManager::TextureManager() : m_activeTexture(nullptr) {}
 
 TextureManager::~TextureManager() = default;

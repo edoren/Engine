@@ -8,7 +8,7 @@
 #include "Vk_Image.hpp"
 #include "Vk_Surface.hpp"
 
-namespace engine {
+namespace engine::plugin::vulkan {
 
 class VULKAN_PLUGIN_API Vk_SwapChain : private NonCopyable {
 public:
@@ -35,4 +35,4 @@ private:
     Vector<Vk_Image> m_images;
 };
 
-}  // namespace engine
+}  // namespace engine::plugin::vulkan

@@ -39,3 +39,18 @@
     #define _CRT_SECURE_NO_WARNINGS
     #pragma warning(disable : 4996)
 #endif
+
+/**
+ * @brief Namespace that contains all the vanilla engine code
+ */
+namespace engine {}
+
+/**
+ * @brief Namespace that contains all the provided plugins
+ */
+namespace engine::plugin {}
+
+/**
+ * @brief Namespace that contains functions and classes to handle UTF encodings
+ */
+namespace engine::utf {}

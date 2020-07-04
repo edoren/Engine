@@ -5,7 +5,7 @@
 #include "Vk_Context.hpp"
 #include "Vk_Utilities.hpp"
 
-namespace engine {
+namespace engine::plugin::vulkan {
 
 namespace {
 
@@ -94,4 +94,4 @@ VkDeviceSize Vk_Buffer::getSize() const {
     return m_size;
 }
 
-}  // namespace engine
+}  // namespace engine::plugin::vulkan

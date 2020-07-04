@@ -4,14 +4,15 @@
 
 #include "GL_Config.hpp"
 
-namespace engine {
-
-class String;
+namespace engine::plugin::opengl {
 
 class GL_Renderer;
 class GL_ShaderManagerDelegate;
 class GL_TextureManagerDelegate;
 
+/**
+ * @brief OpenGL plugin class
+ */
 class OPENGL_PLUGIN_API GL_Plugin : public Plugin {
 public:
     GL_Plugin();
@@ -32,4 +33,4 @@ protected:
     GL_TextureManagerDelegate* m_textureManagerDelegate;
 };
 
-}  // namespace engine
+}  // namespace engine::plugin::opengl

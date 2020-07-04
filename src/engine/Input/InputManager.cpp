@@ -31,14 +31,6 @@ int EngineEventFilter(void* userdata, SDL_Event* event) {
 template <>
 InputManager* Singleton<InputManager>::sInstance = nullptr;
 
-InputManager& InputManager::GetInstance() {
-    return Singleton<InputManager>::GetInstance();
-}
-
-InputManager* InputManager::GetInstancePtr() {
-    return Singleton<InputManager>::GetInstancePtr();
-}
-
 InputManager::InputManager()
       : m_exitRequested(false),
         m_pointers(sMaxSimultanuousPointers),

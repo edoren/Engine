@@ -4,7 +4,7 @@
 
 #include "GL_Config.hpp"
 
-namespace engine {
+namespace engine::plugin::opengl {
 
 class OPENGL_PLUGIN_API GL_Renderer : public Renderer {
 public:
@@ -21,4 +21,4 @@ public:
     const String& getName() const override;
 };
 
-}  // namespace engine
+}  // namespace engine::plugin::opengl

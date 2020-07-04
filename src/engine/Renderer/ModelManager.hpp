@@ -29,16 +29,6 @@ public:
     void unload(Model* model);
     void unloadFromFile(const String& basename);
 
-    /**
-     * @copydoc Main::GetInstance
-     */
-    static ModelManager& GetInstance();
-
-    /**
-     * @copydoc Main::GetInstance
-     */
-    static ModelManager* GetInstancePtr();
-
     virtual std::unique_ptr<Mesh> createMesh() = 0;  // TODO: protected
 
 protected:
@@ -48,5 +38,8 @@ protected:
     std::map<Model*, uint32> m_modelRefCount;
     Vector<std::unique_ptr<Model>> m_models;
 };
+
+template<>
+ModelManager* Singleton<ModelManager>::sInstance;
 
 }  // namespace engine

@@ -10,6 +10,11 @@
 
 namespace engine {
 
+template <>
+plugin::vulkan::Vk_Context* Singleton<plugin::vulkan::Vk_Context>::sInstance = nullptr;
+
+namespace plugin::vulkan {
+
 namespace {
 
 const StringView sTag("Vk_Context");
@@ -69,17 +74,6 @@ bool CheckLayerAvailability(const char* str, const Vector<VkLayerProperties>& ve
 
 }  // namespace
 
-template <>
-Vk_Context* Singleton<Vk_Context>::sInstance = nullptr;
-
-Vk_Context& Vk_Context::GetInstance() {
-    return Singleton<Vk_Context>::GetInstance();
-}
-
-Vk_Context* Vk_Context::GetInstancePtr() {
-    return Singleton<Vk_Context>::GetInstancePtr();
-}
-
 Vk_Context::Vk_Context()
       : m_instance(VK_NULL_HANDLE),
         m_device(VK_NULL_HANDLE),
@@ -92,7 +86,7 @@ Vk_Context::Vk_Context()
         m_validationLayersEnabled(false){
 #endif
 
-}  // namespace engine
+}  // namespace plugin::vulkan
 
 Vk_Context::~Vk_Context() {
     shutdown();
@@ -580,5 +574,7 @@ bool Vk_Context::createUboDescriptorPool() {
 
     return true;
 }
+
+}  // namespace plugin::vulkan
 
 }  // namespace engine

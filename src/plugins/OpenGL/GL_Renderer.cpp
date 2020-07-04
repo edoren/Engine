@@ -4,7 +4,7 @@
 #include "GL_ShaderManager.hpp"
 #include "GL_TextureManager.hpp"
 
-namespace engine {
+namespace engine::plugin::opengl {
 
 namespace {
 
@@ -47,4 +47,4 @@ const String& GL_Renderer::getName() const {
     return sRendererName;
 }
 
-}  // namespace engine
+}  // namespace engine::plugin::opengl

@@ -24,18 +24,11 @@ public:
 
     void unload(SharedLibrary* lib);
 
-    /**
-     * @copydoc Main::GetInstance
-     */
-    static SharedLibManager& GetInstance();
-
-    /**
-     * @copydoc Main::GetInstancePtr
-     */
-    static SharedLibManager* GetInstancePtr();
-
 private:
     std::map<String, SharedLibrary> m_libraries;
 };
+
+template <>
+SharedLibManager* Singleton<SharedLibManager>::sInstance;
 
 }  // namespace engine

@@ -9,7 +9,32 @@ namespace engine {
 
 /**
  * @brief Utility string class that automatically handles
- *       conversions between types and encodings
+ *        conversions between types and encodings
+ *
+ * String is a utility string class defined mainly for
+ * convenience. It is a Unicode string (implemented using
+ * UTF-8), thus it can store any character in the world
+ * (European, Chinese, Arabic, Hebrew, etc.).
+ *
+ * It automatically handles conversions from/to ASCII and
+ * wide strings, so that you can work with standard string
+ * classes and still be compatible with functions taking a
+ * String.
+ *
+ * @code
+ * String s;
+ *
+ * std::basic_string<char8> s1 = s;  // automatically converted to ASCII string
+ * std::basic_string<wchar> s2 = s; // automatically converted to wide string
+ * s = "hello";         // automatically converted from ASCII string
+ * s = L"hello";        // automatically converted from wide string
+ * s += 'a';            // automatically converted from ASCII string
+ * s += L'a';           // automatically converted from wide string
+ * @endcode
+ *
+ * String defines the most important functions of the
+ * standard std::basic_string<char8> class: removing, random access, iterating,
+ * appending, comparing, etc.
  */
 class ENGINE_API StringView {
 public:
@@ -324,34 +349,5 @@ ENGINE_API bool operator>=(const StringView& left, const StringView& right);
 ENGINE_API std::ostream& operator<<(std::ostream& os, const StringView& str);
 
 }  // namespace engine
-
-/**
- * @class String
- *
- * String is a utility string class defined mainly for
- * convenience. It is a Unicode string (implemented using
- * UTF-8), thus it can store any character in the world
- * (European, Chinese, Arabic, Hebrew, etc.).
- *
- * It automatically handles conversions from/to ASCII and
- * wide strings, so that you can work with standard string
- * classes and still be compatible with functions taking a
- * String.
- *
- * @code
- * String s;
- *
- * std::basic_string<char8> s1 = s;  // automatically converted to ASCII string
- * std::basic_string<wchar> s2 = s; // automatically converted to wide string
- * s = "hello";         // automatically converted from ASCII string
- * s = L"hello";        // automatically converted from wide string
- * s += 'a';            // automatically converted from ASCII string
- * s += L'a';           // automatically converted from wide string
- * @endcode
- *
- * String defines the most important functions of the
- * standard std::basic_string<char8> class: removing, random access, iterating,
- * appending, comparing, etc.
- */
 
 #include <System/StringView.inl>

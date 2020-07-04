@@ -6,7 +6,7 @@
 // Structures to encapsulate the Vulkan structs
 //
 
-namespace engine {
+namespace engine::plugin::vulkan {
 
 struct PhysicalDeviceParameters {
     VkPhysicalDevice handle;
@@ -62,4 +62,4 @@ struct DescriptorSetParameters {
     }
 };
 
-}  // namespace engine
+}  // namespace engine::plugin::vulkan

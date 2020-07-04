@@ -12,7 +12,7 @@
 #include <array>
 #include <map>
 
-namespace engine {
+namespace engine::plugin::opengl {
 
 class OPENGL_PLUGIN_API GL_Shader : public Shader {
 public:
@@ -74,4 +74,4 @@ private:
     std::map<String, GLint> m_uniforms;
 };
 
-}  // namespace engine
+}  // namespace engine::plugin::opengl

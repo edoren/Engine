@@ -31,14 +31,6 @@ const std::array<ShaderType, 3> sAvailableShaderTypes = {{
 template <>
 ShaderManager* Singleton<ShaderManager>::sInstance = nullptr;
 
-ShaderManager& ShaderManager::GetInstance() {
-    return Singleton<ShaderManager>::GetInstance();
-}
-
-ShaderManager* ShaderManager::GetInstancePtr() {
-    return Singleton<ShaderManager>::GetInstancePtr();
-}
-
 ShaderManager::ShaderManager() : m_activeShader(nullptr) {}
 
 ShaderManager::~ShaderManager() = default;

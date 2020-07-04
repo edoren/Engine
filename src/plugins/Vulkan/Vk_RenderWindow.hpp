@@ -20,9 +20,7 @@
 #include "Vk_SwapChain.hpp"
 #include "Vk_VulkanParameters.hpp"
 
-namespace engine {
-
-class String;
+namespace engine::plugin::vulkan {
 
 class Vk_TextureManager;
 
@@ -97,4 +95,4 @@ private:
     Vector<Vk_RenderResource> m_renderResources;
 };
 
-}  // namespace engine
+}  // namespace engine::plugin::vulkan

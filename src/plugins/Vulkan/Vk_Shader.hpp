@@ -11,7 +11,7 @@
 
 #include <array>
 
-namespace engine {
+namespace engine::plugin::vulkan {
 
 class VULKAN_PLUGIN_API Vk_Shader : public Shader {
 public:
@@ -64,4 +64,4 @@ private:
     VkDescriptorSet m_uboDescriptorSet;
 };
 
-}  // namespace engine
+}  // namespace engine::plugin::vulkan

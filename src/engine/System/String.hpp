@@ -38,15 +38,42 @@ namespace engine {
 /**
  * @brief Utility string class that automatically handles
  *       conversions between types and encodings
+ *
+ * String is a utility string class defined mainly for
+ * convenience. It is a Unicode string (implemented using
+ * UTF-8), thus it can store any character in the world
+ * (European, Chinese, Arabic, Hebrew, etc.).
+ *
+ * It automatically handles conversions from/to ASCII and
+ * wide strings, so that you can work with standard string
+ * classes and still be compatible with functions taking a
+ * String.
+ *
+ * @code
+ * String s;
+ *
+ * std::basic_string<char8> s1 = s;  // automatically converted to ASCII string
+ * std::basic_string<wchar> s2 = s; // automatically converted to wide string
+ * s = "hello";         // automatically converted from ASCII string
+ * s = L"hello";        // automatically converted from wide string
+ * s += 'a';            // automatically converted from ASCII string
+ * s += L'a';           // automatically converted from wide string
+ * @endcode
+ *
+ * String defines the most important functions of the
+ * standard std::basic_string<char8> class: removing, random access, iterating,
+ * appending, comparing, etc.
  */
 class ENGINE_API String {
 public:
     ////////////////////////////////////////////////////////////
     // Types
     ////////////////////////////////////////////////////////////
-    using size_type = std::size_t;                        ///< Size type
-    using const_iterator = UTFIterator<8, const char8*>;  ///< Read-only iterator type
-    using iterator = const_iterator;                      ///< Iterator type
+    using size_type = std::size_t;                                         ///< Size type
+    using const_iterator = UTFIterator<8, const char8*>;                   ///< Read-only iterator type
+    using iterator = const_iterator;                                       ///< Iterator type
+    using const_reverse_iterator = std::reverse_iterator<const_iterator>;  ///< Read-only reverse iterator type
+    using reverse_iterator = std::reverse_iterator<iterator>;              ///< Reverse iterator type
 
     ////////////////////////////////////////////////////////////
     // Static member data
@@ -378,7 +405,7 @@ public:
     const std::basic_string<char8>& toUtf8() const;
 
     /**
-     * @brief Convert the Unicode string to a UTF-16 string
+     * @brief Convert the UTF-8 string to a UTF-16 string
      *
      * @return Converted UTF-16 string
      *
@@ -387,7 +414,7 @@ public:
     std::basic_string<char16> toUtf16() const;
 
     /**
-     * @brief Convert the Unicode string to a UTF-32 string
+     * @brief Convert the UTF-8 string to a UTF-32 string
      *
      * @return Converted UTF-32 string
      *
@@ -396,7 +423,7 @@ public:
     std::basic_string<char32> toUtf32() const;
 
     /**
-     * @brief Convert the Unicode string to a UTF-32 string
+     * @brief Convert the UTF-8 string to a UTF-32 string
      *
      * @return Converted UTF-32 string
      *
@@ -461,6 +488,15 @@ public:
     String& operator+=(char8 right);
 
     /**
+     * @brief Overload of += operator to append a UTF-32 character
+     *
+     * @param right Utf-32 character to append
+     *
+     * @return Reference to self
+     */
+    String& operator+=(char32 right);
+
+    /**
      * @brief Overload of += operator to append a UTF-8 CodeUnit
      *
      * @param right CodeUnit to append
@@ -486,7 +522,7 @@ public:
      *
      * This function removes all the characters from the string.
      *
-     * @see IsEmpty, erase
+     * @see isEmpty, erase
      */
     void clear();
 
@@ -495,7 +531,7 @@ public:
      *
      * @return Number of UTF-8 codepoints in the string
      *
-     * @see IsEmpty
+     * @see isEmpty
      */
     size_type getSize() const;
 
@@ -504,7 +540,7 @@ public:
      *
      * @return True if the string is empty (i.e. contains no character)
      *
-     * @see Clear, getSize
+     * @see clear, getSize
      */
     bool isEmpty() const;
 
@@ -647,7 +683,7 @@ public:
     /**
      * @brief Return an iterator to the beginning of the string
      *
-     * @return Read-write iterator to the beginning of the string characters
+     * @return Read-only iterator to the beginning of the string
      *
      * @see end
      */
@@ -656,11 +692,11 @@ public:
     /**
      * @brief Return an iterator to the beginning of the string
      *
-     * @return Read-only iterator to the beginning of the string characters
+     * @return Read-only iterator to the beginning of the string
      *
      * @see end
      */
-    const_iterator begin() const;
+    const_iterator cbegin() const;
 
     /**
      * @brief Return an iterator to the end of the string
@@ -669,7 +705,7 @@ public:
      * thus it represents an invalid character and should never be
      * accessed.
      *
-     * @return Read-write iterator to the end of the string characters
+     * @return Read-only iterator to the end of the string
      *
      * @see begin
      */
@@ -682,11 +718,55 @@ public:
      * thus it represents an invalid character and should never be
      * accessed.
      *
-     * @return Read-only iterator to the end of the string characters
+     * @return Read-only iterator to the end of the string
      *
      * @see begin
      */
-    const_iterator end() const;
+    const_iterator cend() const;
+
+    /**
+     * @brief Return an iterator to the beginning of the string
+     *
+     * @return Read-only iterator to the beginning of the string
+     *
+     * @see end
+     */
+    reverse_iterator rbegin();
+
+    /**
+     * @brief Return an iterator to the beginning of the string
+     *
+     * @return Read-only iterator to the beginning of the string
+     *
+     * @see end
+     */
+    const_reverse_iterator crbegin() const;
+
+    /**
+     * @brief Return an iterator to the end of the string
+     *
+     * The end iterator refers to 1 position past the last character;
+     * thus it represents an invalid character and should never be
+     * accessed.
+     *
+     * @return Read-only iterator to the end of the string
+     *
+     * @see begin
+     */
+    reverse_iterator rend();
+
+    /**
+     * @brief Return an iterator to the end of the string
+     *
+     * The end iterator refers to 1 position past the last character;
+     * thus it represents an invalid character and should never be
+     * accessed.
+     *
+     * @return Read-only iterator to the end of the string
+     *
+     * @see begin
+     */
+    const_reverse_iterator crend() const;
 
 private:
     friend ENGINE_API bool operator==(const String& left, const String& right);
@@ -987,32 +1067,3 @@ ENGINE_API String operator+(char8 left, const String& right);
 ENGINE_API std::ostream& operator<<(std::ostream& os, const String& str);
 
 }  // namespace engine
-
-/**
- * @class String
- *
- * String is a utility string class defined mainly for
- * convenience. It is a Unicode string (implemented using
- * UTF-8), thus it can store any character in the world
- * (European, Chinese, Arabic, Hebrew, etc.).
- *
- * It automatically handles conversions from/to ASCII and
- * wide strings, so that you can work with standard string
- * classes and still be compatible with functions taking a
- * String.
- *
- * @code
- * String s;
- *
- * std::basic_string<char8> s1 = s;  // automatically converted to ASCII string
- * std::basic_string<wchar> s2 = s; // automatically converted to wide string
- * s = "hello";         // automatically converted from ASCII string
- * s = L"hello";        // automatically converted from wide string
- * s += 'a';            // automatically converted from ASCII string
- * s += L'a';           // automatically converted from wide string
- * @endcode
- *
- * String defines the most important functions of the
- * standard std::basic_string<char8> class: removing, random access, iterating,
- * appending, comparing, etc.
- */

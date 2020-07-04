@@ -16,14 +16,6 @@ const StringView sTag("ModelManager");
 template <>
 ModelManager* Singleton<ModelManager>::sInstance = nullptr;
 
-ModelManager& ModelManager::GetInstance() {
-    return Singleton<ModelManager>::GetInstance();
-}
-
-ModelManager* ModelManager::GetInstancePtr() {
-    return Singleton<ModelManager>::GetInstancePtr();
-}
-
 ModelManager::ModelManager() = default;
 
 ModelManager::~ModelManager() = default;

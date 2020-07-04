@@ -8,7 +8,7 @@
 
 #include <memory>
 
-namespace engine {
+namespace engine::plugin::vulkan {
 
 namespace {
 
@@ -138,4 +138,4 @@ bool Vk_TextureManager::createDescriptorSetLayout() {
     return true;
 }
 
-}  // namespace engine
+}  // namespace engine::plugin::vulkan

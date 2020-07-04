@@ -8,7 +8,7 @@
 
 #include <array>
 
-namespace engine {
+namespace engine::plugin::vulkan {
 
 namespace {
 
@@ -345,4 +345,4 @@ bool Vk_Shader::uploadUniformBuffers() {
     return true;
 }
 
-}  // namespace engine
+}  // namespace engine::plugin::vulkan

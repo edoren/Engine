@@ -3,6 +3,7 @@
 #include <Graphics/3D/Camera.hpp>
 #include <Renderer/RenderStates.hpp>
 #include <System/LogManager.hpp>
+#include <System/String.hpp>
 #include <System/StringFormat.hpp>
 #include <Util/Container/Vector.hpp>
 
@@ -15,7 +16,7 @@
 
 #include <utility>
 
-namespace engine {
+namespace engine::plugin::opengl {
 
 GL_Mesh::GL_Mesh() : m_vao(0), m_vbo(0), m_ebo(0) {}
 
@@ -136,4 +137,4 @@ void GL_Mesh::draw(RenderWindow& target, const RenderStates& states) const {
     GL_CALL(glBindVertexArray(0));
 }
 
-}  // namespace engine
+}  // namespace engine::plugin::opengl
