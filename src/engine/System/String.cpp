@@ -32,7 +32,7 @@
 
 namespace engine {
 
-const std::size_t String::sInvalidPos = std::basic_string<char8>::npos;
+const String::size_type String::sInvalidPos = std::basic_string<char8>::npos;
 
 String::String() = default;
 
@@ -52,7 +52,7 @@ String::String(char32 utf32Char) {
 
 String::String(const char8* utf8String) {
     if (utf8String && utf8String[0] != 0) {
-        std::size_t length = std::strlen(utf8String);
+        size_type length = std::strlen(utf8String);
         if (length > 0) {
             if (utf::IsValidUTF<8>(utf8String, utf8String + length)) {
                 m_string.assign(utf8String);
@@ -69,7 +69,7 @@ String::String(const char16* utf16String) {
         const char16* it = utf16String;
         while (*(++it) != 0) {
         }
-        std::size_t length = it - utf16String;
+        size_type length = it - utf16String;
         utf::UtfToUtf<16, 8>(utf16String, utf16String + length, &m_string);
     }
 }
@@ -80,14 +80,14 @@ String::String(const char32* utf32String) {
         const char32* it = utf32String;
         while (*(++it) != 0) {
         }
-        std::size_t length = it - utf32String;
+        size_type length = it - utf32String;
         utf::UtfToUtf<32, 8>(utf32String, utf32String + length, &m_string);
     }
 }
 
 String::String(const wchar* wideString) {
     if (wideString && wideString[0] != 0) {
-        std::size_t length = std::wcslen(wideString);
+        size_type length = std::wcslen(wideString);
 #if PLATFORM_IS(PLATFORM_WINDOWS)
         utf::UtfToUtf<16, 8>(wideString, wideString + length, &m_string);
 #else
@@ -257,7 +257,7 @@ String& String::operator+=(const utf::CodeUnit<8>& right) {
     return *this;
 }
 
-utf::CodeUnit<8> String::operator[](std::size_t index) const {
+utf::CodeUnit<8> String::operator[](size_type index) const {
     // TODO: throw error
     return (cbegin() + index)->getUnit();
 }
@@ -266,7 +266,7 @@ void String::clear() {
     m_string.clear();
 }
 
-std::size_t String::getSize() const {
+String::size_type String::getSize() const {
     return utf::GetSizeUTF<8>(m_string.begin(), m_string.end());
 }
 
@@ -274,10 +274,10 @@ bool String::isEmpty() const {
     return m_string.empty();
 }
 
-void String::erase(std::size_t position, std::size_t count) {
+void String::erase(size_type position, size_type count) {
     // Iterate to the start codepoint
     auto startIt(m_string.begin());
-    for (std::size_t i = 0; i < position; i++) {
+    for (size_type i = 0; i < position; i++) {
         auto nextIt = utf::NextUTF<8>(startIt, m_string.end());
         if (nextIt == m_string.end()) {
             ENGINE_THROW(std::out_of_range("the specified position is out of the string range"));
@@ -286,7 +286,7 @@ void String::erase(std::size_t position, std::size_t count) {
     }
     // Iterate to the end codepoint
     auto endIt(startIt);
-    for (std::size_t i = 0; i < count; i++) {
+    for (size_type i = 0; i < count; i++) {
         endIt = utf::NextUTF<8>(endIt, m_string.end());
         if (endIt == m_string.end()) {
             break;
@@ -295,10 +295,10 @@ void String::erase(std::size_t position, std::size_t count) {
     m_string.erase(startIt, endIt);
 }
 
-void String::insert(std::size_t position, const String& str) {
+void String::insert(size_type position, const String& str) {
     // Iterate to the start codepoint
     auto startIt(m_string.begin());
-    for (std::size_t i = 0; i < position; i++) {
+    for (size_type i = 0; i < position; i++) {
         auto nextIt = utf::NextUTF<8>(startIt, m_string.end());
         if (nextIt == m_string.end()) {
             ENGINE_THROW(std::out_of_range("the specified position is out of the string range"));
@@ -308,10 +308,10 @@ void String::insert(std::size_t position, const String& str) {
     m_string.insert(startIt, str.m_string.cbegin(), str.m_string.cend());
 }
 
-std::size_t String::find(const String& str, std::size_t start) const {
+String::size_type String::find(const String& str, size_type start) const {
     // Iterate to the start codepoint
     auto startIt(m_string.cbegin());
-    for (std::size_t i = 0; i < start; i++) {
+    for (size_type i = 0; i < start; i++) {
         startIt = utf::NextUTF<8>(startIt, m_string.cend());
         if (startIt == m_string.cend()) {
             return sInvalidPos;
@@ -322,7 +322,7 @@ std::size_t String::find(const String& str, std::size_t start) const {
     return (findIt == m_string.cend()) ? sInvalidPos : utf::GetSizeUTF<8>(m_string.cbegin(), findIt);
 }
 
-std::size_t String::findFirstOf(const String& str, std::size_t pos) const {
+String::size_type String::findFirstOf(const String& str, size_type pos) const {
     size_t strSize = getSize();
 
     if (pos >= strSize) {
@@ -331,7 +331,7 @@ std::size_t String::findFirstOf(const String& str, std::size_t pos) const {
 
     // Iterate to the start codepoint
     auto startIt(m_string.cbegin());
-    for (std::size_t i = 0; i < pos; i++) {
+    for (size_type i = 0; i < pos; i++) {
         startIt = utf::NextUTF<8>(startIt, m_string.cend());
         if (startIt == m_string.cend()) {
             return sInvalidPos;
@@ -353,13 +353,13 @@ std::size_t String::findFirstOf(const String& str, std::size_t pos) const {
     }
 }
 
-std::size_t String::findLastOf(const String& str, std::size_t pos) const {
+String::size_type String::findLastOf(const String& str, size_type pos) const {
     // Iterate to the start codepoint
     auto startIt(m_string.cbegin());
     if (pos == sInvalidPos) {
         startIt = m_string.cend();
     } else {
-        for (std::size_t i = 0; i < pos + 1; i++) {
+        for (size_type i = 0; i < pos + 1; i++) {
             startIt = utf::NextUTF<8>(startIt, m_string.cend());
             if (startIt == m_string.cend()) {
                 break;
@@ -384,10 +384,10 @@ std::size_t String::findLastOf(const String& str, std::size_t pos) const {
     return sInvalidPos;
 }
 
-void String::replace(std::size_t position, std::size_t length, const String& replaceWith) {
+void String::replace(size_type position, size_type length, const String& replaceWith) {
     // Iterate to the start codepoint
     auto startIt(m_string.begin());
-    for (std::size_t i = 0; i < position; i++) {
+    for (size_type i = 0; i < position; i++) {
         auto nextIt = utf::NextUTF<8>(startIt, m_string.end());
         if (nextIt == m_string.end()) {
             ENGINE_THROW(std::out_of_range("the specified position is out of the string range"));
@@ -396,7 +396,7 @@ void String::replace(std::size_t position, std::size_t length, const String& rep
     }
     // Iterate to the end codepoint
     auto endIt(startIt);
-    for (std::size_t i = 0; i < length; i++) {
+    for (size_type i = 0; i < length; i++) {
         endIt = utf::NextUTF<8>(endIt, m_string.end());
         if (endIt == m_string.end()) {
             break;
@@ -423,8 +423,8 @@ void String::replace(uint32 searchFor, uint32 replaceWith) {
 }
 
 void String::replace(const String& searchFor, const String& replaceWith) {
-    std::size_t step = replaceWith.m_string.size();
-    std::size_t len = searchFor.m_string.size();
+    size_type step = replaceWith.m_string.size();
+    size_type len = searchFor.m_string.size();
     // Start the iterator at the beginning of the sequence
     size_t findItPos = 0;
     // Replace each occurrence of search
@@ -447,10 +447,10 @@ void String::replace(const String& searchFor, const String& replaceWith) {
     }
 }
 
-String String::subString(std::size_t position, std::size_t length) const {
+String String::subString(size_type position, size_type length) const {
     // Iterate to the start codepoint
     auto startIt(m_string.begin());
-    for (std::size_t i = 0; i < position; i++) {
+    for (size_type i = 0; i < position; i++) {
         auto nextIt = utf::NextUTF<8>(startIt, m_string.end());
         if (nextIt == m_string.end()) {
             ENGINE_THROW(std::out_of_range("the specified position is out of the string range"));
@@ -459,7 +459,7 @@ String String::subString(std::size_t position, std::size_t length) const {
     }
     // Iterate to the end codepoint
     auto endIt(startIt);
-    for (std::size_t i = 0; i < length; i++) {
+    for (size_type i = 0; i < length; i++) {
         endIt = utf::NextUTF<8>(endIt, m_string.end());
         if (endIt == m_string.end()) {
             break;

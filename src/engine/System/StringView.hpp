@@ -8,43 +8,18 @@
 namespace engine {
 
 /**
- * @brief Utility string class that automatically handles
- *        conversions between types and encodings
- *
- * String is a utility string class defined mainly for
- * convenience. It is a Unicode string (implemented using
- * UTF-8), thus it can store any character in the world
- * (European, Chinese, Arabic, Hebrew, etc.).
- *
- * It automatically handles conversions from/to ASCII and
- * wide strings, so that you can work with standard string
- * classes and still be compatible with functions taking a
- * String.
- *
- * @code
- * String s;
- *
- * std::basic_string<char8> s1 = s;  // automatically converted to ASCII string
- * std::basic_string<wchar> s2 = s; // automatically converted to wide string
- * s = "hello";         // automatically converted from ASCII string
- * s = L"hello";        // automatically converted from wide string
- * s += 'a';            // automatically converted from ASCII string
- * s += L'a';           // automatically converted from wide string
- * @endcode
- *
- * String defines the most important functions of the
- * standard std::basic_string<char8> class: removing, random access, iterating,
- * appending, comparing, etc.
+ * @brief Utility class to handle a string view to a UTF-8 character sequence
  */
 class ENGINE_API StringView {
 public:
     ////////////////////////////////////////////////////////////
     // Types
     ////////////////////////////////////////////////////////////
-    using size_type = std::size_t;  ///< Size type
-    // using char_type = char8;
-    using const_iterator = UTFIterator<8, const char8*>;  ///< Read-only iterator type
-    using iterator = const_iterator;                      ///< Iterator type
+    using size_type = std::size_t;                                         ///< Size type
+    using const_iterator = UTFIterator<8>;                                 ///< Read-only iterator type
+    using iterator = const_iterator;                                       ///< Iterator type
+    using const_reverse_iterator = std::reverse_iterator<const_iterator>;  ///< Read-only reverse iterator type
+    using reverse_iterator = std::reverse_iterator<iterator>;              ///< Reverse iterator type
 
     ////////////////////////////////////////////////////////////
     // Static member data
@@ -121,7 +96,7 @@ public:
      *
      * @return Character at position \a index
      */
-    constexpr char8 operator[](std::size_t index) const;
+    constexpr char8 operator[](size_type index) const;
 
     /**
      * @brief Get the size of the string
@@ -130,7 +105,7 @@ public:
      *
      * @see IsEmpty
      */
-    constexpr std::size_t getSize() const;
+    constexpr size_type getSize() const;
 
     /**
      * @brief Check whether the string is empty or not
@@ -154,7 +129,7 @@ public:
      * @return Position of \a str in the string, or String::InvalidPos
      *         if not found
      */
-    constexpr std::size_t find(const StringView& str, std::size_t start = 0) const;
+    constexpr size_type find(const StringView& str, size_type start = 0) const;
 
     /**
      * @brief Finds the first character equal to one of the
@@ -170,7 +145,7 @@ public:
      * @return Position of the first character of \a str found
      *        in the string, or String::InvalidPos if not found
      */
-    constexpr std::size_t findFirstOf(const StringView& str, std::size_t pos = 0) const;
+    constexpr size_type findFirstOf(const StringView& str, size_type pos = 0) const;
 
     /**
      * @brief Finds the last character equal to one of the
@@ -186,7 +161,7 @@ public:
      * @return Position of the last character of \a str found
      *        in the string, or String::InvalidPos if not found
      */
-    constexpr std::size_t findLastOf(const StringView& str, std::size_t pos = sInvalidPos) const;
+    constexpr size_type findLastOf(const StringView& str, size_type pos = sInvalidPos) const;
 
     /**
      * @brief Return a part of the string
@@ -203,7 +178,7 @@ public:
      *
      * @return String object containing a SubString of this object
      */
-    constexpr StringView subString(std::size_t position, std::size_t length = sInvalidPos) const;
+    constexpr StringView subString(size_type position, size_type length = sInvalidPos) const;
 
     /**
      * @brief Get a pointer to the C-style array of characters
@@ -233,7 +208,7 @@ public:
      *
      * @see end
      */
-    constexpr const_iterator begin() const;
+    constexpr const_iterator cbegin() const;
 
     /**
      * @brief Return an iterator to the end of the string
@@ -259,7 +234,51 @@ public:
      *
      * @see begin
      */
-    constexpr const_iterator end() const;
+    constexpr const_iterator cend() const;
+
+    /**
+     * @brief Return an iterator to the beginning of the string
+     *
+     * @return Read-only iterator to the beginning of the string
+     *
+     * @see end
+     */
+    reverse_iterator rbegin();
+
+    /**
+     * @brief Return an iterator to the beginning of the string
+     *
+     * @return Read-only iterator to the beginning of the string
+     *
+     * @see end
+     */
+    const_reverse_iterator crbegin() const;
+
+    /**
+     * @brief Return an iterator to the end of the string
+     *
+     * The end iterator refers to 1 position past the last character;
+     * thus it represents an invalid character and should never be
+     * accessed.
+     *
+     * @return Read-only iterator to the end of the string
+     *
+     * @see begin
+     */
+    reverse_iterator rend();
+
+    /**
+     * @brief Return an iterator to the end of the string
+     *
+     * The end iterator refers to 1 position past the last character;
+     * thus it represents an invalid character and should never be
+     * accessed.
+     *
+     * @return Read-only iterator to the end of the string
+     *
+     * @see begin
+     */
+    const_reverse_iterator crend() const;
 
 private:
     ////////////////////////////////////////////////////////////

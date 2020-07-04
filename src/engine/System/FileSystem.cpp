@@ -278,14 +278,14 @@ bool FileSystem::isAbsolutePath(const StringView& path) const {
 
 String FileSystem::join(const StringView& left, const StringView& right) const {
     if (right.isEmpty()) {
-        return String::FromUtf8(left.begin(), left.end());
+        return String::FromUtf8(left.cbegin(), left.cend());
     }
     if (left.isEmpty()) {
-        return String::FromUtf8(right.begin(), right.end());
+        return String::FromUtf8(right.cbegin(), right.cend());
     }
 
     if (isAbsolutePath(right)) {
-        return String::FromUtf8(right.begin(), right.end());
+        return String::FromUtf8(right.cbegin(), right.cend());
     }
 
     String ret;
