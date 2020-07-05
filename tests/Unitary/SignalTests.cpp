@@ -1,6 +1,7 @@
 #include <catch2/catch.hpp>
 
 #include <cstdlib>
+#include <iostream>
 #include <sstream>
 
 #include <System/Signal.hpp>
@@ -13,6 +14,7 @@ static std::stringstream gStream;
 static const String gBaseMemberFunctionStr = "[Base Member Function]";
 static const String gDerivedMemberFunctionStr = "[Derived Member Function]";
 static const String gMemberFunctionStr = "[Member Function]";
+static const String gConstMemberFunctionStr = "[Const Member Function]";
 static const String gStaticMemberFunctionStr = "[Static Member Function]";
 static const String gStaticFunctionStr = "[Static Function]";
 static const String gLambdaFunctionStr = "[Lambda Function]";
@@ -30,6 +32,10 @@ struct MyClass : public MyBase {
 
     void member() {
         gStream << gMemberFunctionStr;
+    }
+
+    void constMember() const {
+        gStream << gConstMemberFunctionStr;
     }
 
     static void StaticMember() {
@@ -104,6 +110,14 @@ TEST_CASE("Signal connection", "[Signal]") {
         MyClass instance;
         Signal<> sig;
         sig.connect(instance, &MyClass::member);
+        sig.emit();
+        REQUIRE(gStream.str() == result);
+    }
+    SECTION("Connect to a class non-static const member function") {
+        const String result = gConstMemberFunctionStr;
+        MyClass instance;
+        Signal<> sig;
+        sig.connect(instance, &MyClass::constMember);
         sig.emit();
         REQUIRE(gStream.str() == result);
     }

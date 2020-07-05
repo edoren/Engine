@@ -9,56 +9,124 @@
 #include <mutex>
 #include <utility>
 
-// A signal object may call multiple slots with the
-// same signature. You can connect functions to the signal
-// which will be called when the Emit() method on the
-// signal object is invoked. Any argument passed to Emit()
-// will be passed to the given functions.
-
 namespace engine {
 
+/**
+ * @brief Class used to manage signal and event connections
+ *
+ * A signal object may call multiple slots with the
+ * same signature. You can connect functions to the signal
+ * which will be called when the Emit() method on the
+ * signal object is invoked. Any argument passed to Emit()
+ * will be passed to the given functions.
+ *
+ * Example:
+ * @code
+ * auto fn = [](int a, int b) {
+ *     std::cout << a << " + " << b << " = " << a + b << std::endl;
+ * };
+ * Signal<int, int> sig1;
+ * sig1.connect(fn);
+ * sig1.emit(2, 3);
+ * @endcode
+ *
+ * @tparam Args The propagated parameters when this signal is emmited
+ */
 template <typename... Args>
 class Signal {
 public:
-    using SlotType = Function<void(Args...)>;
+    using SlotType = Function<void(Args...)>;  ///< The stored slot type
 
-    // Default constructor
+    /**
+     * @brief Default constructor
+     */
     Signal();
 
-    // Copy constructor
+    /**
+     * @brief Copy constructor
+     */
     Signal(const Signal& other);
 
-    // Move constructor
+    /**
+     * @brief Move constructor
+     */
     Signal(Signal&& other) noexcept;
 
-    // Destructor
+    /**
+     * @brief Destructor
+     */
     ~Signal();
 
-    // Copy assignment
+    /**
+     * @brief Copy assignment
+     */
     Signal& operator=(const Signal& other);
 
-    // Move assignment
+    /**
+     * @brief Move assignment
+     */
     Signal& operator=(Signal&& other) noexcept;
 
-    // Connects a member function to this Signal
+    /**
+     * @brief Connects a member function to this Signal
+     *
+     * Example:
+     * @code
+     * Signal<> sig;
+     * MyClass instance;
+     * sig.connect(instance, &MyClass::member);
+     * @endcode
+     *
+     * @param instance Reference to the instance object
+     * @param func Member function to connect to
+     * @return The signal connection to this slot
+     */
     template <typename InstanceType, typename FMInstanceType>
     SignalConnection& connect(InstanceType& instance, void (FMInstanceType::*func)(Args...));
 
-    // Connects a const member function to this Signal
+    /**
+     * @brief Connects a const member function to this Signal
+     *
+     * Example:
+     * @code
+     * Signal<> sig;
+     * MyClass instance;
+     * sig.connect(instance, &MyClass::constMember);
+     * @endcode
+     *
+     * @param instance Reference to the instance object
+     * @param func Const member function to connect to
+     * @return The signal connection to this slot
+     */
     template <typename InstanceType, typename FMInstanceType>
     SignalConnection& connect(InstanceType& instance, void (FMInstanceType::*func)(Args...) const);
 
-    // Connects a Slot to this Signal
+    /**
+     * @brief Connects a Slot to this Signal
+     *
+     * @param slot The function to connect to, it can be a global, static or lambda function
+     * @return The signal connection to this slot
+     */
     SignalConnection& connect(const SlotType& slot);
 
-    // Disconnects a previously connected function
+    /**
+     * @brief Disconnects a previously connected function
+     *
+     * @param connection The signal connection to disconnect
+     */
     void disconnect(SignalConnection& connection);
 
-    // Disconnects all previously connected functions
+    /**
+     * @brief Disconnects all previously connected functions
+     */
     void disconnectAll();
 
-    // Calls all connected functions
-    void emit(Args... args);
+    /**
+     * @brief Calls all connected functions
+     *
+     * @param args The arguments to propagate to the connected functions
+     */
+    void emit(Args&&... args);
 
 private:
     SignalConnection::IdType m_currentId;

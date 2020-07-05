@@ -81,7 +81,7 @@ void Signal<Args...>::disconnectAll() {
 }
 
 template <typename... Args>
-void Signal<Args...>::emit(Args... args) {
+void Signal<Args...>::emit(Args&&... args) {
     std::lock_guard<std::mutex> lock(m_slotsMutex);
     for (auto& pair : m_slots) {
         pair.second.second(std::forward<Args>(args)...);
