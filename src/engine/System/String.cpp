@@ -42,19 +42,19 @@ String::String(char8 asciiChar) {
 
 String::String(char16 utf16Char) {
     char16* ptr = &utf16Char;
-    utf::UtfToUtf<16, 8>(ptr, ptr + 1, &m_string);
+    utf::UtfToUtf<utf::UTF_16, utf::UTF_8>(ptr, ptr + 1, &m_string);
 }
 
 String::String(char32 utf32Char) {
     char32* ptr = &utf32Char;
-    utf::UtfToUtf<32, 8>(ptr, ptr + 1, &m_string);
+    utf::UtfToUtf<utf::UTF_32, utf::UTF_8>(ptr, ptr + 1, &m_string);
 }
 
 String::String(const char8* utf8String) {
     if (utf8String && utf8String[0] != 0) {
         size_type length = std::strlen(utf8String);
         if (length > 0) {
-            if (utf::IsValidUTF<8>(utf8String, utf8String + length)) {
+            if (utf::IsValidUTF<utf::UTF_8>(utf8String, utf8String + length)) {
                 m_string.assign(utf8String);
             } else {
                 ENGINE_THROW(std::runtime_error("invalid utf8 convertion."));
@@ -70,7 +70,7 @@ String::String(const char16* utf16String) {
         while (*(++it) != 0) {
         }
         size_type length = it - utf16String;
-        utf::UtfToUtf<16, 8>(utf16String, utf16String + length, &m_string);
+        utf::UtfToUtf<utf::UTF_16, utf::UTF_8>(utf16String, utf16String + length, &m_string);
     }
 }
 
@@ -81,7 +81,7 @@ String::String(const char32* utf32String) {
         while (*(++it) != 0) {
         }
         size_type length = it - utf32String;
-        utf::UtfToUtf<32, 8>(utf32String, utf32String + length, &m_string);
+        utf::UtfToUtf<utf::UTF_32, utf::UTF_8>(utf32String, utf32String + length, &m_string);
     }
 }
 
@@ -89,16 +89,16 @@ String::String(const wchar* wideString) {
     if (wideString && wideString[0] != 0) {
         size_type length = std::wcslen(wideString);
 #if PLATFORM_IS(PLATFORM_WINDOWS)
-        utf::UtfToUtf<16, 8>(wideString, wideString + length, &m_string);
+        utf::UtfToUtf<utf::UTF_16, utf::UTF_8>(wideString, wideString + length, &m_string);
 #else
-        utf::UtfToUtf<32, 8>(wideString, wideString + length, &m_string);
+        utf::UtfToUtf<utf::UTF_32, utf::UTF_8>(wideString, wideString + length, &m_string);
 #endif
     }
 }
 
 String::String(const std::basic_string<char8>& utf8String) {
     if (!utf8String.empty()) {
-        if (utf::IsValidUTF<8>(utf8String.cbegin(), utf8String.cend())) {
+        if (utf::IsValidUTF<utf::UTF_8>(utf8String.cbegin(), utf8String.cend())) {
             m_string.assign(utf8String);
         } else {
             ENGINE_THROW(std::runtime_error("invalid utf8 convertion."));
@@ -108,7 +108,7 @@ String::String(const std::basic_string<char8>& utf8String) {
 
 String::String(std::basic_string<char8>&& utf8String) {
     if (!utf8String.empty()) {
-        if (utf::IsValidUTF<8>(utf8String.cbegin(), utf8String.cend())) {
+        if (utf::IsValidUTF<utf::UTF_8>(utf8String.cbegin(), utf8String.cend())) {
             m_string = std::move(utf8String);
         } else {
             ENGINE_THROW(std::runtime_error("invalid utf8 convertion."));
@@ -117,18 +117,18 @@ String::String(std::basic_string<char8>&& utf8String) {
 }
 
 String::String(const std::basic_string<char16>& utf16String) {
-    utf::UtfToUtf<16, 8>(utf16String.cbegin(), utf16String.cend(), &m_string);
+    utf::UtfToUtf<utf::UTF_16, utf::UTF_8>(utf16String.cbegin(), utf16String.cend(), &m_string);
 }
 
 String::String(const std::basic_string<char32>& utf32String) {
-    utf::UtfToUtf<32, 8>(utf32String.cbegin(), utf32String.cend(), &m_string);
+    utf::UtfToUtf<utf::UTF_32, utf::UTF_8>(utf32String.cbegin(), utf32String.cend(), &m_string);
 }
 
 String::String(const std::basic_string<wchar>& wideString) {
 #if PLATFORM_IS(PLATFORM_WINDOWS)
-    utf::UtfToUtf<16, 8>(wideString.cbegin(), wideString.cend(), &m_string);
+    utf::UtfToUtf<utf::UTF_16, utf::UTF_8>(wideString.cbegin(), wideString.cend(), &m_string);
 #else
-    utf::UtfToUtf<32, 8>(wideString.cbegin(), wideString.cend(), &m_string);
+    utf::UtfToUtf<utf::UTF_32, utf::UTF_8>(wideString.cbegin(), wideString.cend(), &m_string);
 #endif
 }
 
@@ -140,7 +140,7 @@ String::~String() = default;
 
 String String::FromUtf8(const char8* begin, const char8* end) {
     String string;
-    if (utf::IsValidUTF<8>(begin, end)) {
+    if (utf::IsValidUTF<utf::UTF_8>(begin, end)) {
         string.m_string.assign(begin, end);
     } else {
         ENGINE_THROW(std::runtime_error("invalid utf8 convertion."));
@@ -154,13 +154,13 @@ String String::FromUtf8(iterator begin, iterator end) {
 
 String String::FromUtf16(const char16* begin, const char16* end) {
     String string;
-    utf::UtfToUtf<16, 8>(begin, end, &string.m_string);
+    utf::UtfToUtf<utf::UTF_16, utf::UTF_8>(begin, end, &string.m_string);
     return string;
 }
 
 String String::FromUtf32(const char32* begin, const char32* end) {
     String string;
-    utf::UtfToUtf<32, 8>(begin, end, &string.m_string);
+    utf::UtfToUtf<utf::UTF_32, utf::UTF_8>(begin, end, &string.m_string);
     return string;
 }
 
@@ -194,22 +194,22 @@ const std::basic_string<char8>& String::toUtf8() const {
 
 std::basic_string<char16> String::toUtf16() const {
     std::basic_string<char16> output;
-    utf::UtfToUtf<8, 16>(m_string.cbegin(), m_string.cend(), &output);
+    utf::UtfToUtf<utf::UTF_8, utf::UTF_16>(m_string.cbegin(), m_string.cend(), &output);
     return output;
 }
 
 std::basic_string<char32> String::toUtf32() const {
     std::basic_string<char32> output;
-    utf::UtfToUtf<8, 32>(m_string.cbegin(), m_string.cend(), &output);
+    utf::UtfToUtf<utf::UTF_8, utf::UTF_32>(m_string.cbegin(), m_string.cend(), &output);
     return output;
 }
 
 std::basic_string<wchar> String::toWide() const {
     std::basic_string<wchar> output;
 #if PLATFORM_IS(PLATFORM_WINDOWS)
-    utf::UtfToUtf<8, 16>(m_string.cbegin(), m_string.cend(), &output);
+    utf::UtfToUtf<utf::UTF_8, utf::UTF_16>(m_string.cbegin(), m_string.cend(), &output);
 #else
-    utf::UtfToUtf<8, 32>(m_string.cbegin(), m_string.cend(), &output);
+    utf::UtfToUtf<utf::UTF_8, utf::UTF_32>(m_string.cbegin(), m_string.cend(), &output);
 #endif
     return output;
 }
@@ -244,11 +244,11 @@ String& String::operator+=(char8 right) {
 }
 
 String& String::operator+=(char32 right) {
-    utf::UtfToUtf<32, 8>(&right, &right + 1, &m_string);
+    utf::UtfToUtf<utf::UTF_32, utf::UTF_8>(&right, &right + 1, &m_string);
     return *this;
 }
 
-String& String::operator+=(const utf::CodeUnit<8>& right) {
+String& String::operator+=(const utf::CodeUnit<utf::UTF_8>& right) {
     // TODO: Missing test
     m_string.reserve(m_string.size() + right.getSize());
     for (auto data : right) {
@@ -257,9 +257,9 @@ String& String::operator+=(const utf::CodeUnit<8>& right) {
     return *this;
 }
 
-utf::CodeUnit<8> String::operator[](size_type index) const {
+utf::CodeUnit<utf::UTF_8> String::operator[](size_type index) const {
     // TODO: throw error
-    return (cbegin() + index)->getUnit();
+    return (cbegin() + index)->get();
 }
 
 void String::clear() {
@@ -267,7 +267,7 @@ void String::clear() {
 }
 
 String::size_type String::getSize() const {
-    return utf::GetSizeUTF<8>(m_string.begin(), m_string.end());
+    return utf::GetSizeUTF<utf::UTF_8>(m_string.begin(), m_string.end());
 }
 
 bool String::isEmpty() const {
@@ -278,7 +278,7 @@ void String::erase(size_type position, size_type count) {
     // Iterate to the start codepoint
     auto startIt(m_string.begin());
     for (size_type i = 0; i < position; i++) {
-        auto nextIt = utf::NextUTF<8>(startIt, m_string.end());
+        auto nextIt = utf::NextUTF<utf::UTF_8>(startIt, m_string.end());
         if (nextIt == m_string.end()) {
             ENGINE_THROW(std::out_of_range("the specified position is out of the string range"));
         }
@@ -287,7 +287,7 @@ void String::erase(size_type position, size_type count) {
     // Iterate to the end codepoint
     auto endIt(startIt);
     for (size_type i = 0; i < count; i++) {
-        endIt = utf::NextUTF<8>(endIt, m_string.end());
+        endIt = utf::NextUTF<utf::UTF_8>(endIt, m_string.end());
         if (endIt == m_string.end()) {
             break;
         }
@@ -299,7 +299,7 @@ void String::insert(size_type position, const String& str) {
     // Iterate to the start codepoint
     auto startIt(m_string.begin());
     for (size_type i = 0; i < position; i++) {
-        auto nextIt = utf::NextUTF<8>(startIt, m_string.end());
+        auto nextIt = utf::NextUTF<utf::UTF_8>(startIt, m_string.end());
         if (nextIt == m_string.end()) {
             ENGINE_THROW(std::out_of_range("the specified position is out of the string range"));
         }
@@ -312,14 +312,14 @@ String::size_type String::find(const String& str, size_type start) const {
     // Iterate to the start codepoint
     auto startIt(m_string.cbegin());
     for (size_type i = 0; i < start; i++) {
-        startIt = utf::NextUTF<8>(startIt, m_string.cend());
+        startIt = utf::NextUTF<utf::UTF_8>(startIt, m_string.cend());
         if (startIt == m_string.cend()) {
             return sInvalidPos;
         }
     }
     // Find the string
     auto findIt(std::search(startIt, m_string.cend(), str.m_string.cbegin(), str.m_string.cend()));
-    return (findIt == m_string.cend()) ? sInvalidPos : utf::GetSizeUTF<8>(m_string.cbegin(), findIt);
+    return (findIt == m_string.cend()) ? sInvalidPos : utf::GetSizeUTF<utf::UTF_8>(m_string.cbegin(), findIt);
 }
 
 String::size_type String::findFirstOf(const String& str, size_type pos) const {
@@ -332,7 +332,7 @@ String::size_type String::findFirstOf(const String& str, size_type pos) const {
     // Iterate to the start codepoint
     auto startIt(m_string.cbegin());
     for (size_type i = 0; i < pos; i++) {
-        startIt = utf::NextUTF<8>(startIt, m_string.cend());
+        startIt = utf::NextUTF<utf::UTF_8>(startIt, m_string.cend());
         if (startIt == m_string.cend()) {
             return sInvalidPos;
         }
@@ -344,10 +344,10 @@ String::size_type String::findFirstOf(const String& str, size_type pos) const {
         if (startIt == m_string.cend()) {
             return sInvalidPos;
         }
-        endIt = utf::NextUTF<8>(endIt, m_string.cend());
+        endIt = utf::NextUTF<utf::UTF_8>(endIt, m_string.cend());
         auto findIt(std::search(str.m_string.cbegin(), str.m_string.cend(), startIt, endIt));
         if (findIt != str.m_string.cend()) {
-            return utf::GetSizeUTF<8>(m_string.cbegin(), startIt);
+            return utf::GetSizeUTF<utf::UTF_8>(m_string.cbegin(), startIt);
         }
         startIt = endIt;
     }
@@ -360,7 +360,7 @@ String::size_type String::findLastOf(const String& str, size_type pos) const {
         startIt = m_string.cend();
     } else {
         for (size_type i = 0; i < pos + 1; i++) {
-            startIt = utf::NextUTF<8>(startIt, m_string.cend());
+            startIt = utf::NextUTF<utf::UTF_8>(startIt, m_string.cend());
             if (startIt == m_string.cend()) {
                 break;
             }
@@ -373,10 +373,10 @@ String::size_type String::findLastOf(const String& str, size_type pos) const {
         if (startIt == m_string.cbegin()) {
             return sInvalidPos;
         }
-        endIt = utf::PriorUTF<8>(endIt, m_string.cbegin());
+        endIt = utf::PriorUTF<utf::UTF_8>(endIt, m_string.cbegin());
         auto findIt(std::search(str.m_string.cbegin(), str.m_string.cend(), endIt, startIt));
         if (findIt != str.m_string.cend()) {
-            return utf::GetSizeUTF<8>(m_string.cbegin(), endIt);
+            return utf::GetSizeUTF<utf::UTF_8>(m_string.cbegin(), endIt);
         }
         startIt = endIt;
     }
@@ -388,7 +388,7 @@ void String::replace(size_type position, size_type length, const String& replace
     // Iterate to the start codepoint
     auto startIt(m_string.begin());
     for (size_type i = 0; i < position; i++) {
-        auto nextIt = utf::NextUTF<8>(startIt, m_string.end());
+        auto nextIt = utf::NextUTF<utf::UTF_8>(startIt, m_string.end());
         if (nextIt == m_string.end()) {
             ENGINE_THROW(std::out_of_range("the specified position is out of the string range"));
         }
@@ -397,7 +397,7 @@ void String::replace(size_type position, size_type length, const String& replace
     // Iterate to the end codepoint
     auto endIt(startIt);
     for (size_type i = 0; i < length; i++) {
-        endIt = utf::NextUTF<8>(endIt, m_string.end());
+        endIt = utf::NextUTF<utf::UTF_8>(endIt, m_string.end());
         if (endIt == m_string.end()) {
             break;
         }
@@ -451,7 +451,7 @@ String String::subString(size_type position, size_type length) const {
     // Iterate to the start codepoint
     auto startIt(m_string.begin());
     for (size_type i = 0; i < position; i++) {
-        auto nextIt = utf::NextUTF<8>(startIt, m_string.end());
+        auto nextIt = utf::NextUTF<utf::UTF_8>(startIt, m_string.end());
         if (nextIt == m_string.end()) {
             ENGINE_THROW(std::out_of_range("the specified position is out of the string range"));
         }
@@ -460,7 +460,7 @@ String String::subString(size_type position, size_type length) const {
     // Iterate to the end codepoint
     auto endIt(startIt);
     for (size_type i = 0; i < length; i++) {
-        endIt = utf::NextUTF<8>(endIt, m_string.end());
+        endIt = utf::NextUTF<utf::UTF_8>(endIt, m_string.end());
         if (endIt == m_string.end()) {
             break;
         }

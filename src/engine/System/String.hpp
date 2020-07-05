@@ -28,7 +28,7 @@
 
 #include <Util/Prerequisites.hpp>
 
-#include <Util/UTFIterator.hpp>
+#include <Util/UTF.hpp>
 
 #include <sstream>
 #include <string>
@@ -70,7 +70,7 @@ public:
     // Types
     ////////////////////////////////////////////////////////////
     using size_type = std::size_t;                                         ///< Size type
-    using const_iterator = UTFIterator<8>;                                 ///< Read-only iterator type
+    using const_iterator = utf::Iterator<utf::UTF_8>;                                 ///< Read-only iterator type
     using iterator = const_iterator;                                       ///< Iterator type
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;  ///< Read-only reverse iterator type
     using reverse_iterator = std::reverse_iterator<iterator>;              ///< Reverse iterator type
@@ -503,7 +503,7 @@ public:
      *
      * @return Reference to self
      */
-    String& operator+=(const utf::CodeUnit<8>& right);
+    String& operator+=(const utf::CodeUnit<utf::UTF_8>& right);
 
     /**
      * @brief Overload of [] operator to access a character by its position
@@ -515,7 +515,7 @@ public:
      *
      * @return Character at position \a index
      */
-    utf::CodeUnit<8> operator[](size_type index) const;
+    utf::CodeUnit<utf::UTF_8> operator[](size_type index) const;
 
     /**
      * @brief Clear the string
