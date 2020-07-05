@@ -155,7 +155,4 @@ private:
     Vector<String> m_searchPaths;
 };
 
-template <>
-FileSystem* Singleton<FileSystem>::sInstance;
-
 }  // namespace engine

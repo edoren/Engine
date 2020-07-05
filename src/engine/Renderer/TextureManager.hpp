@@ -54,7 +54,4 @@ protected:
     std::map<String, std::unique_ptr<Texture2D>> m_textures;
 };
 
-template<>
-TextureManager* Singleton<TextureManager>::sInstance;
-
 }  // namespace engine

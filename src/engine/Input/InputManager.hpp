@@ -62,7 +62,4 @@ private:
     math::ivec2 m_mousewheelDelta;
 };
 
-template<>
-InputManager* Singleton<InputManager>::sInstance;
-
 }  // namespace engine

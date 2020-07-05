@@ -84,7 +84,4 @@ private:
     std::unique_ptr<AsyncTaskRunner> m_asyncTaskRunner;
 };
 
-template<>
-Main* Singleton<Main>::sInstance;
-
 }  // namespace engine

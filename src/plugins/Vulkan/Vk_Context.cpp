@@ -8,12 +8,7 @@
 
 #include <array>
 
-namespace engine {
-
-template <>
-plugin::vulkan::Vk_Context* Singleton<plugin::vulkan::Vk_Context>::sInstance = nullptr;
-
-namespace plugin::vulkan {
+namespace engine::plugin::vulkan {
 
 namespace {
 
@@ -576,5 +571,3 @@ bool Vk_Context::createUboDescriptorPool() {
 }
 
 }  // namespace plugin::vulkan
-
-}  // namespace engine

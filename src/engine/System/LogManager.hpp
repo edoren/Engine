@@ -52,9 +52,6 @@ private:
     bool m_consoleLoggingEnable;
 };
 
-template<>
-LogManager* Singleton<LogManager>::sInstance;
-
 inline void LogVerbose(const StringView& tag, const StringView& message) {
     LogManager::GetInstance().verbose(tag, message);
 }

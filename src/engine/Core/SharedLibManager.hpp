@@ -28,7 +28,4 @@ private:
     std::map<String, SharedLibrary> m_libraries;
 };
 
-template <>
-SharedLibManager* Singleton<SharedLibManager>::sInstance;
-
 }  // namespace engine

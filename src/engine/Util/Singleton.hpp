@@ -8,17 +8,17 @@ template <class T>
 class Singleton {
 public:
     Singleton() {
-        assert(!sInstance);
+        ENGINE_ASSERT(!sInstance, "Instance not found");
         sInstance = static_cast<T*>(this);
     }
 
     ~Singleton() {
-        assert(sInstance);
+        ENGINE_ASSERT(sInstance, "Instance not found");
         sInstance = nullptr;
     }
 
     static T& GetInstance() {
-        assert(sInstance);
+        ENGINE_ASSERT(sInstance, "Instance not found");
         return (*sInstance);
     }
 
@@ -30,7 +30,7 @@ public:
     Singleton<T>& operator=(const Singleton<T>&) = delete;
 
 protected:
-    static T* sInstance;
+    static inline T* sInstance = nullptr;
 };
 
 }  // namespace engine

@@ -67,6 +67,3 @@ private:
 };
 
 }  // namespace engine::plugin::vulkan
-
-template<>
-engine::plugin::vulkan::Vk_Context* engine::Singleton<engine::plugin::vulkan::Vk_Context>::sInstance;

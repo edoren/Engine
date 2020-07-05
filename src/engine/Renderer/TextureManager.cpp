@@ -21,9 +21,6 @@ const String sRootTextureFolder("textures");
 
 const String TextureManager::sDefaultTextureId("DEFAULT");
 
-template <>
-TextureManager* Singleton<TextureManager>::sInstance = nullptr;
-
 TextureManager::TextureManager() : m_activeTexture(nullptr) {}
 
 TextureManager::~TextureManager() = default;
