@@ -6,8 +6,6 @@
 
 namespace engine {
 
-inline const StringView::size_type StringView::sInvalidPos = size_type(-1);
-
 constexpr StringView::StringView(const char8* utf8String) {
     if (utf8String && utf8String[0] != 0) {
         size_type length = std::strlen(utf8String);
@@ -22,11 +20,11 @@ constexpr StringView::StringView(const char8* utf8String) {
     }
 }
 
-constexpr StringView::StringView(const String& string) : m_data(string.getData()), m_size(string.getSize()) {}
+inline StringView::StringView(const String& string) : m_data(string.getData()), m_size(string.getSize()) {}
 
 constexpr StringView& StringView::operator=(const StringView& right) = default;
 
-constexpr StringView& StringView::operator=(const String& right) {
+inline StringView& StringView::operator=(const String& right) {
     m_data = right.getData();
     m_size = right.getSize();
     return *this;

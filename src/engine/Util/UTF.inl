@@ -4,11 +4,7 @@
 
 #include <string>
 
-#include <cassert>
-
-namespace engine {
-
-namespace utf {
+namespace engine::utf {
 
 namespace internal {
 
@@ -693,7 +689,6 @@ constexpr typename Iterator<Base, T>::pointed_type Iterator<Base, T>::getPtr() c
 template <Encoding BaseFrom, Encoding BaseTo, typename T, typename Ret, typename>
 constexpr void UtfToUtf(T begin, T end, std::basic_string<Ret>* result) {
     size_t sizeBytes = 0;
-    CodeUnit<BaseTo> hola(0x0);
 
     ForEachUTF<BaseFrom>(begin, end, [&sizeBytes](auto codeUnitRange) {
         auto convertedCodeUnit = codeUnitRange.template getAs<BaseTo>();
@@ -765,7 +760,7 @@ constexpr size_t GetSizeUTF(T begin, T end) {
     size_t size = 0;
     auto it = ForEachUTF<Base>(begin, end, [&size](auto /*unused*/) { size++; });
     if (it != end) {
-        size = -1;
+        size = size_t(-1);
     }
     return size;
 }
@@ -775,9 +770,7 @@ constexpr bool IsValidUTF(T begin, T end) {
     return ForEachUTF<Base>(begin, end, [](auto /*unused*/) {}) == end;
 }
 
-}  // namespace utf
-
-}  // namespace engine
+}  // namespace engine::utf
 
 // namespace std {
 
