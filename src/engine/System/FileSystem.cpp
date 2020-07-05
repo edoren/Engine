@@ -28,9 +28,6 @@ String sExecutableDirectory;
 
 }  // namespace
 
-template <>
-FileSystem* Singleton<FileSystem>::sInstance = nullptr;
-
 FileSystem::FileSystem() {
     m_searchPaths = {
 #if PLATFORM_IS(PLATFORM_ANDROID)

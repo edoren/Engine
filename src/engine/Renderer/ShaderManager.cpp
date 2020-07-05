@@ -28,9 +28,6 @@ const std::array<ShaderType, 3> sAvailableShaderTypes = {{
 
 }  // namespace
 
-template <>
-ShaderManager* Singleton<ShaderManager>::sInstance = nullptr;
-
 ShaderManager::ShaderManager() : m_activeShader(nullptr) {}
 
 ShaderManager::~ShaderManager() = default;

@@ -33,7 +33,4 @@ private:
     Vector<std::unique_ptr<Scene>> m_scenes;
 };
 
-template<>
-SceneManager* Singleton<SceneManager>::sInstance;
-
 }  // namespace engine

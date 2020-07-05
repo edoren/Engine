@@ -39,7 +39,4 @@ protected:
     Vector<std::unique_ptr<Model>> m_models;
 };
 
-template<>
-ModelManager* Singleton<ModelManager>::sInstance;
-
 }  // namespace engine

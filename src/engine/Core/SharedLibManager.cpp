@@ -11,9 +11,6 @@ const StringView sTag("SharedLibManager");
 
 }  // namespace
 
-template <>
-SharedLibManager* Singleton<SharedLibManager>::sInstance = nullptr;
-
 SharedLibManager::SharedLibManager() = default;
 
 SharedLibManager::~SharedLibManager() {

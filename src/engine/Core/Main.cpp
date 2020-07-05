@@ -25,9 +25,6 @@ const StringView sTag("Main");
 using PFN_START_PLUGIN = void (*)();
 using PFN_STOP_PLUGIN = void (*)();
 
-template <>
-Main* Singleton<Main>::sInstance = nullptr;
-
 Main::Main(int argc, char* argv[])
       : m_activeRenderer(nullptr),
         m_app(nullptr),

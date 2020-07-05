@@ -19,9 +19,6 @@ uint32 sSceneIndex(0);
 
 }  // namespace
 
-template <>
-SceneManager* Singleton<SceneManager>::sInstance = nullptr;
-
 SceneManager::SceneManager() = default;
 
 SceneManager::~SceneManager() = default;

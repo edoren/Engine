@@ -62,7 +62,4 @@ protected:
     std::map<String, std::unique_ptr<Shader>> m_shaders;
 };
 
-template<>
-ShaderManager* Singleton<ShaderManager>::sInstance;
-
 }  // namespace engine

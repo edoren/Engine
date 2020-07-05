@@ -13,9 +13,6 @@ const StringView sTag("ModelManager");
 
 }  // namespace
 
-template <>
-ModelManager* Singleton<ModelManager>::sInstance = nullptr;
-
 ModelManager::ModelManager() = default;
 
 ModelManager::~ModelManager() = default;

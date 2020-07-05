@@ -28,9 +28,6 @@ int EngineEventFilter(void* userdata, SDL_Event* event) {
 
 }  // namespace
 
-template <>
-InputManager* Singleton<InputManager>::sInstance = nullptr;
-
 InputManager::InputManager()
       : m_exitRequested(false),
         m_pointers(sMaxSimultanuousPointers),
