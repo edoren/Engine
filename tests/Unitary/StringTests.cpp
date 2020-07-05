@@ -192,7 +192,7 @@ TEST_CASE("String::iterator forward", "[String]") {
     auto it0 = elements.begin();
 
     SECTION("begin() must be able to get the first character of the UTF-8 string") {
-        char32 codePoint0 = it0->getUnit().getCodePoint();
+        char32 codePoint0 = it0->get().getCodePoint();
         REQUIRE(codePoint0 == 0x6C34);
     }
     SECTION("must be able to increment the UTF-8 iterator") {
@@ -201,11 +201,11 @@ TEST_CASE("String::iterator forward", "[String]") {
         auto it3 = ++it0;
         auto it4 = it0 + 1;
         auto it5 = it0;
-        auto codeUnit1 = it1->getUnit();
-        auto codeUnit2 = it2->getUnit();
-        auto codeUnit3 = it3->getUnit();
-        auto codeUnit4 = it4->getUnit();
-        auto codeUnit5 = it5->getUnit();
+        auto codeUnit1 = it1->get();
+        auto codeUnit2 = it2->get();
+        auto codeUnit3 = it3->get();
+        auto codeUnit4 = it4->get();
+        auto codeUnit5 = it5->get();
         REQUIRE(codeUnit1.getCodePoint() == 0x6C34);
         REQUIRE(codeUnit2.getCodePoint() == 0x3001);
         REQUIRE(codeUnit3.getCodePoint() == 0x706B);
@@ -213,29 +213,15 @@ TEST_CASE("String::iterator forward", "[String]") {
         REQUIRE(codeUnit5.getCodePoint() == 0x706B);
     }
     SECTION("must be able to increment the UTF-8 iterator") {
-        REQUIRE(elements[0] == utf::CodeUnit<8>({0xE6, 0xB0, 0xB4}));
-        REQUIRE(elements[1] == utf::CodeUnit<8>({0xE3, 0x80, 0x81}));
-        REQUIRE(elements[2] == utf::CodeUnit<8>({0xE7, 0x81, 0xAB}));
-        REQUIRE(elements[3] == utf::CodeUnit<8>({0xE3, 0x80, 0x81}));
+        REQUIRE(elements[0] == utf::CodeUnit<utf::UTF_8>({0xE6, 0xB0, 0xB4}));
+        REQUIRE(elements[1] == utf::CodeUnit<utf::UTF_8>({0xE3, 0x80, 0x81}));
+        REQUIRE(elements[2] == utf::CodeUnit<utf::UTF_8>({0xE7, 0x81, 0xAB}));
+        REQUIRE(elements[3] == utf::CodeUnit<utf::UTF_8>({0xE3, 0x80, 0x81}));
     }
     SECTION("must be able to iterate correctly through the UTF-8 string") {
         size_t count = 0;
         for (const auto& utfIt : elements) {
-            char32 codePoint = utfIt.getUnit().getCodePoint();
-            if (count == 0) {
-                REQUIRE(codePoint == 0x6C34);
-            } else if (count == 1) {
-                REQUIRE(codePoint == 0x3001);
-            } else if (count == 2) {
-                REQUIRE(codePoint == 0x706B);
-            } else if (count == 3) {
-                REQUIRE(codePoint == 0x3001);
-            }
-            count++;
-        }
-        count = 0;
-        for (auto it = elements.begin(); it != elements.end(); ++it) {
-            char32 codePoint = it->getUnit().getCodePoint();
+            char32 codePoint = utfIt.get().getCodePoint();
             if (count == 0) {
                 REQUIRE(codePoint == 0x6C34);
             } else if (count == 1) {
@@ -255,7 +241,7 @@ TEST_CASE("String::iterator reverse", "[String]") {
     auto it0 = elements.end();
 
     SECTION("end() should return an invalid interator which will hold always null") {
-        char32 codePoint0 = it0->getUnit().getCodePoint();
+        char32 codePoint0 = it0->get().getCodePoint();
         REQUIRE(codePoint0 == 0x0);
     }
     SECTION("must be able to decrement the UTF-8 iterator") {
@@ -265,12 +251,12 @@ TEST_CASE("String::iterator reverse", "[String]") {
         auto it4 = --it0;
         auto it5 = it0 - 1;
         auto it6 = it0;
-        auto codeUnit1 = it1->getUnit();
-        auto codeUnit2 = it2->getUnit();
-        auto codeUnit3 = it3->getUnit();
-        auto codeUnit4 = it4->getUnit();
-        auto codeUnit5 = it5->getUnit();
-        auto codeUnit6 = it6->getUnit();
+        auto codeUnit1 = it1->get();
+        auto codeUnit2 = it2->get();
+        auto codeUnit3 = it3->get();
+        auto codeUnit4 = it4->get();
+        auto codeUnit5 = it5->get();
+        auto codeUnit6 = it6->get();
         REQUIRE(codeUnit1.getCodePoint() == 0x3001);
         REQUIRE(codeUnit2.getCodePoint() == 0x3001);
         REQUIRE(codeUnit3.getCodePoint() == 0x706B);
@@ -279,15 +265,17 @@ TEST_CASE("String::iterator reverse", "[String]") {
         REQUIRE(codeUnit6.getCodePoint() == 0x3001);
     }
     SECTION("must be able to increment the UTF-8 iterator") {
-        REQUIRE(elements[0] == utf::CodeUnit<8>({0xE6, 0xB0, 0xB4}));
-        REQUIRE(elements[1] == utf::CodeUnit<8>({0xE3, 0x80, 0x81}));
-        REQUIRE(elements[2] == utf::CodeUnit<8>({0xE7, 0x81, 0xAB}));
-        REQUIRE(elements[3] == utf::CodeUnit<8>({0xE3, 0x80, 0x81}));
+        REQUIRE(elements[0] == utf::CodeUnit<utf::UTF_8>({0xE6, 0xB0, 0xB4}));
+        REQUIRE(elements[1] == utf::CodeUnit<utf::UTF_8>({0xE3, 0x80, 0x81}));
+        REQUIRE(elements[2] == utf::CodeUnit<utf::UTF_8>({0xE7, 0x81, 0xAB}));
+        REQUIRE(elements[3] == utf::CodeUnit<utf::UTF_8>({0xE3, 0x80, 0x81}));
     }
     SECTION("must be able to iterate backwards correctly through the UTF-8 string") {
         size_t count = 0;
-        for (auto it = elements.rbegin(); it != elements.rend(); ++it) {
-            char32 codePoint = it->getUnit().getCodePoint();
+        for (auto it = elements.rbegin();
+                it != elements.rend();
+                ++it) {
+            char32 codePoint = it->get().getCodePoint();
             if (count == 0) {
                 REQUIRE(codePoint == 0x3001);
             } else if (count == 1) {
@@ -306,9 +294,9 @@ TEST_CASE("String::operator[]", "[String]") {
     String elements = u8"水、火";
 
     SECTION("must be able to access any code unit in the UTF-8 String") {
-        REQUIRE(elements[0] == utf::CodeUnit<8>({0xE6, 0xB0, 0xB4}));
-        REQUIRE(elements[1] == utf::CodeUnit<8>({0xE3, 0x80, 0x81}));
-        REQUIRE(elements[2] == utf::CodeUnit<8>({0xE7, 0x81, 0xAB}));
+        REQUIRE(elements[0] == utf::CodeUnit<utf::UTF_8>({0xE6, 0xB0, 0xB4}));
+        REQUIRE(elements[1] == utf::CodeUnit<utf::UTF_8>({0xE3, 0x80, 0x81}));
+        REQUIRE(elements[2] == utf::CodeUnit<utf::UTF_8>({0xE7, 0x81, 0xAB}));
     }
 }
 
@@ -328,7 +316,7 @@ TEST_CASE("String::operator+=", "[String]") {
         REQUIRE(elements == u8"Love 地");
     }
     SECTION("must be able to append a CodeUnit") {
-        elements += utf::CodeUnit<8>({0xE6, 0xB0, 0xB4});
+        elements += utf::CodeUnit<utf::UTF_8>({0xE6, 0xB0, 0xB4});
         REQUIRE(elements == u8"水");
     }
     SECTION("must be able to append a raw UTF-8 string") {

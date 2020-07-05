@@ -12,7 +12,7 @@ constexpr StringView::StringView(const char8* utf8String) {
     if (utf8String && utf8String[0] != 0) {
         size_type length = std::strlen(utf8String);
         if (length > 0) {
-            if (utf::IsValidUTF<8>(utf8String, utf8String + length)) {
+            if (utf::IsValidUTF<utf::UTF_8>(utf8String, utf8String + length)) {
                 m_data = utf8String;
                 m_size = length;
             } else {
@@ -37,7 +37,7 @@ constexpr StringView& StringView::operator=(const char8* right) {
     if (utf8String && utf8String[0] != 0) {
         size_type length = std::strlen(utf8String);
         if (length > 0) {
-            if (utf::IsValidUTF<8>(utf8String, utf8String + length)) {
+            if (utf::IsValidUTF<utf::UTF_8>(utf8String, utf8String + length)) {
                 m_data = utf8String;
                 m_size = length;
             } else {
@@ -53,7 +53,7 @@ constexpr char8 StringView::operator[](size_type index) const {
 }
 
 constexpr StringView::size_type StringView::getSize() const {
-    return utf::GetSizeUTF<8>(m_data, m_data + m_size);
+    return utf::GetSizeUTF<utf::UTF_8>(m_data, m_data + m_size);
 }
 
 constexpr bool StringView::isEmpty() const {
@@ -64,14 +64,14 @@ constexpr StringView::size_type StringView::find(const StringView& str, size_typ
     // Iterate to the start codepoint
     const auto* startIt(m_data);
     for (size_type i = 0; i < start; i++) {
-        startIt = utf::NextUTF<8>(startIt, m_data + m_size);
+        startIt = utf::NextUTF<utf::UTF_8>(startIt, m_data + m_size);
         if (startIt == m_data + m_size) {
             return sInvalidPos;
         }
     }
     // Find the string
     const auto* findIt(std::search(startIt, m_data + m_size, str.m_data, str.m_data + m_size));
-    return (findIt == m_data + m_size) ? sInvalidPos : utf::GetSizeUTF<8>(m_data, findIt);
+    return (findIt == m_data + m_size) ? sInvalidPos : utf::GetSizeUTF<utf::UTF_8>(m_data, findIt);
 }
 
 constexpr StringView::size_type StringView::findFirstOf(const StringView& str, size_type pos) const {
@@ -84,7 +84,7 @@ constexpr StringView::size_type StringView::findFirstOf(const StringView& str, s
     // Iterate to the start codepoint
     const auto* startIt(m_data);
     for (size_type i = 0; i < pos; i++) {
-        startIt = utf::NextUTF<8>(startIt, m_data + m_size);
+        startIt = utf::NextUTF<utf::UTF_8>(startIt, m_data + m_size);
         if (startIt == m_data + m_size) {
             return sInvalidPos;
         }
@@ -96,10 +96,10 @@ constexpr StringView::size_type StringView::findFirstOf(const StringView& str, s
         if (startIt == m_data + m_size) {
             return sInvalidPos;
         }
-        endIt = utf::NextUTF<8>(endIt, m_data + m_size);
+        endIt = utf::NextUTF<utf::UTF_8>(endIt, m_data + m_size);
         const auto* findIt(std::search(str.m_data, str.m_data + m_size, startIt, endIt));
         if (findIt != str.m_data + m_size) {
-            return utf::GetSizeUTF<8>(m_data, startIt);
+            return utf::GetSizeUTF<utf::UTF_8>(m_data, startIt);
         }
         startIt = endIt;
     }
@@ -112,7 +112,7 @@ constexpr StringView::size_type StringView::findLastOf(const StringView& str, si
         startIt = m_data + m_size;
     } else {
         for (size_type i = 0; i < pos + 1; i++) {
-            startIt = utf::NextUTF<8>(startIt, m_data + m_size);
+            startIt = utf::NextUTF<utf::UTF_8>(startIt, m_data + m_size);
             if (startIt == m_data + m_size) {
                 break;
             }
@@ -125,10 +125,10 @@ constexpr StringView::size_type StringView::findLastOf(const StringView& str, si
         if (startIt == m_data) {
             return sInvalidPos;
         }
-        endIt = utf::PriorUTF<8>(endIt, m_data);
+        endIt = utf::PriorUTF<utf::UTF_8>(endIt, m_data);
         const auto* findIt(std::search(str.m_data, str.m_data + m_size, endIt, startIt));
         if (findIt != str.m_data + m_size) {
-            return utf::GetSizeUTF<8>(m_data, endIt);
+            return utf::GetSizeUTF<utf::UTF_8>(m_data, endIt);
         }
         startIt = endIt;
     }
@@ -140,7 +140,7 @@ constexpr StringView StringView::subString(size_type position, size_type length)
     // Iterate to the start codepoint
     const auto* startIt(m_data);
     for (size_type i = 0; i < position; i++) {
-        startIt = utf::NextUTF<8>(startIt, m_data + m_size);
+        startIt = utf::NextUTF<utf::UTF_8>(startIt, m_data + m_size);
         if (startIt == m_data + m_size) {
             ENGINE_THROW(std::out_of_range("the specified position is out of the string range"));
         }
@@ -148,7 +148,7 @@ constexpr StringView StringView::subString(size_type position, size_type length)
     // Iterate to the end codepoint
     const auto* endIt(startIt);
     for (size_type i = 0; i < length; i++) {
-        endIt = utf::NextUTF<8>(endIt, m_data + m_size);
+        endIt = utf::NextUTF<utf::UTF_8>(endIt, m_data + m_size);
         if (endIt == m_data + m_size) {
             break;
         }
