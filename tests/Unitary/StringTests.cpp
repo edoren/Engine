@@ -6,12 +6,12 @@ using namespace engine;
 
 TEST_CASE("String from other encodings", "[String]") {
     SECTION("from Wide strings") {
-        const wchar* elements = L"水、火、地、風、空";
+        const wchar* elements = L"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606";
         String a = String(elements);
         String b = String(std::wstring(elements));
         String c = String::FromWide(elements, elements + wcslen(elements));
-        REQUIRE(a.getSize() == 9);
-        REQUIRE(a == u8"水、火、地、風、空");
+        REQUIRE(a.getSize() == 5);
+        REQUIRE(a == u8"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606");
         REQUIRE(a == b);
         REQUIRE(b == c);
     }
@@ -45,150 +45,154 @@ TEST_CASE("String from other encodings", "[String]") {
 }
 
 TEST_CASE("String to other encodings", "[String]") {
-    String hello = u8"مرحبا بالعالم";  // "Hello World" in Arabic
-    String smiley = u8"\U0001F60A";
+    String faces = u8"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606";     // "😀😃😄😁😆"
+    String elements = u8"\U00006C34\U0000706B\U00005730\U000098A8\U00007A7A";  // "水火地風空"
 
     SECTION("to Wide strings") {
-        std::wstring helloWide = hello.toWide();
-        REQUIRE(helloWide == L"مرحبا بالعالم");
+        std::wstring facesWide = faces.toWide();
+        REQUIRE(facesWide == L"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606");
     }
     SECTION("to UTF-8 strings") {
-        const std::string& helloUtf8 = hello.toUtf8();
-        const std::string& smileyUtf8 = smiley.toUtf8();
-        REQUIRE(helloUtf8 == u8"مرحبا بالعالم");
-        REQUIRE(smileyUtf8 == u8"\U0001F60A");
+        const std::string& facesUtf8 = faces.toUtf8();
+        const std::string& elementsUtf8 = elements.toUtf8();
+        REQUIRE(facesUtf8 == u8"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606");
+        REQUIRE(elementsUtf8 == u8"\U00006C34\U0000706B\U00005730\U000098A8\U00007A7A");
     }
     SECTION("to UTF-16 strings") {
-        std::u16string helloUtf16 = hello.toUtf16();
-        std::u16string smileyUtf16 = smiley.toUtf16();
-        REQUIRE(helloUtf16 == u"مرحبا بالعالم");
-        REQUIRE(smileyUtf16 == u"\U0001F60A");
+        std::u16string facesUtf16 = faces.toUtf16();
+        std::u16string elementsUtf16 = elements.toUtf16();
+        REQUIRE(facesUtf16 == u"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606");
+        REQUIRE(elementsUtf16 == u"\U00006C34\U0000706B\U00005730\U000098A8\U00007A7A");
     }
     SECTION("to UTF-32 strings") {
-        std::u32string helloUtf32 = hello.toUtf32();
-        std::u32string smileyUtf32 = smiley.toUtf32();
-        REQUIRE(helloUtf32 == U"مرحبا بالعالم");
-        REQUIRE(smileyUtf32 == U"\U0001F60A");
+        std::u32string facesUtf32 = faces.toUtf32();
+        std::u32string elementsUtf32 = elements.toUtf32();
+        REQUIRE(facesUtf32 == U"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606");
+        REQUIRE(elementsUtf32 == U"\U00006C34\U0000706B\U00005730\U000098A8\U00007A7A");
     }
 }
 
 TEST_CASE("String::find", "[String]") {
-    // "Water, Fire, Earth, Wind, Void"
-    String elements = u8"水、火、地、風、空";
+    // "水、火、地、風、空"
+    String elements = u8"\U00006C34\U00003001\U0000706B\U00003001\U00005730\U00003001\U000098A8\U00003001\U00007A7A";
 
     SECTION("must be able to find any UTF-8 string") {
-        size_t location = elements.find("風", 0);
+        size_t location = elements.find(u8"\U000098A8", 0);  // "風"
         REQUIRE(location == 6);
     }
     SECTION("if no start is specified it start from the beginning") {
-        size_t location = elements.find("水");
+        size_t location = elements.find(u8"\U00006C34");  // "水"
         REQUIRE(location == 0);
     }
     SECTION("it can start to search from any position") {
-        size_t location1 = elements.find("地", 2);
-        size_t location2 = elements.find("地", 4);
+        size_t location1 = elements.find(u8"\U00005730", 2);  // "地"
+        size_t location2 = elements.find(u8"\U00005730", 4);  // "地"
         REQUIRE(location1 == 4);
         REQUIRE(location1 == location2);
     }
     SECTION("if the string is not found it returns String::sInvalidPos") {
-        size_t location1 = elements.find("A", 0);
-        size_t location2 = elements.find("火", 5);
+        size_t location1 = elements.find(u8"A", 0);
+        size_t location2 = elements.find(u8"\U0000706B", 5);  // "火"
         REQUIRE(location1 == String::sInvalidPos);
         REQUIRE(location1 == location2);
     }
 }
 
 TEST_CASE("String::findFirstOf", "[String]") {
-    // "Water, Fire, Earth, Wind, Void"
-    String elements = u8"水、火、地、風、空";
+    // "水、火、地、風、空"
+    String elements = u8"\U00006C34\U00003001\U0000706B\U00003001\U00005730\U00003001\U000098A8\U00003001\U00007A7A";
 
     SECTION("must be able to find any of the specified UTF-8 codepoints") {
-        size_t location = elements.findFirstOf("火ñ地", 0);
+        size_t location = elements.findFirstOf(u8"\U0000706Bñ\U00005730", 0);  // "火ñ地"
         REQUIRE(location == 2);
     }
     SECTION("if no start is specified it start from the beginning") {
-        size_t location = elements.findFirstOf("地火、");
+        size_t location = elements.findFirstOf(u8"\U00005730\U0000706B\U00003001");  // "地火、"
         REQUIRE(location == 1);
     }
     SECTION("it can start to search from any position") {
-        size_t location1 = elements.findFirstOf("、地火", 2);
-        size_t location2 = elements.findFirstOf("空、地火", 4);
+        size_t location1 = elements.findFirstOf(u8"\U00003001\U00005730\U0000706B", 2);            // "、地火"
+        size_t location2 = elements.findFirstOf(u8"\U00007A7A\U00003001\U00005730\U0000706B", 4);  // "空、地火"
         REQUIRE(location1 == 2);
         REQUIRE(location2 == 4);
     }
     SECTION("if the any of the UTF-8 characters are not found it returns String::sInvalidPos") {
         size_t location1 = elements.findFirstOf("A", 0);
-        size_t location2 = elements.findFirstOf("#空ñ、風");
+        size_t location2 = elements.findFirstOf(u8"#\U00007A7Añ\U00003001\U000098A8");  // "#空ñ、風"
         REQUIRE(location1 == String::sInvalidPos);
         REQUIRE(location2 == 1);
     }
 }
 
 TEST_CASE("String::findLastOf", "[String]") {
-    // "Water, Fire, Earth, Wind, Void"
-    String elements = u8"水、火、地、風、空";
+    // "水、火、地、風、空"
+    String elements = u8"\U00006C34\U00003001\U0000706B\U00003001\U00005730\U00003001\U000098A8\U00003001\U00007A7A";
 
     SECTION("must be able to find any of the specified UTF-8 codepoints") {
-        size_t location = elements.findLastOf("火、地", elements.getSize() - 1);
+        size_t location = elements.findLastOf(u8"\U0000706B\U00003001\U00005730", elements.getSize() - 1);  // "火、地"
         REQUIRE(location == 7);
     }
     SECTION("if no start is specified it start from the end") {
-        size_t location = elements.findLastOf("風地火");
+        size_t location = elements.findLastOf(u8"\U000098A8\U00005730\U0000706B");  // "風地火"
         REQUIRE(location == 6);
     }
     SECTION("it can start to search from any position") {
-        size_t location1 = elements.findLastOf("、地火", 2);
-        size_t location2 = elements.findLastOf("空、火", 4);
+        size_t location1 = elements.findLastOf(u8"\U00003001\U00005730\U0000706B", 2);  // "、地火"
+        size_t location2 = elements.findLastOf(u8"\U00007A7A\U00003001\U0000706B", 4);  // "空、火"
         REQUIRE(location1 == 2);
         REQUIRE(location2 == 3);
     }
     SECTION("if the any of the UTF-8 characters are not found it returns String::sInvalidPos") {
         size_t location1 = elements.findLastOf("A");
-        size_t location2 = elements.findLastOf("#空ñ、風");
+        size_t location2 = elements.findLastOf(u8"#\U00007A7Añ\U00003001\U000098A8");  // "#空ñ、風"
         REQUIRE(location1 == String::sInvalidPos);
         REQUIRE(location2 == 8);
     }
 }
 
 TEST_CASE("String::replace", "[String]") {
-    // "Water, Fire, Earth, Wind, Void"
-    String elements = u8"水、火、地、風、空";
+    // "水、火、地、風、空"
+    String elements = u8"\U00006C34\U00003001\U0000706B\U00003001\U00005730\U00003001\U000098A8\U00003001\U00007A7A";
 
     SECTION("must be able to replace any UTF-8 string") {
-        elements.replace("水", "Water");
-        elements.replace("地", "Earth");
-        elements.replace("空", "Void");
-        REQUIRE(elements == u8"Water、火、Earth、風、Void");
+        elements.replace(u8"\U00006C34", "Water");  // "水", "Water"
+        elements.replace(u8"\U00005730", "Earth");  // "地", "Earth"
+        elements.replace(u8"\U00007A7A", "Void");   // "空", "Void"
+        // // "Water、火、Earth、風、Void"
+        REQUIRE(elements == u8"Water\U00003001\U0000706B\U00003001Earth\U00003001\U000098A8\U00003001Void");
     }
     SECTION("must replace all the ocurrences of the provided string") {
-        elements.replace("、", ", ");
-        REQUIRE(elements == u8"水, 火, 地, 風, 空");
+        elements.replace(u8"\U00003001", ", ");  // "、", ", "
+        REQUIRE(elements == u8"\U00006C34, \U0000706B, \U00005730, \U000098A8, \U00007A7A");
     }
     SECTION("could replace any element given a range") {
         elements.replace(4, 1, "Earth");
         elements.replace(0, 1, "Water");
         elements.replace(16, 1, "Void");
-        REQUIRE(elements == u8"Water、火、Earth、風、Void");
+        // "Water、火、Earth、風、Void"
+        REQUIRE(elements == u8"Water\U00003001\U0000706B\U00003001Earth\U00003001\U000098A8\U00003001Void");
     }
     SECTION("could replace the whole string") {
-        elements.replace(0, elements.getSize(), u8"مرحبا بالعالم");
-        REQUIRE(elements == u8"مرحبا بالعالم");
+        // "😀😃😄😁😆"
+        elements.replace(0, elements.getSize(), u8"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606");
+        REQUIRE(elements == u8"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606");
     }
     SECTION("must replace any Unicode code point with another") {
         // Replace U+3001 (、) with U+1F603 (😃)
         elements.replace(0x3001, 0x1F603);
-        REQUIRE(elements == u8"水😃火😃地😃風😃空");
+        REQUIRE(elements ==
+                u8"\U00006C34\U0001F603\U0000706B\U0001F603\U00005730\U0001F603\U000098A8\U0001F603\U00007A7A");
         // Replace U+1F603 (😃) with U+2D (-)
         elements.replace(0x1F603, '-');
-        REQUIRE(elements == u8"水-火-地-風-空");
+        REQUIRE(elements == u8"\U00006C34-\U0000706B-\U00005730-\U000098A8-\U00007A7A");
         // Replace U+2D (-) with U+20 (Space)
         elements.replace('-', ' ');
-        REQUIRE(elements == u8"水 火 地 風 空");
+        REQUIRE(elements == u8"\U00006C34 \U0000706B \U00005730 \U000098A8 \U00007A7A");
     }
 }
 
 TEST_CASE("String::iterator forward", "[String]") {
-    String elements = u8"水、火、";
+    String elements = u8"\U00006C34\U00003001\U0000706B\U00003001";  // "水、火、"
     auto it0 = elements.begin();
 
     SECTION("begin() must be able to get the first character of the UTF-8 string") {
@@ -206,17 +210,11 @@ TEST_CASE("String::iterator forward", "[String]") {
         auto codeUnit3 = it3->get();
         auto codeUnit4 = it4->get();
         auto codeUnit5 = it5->get();
-        REQUIRE(codeUnit1.getCodePoint() == 0x6C34);
-        REQUIRE(codeUnit2.getCodePoint() == 0x3001);
-        REQUIRE(codeUnit3.getCodePoint() == 0x706B);
-        REQUIRE(codeUnit4.getCodePoint() == 0x3001);
-        REQUIRE(codeUnit5.getCodePoint() == 0x706B);
-    }
-    SECTION("must be able to increment the UTF-8 iterator") {
-        REQUIRE(elements[0] == utf::CodeUnit<utf::UTF_8>({0xE6, 0xB0, 0xB4}));
-        REQUIRE(elements[1] == utf::CodeUnit<utf::UTF_8>({0xE3, 0x80, 0x81}));
-        REQUIRE(elements[2] == utf::CodeUnit<utf::UTF_8>({0xE7, 0x81, 0xAB}));
-        REQUIRE(elements[3] == utf::CodeUnit<utf::UTF_8>({0xE3, 0x80, 0x81}));
+        REQUIRE(codeUnit1.getCodePoint() == 0x6C34);  // 水
+        REQUIRE(codeUnit2.getCodePoint() == 0x3001);  // 、
+        REQUIRE(codeUnit3.getCodePoint() == 0x706B);  // 火
+        REQUIRE(codeUnit4.getCodePoint() == 0x3001);  // 、
+        REQUIRE(codeUnit5.getCodePoint() == 0x706B);  // 火
     }
     SECTION("must be able to iterate correctly through the UTF-8 string") {
         size_t count = 0;
@@ -237,7 +235,7 @@ TEST_CASE("String::iterator forward", "[String]") {
 }
 
 TEST_CASE("String::iterator reverse", "[String]") {
-    String elements = u8"水、火、";
+    String elements = u8"\U00006C34\U00003001\U0000706B\U00003001";  // "水、火、"
     auto it0 = elements.end();
 
     SECTION("end() should return an invalid interator which will hold always null") {
@@ -264,17 +262,9 @@ TEST_CASE("String::iterator reverse", "[String]") {
         REQUIRE(codeUnit5.getCodePoint() == 0x6C34);
         REQUIRE(codeUnit6.getCodePoint() == 0x3001);
     }
-    SECTION("must be able to increment the UTF-8 iterator") {
-        REQUIRE(elements[0] == utf::CodeUnit<utf::UTF_8>({0xE6, 0xB0, 0xB4}));
-        REQUIRE(elements[1] == utf::CodeUnit<utf::UTF_8>({0xE3, 0x80, 0x81}));
-        REQUIRE(elements[2] == utf::CodeUnit<utf::UTF_8>({0xE7, 0x81, 0xAB}));
-        REQUIRE(elements[3] == utf::CodeUnit<utf::UTF_8>({0xE3, 0x80, 0x81}));
-    }
     SECTION("must be able to iterate backwards correctly through the UTF-8 string") {
         size_t count = 0;
-        for (auto it = elements.rbegin();
-                it != elements.rend();
-                ++it) {
+        for (auto it = elements.rbegin(); it != elements.rend(); ++it) {
             char32 codePoint = it->get().getCodePoint();
             if (count == 0) {
                 REQUIRE(codePoint == 0x3001);
@@ -291,36 +281,39 @@ TEST_CASE("String::iterator reverse", "[String]") {
 }
 
 TEST_CASE("String::operator[]", "[String]") {
-    String elements = u8"水、火";
+    String faces = u8"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606";  // "😀😃😄😁😆"
 
     SECTION("must be able to access any code unit in the UTF-8 String") {
-        REQUIRE(elements[0] == utf::CodeUnit<utf::UTF_8>({0xE6, 0xB0, 0xB4}));
-        REQUIRE(elements[1] == utf::CodeUnit<utf::UTF_8>({0xE3, 0x80, 0x81}));
-        REQUIRE(elements[2] == utf::CodeUnit<utf::UTF_8>({0xE7, 0x81, 0xAB}));
+        REQUIRE(faces[0] == utf::CodeUnit<utf::UTF_8>({0xF0, 0x9F, 0x98, 0x80}));  // 😀
+        REQUIRE(faces[1] == utf::CodeUnit<utf::UTF_8>({0xF0, 0x9F, 0x98, 0x83}));  // 😃
+        REQUIRE(faces[2] == utf::CodeUnit<utf::UTF_8>({0xF0, 0x9F, 0x98, 0x84}));  // 😄
+        REQUIRE(faces[3] == utf::CodeUnit<utf::UTF_8>({0xF0, 0x9F, 0x98, 0x81}));  // 😁
+        REQUIRE(faces[4] == utf::CodeUnit<utf::UTF_8>({0xF0, 0x9F, 0x98, 0x86}));  // 😆
     }
 }
 
 TEST_CASE("String::operator+=", "[String]") {
-    String elements;
+    String string;
 
     SECTION("must be able to append a ASCII value") {
-        elements += 'A';
-        REQUIRE(elements == u8"A");
+        string += 'A';
+        REQUIRE(string == u8"A");
     }
     SECTION("must be able to append an UTF-32 value") {
-        elements += char32(0x6C34);
-        REQUIRE(elements == u8"水");
+        string += char32(0x6C34);
+        REQUIRE(string == u8"\U00006C34");  // "水"
     }
     SECTION("must be able to append another String") {
-        elements += String(u8"Love 地");
-        REQUIRE(elements == u8"Love 地");
+        string += String(u8"Love \U00005730");   // "Love 地"
+        REQUIRE(string == u8"Love \U00005730");  // "Love 地"
     }
     SECTION("must be able to append a CodeUnit") {
-        elements += utf::CodeUnit<utf::UTF_8>({0xE6, 0xB0, 0xB4});
-        REQUIRE(elements == u8"水");
+        string += utf::CodeUnit<utf::UTF_8>({0xE6, 0xB0, 0xB4});
+        REQUIRE(string == u8"\U00006C34");  // "水"
     }
     SECTION("must be able to append a raw UTF-8 string") {
-        elements += u8"水、火、地、風、空";
-        REQUIRE(elements == u8"水、火、地、風、空");
+        // "😀😃😄😁😆"
+        string += u8"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606";
+        REQUIRE(string == u8"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606");
     }
 }

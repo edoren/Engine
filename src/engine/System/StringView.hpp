@@ -23,7 +23,7 @@ public:
     ////////////////////////////////////////////////////////////
     // Static member data
     ////////////////////////////////////////////////////////////
-    static const size_type sInvalidPos;  ///< Represents an invalid position in the string view
+    static inline const size_type sInvalidPos = size_type(-1);  ///< Represents an invalid position in the string view
 
     /**
      * @brief Default constructor
@@ -44,7 +44,7 @@ public:
      *
      * @param string String to view
      */
-    constexpr StringView(const String& string);
+    StringView(const String& string);
 
     /**
      * @brief Construct a string view from an StringView
@@ -74,7 +74,7 @@ public:
      *
      * @return Reference to self
      */
-    constexpr StringView& operator=(const String& right);
+    StringView& operator=(const String& right);
 
     /**
      * @brief Overload of assignment operator
