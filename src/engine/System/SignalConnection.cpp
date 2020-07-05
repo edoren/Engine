@@ -117,6 +117,9 @@ void SignalConnection::disconnectWithCallback() {
 void SignalConnection::disconnectWithoutCallback() {
     if (m_reference) {
         m_reference->disconnect();
+        m_id = sInvalidId;
+        m_reference = nullptr;
+        m_disconnectCallback = nullptr;
     }
 }
 
