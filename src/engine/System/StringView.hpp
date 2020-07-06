@@ -14,8 +14,8 @@ public:
     ////////////////////////////////////////////////////////////
     // Types
     ////////////////////////////////////////////////////////////
-    using size_type = std::size_t;                                         ///< Size type
-    using const_iterator = utf::Iterator<utf::UTF_8>;                                 ///< Read-only iterator type
+    using size_type = size_t;                                              ///< Size type
+    using const_iterator = utf::Iterator<utf::UTF_8>;                      ///< Read-only iterator type
     using iterator = const_iterator;                                       ///< Iterator type
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;  ///< Read-only reverse iterator type
     using reverse_iterator = std::reverse_iterator<iterator>;              ///< Reverse iterator type
@@ -89,20 +89,20 @@ public:
      * @brief Overload of [] operator to access a character by its position
      *
      * This function provides read-only access to characters.
-     * Note: the behavior is undefined if \a index is out of range.
+     * Note: the behavior is undefined if `index` is out of range.
      *
      * @param index Index of the character to get
      *
-     * @return Character at position \a index
+     * @return Character at position `index`
      */
-    constexpr char8 operator[](size_type index) const;
+    constexpr utf::CodeUnit<utf::UTF_8> operator[](size_type index) const;
 
     /**
      * @brief Get the size of the string
      *
      * @return Number of UTF-8 codepoints in the string
      *
-     * @see IsEmpty
+     * @see isEmpty
      */
     constexpr size_type getSize() const;
 
@@ -111,7 +111,7 @@ public:
      *
      * @return True if the string is empty (i.e. contains no character)
      *
-     * @see Clear, getSize
+     * @see clear, getSize
      */
     constexpr bool isEmpty() const;
 
@@ -119,13 +119,13 @@ public:
      * @brief Find a sequence of one or more characters in
      *        the string
      *
-     * This function searches for the characters of \a str
-     * in the string, starting from \a start.
+     * This function searches for the characters of `str`
+     * in the string, starting from `start`.
      *
      * @param str   Characters to find
      * @param start Where to begin searching
      *
-     * @return Position of \a str in the string, or String::InvalidPos
+     * @return Position of `str` in the string, or @ref sInvalidPos
      *         if not found
      */
     constexpr size_type find(const StringView& str, size_type start = 0) const;
@@ -135,14 +135,14 @@ public:
      *        characters in the given character sequence.
      *
      * This function searches for the first character equal to
-     * one of the characters in \a str. The search considers
-     * only the interval [\a pos, Size()]
+     * one of the characters in `str`. The search considers
+     * only the interval [`pos`, `getSize()`]
      *
      * @param str   Characters to find
      * @param pos Where to begin searching
      *
-     * @return Position of the first character of \a str found
-     *        in the string, or String::InvalidPos if not found
+     * @return Position of the first character of `str` found
+     *         in the string, or @ref sInvalidPos if not found
      */
     constexpr size_type findFirstOf(const StringView& str, size_type pos = 0) const;
 
@@ -151,29 +151,28 @@ public:
      *        characters in the given character sequence.
      *
      * This function searches for the last character equal to
-     * one of the characters in \a str. The search considers
-     * only the interval [0, \a pos]
+     * one of the characters in `str`. The search considers
+     * only the interval [`0`, `pos`]
      *
      * @param str Characters to find
      * @param pos Where to begin searching
      *
-     * @return Position of the last character of \a str found
-     *        in the string, or String::InvalidPos if not found
+     * @return Position of the last character of `str` found
+     *        in the string, or @ref sInvalidPos if not found
      */
     constexpr size_type findLastOf(const StringView& str, size_type pos = sInvalidPos) const;
 
     /**
      * @brief Return a part of the string
      *
-     * This function returns the SubString that starts at index \a position
-     * and spans \a length characters.
+     * This function returns the SubString that starts at index `position`
+     * and spans `length` characters.
      *
      * @param position Index of the first character
      * @param length   Number of characters to include in the SubString (if
      *                 the string is shorter, as many characters as possible
-     *                 are included). \ref InvalidPos can be used to include
-     *                 all
-     *                 characters until the end of the string.
+     *                 are included). @ref sInvalidPos can be used to include
+     *                 all characters until the end of the string.
      *
      * @return String object containing a SubString of this object
      */
@@ -198,7 +197,7 @@ public:
      *
      * @see end
      */
-    constexpr const_iterator begin();
+    constexpr iterator begin();
 
     /**
      * @brief Return an iterator to the beginning of the string
@@ -212,7 +211,7 @@ public:
     /**
      * @brief Return an iterator to the end of the string
      *
-     * The end iterator refers to 1 position past the last character;
+     * This iterator refers to 1 position past the last character;
      * thus it represents an invalid character and should never be
      * accessed.
      *
@@ -220,12 +219,12 @@ public:
      *
      * @see begin
      */
-    constexpr const_iterator end();
+    constexpr iterator end();
 
     /**
      * @brief Return an iterator to the end of the string
      *
-     * The end iterator refers to 1 position past the last character;
+     * This iterator refers to 1 position past the last character;
      * thus it represents an invalid character and should never be
      * accessed.
      *
@@ -236,46 +235,50 @@ public:
     constexpr const_iterator cend() const;
 
     /**
-     * @brief Return an iterator to the beginning of the string
+     * @brief Return an iterator to the reverse beginning of the string
      *
-     * @return Read-only iterator to the beginning of the string
+     * This iterator refers to 1 position prior the first character;
+     * thus it represents an invalid character and should never be
+     * accessed.
      *
-     * @see end
+     * @return Read-only iterator to the reverse beginning of the string
+     *
+     * @see rend
      */
     reverse_iterator rbegin();
 
     /**
-     * @brief Return an iterator to the beginning of the string
+     * @brief Return an iterator to the reverse beginning of the string
      *
-     * @return Read-only iterator to the beginning of the string
+     * This iterator refers to 1 position prior the first character;
+     * thus it represents an invalid character and should never be
+     * accessed.
      *
-     * @see end
+     * @return Read-only iterator to the reverse beginning of the string
+     *
+     * @see crend
      */
     const_reverse_iterator crbegin() const;
 
     /**
-     * @brief Return an iterator to the end of the string
+     * @brief Return an iterator to the reverse end of the string
      *
-     * The end iterator refers to 1 position past the last character;
-     * thus it represents an invalid character and should never be
-     * accessed.
+     * This iterator refers to the first element in the string
      *
      * @return Read-only iterator to the end of the string
      *
-     * @see begin
+     * @see rbegin
      */
     reverse_iterator rend();
 
     /**
      * @brief Return an iterator to the end of the string
      *
-     * The end iterator refers to 1 position past the last character;
-     * thus it represents an invalid character and should never be
-     * accessed.
+     * This iterator refers to the first element in the string
      *
      * @return Read-only iterator to the end of the string
      *
-     * @see begin
+     * @see crbegin
      */
     const_reverse_iterator crend() const;
 
@@ -316,7 +319,7 @@ ENGINE_API bool operator!=(const StringView& left, const StringView& right);
  * @param left  Left operand (a StringView)
  * @param right Right operand (a StringView)
  *
- * @return True if \a left is lexicographically before \a right
+ * @return True if `left` is lexicographically before `right`
  */
 ENGINE_API bool operator<(const StringView& left, const StringView& right);
 
@@ -327,7 +330,7 @@ ENGINE_API bool operator<(const StringView& left, const StringView& right);
  * @param left  Left operand (a StringView)
  * @param right Right operand (a StringView)
  *
- * @return True if \a left is lexicographically after \a right
+ * @return True if `left` is lexicographically after `right`
  */
 ENGINE_API bool operator>(const StringView& left, const StringView& right);
 
@@ -338,7 +341,7 @@ ENGINE_API bool operator>(const StringView& left, const StringView& right);
  * @param left  Left operand (a StringView)
  * @param right Right operand (a StringView)
  *
- * @return True if \a left is lexicographically before or equivalent to \a
+ * @return True if `left` is lexicographically before or equivalent to \a
  *        right
  */
 ENGINE_API bool operator<=(const StringView& left, const StringView& right);
@@ -350,7 +353,7 @@ ENGINE_API bool operator<=(const StringView& left, const StringView& right);
  * @param left  Left operand (a StringView)
  * @param right Right operand (a StringView)
  *
- * @return True if \a left is lexicographically after or equivalent to \a right
+ * @return True if `left` is lexicographically after or equivalent to `right`
  */
 ENGINE_API bool operator>=(const StringView& left, const StringView& right);
 

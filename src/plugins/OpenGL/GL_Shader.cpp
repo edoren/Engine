@@ -71,7 +71,7 @@ GL_Shader& GL_Shader::operator=(GL_Shader&& other) noexcept {
     return *this;
 }
 
-bool GL_Shader::loadFromMemory(const byte* source, std::size_t sourceSize, ShaderType type) {
+bool GL_Shader::loadFromMemory(const byte* source, size_t sourceSize, ShaderType type) {
     if (isLinked()) {
         return false;
     }

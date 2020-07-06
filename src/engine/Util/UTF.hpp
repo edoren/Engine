@@ -13,32 +13,37 @@ namespace utf {
 
 /**
  * @brief Enum to request certain UTF operations
- *
- * @see utf namespace
  */
 enum Encoding {
-    UTF_8 = 1,   ///< Base for UTF-8 support
-    UTF_16 = 2,  ///< Base for UTF-16 support
-    UTF_32 = 4,  ///< Base for UTF-32 support
+    UTF_8,   ///< Base for UTF-8 support.
+    UTF_16,  ///< Base for UTF-16 support.
+    UTF_32,  ///< Base for UTF-32 support.
 };
+
+/**
+ * @brief Returns the size in bytes of each code unit internal data
+ *
+ * @param encoding The encoding to get the size from
+ * @return This must return 1 for UTF-8, 2 for UTF-16 and 4 for UTF-32.
+ */
+constexpr size_t GetEncodingSize(Encoding encoding);
 
 /**
  * @brief Class to handle a single UTF code unit
  *
- * @tparam Base The base for the UTF support, must be 8, 16 or 32
+ * @tparam Base The encoding for the UTF support. See @ref Encoding.
  */
 template <Encoding Base>
 class CodeUnit {
 public:
-    /**
-     * @brief Type of the internal data for the code unit
-     */
-    using value_type = std::conditional_t<(Base == UTF_8), uint8, std::conditional_t<(Base == UTF_16), uint16, uint32>>;
-
-    /**
-     * @brief Type of container of the complete code unit data
-     */
-    using data_type = std::array<value_type, 32 / (sizeof(value_type) * 8)>;
+    using size_type = size_t;  ///< The size type
+    using value_type =
+        std::conditional_t<(Base == UTF_8),
+                           uint8,
+                           std::conditional_t<(Base == UTF_16), uint16, uint32>>;  ///< Type of the internal data for
+                                                                                   ///< the code unit
+    using data_type =
+        std::array<value_type, 32 / (sizeof(value_type) * 8)>;  ///< Type of container of the complete code unit data
 
     /**
      * @brief Create an unit from an array
@@ -52,8 +57,7 @@ public:
      *
      * @param codePoint The Unicode code point to convert
      *
-     * @tparam The type of the codePoint,
-     * @tparam SFINAE to check T is integer and have 4 bytes of size
+     * @tparam T The type of the codePoint,
      */
     template <typename T = char32, typename = std::enable_if_t<std::is_integral_v<T> && sizeof(T) == 4>>
     explicit constexpr CodeUnit(T codePoint);
@@ -94,7 +98,7 @@ public:
      *           1 byte for UTF-8, 2 byte for UTF-16, and 4 bytes for UTF-32
      */
     template <typename T>
-    explicit constexpr CodeUnit(const T* begin, size_t size);
+    explicit constexpr CodeUnit(const T* begin, size_type size);
 
     /**
      * @brief Copy contructor
@@ -114,7 +118,7 @@ public:
      * @brief Copy operator
      *
      * @param other Other to copy from
-     * @return Reference to this
+     * @return Reference to self
      */
     constexpr CodeUnit& operator=(const CodeUnit& other) = default;
 
@@ -122,7 +126,7 @@ public:
      * @brief Move operator
      *
      * @param other Other to move to this
-     * @return Reference to this
+     * @return Reference to self
      */
     constexpr CodeUnit& operator=(CodeUnit&& other) noexcept = default;
 
@@ -159,7 +163,7 @@ public:
      *
      * @return The size
      */
-    constexpr size_t getSize() const;
+    constexpr size_type getSize() const;
 
     /**
      * @brief Check equality
@@ -192,19 +196,21 @@ private:
 /**
  * @brief Helper class that holds the begin and end to an iterator/pointer of a CodeUnit
  *
- * @tparam Base The base for the UTF support, must be 8, 16 or 32
+ * @tparam Base The encoding for the UTF support. See @ref Encoding.
  * @tparam T The type of the iterator
  */
-template <Encoding Base, typename T>
+template <Encoding Base,
+          typename T = std::conditional_t<(Base == UTF_8), char8, std::conditional_t<(Base == UTF_16), char16, char32>>>
 class CodeUnitRange {
     static_assert(type::is_forward_iterator<T>::value, "Value should be a forward iterator");
     static_assert(std::is_integral<type::iterator_underlying_type_t<T>>::value,
                   "Iterator internal type should be an integer");
-    static_assert(sizeof(type::iterator_underlying_type_t<T>) == size_t(Base),
+    static_assert(sizeof(type::iterator_underlying_type_t<T>) == GetEncodingSize(Base),
                   "Iterator internal type has an invalid size");
 
 public:
-    using pointed_type = T;  ///< The type of the pointed element
+    using size_type = size_t;  ///< The size type
+    using pointed_type = T;    ///< The type of the pointed element
 
     /**
      * @brief Construct a default null initialized range
@@ -214,7 +220,7 @@ public:
     /**
      * @brief Construct a new CodeUnitRange object
      *
-     * @param value The begin and end of the code unit
+     * @param range The begin and end of the code unit
      */
     constexpr CodeUnitRange(std::pair<pointed_type, pointed_type>&& range);
 
@@ -313,24 +319,25 @@ private:
 /**
  * @brief Read-only iterator class for an UTF sequence
  *
- * @tparam Base The base for the UTF support, must be 8, 16 or 32
- * @tparam T The internal type for the unit pointer, by default char8, char16 or char32 for Base 8, 16 and 32
+ * @tparam Base The encoding for the UTF support. See @ref Encoding.
+ * @tparam T The internal type for the unit pointer, by default char8, char16 or char32 for UTF-8, UTF-16 and UTF-32
  *           respectively
  */
 template <Encoding Base,
           typename T = std::conditional_t<(Base == UTF_8), char8, std::conditional_t<(Base == UTF_16), char16, char32>>>
 class Iterator {
     static_assert(std::is_integral<T>::value, "Pointed type should be an integer");
-    static_assert(sizeof(T) == size_t(Base), "Error invalid type (T), it should has the same size in bits as Base");
+    static_assert(sizeof(T) == GetEncodingSize(Base),
+                  "Error invalid type (T), it should has the same size in bits as Base");
 
 public:
+    using size_type = size_t;                                   ///< The size type
     using difference_type = std::ptrdiff_t;                     ///< The difference type
     using value_type = CodeUnitRange<Base, const T*>;           ///< The value type
     using pointer = value_type*;                                ///< The pointer type
     using reference = value_type&;                              ///< The reference type
     using iterator_category = std::bidirectional_iterator_tag;  ///< The category of the iterator
-
-    using pointed_type = typename value_type::pointed_type;  ///< @copydoc value_type::pointed_type
+    using pointed_type = typename value_type::pointed_type;     ///< @copydoc value_type::pointed_type
 
     /**
      * @brief Constructs a new Iterator object
@@ -363,7 +370,7 @@ public:
      * @brief Copy operator
      *
      * @param other The other iterator to copy
-     * @return Reference to this
+     * @return Reference to self
      */
     constexpr Iterator& operator=(const Iterator& other) = default;
 
@@ -371,7 +378,7 @@ public:
      * @brief Move operator
      *
      * @param other The other iterator to move into
-     * @return Reference to this
+     * @return Reference to self
      */
     constexpr Iterator& operator=(Iterator&& other) noexcept = default;
 
@@ -508,13 +515,10 @@ private:
  *
  * This method will append to the `result` string the requested Base for the conversion
  *
- * @tparam BaseFrom The base to convert from, must be 8, 16, or 32, for UTF-8, UTF-16 and UTF-32 respectively, and
- *                  different than BaseTo
- * @tparam BaseTo The base to convert to, must be 8, 16, or 32, for UTF-8, UTF-16 and UTF-32 respectively,
- *                and different than BaseFrom
+ * @tparam BaseFrom The encoding to convert from. See @ref Encoding.
+ * @tparam BaseTo The encoding to convert to. See @ref Encoding.
  * @tparam T The type of the iterator has the string
  * @tparam Ret The type of the string data, must be 8, 16, or 32, for UTF-8, UTF-16 and UTF-32 respectively
- * @tparam std::enable_if_t<sizeof(Ret) == (BaseTo / 8)> SFINAE
  * @param begin The begin of the string to convert from
  * @param end The end of the string to convert from
  * @param result The string to modify
@@ -523,13 +527,13 @@ template <Encoding BaseFrom,
           Encoding BaseTo,
           typename T,
           typename Ret,
-          typename = std::enable_if_t<BaseFrom != BaseTo && sizeof(Ret) == size_t(BaseTo)>>
+          typename = std::enable_if_t<BaseFrom != BaseTo && sizeof(Ret) == GetEncodingSize(BaseTo)>>
 constexpr void UtfToUtf(T begin, T end, std::basic_string<Ret>* result);
 
 /**
  * @brief Get a Unicode code point from a code unit
  *
- * @tparam Base Must be 8, 16, or 32, for UTF-8, UTF-16 and UTF-32 respectively
+ * @tparam Base The encoding for the UTF support. See @ref Encoding.
  * @tparam T The type of the iterator has the string
  * @param begin The start of the code unit
  * @param end The end of the code unit
@@ -541,7 +545,7 @@ constexpr char32 CodePointFromUTF(T begin, T end);
 /**
  * @brief Get the iterator to the next code unit of the UTF string
  *
- * @tparam Base Must be 8, 16, or 32, for UTF-8, UTF-16 and UTF-32 respectively
+ * @tparam Base The encoding for the UTF support. See @ref Encoding.
  * @tparam T The type of the iterator has the string
  * @param begin The start of the iterator to begin searching
  * @param end The iterator to the end of the UTF string
@@ -554,7 +558,7 @@ constexpr T NextUTF(T begin, T end);
 /**
  * @brief Get the iterator to the prior code unit of the UTF string
  *
- * @tparam Base Must be 8, 16, or 32, for UTF-8, UTF-16 and UTF-32 respectively
+ * @tparam Base The encoding for the UTF support. See @ref Encoding.
  * @tparam T The type of the iterator has the string
  * @param end The start of the iterator to begin searching backwards
  * @param begin The iterator to the start of the UTF string
@@ -567,16 +571,7 @@ constexpr T PriorUTF(T end, T begin);
 /**
  * @brief Iterate over an UTF string
  *
- * @tparam Base Must be 8, 16, or 32, for UTF-8, UTF-16 and UTF-32 respectively
- * @tparam T The type of the iterator has the string
- * @param end The iterator to the start of the UTF string
- * @param begin The iterator to the end of the UTF string
- */
-
-/**
- * @brief
- *
- * @tparam Base Must be 8, 16, or 32, for UTF-8, UTF-16 and UTF-32 respectively
+ * @tparam Base The encoding for the UTF support. See @ref Encoding.
  * @tparam T The type of the iterator has the string
  * @tparam Func The function of type `void(T begin, T end)`
  * @param begin The iterator to the start of the UTF string
@@ -593,7 +588,7 @@ constexpr T ForEachUTF(T begin, T end, Func fn);
  *
  * @note This method does not check for a valid UTF string
  *
- * @tparam Base Must be 8, 16, or 32, for UTF-8, UTF-16 and UTF-32 respectively
+ * @tparam Base The encoding for the UTF support. See @ref Encoding.
  * @tparam T The type of the iterator has the string
  * @param begin The iterator to the start of the UTF string
  * @param end The iterator to the end of the UTF string
@@ -605,7 +600,7 @@ constexpr size_t GetSizeUTF(T begin, T end);
 /**
  * @brief Validate an UTF string
  *
- * @tparam Base Must be 8, 16, or 32, for UTF-8, UTF-16 and UTF-32 respectively
+ * @tparam Base The encoding for the UTF support. See @ref Encoding.
  * @tparam T The type of the iterator has the string
  * @param begin The iterator to the start of the UTF string
  * @param end The iterator to the end of the UTF string
@@ -630,7 +625,7 @@ constexpr bool IsValidUTF(T begin, T end);
 // namespace std {
 
 // template <Encoding Base, typename T>
-// struct tuple_size<engine::utf::CodeUnit<Base, T>> : std::integral_constant<std::size_t, 2> {};
+// struct tuple_size<engine::utf::CodeUnit<Base, T>> : std::integral_constant<size_t, 2> {};
 
 // template <Encoding Base, typename T>
 // struct tuple_element<0, engine::utf::CodeUnit<Base, T>> {

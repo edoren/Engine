@@ -388,8 +388,9 @@ constexpr CodeUnit<Base>::CodeUnit(const T* begin, const T* end) : CodeUnit(begi
 
 template <Encoding Base>
 template <typename T>
-constexpr CodeUnit<Base>::CodeUnit(const T* begin, const size_t size) {
-    static_assert(sizeof(T) == size_t(Base), "Error invalid value, it should has the same value in bits as Base");
+constexpr CodeUnit<Base>::CodeUnit(const T* begin, const size_type size) {
+    static_assert(sizeof(T) == GetEncodingSize(Base),
+                  "Error invalid value, it should has the same value in bits as Base");
 
     ENGINE_ASSERT(IsValidUTF<Base>(begin, begin + size), "Invalid UTF code unit");
 
@@ -430,7 +431,7 @@ constexpr const typename CodeUnit<Base>::data_type& CodeUnit<Base>::getData() co
 }
 
 template <Encoding Base>
-constexpr size_t CodeUnit<Base>::getSize() const {
+constexpr typename CodeUnit<Base>::size_type CodeUnit<Base>::getSize() const {
     if constexpr (Base == UTF_8) {
         if ((m_unit[0] & 0x80) == 0x00) {
             return 1;
@@ -515,8 +516,8 @@ constexpr auto CodeUnitRange<Base, T>::getRange() const -> const std::pair<point
 template <Encoding Base, typename T>
 template <typename U>
 constexpr bool CodeUnitRange<Base, T>::operator==(const CodeUnitRange<Base, U>& other) const {
-    size_t size = (m_range.second - m_range.first);
-    size_t otherSize = (other.m_range.second - other.m_range.first);
+    size_type size = (m_range.second - m_range.first);
+    size_type otherSize = (other.m_range.second - other.m_range.first);
     return otherSize == size && memcmp(m_range.first, other.m_range.first, size) == 0;
 }
 
@@ -654,17 +655,17 @@ constexpr bool Iterator<Base, T>::operator<(const Iterator& other) const {
 
 template <Encoding Base, typename T>
 constexpr bool Iterator<Base, T>::operator>(const Iterator& other) const {
-    return m_ref.getRange() > other.m_ref.getRange();
+    return other < *this;
 }
 
 template <Encoding Base, typename T>
 constexpr bool Iterator<Base, T>::operator<=(const Iterator& other) const {
-    return *this < other || *this == other;
+    return !(other < *this);
 }
 
 template <Encoding Base, typename T>
 constexpr bool Iterator<Base, T>::operator>=(const Iterator& other) const {
-    return *this > other || *this == other;
+    return !(*this < other);
 }
 
 template <Encoding Base, typename T>
@@ -685,6 +686,17 @@ constexpr typename Iterator<Base, T>::pointed_type Iterator<Base, T>::getPtr() c
 ////////////////////////////////////////////////////////////////////////////////
 // Static Functions
 ////////////////////////////////////////////////////////////////////////////////
+
+constexpr size_t GetEncodingSize(Encoding encoding) {
+    switch (encoding) {
+        case Encoding::UTF_8:
+            return 1;
+        case Encoding::UTF_16:
+            return 2;
+        case Encoding::UTF_32:
+            return 4;
+    }
+}
 
 template <Encoding BaseFrom, Encoding BaseTo, typename T, typename Ret, typename>
 constexpr void UtfToUtf(T begin, T end, std::basic_string<Ret>* result) {

@@ -46,8 +46,9 @@ constexpr StringView& StringView::operator=(const char8* right) {
     return *this;
 }
 
-constexpr char8 StringView::operator[](size_type index) const {
-    return m_data[index];
+constexpr utf::CodeUnit<utf::UTF_8> StringView::operator[](size_type index) const {
+    // TODO: throw error
+    return (cbegin() + index)->get();
 }
 
 constexpr StringView::size_type StringView::getSize() const {
@@ -73,7 +74,7 @@ constexpr StringView::size_type StringView::find(const StringView& str, size_typ
 }
 
 constexpr StringView::size_type StringView::findFirstOf(const StringView& str, size_type pos) const {
-    size_t strSize = getSize();
+    size_type strSize = getSize();
 
     if (pos >= strSize) {
         return sInvalidPos;

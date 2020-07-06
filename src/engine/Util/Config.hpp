@@ -41,16 +41,16 @@
 #endif
 
 /**
+ * @namespace engine
  * @brief Namespace that contains all the vanilla engine code
  */
-namespace engine {}
 
 /**
+ * @namespace engine::plugin
  * @brief Namespace that contains all the provided plugins
  */
-namespace engine::plugin {}
 
 /**
+ * @namespace engine::utf
  * @brief Namespace that contains functions and classes to handle UTF encodings
  */
-namespace engine::utf {}

@@ -89,9 +89,9 @@ bool FileSystem::loadFileData(const String& filename, Vector<byte>* dest) const 
         return false;
     }
 
-    std::size_t len = file.getSize();
+    size_t len = file.getSize();
     dest->resize(len);
-    std::size_t rlen = file.read(dest->data(), 1, len);
+    size_t rlen = file.read(dest->data(), 1, len);
     return len == rlen && len > 0;
 }
 
