@@ -14,124 +14,117 @@
 
 namespace engine {
 
-namespace {
+/**
+ * @brief Class to hold a function reference with static size for capture arguments
+ *
+ * @tparam Func The function type
+ * @tparam MaxSize The maximum stack size used for the function class
+ *
+ * @see Function<Ret(Args...), MaxSize> for concrete implementation
+ */
+template <typename Func, size_t MaxSize = LAMBDA_FUNCTION_SIZE(LAMBDA_DEFAULT_SIZE)>
+class Function;
 
-template <typename A, typename B, size_t SizeA = sizeof(A), size_t SizeB = sizeof(B)>
-void check_size() {
-    static_assert(SizeA <= SizeB, "Size is off!");
-}
-
-template <typename A, typename B, size_t AlignA = alignof(A), size_t AlignB = alignof(B)>
-void check_align() {
-    static_assert(AlignA <= AlignB, "Align is off!");
-}
-
-}  // namespace
-
-template <typename, size_t MaxSize = LAMBDA_FUNCTION_SIZE(LAMBDA_DEFAULT_SIZE)>
-class Function {
-    static_assert(sizeof(MaxSize) > 0, "MaxSize must be at least 1");
-};
-
+/**
+ * @brief Class to hold a function reference with static size for capture arguments
+ *
+ * @tparam Ret The return type of the function
+ * @tparam Args The parameters that the function receives
+ * @tparam MaxSize The maximum stack size used for the function class
+ */
 template <typename Ret, typename... Args, size_t MaxSize>
 class Function<Ret(Args...), MaxSize> {
+    static_assert(sizeof(MaxSize) > 0, "MaxSize must be at least 1");
+
 public:
-    Function() : m_data(), m_invoker(nullptr), m_manager(nullptr) {}
+    /**
+     * @brief Default constructor
+     */
+    Function();
 
-    Function(std::nullptr_t) noexcept : m_data(), m_invoker(nullptr), m_manager(nullptr) {}
+    /**
+     * @brief Null constructor, this yields an empty function
+     */
+    Function(std::nullptr_t) noexcept;
 
-    Function(const Function& other) : m_data(), m_invoker(nullptr), m_manager(nullptr) {
-        if (other.m_manager) {
-            other.m_manager(&m_data, &other.m_data, Operation::COPY);
-            m_invoker = other.m_invoker;
-            m_manager = other.m_manager;
-        }
-    }
+    /**
+     * @brief Copy constructor
+     */
+    Function(const Function& other);
 
-    Function(Function&& other) noexcept
-          : m_data(std::move(other.m_data)),
-            m_invoker(std::move(other.m_invoker)),
-            m_manager(std::move(other.m_manager)) {
-        other.m_invoker = nullptr;
-        other.m_manager = nullptr;
-    }
+    /**
+     * @brief Move constructor
+     */
+    Function(Function&& other) noexcept;
 
-    // SFINAE to avoid being called when T is of type Function<Ret(Args...)>
-    // This constructor should be called only when T is a lambda or a function
+    /**
+     * @brief Construct a new Function object
+     *
+     * @note This constructor should be called only when T is a lambda or a function
+     *
+     * @param fun The lambda function or function to assign to
+     */
     template <typename T,
-              typename = typename std::enable_if<
-                  !std::is_same<typename std::decay<T>::type, Function<Ret(Args...), MaxSize>>::value>::type>
-    Function(T&& f) : m_data(),
-                      m_invoker(nullptr),
-                      m_manager(nullptr) {
-        using lambda_type = typename std::decay<T>::type;
-        check_align<lambda_type, Storage>();
-        check_size<lambda_type, Storage>();
-        new (&m_data) lambda_type(std::forward<T>(f));
-        m_invoker = &CallFunction<lambda_type>;
-        m_manager = &ManageFunction<lambda_type>;
-    }
+              typename = std::enable_if_t<!std::is_same_v<std::decay_t<T>, Function<Ret(Args...), MaxSize>>>>
+    Function(T&& fun);
 
-    ~Function() {
-        if (m_manager != nullptr) {
-            m_manager(&m_data, nullptr, Operation::DESTROY);
-        }
-    }
+    /**
+     * @brief Destructor
+     */
+    ~Function();
 
-    Function& operator=(const Function& other) {
-        Function(other).Swap(*this);
-        return *this;
-    }
+    /**
+     * @brief Copy operator
+     */
+    Function& operator=(const Function& other);
 
-    Function& operator=(Function&& other) noexcept {
-        Function(std::move(other)).Swap(*this);
-        return *this;
-    }
+    /**
+     * @brief Move operator
+     */
+    Function& operator=(Function&& other) noexcept;
 
-    Function& operator=(std::nullptr_t) {
-        if (m_manager != nullptr) {
-            m_manager(&m_data, nullptr, Operation::DESTROY);
-            m_manager = nullptr;
-            m_invoker = nullptr;
-        }
-        return *this;
-    }
+    /**
+     * @brief Null assignment operator
+     */
+    Function& operator=(std::nullptr_t);
 
+    /**
+     * @brief Redirect assigment operator based on available constructors
+     */
     template <typename T>
-    Function& operator=(T&& other) {
-        Function(std::forward<T>(other)).Swap(*this);
-        return *this;
-    }
+    Function& operator=(T&& other);
 
+    /**
+     * @brief Redirect assigment operator based on available constructors
+     */
     template <typename T>
-    Function& operator=(std::reference_wrapper<T> other) {
-        Function(other).Swap(*this);
-        return *this;
-    }
+    Function& operator=(std::reference_wrapper<T> other);
 
-    void swap(Function& other) {
-        std::swap(m_data, other.m_data);
-        std::swap(m_manager, other.m_manager);
-        std::swap(m_invoker, other.m_invoker);
-    }
+    /**
+     * @brief Swap two functions with the same return and arguments
+     *
+     * @param other The other function to swap with this
+     */
+    void swap(Function& other);
 
-    explicit operator bool() const noexcept {
-        return m_manager != nullptr;
-    }
+    /**
+     * @brief Checks instance does not point to any function
+     */
+    explicit operator bool() const noexcept;
 
-    Ret operator()(Args&&... args) {
-        if (m_invoker == nullptr) {
-            abort();
-        }
-        return m_invoker(&m_data, std::forward<Args>(args)...);
-    }
+    /**
+     * @brief Invoke operator
+     *
+     * @param args Arguments to call the internal function
+     */
+    Ret operator()(Args&&... args);
 
-    Ret operator()(Args&&... args) const {
-        if (m_invoker == nullptr) {
-            abort();
-        }
-        return m_invoker(&m_data, std::forward<Args>(args)...);
-    }
+    /**
+     * @brief Invoke const operator
+     *
+     * @param args Arguments to call the internal function
+     */
+    Ret operator()(Args&&... args) const;
 
 private:
     enum class Operation {
@@ -140,25 +133,10 @@ private:
     };
 
     template <typename FunctionType>
-    static Ret CallFunction(const void* data, Args&&... args) {
-        const auto* callable = static_cast<const FunctionType*>(data);
-        return (*callable)(std::forward<Args>(args)...);
-    }
+    static Ret CallFunction(const void* data, Args&&... args);
 
     template <typename FunctionType>
-    static void ManageFunction(void* dest, const void* src, Operation op) {
-        auto* destCast = static_cast<FunctionType*>(dest);
-        switch (op) {
-            case Operation::COPY: {
-                const auto* srcCast = static_cast<const FunctionType*>(src);
-                new (destCast) FunctionType(*srcCast);
-                break;
-            }
-            case Operation::DESTROY:
-                destCast->~FunctionType();
-                break;
-        }
-    }
+    static void ManageFunction(void* dest, const void* src, Operation op);
 
     using Invoker = Ret (*)(const void*, Args&&...);
     using Manager = void (*)(void*, const void*, Operation);
@@ -175,3 +153,5 @@ private:
 };
 
 }  // namespace engine
+
+#include <Util/Function.inl>

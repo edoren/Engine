@@ -28,11 +28,11 @@ struct UdlStringFormatProxy {
     }
 };
 
-inline UdlStringFormatProxy<char8> operator""_format(const char8* str, std::size_t /*unused*/) {
+inline UdlStringFormatProxy<char8> operator""_format(const char8* str, size_t /*unused*/) {
     return {str};
 }
 
-inline UdlStringFormatProxy<wchar> operator""_format(const wchar* str, std::size_t /*unused*/) {
+inline UdlStringFormatProxy<wchar> operator""_format(const wchar* str, size_t /*unused*/) {
     return {str};
 }
 

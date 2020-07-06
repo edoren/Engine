@@ -72,7 +72,7 @@ String SharedLibrary::getErrorString() {
     LPWSTR lpMsgBuf;
     FormatMessageW((FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS), NULL,
                    GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&lpMsgBuf, 0, NULL);
-    std::size_t msg_len = std::wcslen(lpMsgBuf);
+    size_t msg_len = std::wcslen(lpMsgBuf);
     if (msg_len >= 2) msg_len -= 2;  // Remove the /r/n characters
     String ret = String::FromWide(lpMsgBuf, lpMsgBuf + msg_len);
     LocalFree(lpMsgBuf);

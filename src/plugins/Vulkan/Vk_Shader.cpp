@@ -49,7 +49,7 @@ Vk_Shader& Vk_Shader::operator=(Vk_Shader&& other) noexcept {
     return *this;
 }
 
-bool Vk_Shader::loadFromMemory(const byte* source, std::size_t sourceSize, ShaderType type) {
+bool Vk_Shader::loadFromMemory(const byte* source, size_t sourceSize, ShaderType type) {
     if (sourceSize == 0) {
         return false;
     }

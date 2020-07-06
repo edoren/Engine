@@ -29,6 +29,18 @@ struct ENGINE_API is_forward_iterator
                                        std::is_compound<iterator_underlying_type_t<T>>::value) &&
                                           std::is_same<decltype(++(std::declval<T&>())), T&>::value> {};
 
+template <typename T>
+struct ENGINE_API alignment_of : std::integral_constant<size_t, alignof(T)> {};
+
+template <typename T>
+struct ENGINE_API size_of : std::integral_constant<size_t, sizeof(T)> {};
+
+template <typename T>
+using alignment_of_v = typename alignment_of<T>::value;
+
+template <typename T>
+using size_of_v = typename size_of<T>::value;
+
 }  // namespace type
 
 }  // namespace engine

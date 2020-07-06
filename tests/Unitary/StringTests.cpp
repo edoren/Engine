@@ -2,43 +2,45 @@
 
 #include <System/String.hpp>
 
+#include <iostream>
+
 using namespace engine;
 
 TEST_CASE("String from other encodings", "[String]") {
     SECTION("from Wide strings") {
-        const wchar* elements = L"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606";
-        String a = String(elements);
-        String b = String(std::wstring(elements));
-        String c = String::FromWide(elements, elements + wcslen(elements));
+        std::wstring smiley = L"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606";
+        String a = String(smiley.data());
+        String b = String(smiley);
+        String c = String::FromWide(smiley.begin(), smiley.end());
         REQUIRE(a.getSize() == 5);
-        REQUIRE(a == u8"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606");
+        REQUIRE(a == L"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606");
         REQUIRE(a == b);
         REQUIRE(b == c);
     }
     SECTION("from UTF-8 strings") {
-        const char8* smiley = u8"\U0001F601";
-        String a = String(smiley);
-        String b = String(std::string(smiley));
-        String c = String::FromUtf8(smiley, smiley + 4);
-        REQUIRE(a == u8"\U0001F601");
+        std::string smiley = u8"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606";
+        String a = String(smiley.data());
+        String b = String(smiley);
+        String c = String::FromUtf8(smiley.begin(), smiley.end());
+        REQUIRE(a == u8"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606");
         REQUIRE(a == b);
         REQUIRE(b == c);
     }
     SECTION("from UTF-16 strings") {
-        const char16* smiley = u"\U0001F601";
-        String a = String(smiley);
-        String b = String(std::u16string(smiley));
-        String c = String::FromUtf16(smiley, smiley + 2);
-        REQUIRE(a == u8"\U0001F601");
+        std::u16string smiley = u"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606";
+        String a = String(smiley.data());
+        String b = String(smiley);
+        String c = String::FromUtf16(smiley.begin(), smiley.end());
+        REQUIRE(a == u"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606");
         REQUIRE(a == b);
         REQUIRE(b == c);
     }
     SECTION("from UTF-32 strings") {
-        const char32* smiley = U"\U0001F601";
-        String a = String(smiley);
-        String b = String(std::u32string(smiley));
-        String c = String::FromUtf32(smiley, smiley + 1);
-        REQUIRE(a == u8"\U0001F601");
+        std::u32string smiley = U"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606";
+        String a = String(smiley.data());
+        String b = String(smiley);
+        String c = String::FromUtf32(smiley.begin(), smiley.end());
+        REQUIRE(a == U"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606");
         REQUIRE(a == b);
         REQUIRE(b == c);
     }
@@ -282,6 +284,8 @@ TEST_CASE("String::iterator reverse", "[String]") {
 
 TEST_CASE("String::operator[]", "[String]") {
     String faces = u8"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606";  // "😀😃😄😁😆"
+
+    std::cout << std::hex << faces[0].getCodePoint() << std::endl;
 
     SECTION("must be able to access any code unit in the UTF-8 String") {
         REQUIRE(faces[0] == utf::CodeUnit<utf::UTF_8>({0xF0, 0x9F, 0x98, 0x80}));  // 😀
