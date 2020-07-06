@@ -287,7 +287,7 @@ private:
     // Member data
     ////////////////////////////////////////////////////////////
     const char8* m_data = {nullptr};  ///< The begining of the string view
-    size_t m_size = {0};              ///< The size of the string view
+    size_type m_size = {0};              ///< The size of the string view
 };
 
 /**

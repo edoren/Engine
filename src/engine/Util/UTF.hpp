@@ -402,7 +402,7 @@ public:
      * @param num The number to increase
      * @return A new iterator pointing a next code unit
      */
-    constexpr Iterator operator+(uint32 num);
+    constexpr Iterator operator+(size_type num);
 
     /**
      * @brief Addition assignment operator
@@ -410,7 +410,7 @@ public:
      * @param num The number to increase
      * @return The current iterator pointing a next code unit
      */
-    constexpr Iterator& operator+=(uint32 num);
+    constexpr Iterator& operator+=(size_type num);
 
     /**
      * @brief Pre-increment operator
@@ -432,7 +432,7 @@ public:
      * @param num The number to decrease
      * @return A new iterator pointing a previous code unit
      */
-    constexpr Iterator operator-(uint32 num);
+    constexpr Iterator operator-(size_type num);
 
     /**
      * @brief Subtraction assignment operator
@@ -440,7 +440,7 @@ public:
      * @param num The number to decrease
      * @return The current iterator pointing a previous code unit
      */
-    constexpr Iterator& operator-=(uint32 num);
+    constexpr Iterator& operator-=(size_type num);
 
     /**
      * @brief Pre-decrement operator
