@@ -95,19 +95,19 @@ constexpr CodeUnit<UTF_8> CodePointToUTF8(T codePoint) {
         codeUnit[0] = static_cast<uint8>(codePoint);
         size = 1;
     } else if (codePoint >= 0x0080 && codePoint <= 0x07FF) {
-        codeUnit[0] = ((codePoint & 0x7C0) >> 6) | 0xC0;
-        codeUnit[1] = (codePoint & 0x3F) | 0x80;
+        codeUnit[0] = static_cast<uint8>(((codePoint & 0x7C0) >> 6) | 0xC0);
+        codeUnit[1] = static_cast<uint8>((codePoint & 0x3F) | 0x80);
         size = 2;
     } else if (codePoint >= 0x0800 && codePoint <= 0xFFFF) {
-        codeUnit[0] = ((codePoint & 0xF000) >> 12) | 0xE0;
-        codeUnit[1] = ((codePoint & 0xFC0) >> 6) | 0x80;
-        codeUnit[2] = (codePoint & 0x3F) | 0x80;
+        codeUnit[0] = static_cast<uint8>(((codePoint & 0xF000) >> 12) | 0xE0);
+        codeUnit[1] = static_cast<uint8>(((codePoint & 0xFC0) >> 6) | 0x80);
+        codeUnit[2] = static_cast<uint8>((codePoint & 0x3F) | 0x80);
         size = 3;
     } else if (codePoint >= 0x10000 && codePoint <= 0x10FFFF) {
-        codeUnit[0] = ((codePoint & 0x1C0000) >> 18) | 0xF0;
-        codeUnit[1] = ((codePoint & 0x3F000) >> 12) | 0x80;
-        codeUnit[2] = ((codePoint & 0xFC0) >> 6) | 0x80;
-        codeUnit[3] = (codePoint & 0x3F) | 0x80;
+        codeUnit[0] = static_cast<uint8>(((codePoint & 0x1C0000) >> 18) | 0xF0);
+        codeUnit[1] = static_cast<uint8>(((codePoint & 0x3F000) >> 12) | 0x80);
+        codeUnit[2] = static_cast<uint8>(((codePoint & 0xFC0) >> 6) | 0x80);
+        codeUnit[3] = static_cast<uint8>((codePoint & 0x3F) | 0x80);
         size = 4;
     }
 
@@ -127,8 +127,8 @@ constexpr CodeUnit<UTF_16> CodePointToUTF16(T codePoint) {
         size = 1;
     } else if (codePoint >= 0x010000 && codePoint <= 0x10FFFF) {
         char32 u = codePoint - 0x10000;
-        codeUnit[0] = ((u & 0xFFC00) | 0x3600000) >> 10;
-        codeUnit[1] = ((u & 0x3FF) | 0xDC00);
+        codeUnit[0] = static_cast<uint16>(((u & 0xFFC00) | 0x3600000) >> 10);
+        codeUnit[1] = static_cast<uint16>(((u & 0x3FF) | 0xDC00));
         size = 2;
     }
 
@@ -581,11 +581,11 @@ constexpr typename Iterator<Base, T>::pointer Iterator<Base, T>::operator->() {
 }
 
 template <Encoding Base, typename T>
-constexpr Iterator<Base, T> Iterator<Base, T>::operator+(uint32 num) {
+constexpr Iterator<Base, T> Iterator<Base, T>::operator+(size_type num) {
     // TODO: Improve this iteration for edge cases
     // Check if already on the end
     const auto* newBegin = m_ref.begin();
-    for (uint32 i = 0; i < num; i++) {
+    for (size_type i = 0; i < num; i++) {
         const auto* it = NextUTF<Base>(newBegin, m_maxRange.second);
         if (it == newBegin) {
             // Error getting next
@@ -597,7 +597,7 @@ constexpr Iterator<Base, T> Iterator<Base, T>::operator+(uint32 num) {
 }
 
 template <Encoding Base, typename T>
-constexpr Iterator<Base, T>& Iterator<Base, T>::operator+=(uint32 num) {
+constexpr Iterator<Base, T>& Iterator<Base, T>::operator+=(size_type num) {
     *this = *this + num;
     return *this;
 }
@@ -615,11 +615,11 @@ constexpr Iterator<Base, T> Iterator<Base, T>::operator++(int) {
 }
 
 template <Encoding Base, typename T>
-constexpr Iterator<Base, T> Iterator<Base, T>::operator-(uint32 num) {
+constexpr Iterator<Base, T> Iterator<Base, T>::operator-(size_type num) {
     // TODO: Improve this iteration for edge cases
     // Check if already on the end
     const auto* newBegin = m_ref.begin();
-    for (uint32 i = 0; i < num; i++) {
+    for (size_type i = 0; i < num; i++) {
         const auto* it = PriorUTF<Base>(newBegin, m_maxRange.first);
         if (it == newBegin) {
             // Error getting next
@@ -631,7 +631,7 @@ constexpr Iterator<Base, T> Iterator<Base, T>::operator-(uint32 num) {
 }
 
 template <Encoding Base, typename T>
-constexpr Iterator<Base, T>& Iterator<Base, T>::operator-=(uint32 num) {
+constexpr Iterator<Base, T>& Iterator<Base, T>::operator-=(size_type num) {
     *this = *this - num;
     return *this;
 }

@@ -2,8 +2,6 @@
 
 #include <System/String.hpp>
 
-#include <iostream>
-
 using namespace engine;
 
 TEST_CASE("String from other encodings", "[String]") {
@@ -284,8 +282,6 @@ TEST_CASE("String::iterator reverse", "[String]") {
 
 TEST_CASE("String::operator[]", "[String]") {
     String faces = u8"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606";  // "😀😃😄😁😆"
-
-    std::cout << std::hex << faces[0].getCodePoint() << std::endl;
 
     SECTION("must be able to access any code unit in the UTF-8 String") {
         REQUIRE(faces[0] == utf::CodeUnit<utf::UTF_8>({0xF0, 0x9F, 0x98, 0x80}));  // 😀
