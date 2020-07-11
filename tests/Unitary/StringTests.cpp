@@ -6,39 +6,39 @@ using namespace engine;
 
 TEST_CASE("String from other encodings", "[String]") {
     SECTION("from Wide strings") {
-        std::wstring smiley = L"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606";
+        std::wstring smiley = L"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606";  // "😀😃😄😁😆"
         String a = String(smiley.data());
         String b = String(smiley);
         String c = String::FromWide(smiley.begin(), smiley.end());
         REQUIRE(a.getSize() == 5);
-        REQUIRE(a == L"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606");
+        REQUIRE(a == L"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606");  // "😀😃😄😁😆"
         REQUIRE(a == b);
         REQUIRE(b == c);
     }
     SECTION("from UTF-8 strings") {
-        std::string smiley = u8"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606";
+        std::string smiley = u8"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606";  // "😀😃😄😁😆"
         String a = String(smiley.data());
         String b = String(smiley);
         String c = String::FromUtf8(smiley.begin(), smiley.end());
-        REQUIRE(a == u8"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606");
+        REQUIRE(a == u8"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606");  // "😀😃😄😁😆"
         REQUIRE(a == b);
         REQUIRE(b == c);
     }
     SECTION("from UTF-16 strings") {
-        std::u16string smiley = u"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606";
+        std::u16string smiley = u"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606";  // "😀😃😄😁😆"
         String a = String(smiley.data());
         String b = String(smiley);
         String c = String::FromUtf16(smiley.begin(), smiley.end());
-        REQUIRE(a == u"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606");
+        REQUIRE(a == u"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606");  // "😀😃😄😁😆"
         REQUIRE(a == b);
         REQUIRE(b == c);
     }
     SECTION("from UTF-32 strings") {
-        std::u32string smiley = U"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606";
+        std::u32string smiley = U"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606";  // "😀😃😄😁😆"
         String a = String(smiley.data());
         String b = String(smiley);
         String c = String::FromUtf32(smiley.begin(), smiley.end());
-        REQUIRE(a == U"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606");
+        REQUIRE(a == U"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606");  // "😀😃😄😁😆"
         REQUIRE(a == b);
         REQUIRE(b == c);
     }
