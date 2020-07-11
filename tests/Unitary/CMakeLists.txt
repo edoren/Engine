@@ -4,6 +4,7 @@ set(TESTS_SOURCES
     "${THIS_DIR}/FileSystemTests.cpp"
     "${THIS_DIR}/SignalTests.cpp"
     "${THIS_DIR}/StringTests.cpp"
+    "${THIS_DIR}/UTFTests.cpp"
     "${THIS_DIR}/TestMain.cpp"
 )
 

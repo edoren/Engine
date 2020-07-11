@@ -30,16 +30,22 @@ struct ENGINE_API is_forward_iterator
                                           std::is_same<decltype(++(std::declval<T&>())), T&>::value> {};
 
 template <typename T>
+inline constexpr bool is_bidirectional_iterator_v = is_bidirectional_iterator<T>::value;  // NOLINT
+
+template <typename T>
+inline constexpr bool is_forward_iterator_v = is_forward_iterator<T>::value;  // NOLINT
+
+template <typename T>
 struct ENGINE_API alignment_of : std::integral_constant<size_t, alignof(T)> {};
 
 template <typename T>
 struct ENGINE_API size_of : std::integral_constant<size_t, sizeof(T)> {};
 
 template <typename T>
-using alignment_of_v = typename alignment_of<T>::value;
+inline constexpr bool alignment_of_v = alignment_of<T>::value;  // NOLINT
 
 template <typename T>
-using size_of_v = typename size_of<T>::value;
+inline constexpr bool size_of_v = size_of<T>::value;  // NOLINT
 
 }  // namespace type
 

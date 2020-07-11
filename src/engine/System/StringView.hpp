@@ -15,7 +15,7 @@ public:
     // Types
     ////////////////////////////////////////////////////////////
     using size_type = size_t;                                              ///< Size type
-    using const_iterator = utf::Iterator<utf::UTF_8>;                      ///< Read-only iterator type
+    using const_iterator = utf::Iterator<utf::UTF_8, const char8*>;        ///< Read-only iterator type
     using iterator = const_iterator;                                       ///< Iterator type
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;  ///< Read-only reverse iterator type
     using reverse_iterator = std::reverse_iterator<iterator>;              ///< Reverse iterator type
@@ -287,7 +287,7 @@ private:
     // Member data
     ////////////////////////////////////////////////////////////
     const char8* m_data = {nullptr};  ///< The begining of the string view
-    size_type m_size = {0};              ///< The size of the string view
+    size_type m_size = {0};           ///< The size of the string view
 };
 
 /**
