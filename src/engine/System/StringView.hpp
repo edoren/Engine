@@ -17,7 +17,7 @@ public:
     // Types
     ////////////////////////////////////////////////////////////
     using size_type = size_t;                                              ///< Size type
-    using const_iterator = utf::Iterator<utf::UTF_8, const char8*>;        ///< Read-only iterator type
+    using const_iterator = utf::Iterator<utf::UTF_8, const char*>;        ///< Read-only iterator type
     using iterator = const_iterator;                                       ///< Iterator type
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;  ///< Read-only reverse iterator type
     using reverse_iterator = std::reverse_iterator<iterator>;              ///< Reverse iterator type
@@ -39,7 +39,7 @@ public:
      *
      * @param utf8String UTF-8 string to view
      */
-    constexpr StringView(const char8* utf8String);
+    constexpr StringView(const char* utf8String);
 
     /**
      * @brief Construct a string view from an String
@@ -85,7 +85,7 @@ public:
      *
      * @return Reference to self
      */
-    constexpr StringView& operator=(const char8* right);
+    constexpr StringView& operator=(const char* right);
 
     /**
      * @brief Overload of [] operator to access a character by its position
@@ -299,7 +299,7 @@ private:
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-    const char8* m_data = {nullptr};  ///< The begining of the string view
+    const char* m_data = {nullptr};  ///< The begining of the string view
     size_type m_size = {0};           ///< The size of the string view
 };
 

@@ -86,7 +86,7 @@ bool GL_Shader::loadFromMemory(const byte* source, size_t sourceSize, ShaderType
         sourceComplete += String("#extension ") + extension + " : enable\n";
     }
     sourceComplete +=
-        String::FromUtf8(reinterpret_cast<const char8*>(source), reinterpret_cast<const char8*>(source) + sourceSize);
+        String::FromUtf8(reinterpret_cast<const char*>(source), reinterpret_cast<const char*>(source) + sourceSize);
 
     GLuint shader = compile(sourceComplete.getData(), sourceComplete.getSize(), type);
     if (!shader) {
@@ -256,7 +256,7 @@ void GL_Shader::setDescriptor(json&& descriptor) {
     m_uboDynamic.setAttributes(attributes);
 }
 
-GLuint GL_Shader::compile(const char8* source, size_t sourceSize, ShaderType type) {
+GLuint GL_Shader::compile(const char* source, size_t sourceSize, ShaderType type) {
     return compile(reinterpret_cast<const byte*>(source), sourceSize, type);
 }
 

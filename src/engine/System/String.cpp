@@ -32,11 +32,11 @@
 
 namespace engine {
 
-const String::size_type String::sInvalidPos = std::basic_string<char8>::npos;
+const String::size_type String::sInvalidPos = std::basic_string<char>::npos;
 
 String::String() = default;
 
-String::String(char8 asciiChar) {
+String::String(char asciiChar) {
     m_string += asciiChar;
 }
 
@@ -50,7 +50,7 @@ String::String(char32 utf32Char) {
     utf::UtfToUtf<utf::UTF_32, utf::UTF_8>(ptr, ptr + 1, &m_string);
 }
 
-String::String(const char8* utf8String) {
+String::String(const char* utf8String) {
     if (utf8String && utf8String[0] != 0) {
         size_type length = std::strlen(utf8String);
         if (length > 0) {
@@ -96,7 +96,7 @@ String::String(const wchar* wideString) {
     }
 }
 
-String::String(const std::basic_string<char8>& utf8String) {
+String::String(const std::basic_string<char>& utf8String) {
     if (!utf8String.empty()) {
         if (utf::IsValid<utf::UTF_8>(utf8String.cbegin(), utf8String.cend())) {
             m_string.assign(utf8String);
@@ -106,7 +106,7 @@ String::String(const std::basic_string<char8>& utf8String) {
     };
 }
 
-String::String(std::basic_string<char8>&& utf8String) {
+String::String(std::basic_string<char>&& utf8String) {
     if (!utf8String.empty()) {
         if (utf::IsValid<utf::UTF_8>(utf8String.cbegin(), utf8String.cend())) {
             m_string = std::move(utf8String);
@@ -138,7 +138,7 @@ String::String(String&& other) noexcept : m_string(std::move(other.m_string)) {}
 
 String::~String() = default;
 
-String String::FromUtf8(const char8* begin, const char8* end) {
+String String::FromUtf8(const char* begin, const char* end) {
     String string;
     if (utf::IsValid<utf::UTF_8>(begin, end)) {
         string.m_string.assign(begin, end);
@@ -172,7 +172,7 @@ String String::FromWide(const wchar* begin, const wchar* end) {
 #endif
 }
 
-String::operator std::basic_string<char8>() const {
+String::operator std::basic_string<char>() const {
     return toUtf8();
 }
 
@@ -188,7 +188,7 @@ String::operator std::basic_string<wchar>() const {
     return toWide();
 }
 
-const std::basic_string<char8>& String::toUtf8() const {
+const std::basic_string<char>& String::toUtf8() const {
     return m_string;
 }
 
@@ -216,7 +216,7 @@ std::basic_string<wchar> String::toWide() const {
 
 String& String::operator=(const String& right) = default;
 
-String& String::operator=(const char8* right) {
+String& String::operator=(const char* right) {
     m_string = right;
     return *this;
 }
@@ -231,12 +231,12 @@ String& String::operator+=(const String& right) {
     return *this;
 }
 
-String& String::operator+=(const char8* right) {
+String& String::operator+=(const char* right) {
     m_string += right;
     return *this;
 }
 
-String& String::operator+=(char8 right) {
+String& String::operator+=(char right) {
     if (right >= 0) {
         m_string += right;
     }
@@ -252,7 +252,7 @@ String& String::operator+=(const utf::CodeUnit<utf::UTF_8>& right) {
     // TODO: Missing test
     m_string.reserve(m_string.size() + right.getSize());
     for (auto data : right) {
-        m_string.push_back(static_cast<char8>(data));
+        m_string.push_back(static_cast<char>(data));
     }
     return *this;
 }
@@ -411,8 +411,8 @@ void String::replace(uint32 searchFor, uint32 replaceWith) {
     }
     if (searchFor <= 0x7F && replaceWith <= 0x7F) {
         for (auto& ch : m_string) {
-            if (ch == static_cast<char8>(searchFor)) {
-                ch = static_cast<char8>(replaceWith);
+            if (ch == static_cast<char>(searchFor)) {
+                ch = static_cast<char>(replaceWith);
             }
         }
     } else {
@@ -468,7 +468,7 @@ String String::subString(size_type position, size_type length) const {
     return String::FromUtf8(&(*startIt), &(*endIt));
 }
 
-const char8* String::getData() const {
+const char* String::getData() const {
     return m_string.data();
 }
 
@@ -516,11 +516,11 @@ bool operator==(const String& left, const String& right) {
     return left.m_string == right.m_string;
 }
 
-bool operator==(const String& left, const char8* right) {
+bool operator==(const String& left, const char* right) {
     return left.m_string == right;
 }
 
-bool operator==(const char8* left, const String& right) {
+bool operator==(const char* left, const String& right) {
     return left == right.m_string;
 }
 
@@ -528,11 +528,11 @@ bool operator!=(const String& left, const String& right) {
     return !(left == right);
 }
 
-bool operator!=(const String& left, const char8* right) {
+bool operator!=(const String& left, const char* right) {
     return !(left == right);
 }
 
-bool operator!=(const char8* left, const String& right) {
+bool operator!=(const char* left, const String& right) {
     return !(left == right);
 }
 
@@ -540,11 +540,11 @@ bool operator<(const String& left, const String& right) {
     return left.m_string < right.m_string;
 }
 
-bool operator<(const String& left, const char8* right) {
+bool operator<(const String& left, const char* right) {
     return left.m_string < right;
 }
 
-bool operator<(const char8* left, const String& right) {
+bool operator<(const char* left, const String& right) {
     return left < right.m_string;
 }
 
@@ -552,11 +552,11 @@ bool operator>(const String& left, const String& right) {
     return right < left;
 }
 
-bool operator>(const String& left, const char8* right) {
+bool operator>(const String& left, const char* right) {
     return right < left;
 }
 
-bool operator>(const char8* left, const String& right) {
+bool operator>(const char* left, const String& right) {
     return right < left;
 }
 
@@ -564,11 +564,11 @@ bool operator<=(const String& left, const String& right) {
     return !(right < left);
 }
 
-bool operator<=(const String& left, const char8* right) {
+bool operator<=(const String& left, const char* right) {
     return !(right < left);
 }
 
-bool operator<=(const char8* left, const String& right) {
+bool operator<=(const char* left, const String& right) {
     return !(right < left);
 }
 
@@ -576,11 +576,11 @@ bool operator>=(const String& left, const String& right) {
     return !(left < right);
 }
 
-bool operator>=(const String& left, const char8* right) {
+bool operator>=(const String& left, const char* right) {
     return !(left < right);
 }
 
-bool operator>=(const char8* left, const String& right) {
+bool operator>=(const char* left, const String& right) {
     return !(left < right);
 }
 
@@ -589,22 +589,22 @@ String operator+(const String& left, const String& right) {
     return string += right;
 }
 
-String operator+(const String& left, const char8* right) {
+String operator+(const String& left, const char* right) {
     String string = left;
     return string += right;
 }
 
-String operator+(const char8* left, const String& right) {
+String operator+(const char* left, const String& right) {
     String string = left;
     return string += right;
 }
 
-String operator+(const String& left, char8 right) {
+String operator+(const String& left, char right) {
     String string = left;
     return string += right;
 }
 
-String operator+(char8 left, const String& right) {
+String operator+(char left, const String& right) {
     String string = left;
     return string += right;
 }

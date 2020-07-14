@@ -196,7 +196,7 @@ private:
  */
 template <Encoding Base,
           typename Iter =
-              std::conditional_t<(Base == UTF_8), char8, std::conditional_t<(Base == UTF_16), char16, char32>>>
+              std::conditional_t<(Base == UTF_8), char, std::conditional_t<(Base == UTF_16), char16, char32>>>
 class CodeUnitRange {
     static_assert(type::is_forward_iterator_v<Iter>, "Value should be a forward iterator");
     static_assert(std::is_integral<type::iterator_underlying_type_t<Iter>>::value,
@@ -319,7 +319,7 @@ private:
  * @brief Read-only iterator class for an UTF sequence
  *
  * @tparam Base The encoding for the UTF support. See @ref Encoding.
- * @tparam T The internal type for the unit pointer, by default char8, char16 or char32 for UTF-8, UTF-16 and UTF-32
+ * @tparam T The internal type for the unit pointer, by default char, char16 or char32 for UTF-8, UTF-16 and UTF-32
  *           respectively
  */
 template <Encoding Base, typename Iter>

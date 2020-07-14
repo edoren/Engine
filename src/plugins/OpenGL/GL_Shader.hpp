@@ -51,7 +51,7 @@ protected:
     void setDescriptor(json&& descriptor) override;
 
 private:
-    GLuint compile(const char8* source, size_t sourceSize, ShaderType type);
+    GLuint compile(const char* source, size_t sourceSize, ShaderType type);
     GLuint compile(const byte* source, size_t sourceSize, ShaderType type);
 
     void cleanUpShaders();

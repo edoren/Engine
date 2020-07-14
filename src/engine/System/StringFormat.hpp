@@ -28,7 +28,7 @@ struct UdlStringFormatProxy {
     }
 };
 
-inline UdlStringFormatProxy<char8> operator""_format(const char8* str, size_t /*unused*/) {
+inline UdlStringFormatProxy<char> operator""_format(const char* str, size_t /*unused*/) {
     return {str};
 }
 
