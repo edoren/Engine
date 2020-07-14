@@ -2,9 +2,11 @@
 
 #include <Util/Prerequisites.hpp>
 
-#include <System/String.hpp>
+#include <Util/UTF.hpp>
 
 namespace engine {
+
+class String;
 
 /**
  * @brief Utility class to handle a string view to a UTF-8 character sequence
@@ -187,8 +189,19 @@ public:
      * immediate use, thus it is not recommended to store it.
      *
      * @return Read-only pointer to the array of characters
+     *
+     * @see getDataSize
      */
-    constexpr const char8* getData() const;
+    constexpr const char* getData() const;
+
+    /**
+     * @brief Get the size in bytes of the string
+     *
+     * @return Number of bytes the data has
+     *
+     * @see getData
+     */
+    constexpr size_type getDataSize() const;
 
     /**
      * @brief Return an iterator to the beginning of the string

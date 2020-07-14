@@ -182,7 +182,7 @@ public:
      * @param right Check if CodeUnit is equals an ASCII char
      * @return true If equals, false otherwhise
      */
-    constexpr bool operator==(char8 right) const;
+    constexpr bool operator==(char right) const;
 
 private:
     data_type m_unit;
