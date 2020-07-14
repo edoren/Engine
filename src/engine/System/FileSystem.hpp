@@ -54,7 +54,7 @@ public:
      *
      * @return The character that represents the path separator
      */
-    char8 getOsSeparator() const;
+    char getOsSeparator() const;
 
     /**
      * @brief Get the directory that contains the executable

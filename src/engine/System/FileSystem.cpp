@@ -65,7 +65,7 @@ bool FileSystem::loadFileData(const String& filename, String* dest) const {
     Vector<byte> out;
     bool success = loadFileData(filename, &out);
     if (success) {
-        auto* begin = reinterpret_cast<char8*>(out.data());
+        auto* begin = reinterpret_cast<char*>(out.data());
         *dest = String::FromUtf8(begin, begin + out.size());
     }
     return success;
@@ -95,7 +95,7 @@ bool FileSystem::loadFileData(const String& filename, Vector<byte>* dest) const 
     return len == rlen && len > 0;
 }
 
-char8 FileSystem::getOsSeparator() const {
+char FileSystem::getOsSeparator() const {
 #if PLATFORM_IS(PLATFORM_WINDOWS)
     return '\\';
 #else
@@ -136,10 +136,10 @@ String FileSystem::currentWorkingDirectory() const {
     }
 #elif PLATFORM_IS(PLATFORM_LINUX | PLATFORM_MACOS | PLATFORM_IOS | PLATFORM_ANDROID)
     size_t bufferLength = PATH_MAX_LENGTH;
-    Vector<char8> buffer;
+    Vector<char> buffer;
     while (true) {
         buffer.resize(bufferLength + 1);
-        char8* result = nullptr;
+        char* result = nullptr;
         result = getcwd(buffer.data(), bufferLength);
         if (result != nullptr) {
             size_t numCharacters = strlen(result);
@@ -166,9 +166,9 @@ String FileSystem::absolutePath(const String& /*path*/) const {
 
 String FileSystem::normalizePath(const String& path) const {
     bool isAbsolute = isAbsolutePath(path);
-    Vector<std::pair<const char8*, const char8*>> pathComps;
+    Vector<std::pair<const char*, const char*>> pathComps;
 
-    auto addPathComponent = [&pathComps, isAbsolute](const char8* begin, const char8* end) {
+    auto addPathComponent = [&pathComps, isAbsolute](const char* begin, const char* end) {
         size_t seqSize = end - begin;
 
         // Ignore the component if the . directories
@@ -211,8 +211,8 @@ String FileSystem::normalizePath(const String& path) const {
 #endif
 
     // Split the string by the separator
-    const char8* pathcStart = internal.data() + beginOffset;
-    const char8* pathcEnd = pathcStart;
+    const char* pathcStart = internal.data() + beginOffset;
+    const char* pathcEnd = pathcStart;
     while (*pathcEnd != 0) {
         // Get the path component from the start and end iterators
         if (*pathcEnd == getOsSeparator() && pathcEnd > pathcStart) {
@@ -287,7 +287,7 @@ String FileSystem::join(const StringView& left, const StringView& right) const {
 
     String ret;
     const auto& internal = left.getData();
-    char8 lastCharacter = internal[left.getSize() - 1];
+    char lastCharacter = internal[left.getSize() - 1];
     if (lastCharacter == getOsSeparator()) {
         ret = "{}{}"_format(left, right);
     } else {

@@ -12,11 +12,11 @@ namespace engine::utf {
 namespace internal {
 
 template <typename Iter>
-constexpr char32 GetCodePoint8(const Iter begin, const Iter end) {
+constexpr char32 GetCodePoint8(Iter begin, Iter end) {
     static_assert(type::is_forward_iterator_v<Iter>, "Value should be a forward iterator");
     static_assert(std::is_integral_v<type::iterator_underlying_type_t<Iter>>,
                   "Iterator internal type should be an integer");
-    static_assert(sizeof(type::iterator_underlying_type_t<Iter>) == sizeof(char8),
+    static_assert(sizeof(type::iterator_underlying_type_t<Iter>) == sizeof(char),
                   "Iterator internal type has an invalid size");
 
     ENGINE_ASSERT((end - begin) != 0, "UTF-8 should have minimum one code unit");
@@ -60,7 +60,7 @@ constexpr char32 GetCodePoint8(const Iter begin, const Iter end) {
 }
 
 template <typename Iter>
-constexpr char32 GetCodePoint16(const Iter begin, const Iter end) {
+constexpr char32 GetCodePoint16(Iter begin, Iter end) {
     static_assert(type::is_forward_iterator_v<Iter>, "Value should be a forward iterator");
     static_assert(std::is_integral_v<type::iterator_underlying_type_t<Iter>>,
                   "Iterator internal type should be an integer");
@@ -93,7 +93,7 @@ constexpr char32 GetCodePoint16(const Iter begin, const Iter end) {
 }
 
 template <typename Iter>
-constexpr char32 GetCodePoint32(const Iter begin, const Iter end) {
+constexpr char32 GetCodePoint32(Iter begin, Iter end) {
     static_assert(type::is_forward_iterator_v<Iter>, "Value should be a forward iterator");
     static_assert(std::is_integral<type::iterator_underlying_type_t<Iter>>::value,
                   "Iterator internal type should be an integer");
@@ -110,7 +110,7 @@ constexpr Iter Next8(Iter begin, Iter end) {
     static_assert(type::is_forward_iterator_v<Iter>, "Value should be a forward iterator");
     static_assert(std::is_integral<type::iterator_underlying_type_t<Iter>>::value,
                   "Iterator internal type should be an integer");
-    static_assert(sizeof(type::iterator_underlying_type_t<Iter>) == sizeof(char8),
+    static_assert(sizeof(type::iterator_underlying_type_t<Iter>) == sizeof(char),
                   "Iterator internal type has an invalid size");
 
     Iter s = begin;
@@ -269,7 +269,7 @@ constexpr Iter Prior8(Iter end, Iter begin) {
     static_assert(type::is_bidirectional_iterator_v<Iter>, "Value should be a bidirectional iterator");
     static_assert(std::is_integral<type::iterator_underlying_type_t<Iter>>::value,
                   "Iterator internal type should be an integer");
-    static_assert(sizeof(type::iterator_underlying_type_t<Iter>) == sizeof(char8),
+    static_assert(sizeof(type::iterator_underlying_type_t<Iter>) == sizeof(char),
                   "Iterator internal type has an invalid size");
 
     ENGINE_ASSERT((end - begin) >= 0, "The end iterator should be same or higher that the begin iterator");
@@ -365,11 +365,11 @@ constexpr CodeUnit<Base>::CodeUnit(char32 codePoint) : m_unit() {
 
 template <Encoding Base>
 template <typename Iter>
-constexpr CodeUnit<Base>::CodeUnit(const Iter begin, const Iter end) : CodeUnit(begin, (end - begin)) {}
+constexpr CodeUnit<Base>::CodeUnit(Iter begin, Iter end) : CodeUnit(begin, (end - begin)) {}
 
 template <Encoding Base>
 template <typename Iter>
-constexpr CodeUnit<Base>::CodeUnit(const Iter begin, const size_type size) {
+constexpr CodeUnit<Base>::CodeUnit(Iter begin, const size_type size) {
     static_assert(type::is_forward_iterator_v<Iter>, "Value should be a forward iterator");
     static_assert(std::is_integral<type::iterator_underlying_type_t<Iter>>::value,
                   "Iterator internal type should be an integer");
@@ -467,7 +467,7 @@ constexpr CodeUnitRange<Base, Iter>::CodeUnitRange(std::pair<pointed_type, point
       : m_range(std::move(range)) {}
 
 template <Encoding Base, typename Iter>
-constexpr CodeUnitRange<Base, Iter>::CodeUnitRange(const Iter begin, const Iter end) : m_range(&(*begin), &(*end)) {}
+constexpr CodeUnitRange<Base, Iter>::CodeUnitRange(Iter begin, Iter end) : m_range(&(*begin), &(*end)) {}
 
 template <Encoding Base, typename Iter>
 constexpr CodeUnit<Base> CodeUnitRange<Base, Iter>::get() const {
@@ -716,7 +716,7 @@ constexpr T UtfToUtf(T begin, T end, std::basic_string<Ret>* result) {
 }
 
 template <Encoding Base, typename Iter>
-constexpr char32 GetCodePoint(const Iter begin, const Iter end) {
+constexpr char32 GetCodePoint(Iter begin, Iter end) {
     if constexpr (Base == UTF_8) {
         return internal::GetCodePoint8(begin, end);
     } else if constexpr (Base == UTF_16) {
@@ -774,7 +774,7 @@ constexpr Iter ForEach(Iter begin, Iter end, Func fn) {
 }
 
 template <Encoding Base, typename Iter>
-constexpr size_t GetSize(const Iter begin, const Iter end) {
+constexpr size_t GetSize(Iter begin, Iter end) {
     size_t size = 0;
     auto it = ForEach<Base>(begin, end, [&size](auto /*unused*/) { size++; });
     if (it != end) {
@@ -784,7 +784,7 @@ constexpr size_t GetSize(const Iter begin, const Iter end) {
 }
 
 template <Encoding Base, typename Iter>
-constexpr bool IsValid(const Iter begin, const Iter end) {
+constexpr bool IsValid(Iter begin, Iter end) {
     return ForEach<Base>(begin, end, [](auto /*unused*/) {}) == end;
 }
 

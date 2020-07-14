@@ -53,7 +53,7 @@ namespace engine {
  * @code
  * String s;
  *
- * std::basic_string<char8> s1 = s;  // automatically converted to ASCII string
+ * std::basic_string<char> s1 = s;  // automatically converted to ASCII string
  * std::basic_string<wchar> s2 = s; // automatically converted to wide string
  * s = "hello";         // automatically converted from ASCII string
  * s = L"hello";        // automatically converted from wide string
@@ -62,7 +62,7 @@ namespace engine {
  * @endcode
  *
  * String defines the most important functions of the
- * standard std::basic_string<char8> class: removing, random access, iterating,
+ * standard std::basic_string<char> class: removing, random access, iterating,
  * appending, comparing, etc.
  */
 class ENGINE_API String {
@@ -71,7 +71,7 @@ public:
     // Types
     ////////////////////////////////////////////////////////////
     using size_type = size_t;                                              ///< Size type
-    using const_iterator = utf::Iterator<utf::UTF_8, const char8*>;        ///< Read-only iterator type
+    using const_iterator = utf::Iterator<utf::UTF_8, const char*>;        ///< Read-only iterator type
     using iterator = const_iterator;                                       ///< Iterator type
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;  ///< Read-only reverse iterator type
     using reverse_iterator = std::reverse_iterator<iterator>;              ///< Reverse iterator type
@@ -93,7 +93,7 @@ public:
      *
      * @param asciiChar ASCII character to convert
      */
-    String(char8 asciiChar);
+    String(char asciiChar);
 
     /**
      * @brief Construct from single UTF-16 character
@@ -114,7 +114,7 @@ public:
      *
      * @param utf8String UTF-8 string to assign
      */
-    String(const char8* utf8String);
+    String(const char* utf8String);
 
     /**
      * @brief Construct from a null-terminated (value 0) UTF-16 string
@@ -142,14 +142,14 @@ public:
      *
      * @param utf8String UTF-8 string to assign
      */
-    String(const std::basic_string<char8>& utf8String);
+    String(const std::basic_string<char>& utf8String);
 
     /**
      * @brief Construct from an UTF-8 string
      *
      * @param utf8String UTF-8 string to move
      */
-    String(std::basic_string<char8>&& utf8String);
+    String(std::basic_string<char>&& utf8String);
 
     /**
      * @brief Construct from a UTF-16 string
@@ -195,8 +195,8 @@ public:
      * @brief Create a new String from a UTF-8 encoded string
      *
      * This function is provided for consistency, it is equivalent to
-     * using the constructors that takes a const char8* or a
-     * std::basic_string<char8>.
+     * using the constructors that takes a const char* or a
+     * std::basic_string<char>.
      *
      * @param begin Pointer to the beginning of the UTF-8 sequence
      * @param end   Pointer to the end of the UTF-8 sequence
@@ -205,7 +205,7 @@ public:
      *
      * @see FromUtf16, FromUtf32, FromWide
      */
-    static String FromUtf8(const char8* begin, const char8* end);
+    static String FromUtf8(const char* begin, const char* end);
 
     /**
      * @brief Create a new String from a UTF-8 encoded string
@@ -222,7 +222,7 @@ public:
     /**
      * @brief Create a new String from a UTF-8 encoded string
      *
-     * The iterators must point to an object of type char8
+     * The iterators must point to an object of type char
      *
      * @param begin Pointer to the beginning of the UTF-8 sequence
      * @param end   Pointer to the end of the UTF-8 sequence
@@ -233,9 +233,9 @@ public:
      */
     template <typename It,
               typename = std::enable_if_t<type::is_forward_iterator<It>::value &&
-                                          sizeof(type::iterator_underlying_type_t<It>) == sizeof(char8)>>
+                                          sizeof(type::iterator_underlying_type_t<It>) == sizeof(char)>>
     static String FromUtf8(It begin, It end) {
-        return FromUtf8(const_cast<const char8*>(&(*begin)), const_cast<const char8*>(&(*end)));
+        return FromUtf8(const_cast<const char*>(&(*begin)), const_cast<const char*>(&(*end)));
     }
 
     /**
@@ -278,7 +278,7 @@ public:
      */
     template <typename T>
     static String FromValue(T value) {
-        std::basic_stringstream<char8> stream;
+        std::basic_stringstream<char> stream;
         stream << value;
         return stream.str();
     }
@@ -342,7 +342,7 @@ public:
     }
 
     /**
-     * @brief Explicit conversion operator to std::basic_string<char8>
+     * @brief Explicit conversion operator to std::basic_string<char>
      *        (UTF-8 string)
      *
      * @return Converted UTF-8 string
@@ -352,7 +352,7 @@ public:
      * @see operator std::basic_string<char32>
      * @see operator std::basic_string<wchar>
      */
-    explicit operator std::basic_string<char8>() const;
+    explicit operator std::basic_string<char>() const;
 
     /**
      * @brief Explicit conversion operator to std::basic_string<char16>
@@ -361,7 +361,7 @@ public:
      * @return Converted UTF-16 string
      *
      * @see ToUtf16
-     * @see operator std::basic_string<char8>
+     * @see operator std::basic_string<char>
      * @see operator std::basic_string<char32>
      * @see operator std::basic_string<wchar>
      */
@@ -374,7 +374,7 @@ public:
      * @return Converted UTF-32 string
      *
      * @see ToUtf32
-     * @see operator std::basic_string<char8>
+     * @see operator std::basic_string<char>
      * @see operator std::basic_string<char16>
      * @see operator std::basic_string<wchar>
      */
@@ -387,7 +387,7 @@ public:
      * @return Converted Wide string
      *
      * @see ToWide
-     * @see operator std::basic_string<char8>
+     * @see operator std::basic_string<char>
      * @see operator std::basic_string<char16>
      * @see operator std::basic_string<char32>
      */
@@ -403,7 +403,7 @@ public:
      *
      * @see ToUtf16, ToUtf32
      */
-    const std::basic_string<char8>& toUtf8() const;
+    const std::basic_string<char>& toUtf8() const;
 
     /**
      * @brief Convert the UTF-8 string to a UTF-16 string
@@ -448,7 +448,7 @@ public:
      *
      * @return Reference to self
      */
-    String& operator=(const char8* right);
+    String& operator=(const char* right);
 
     /**
      * @brief Overload of move assignment operator
@@ -476,7 +476,7 @@ public:
      *
      * @return Reference to self
      */
-    String& operator+=(const char8* right);
+    String& operator+=(const char* right);
 
     /**
      * @brief Overload of += operator to append a single ASCII
@@ -486,7 +486,7 @@ public:
      *
      * @return Reference to self
      */
-    String& operator+=(char8 right);
+    String& operator+=(char right);
 
     /**
      * @brief Overload of += operator to append a UTF-32 character
@@ -680,7 +680,7 @@ public:
      *
      * @see getDataSize
      */
-    const char8* getData() const;
+    const char* getData() const;
 
     /**
      * @brief Get the size in bytes of the string
@@ -785,16 +785,16 @@ public:
 
 private:
     friend ENGINE_API bool operator==(const String& left, const String& right);
-    friend ENGINE_API bool operator==(const String& left, const char8* right);
-    friend ENGINE_API bool operator==(const char8* left, const String& right);
+    friend ENGINE_API bool operator==(const String& left, const char* right);
+    friend ENGINE_API bool operator==(const char* left, const String& right);
     friend ENGINE_API bool operator<(const String& left, const String& right);
-    friend ENGINE_API bool operator<(const String& left, const char8* right);
-    friend ENGINE_API bool operator<(const char8* left, const String& right);
+    friend ENGINE_API bool operator<(const String& left, const char* right);
+    friend ENGINE_API bool operator<(const char* left, const String& right);
 
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
-    std::basic_string<char8> m_string;  ///< Internal string of UTF-8 characters
+    std::basic_string<char> m_string;  ///< Internal string of UTF-8 characters
 };
 
 /**
@@ -818,7 +818,7 @@ ENGINE_API bool operator==(const String& left, const String& right);
  *
  * @return True if both strings are equal
  */
-ENGINE_API bool operator==(const String& left, const char8* right);
+ENGINE_API bool operator==(const String& left, const char* right);
 
 /**
  * @relates String
@@ -830,7 +830,7 @@ ENGINE_API bool operator==(const String& left, const char8* right);
  *
  * @return True if both strings are equal
  */
-ENGINE_API bool operator==(const char8* left, const String& right);
+ENGINE_API bool operator==(const char* left, const String& right);
 
 /**
  * @relates String
@@ -853,7 +853,7 @@ ENGINE_API bool operator!=(const String& left, const String& right);
  *
  * @return True if both strings are equal
  */
-ENGINE_API bool operator!=(const String& left, const char8* right);
+ENGINE_API bool operator!=(const String& left, const char* right);
 
 /**
  * @relates String
@@ -865,7 +865,7 @@ ENGINE_API bool operator!=(const String& left, const char8* right);
  *
  * @return True if both strings are equal
  */
-ENGINE_API bool operator!=(const char8* left, const String& right);
+ENGINE_API bool operator!=(const char* left, const String& right);
 
 /**
  * @relates String
@@ -888,7 +888,7 @@ ENGINE_API bool operator<(const String& left, const String& right);
  *
  * @return True if `left` is lexicographically before `right`
  */
-ENGINE_API bool operator<(const String& left, const char8* right);
+ENGINE_API bool operator<(const String& left, const char* right);
 
 /**
  * @relates String
@@ -900,7 +900,7 @@ ENGINE_API bool operator<(const String& left, const char8* right);
  *
  * @return True if `left` is lexicographically before `right`
  */
-ENGINE_API bool operator<(const char8* left, const String& right);
+ENGINE_API bool operator<(const char* left, const String& right);
 
 /**
  * @relates String
@@ -923,7 +923,7 @@ ENGINE_API bool operator>(const String& left, const String& right);
  *
  * @return True if `left` is lexicographically after `right`
  */
-ENGINE_API bool operator>(const String& left, const char8* right);
+ENGINE_API bool operator>(const String& left, const char* right);
 
 /**
  * @relates String
@@ -935,7 +935,7 @@ ENGINE_API bool operator>(const String& left, const char8* right);
  *
  * @return True if `left` is lexicographically after `right`
  */
-ENGINE_API bool operator>(const char8* left, const String& right);
+ENGINE_API bool operator>(const char* left, const String& right);
 
 /**
  * @relates String
@@ -960,7 +960,7 @@ ENGINE_API bool operator<=(const String& left, const String& right);
  * @return True if `left` is lexicographically before or equivalent to \a
  *        right
  */
-ENGINE_API bool operator<=(const String& left, const char8* right);
+ENGINE_API bool operator<=(const String& left, const char* right);
 
 /**
  * @relates String
@@ -973,7 +973,7 @@ ENGINE_API bool operator<=(const String& left, const char8* right);
  * @return True if `left` is lexicographically before or equivalent to \a
  *        right
  */
-ENGINE_API bool operator<=(const char8* left, const String& right);
+ENGINE_API bool operator<=(const char* left, const String& right);
 
 /**
  * @relates String
@@ -996,7 +996,7 @@ ENGINE_API bool operator>=(const String& left, const String& right);
  *
  * @return True if `left` is lexicographically after or equivalent to `right`
  */
-ENGINE_API bool operator>=(const String& left, const char8* right);
+ENGINE_API bool operator>=(const String& left, const char* right);
 
 /**
  * @relates String
@@ -1008,7 +1008,7 @@ ENGINE_API bool operator>=(const String& left, const char8* right);
  *
  * @return True if `left` is lexicographically after or equivalent to `right`
  */
-ENGINE_API bool operator>=(const char8* left, const String& right);
+ENGINE_API bool operator>=(const char* left, const String& right);
 
 /**
  * @relates String
@@ -1031,7 +1031,7 @@ ENGINE_API String operator+(const String& left, const String& right);
  *
  * @return Concatenated string
  */
-ENGINE_API String operator+(const String& left, const char8* right);
+ENGINE_API String operator+(const String& left, const char* right);
 
 /**
  * @relates String
@@ -1043,7 +1043,7 @@ ENGINE_API String operator+(const String& left, const char8* right);
  *
  * @return Concatenated string
  */
-ENGINE_API String operator+(const char8* left, const String& right);
+ENGINE_API String operator+(const char* left, const String& right);
 
 /**
  * @relates String
@@ -1055,7 +1055,7 @@ ENGINE_API String operator+(const char8* left, const String& right);
  *
  * @return Concatenated string
  */
-ENGINE_API String operator+(const String& left, char8 right);
+ENGINE_API String operator+(const String& left, char right);
 
 /**
  * @relates String
@@ -1067,7 +1067,7 @@ ENGINE_API String operator+(const String& left, char8 right);
  *
  * @return Concatenated string
  */
-ENGINE_API String operator+(char8 left, const String& right);
+ENGINE_API String operator+(char left, const String& right);
 
 /**
  * @relates String
