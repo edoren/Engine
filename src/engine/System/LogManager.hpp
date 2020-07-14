@@ -58,8 +58,9 @@ inline void LogVerbose(const StringView& tag, const StringView& message) {
 
 template <typename... Args>
 inline void LogVerbose(const StringView& tag, const StringView& message, Args&&... args) {
-    auto internalStringView = fmt::string_view(message.getData(), message.getSize());
-    LogVerbose(tag, String(std::move(fmt::format(internalStringView, std::forward<Args>(args)...))));
+    auto internalStringView = fmt::string_view(reinterpret_cast<const char*>(message.getData()), message.getSize());
+    auto formated = fmt::format(internalStringView, std::forward<Args>(args)...);
+    LogVerbose(tag, StringView(formated.data()));
 }
 
 inline void LogDebug(const StringView& tag, const StringView& message) {
@@ -68,8 +69,9 @@ inline void LogDebug(const StringView& tag, const StringView& message) {
 
 template <typename... Args>
 inline void LogDebug(const StringView& tag, const StringView& message, Args&&... args) {
-    auto internalStringView = fmt::string_view(message.getData(), message.getSize());
-    LogDebug(tag, String(std::move(fmt::format(internalStringView, std::forward<Args>(args)...))));
+    auto internalStringView = fmt::string_view(reinterpret_cast<const char*>(message.getData()), message.getSize());
+    auto formated = fmt::format(internalStringView, std::forward<Args>(args)...);
+    LogDebug(tag, StringView(formated.data()));
 }
 
 inline void LogInfo(const StringView& tag, const StringView& message) {
@@ -78,8 +80,9 @@ inline void LogInfo(const StringView& tag, const StringView& message) {
 
 template <typename... Args>
 inline void LogInfo(const StringView& tag, const StringView& message, Args&&... args) {
-    auto internalStringView = fmt::string_view(message.getData(), message.getSize());
-    LogInfo(tag, String(std::move(fmt::format(internalStringView, std::forward<Args>(args)...))));
+    auto internalStringView = fmt::string_view(reinterpret_cast<const char*>(message.getData()), message.getSize());
+    auto formated = fmt::format(internalStringView, std::forward<Args>(args)...);
+    LogInfo(tag, StringView(formated.data()));
 }
 
 inline void LogWarning(const StringView& tag, const StringView& message) {
@@ -88,8 +91,9 @@ inline void LogWarning(const StringView& tag, const StringView& message) {
 
 template <typename... Args>
 inline void LogWarning(const StringView& tag, const StringView& message, Args&&... args) {
-    auto internalStringView = fmt::string_view(message.getData(), message.getSize());
-    LogWarning(tag, String(std::move(fmt::format(internalStringView, std::forward<Args>(args)...))));
+    auto internalStringView = fmt::string_view(reinterpret_cast<const char*>(message.getData()), message.getSize());
+    auto formated = fmt::format(internalStringView, std::forward<Args>(args)...);
+    LogWarning(tag, StringView(formated.data()));
 }
 
 inline void LogError(const StringView& tag, const StringView& message) {
@@ -98,8 +102,9 @@ inline void LogError(const StringView& tag, const StringView& message) {
 
 template <typename... Args>
 inline void LogError(const StringView& tag, const StringView& message, Args&&... args) {
-    auto internalStringView = fmt::string_view(message.getData(), message.getSize());
-    LogError(tag, String(std::move(fmt::format(internalStringView, std::forward<Args>(args)...))));
+    auto internalStringView = fmt::string_view(reinterpret_cast<const char*>(message.getData()), message.getSize());
+    auto formated = fmt::format(internalStringView, std::forward<Args>(args)...);
+    LogError(tag, StringView(formated.data()));
 }
 
 inline void LogFatal(const StringView& tag, const StringView& message) {
@@ -108,8 +113,9 @@ inline void LogFatal(const StringView& tag, const StringView& message) {
 
 template <typename... Args>
 inline void LogFatal(const StringView& tag, const StringView& message, Args&&... args) {
-    auto internalStringView = fmt::string_view(message.getData(), message.getSize());
-    LogFatal(tag, String(std::move(fmt::format(internalStringView, std::forward<Args>(args)...))));
+    auto internalStringView = fmt::string_view(reinterpret_cast<const char*>(message.getData()), message.getSize());
+    auto formated = fmt::format(internalStringView, std::forward<Args>(args)...);
+    LogFatal(tag, StringView(formated.data()));
 }
 
 }  // namespace engine

@@ -451,7 +451,7 @@ constexpr bool CodeUnit<Base>::operator==(const data_type& right) const {
 }
 
 template <Encoding Base>
-constexpr bool CodeUnit<Base>::operator==(char8 right) const {
+constexpr bool CodeUnit<Base>::operator==(char right) const {
     return m_unit[0] == right;
 }
 

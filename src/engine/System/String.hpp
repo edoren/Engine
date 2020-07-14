@@ -28,6 +28,7 @@
 
 #include <Util/Prerequisites.hpp>
 
+#include <System/StringView.hpp>
 #include <Util/UTF.hpp>
 
 #include <sstream>
@@ -277,7 +278,7 @@ public:
      */
     template <typename T>
     static String FromValue(T value) {
-        std::stringstream stream;
+        std::basic_stringstream<char8> stream;
         stream << value;
         return stream.str();
     }
@@ -676,8 +677,19 @@ public:
      * immediate use, thus it is not recommended to store it.
      *
      * @return Read-only pointer to the array of characters
+     *
+     * @see getDataSize
      */
     const char8* getData() const;
+
+    /**
+     * @brief Get the size in bytes of the string
+     *
+     * @return Number of bytes the data has
+     *
+     * @see getData
+     */
+    size_type getDataSize() const;
 
     /**
      * @brief Return an iterator to the beginning of the string

@@ -472,6 +472,10 @@ const char8* String::getData() const {
     return m_string.data();
 }
 
+typename String::size_type String::getDataSize() const {
+    return m_string.size();
+}
+
 String::iterator String::begin() {
     auto maxRange = std::make_pair(m_string.data(), m_string.data() + m_string.size());
     return String::iterator(maxRange, maxRange.first);

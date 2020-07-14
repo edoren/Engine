@@ -2,6 +2,8 @@
 
 #include <Util/UTF.hpp>
 
+#include <sstream>
+
 #include <cstring>
 
 namespace engine {
@@ -20,15 +22,7 @@ constexpr StringView::StringView(const char8* utf8String) {
     }
 }
 
-inline StringView::StringView(const String& string) : m_data(string.getData()), m_size(string.getSize()) {}
-
 constexpr StringView& StringView::operator=(const StringView& right) = default;
-
-inline StringView& StringView::operator=(const String& right) {
-    m_data = right.getData();
-    m_size = right.getSize();
-    return *this;
-}
 
 constexpr StringView& StringView::operator=(const char8* right) {
     const auto* utf8String = right;
@@ -160,6 +154,10 @@ constexpr StringView StringView::subString(size_type position, size_type length)
 
 constexpr const char8* StringView::getData() const {
     return m_data;
+}
+
+constexpr typename StringView::size_type StringView::getDataSize() const {
+    return m_size;
 }
 
 constexpr StringView::const_iterator StringView::begin() {
