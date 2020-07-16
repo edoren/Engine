@@ -38,26 +38,26 @@ bool Vk_Image::createImage(const math::uvec2& size, VkFormat format, VkImageTili
     VkResult result = VK_SUCCESS;
 
     VkImageCreateInfo imageCreateInfo = {
-        VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,  // sType;
-        nullptr,                              // pNext
-        0,                                    // flags
-        VK_IMAGE_TYPE_2D,                     // imageType
-        format,                               // format
-        VkExtent3D{
-            // extent
-            size.x,  // width
-            size.y,  // height
-            1        // depth
-        },
-        1,                          // mipLevels
-        1,                          // arrayLayers
-        VK_SAMPLE_COUNT_1_BIT,      // samples
-        tiling,                     // tiling
-        usage,                      // usage
-        VK_SHARING_MODE_EXCLUSIVE,  // sharingMode
-        0,                          // queueFamilyIndexCount
-        nullptr,                    // pQueueFamilyIndices
-        VK_IMAGE_LAYOUT_UNDEFINED   // initialLayout
+        .sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .imageType = VK_IMAGE_TYPE_2D,
+        .format = format,
+        .extent =
+            {
+                .width = size.x,
+                .height = size.y,
+                .depth = 1,
+            },
+        .mipLevels = 1,
+        .arrayLayers = 1,
+        .samples = VK_SAMPLE_COUNT_1_BIT,
+        .tiling = tiling,
+        .usage = usage,
+        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+        .queueFamilyIndexCount = 0,
+        .pQueueFamilyIndices = nullptr,
+        .initialLayout = VK_IMAGE_LAYOUT_UNDEFINED,
     };
 
     result = vkCreateImage(device, &imageCreateInfo, nullptr, &m_handle);
@@ -70,27 +70,27 @@ bool Vk_Image::createImageView(VkFormat format, VkImageAspectFlags aspectMask) {
     VkDevice& device = context.getVulkanDevice();
 
     VkImageViewCreateInfo imageViewCreateInfo = {
-        VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,  // sType
-        nullptr,                                   // pNext
-        0,                                         // flags
-        m_handle,                                  // image
-        VK_IMAGE_VIEW_TYPE_2D,                     // viewType
-        format,                                    // format
-        {
-            // components
-            VK_COMPONENT_SWIZZLE_IDENTITY,  // r
-            VK_COMPONENT_SWIZZLE_IDENTITY,  // g
-            VK_COMPONENT_SWIZZLE_IDENTITY,  // b
-            VK_COMPONENT_SWIZZLE_IDENTITY   // a
-        },
-        {
-            // subresourceRange
-            aspectMask,  // aspectMask
-            0,           // baseMipLevel
-            1,           // levelCount
-            0,           // baseArrayLayer
-            1            // layerCount
-        },
+        .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .image = m_handle,
+        .viewType = VK_IMAGE_VIEW_TYPE_2D,
+        .format = format,
+        .components =
+            {
+                .r = VK_COMPONENT_SWIZZLE_IDENTITY,
+                .g = VK_COMPONENT_SWIZZLE_IDENTITY,
+                .b = VK_COMPONENT_SWIZZLE_IDENTITY,
+                .a = VK_COMPONENT_SWIZZLE_IDENTITY,
+            },
+        .subresourceRange =
+            {
+                .aspectMask = aspectMask,
+                .baseMipLevel = 0,
+                .levelCount = 1,
+                .baseArrayLayer = 0,
+                .layerCount = 1,
+            },
     };
 
     return vkCreateImageView(device, &imageViewCreateInfo, nullptr, &m_view) == VK_SUCCESS;

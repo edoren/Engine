@@ -1,6 +1,6 @@
 #include <System/LogManager.hpp>
-#include <Util/Container/Vector.hpp>
 #include <System/StringView.hpp>
+#include <Util/Container/Vector.hpp>
 
 #include "Vk_Context.hpp"
 #include "Vk_Texture2D.hpp"
@@ -82,17 +82,17 @@ bool Vk_TextureManager::createDescriptorPool() {
     VkResult result = VK_SUCCESS;
 
     VkDescriptorPoolSize poolSize = {
-        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,  // type
-        sMaxDescriptorSets                          // descriptorCount
+        .type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+        .descriptorCount = sMaxDescriptorSets,
     };
 
     VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = {
-        VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,  // sType
-        nullptr,                                        // pNext
-        0,                                              // flags
-        sMaxDescriptorSets,                             // maxSets
-        1,                                              // poolSizeCount
-        &poolSize                                       // pPoolSizes
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .maxSets = sMaxDescriptorSets,
+        .poolSizeCount = 1,
+        .pPoolSizes = &poolSize,
     };
 
     result = vkCreateDescriptorPool(device, &descriptorPoolCreateInfo, nullptr, &m_descriptorPool);
@@ -113,20 +113,20 @@ bool Vk_TextureManager::createDescriptorSetLayout() {
     Vector<VkDescriptorSetLayoutBinding> layoutBindings = {
         // Diffuse texture
         {
-            0,                                          // binding
-            VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,  // descriptorType
-            1,                                          // descriptorCount
-            VK_SHADER_STAGE_FRAGMENT_BIT,               // stageFlags
-            nullptr                                     // pImmutableSamplers
+            .binding = 0,
+            .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+            .descriptorCount = 1,
+            .stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT,
+            .pImmutableSamplers = nullptr,
         },
     };
 
     VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo = {
-        VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,  // sType
-        nullptr,                                              // pNext
-        0,                                                    // flags
-        static_cast<uint32>(layoutBindings.size()),           // bindingCount
-        layoutBindings.data()                                 // pBindings
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .bindingCount = static_cast<uint32>(layoutBindings.size()),
+        .pBindings = layoutBindings.data(),
     };
 
     result = vkCreateDescriptorSetLayout(device, &descriptorSetLayoutCreateInfo, nullptr, &m_descriptorSetLayout);

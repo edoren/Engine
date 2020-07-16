@@ -37,10 +37,10 @@ Vector<VkVertexInputAttributeDescription> GetAttribDescription(const Vector<Vert
                 continue;
         }
         attributeDescriptions.push_back({
-            location++,    // location
-            bufferBindId,  // binding
-            format,        // format
-            bufferOffset   // offset
+            .location = location++,
+            .binding = bufferBindId,
+            .format = format,
+            .offset = bufferOffset,
         });
         bufferOffset += size;
     }

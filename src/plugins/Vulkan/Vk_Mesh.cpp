@@ -93,11 +93,11 @@ void Vk_Mesh::setupMesh() {
     std::memcpy(indexStartPosition, m_indices.data(), indexBufferDataSize);
 
     VkMappedMemoryRange flushRange = {
-        VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,  // sType
-        nullptr,                                // pNext
-        stagingBuffer.getMemory(),              // memory
-        0,                                      // offset
-        VK_WHOLE_SIZE                           // size
+        .sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,
+        .pNext = nullptr,
+        .memory = stagingBuffer.getMemory(),
+        .offset = 0,
+        .size = VK_WHOLE_SIZE,
     };
     vkFlushMappedMemoryRanges(device, 1, &flushRange);
 
@@ -106,11 +106,11 @@ void Vk_Mesh::setupMesh() {
     // Prepare command buffer to copy data from staging buffer to the vertex
     // and index buffer
     VkCommandBufferAllocateInfo allocInfo = {
-        VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,  // sType
-        nullptr,                                         // pNext
-        context.getGraphicsQueueCmdPool(),               // commandPool
-        VK_COMMAND_BUFFER_LEVEL_PRIMARY,                 // level
-        1                                                // commandBufferCount
+        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+        .pNext = nullptr,
+        .commandPool = context.getGraphicsQueueCmdPool(),
+        .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+        .commandBufferCount = 1,
     };
 
     VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
@@ -121,10 +121,10 @@ void Vk_Mesh::setupMesh() {
     }
 
     VkCommandBufferBeginInfo commandBufferBeginInfo = {
-        VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,  // sType
-        nullptr,                                      // pNext
-        VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,  // flags
-        nullptr                                       // pInheritanceInfo
+        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+        .pNext = nullptr,
+        .flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
+        .pInheritanceInfo = nullptr,
     };
 
     vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo);
@@ -132,15 +132,15 @@ void Vk_Mesh::setupMesh() {
     std::array<VkBufferCopy, 2> bufferCopyInfos = {{
         // Vertex Buffer
         {
-            0,                        // srcOffset
-            0,                        // dstOffset
-            m_vertexBuffer.getSize()  // size
+            .srcOffset = 0,
+            .dstOffset = 0,
+            .size = m_vertexBuffer.getSize(),
         },
         // Index Buffer
         {
-            m_vertexBuffer.getSize(),  // srcOffset
-            0,                         // dstOffset
-            m_indexBuffer.getSize()    // size
+            .srcOffset = m_vertexBuffer.getSize(),
+            .dstOffset = 0,
+            .size = m_indexBuffer.getSize(),
         },
     }};
 
@@ -150,26 +150,26 @@ void Vk_Mesh::setupMesh() {
 
     std::array<VkBufferMemoryBarrier, 2> bufferMemoryBarriers = {{
         {
-            VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,  // sType;
-            nullptr,                                  // pNext
-            VK_ACCESS_MEMORY_WRITE_BIT,               // srcAccessMask
-            VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT,      // dstAccessMask
-            VK_QUEUE_FAMILY_IGNORED,                  // srcQueueFamilyIndex
-            VK_QUEUE_FAMILY_IGNORED,                  // dstQueueFamilyIndex
-            m_vertexBuffer.getHandle(),               // buffer
-            0,                                        // offset
-            VK_WHOLE_SIZE                             // size
+            .sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
+            .pNext = nullptr,
+            .srcAccessMask = VK_ACCESS_MEMORY_WRITE_BIT,
+            .dstAccessMask = VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT,
+            .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .buffer = m_vertexBuffer.getHandle(),
+            .offset = 0,
+            .size = VK_WHOLE_SIZE,
         },
         {
-            VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,  // sType;
-            nullptr,                                  // pNext
-            VK_ACCESS_MEMORY_WRITE_BIT,               // srcAccessMask
-            VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT,      // dstAccessMask
-            VK_QUEUE_FAMILY_IGNORED,                  // srcQueueFamilyIndex
-            VK_QUEUE_FAMILY_IGNORED,                  // dstQueueFamilyIndex
-            m_indexBuffer.getHandle(),                // buffer
-            0,                                        // offset
-            VK_WHOLE_SIZE                             // size
+            .sType = VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER,
+            .pNext = nullptr,
+            .srcAccessMask = VK_ACCESS_MEMORY_WRITE_BIT,
+            .dstAccessMask = VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT,
+            .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+            .buffer = m_indexBuffer.getHandle(),
+            .offset = 0,
+            .size = VK_WHOLE_SIZE,
         },
     }};
 
@@ -179,18 +179,17 @@ void Vk_Mesh::setupMesh() {
 
     vkEndCommandBuffer(commandBuffer);
 
-    // Submit command buffer and copy data from staging buffer to the vertex
-    // and index buffer
+    // Submit command buffer and copy data from staging buffer to the vertex and index buffer
     VkSubmitInfo submitInfo = {
-        VK_STRUCTURE_TYPE_SUBMIT_INFO,  // sType
-        nullptr,                        // pNext
-        0,                              // waitSemaphoreCount
-        nullptr,                        // pWaitSemaphores
-        nullptr,                        // pWaitDstStageMask;
-        1,                              // commandBufferCount
-        &commandBuffer,                 // pCommandBuffers
-        0,                              // signalSemaphoreCount
-        nullptr                         // pSignalSemaphores
+        .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+        .pNext = nullptr,
+        .waitSemaphoreCount = 0,
+        .pWaitSemaphores = nullptr,
+        .pWaitDstStageMask = nullptr,
+        .commandBufferCount = 1,
+        .pCommandBuffers = &commandBuffer,
+        .signalSemaphoreCount = 0,
+        .pSignalSemaphores = nullptr,
     };
 
     result = vkQueueSubmit(graphicsQueue.getHandle(), 1, &submitInfo, VK_NULL_HANDLE);

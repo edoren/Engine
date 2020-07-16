@@ -32,14 +32,14 @@ bool Vk_Buffer::create(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryProp
     VkDevice& device = context.getVulkanDevice();
 
     VkBufferCreateInfo bufferCreateInfo = {
-        VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,  // sType
-        nullptr,                               // pNext
-        0,                                     // flags
-        size,                                  // size
-        usage,                                 // usage
-        VK_SHARING_MODE_EXCLUSIVE,             // sharingMode
-        0,                                     // queueFamilyIndexCount
-        nullptr                                // pQueueFamilyIndices
+        .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .size = size,
+        .usage = usage,
+        .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+        .queueFamilyIndexCount = 0,
+        .pQueueFamilyIndices = nullptr,
     };
 
     result = vkCreateBuffer(device, &bufferCreateInfo, nullptr, &m_handle);

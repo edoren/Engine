@@ -124,24 +124,24 @@ bool Vk_SwapChain::create(Vk_Surface& surface, uint32 width, uint32 height) {
     }
 
     VkSwapchainCreateInfoKHR swapChainCreateInfo = {
-        VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,  // sType
-        nullptr,                                      // pNext
-        VkSwapchainCreateFlagsKHR(),                  // flags
-        surface.getHandle(),                          // surface
-        desiredNumberOfImages,                        // minImageCount
-        desiredFormat.format,                         // imageFormat
-        desiredFormat.colorSpace,                     // imageColorSpace
-        desiredExtent,                                // imageExtent
-        1,                                            // imageArrayLayers
-        desiredUsage,                                 // imageUsage
-        VK_SHARING_MODE_EXCLUSIVE,                    // imageSharingMode
-        0,                                            // queueFamilyIndexCount
-        nullptr,                                      // pQueueFamilyIndices
-        desiredTransform,                             // preTransform
-        compositeAlpha,                               // compositeAlpha
-        desiredPresentMode,                           // presentMode
-        true,                                         // clipped
-        oldSwapChain                                  // oldSwapchain
+        .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
+        .pNext = nullptr,
+        .flags = VkSwapchainCreateFlagsKHR(),
+        .surface = surface.getHandle(),
+        .minImageCount = desiredNumberOfImages,
+        .imageFormat = desiredFormat.format,
+        .imageColorSpace = desiredFormat.colorSpace,
+        .imageExtent = desiredExtent,
+        .imageArrayLayers = 1,
+        .imageUsage = desiredUsage,
+        .imageSharingMode = VK_SHARING_MODE_EXCLUSIVE,
+        .queueFamilyIndexCount = 0,
+        .pQueueFamilyIndices = nullptr,
+        .preTransform = desiredTransform,
+        .compositeAlpha = compositeAlpha,
+        .presentMode = desiredPresentMode,
+        .clipped = true,
+        .oldSwapchain = oldSwapChain,
     };
 
     result = vkCreateSwapchainKHR(device, &swapChainCreateInfo, nullptr, &m_handle);
@@ -185,26 +185,27 @@ bool Vk_SwapChain::create(Vk_Surface& surface, uint32 width, uint32 height) {
     // Create all the ImageViews
     for (auto& image : m_images) {
         VkImageViewCreateInfo imageViewCreateInfo = {
-            VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,  // sType
-            nullptr,                                   // pNext
-            VkImageViewCreateFlags(),                  // flags
-            image.getHandle(),                         // image
-            VK_IMAGE_VIEW_TYPE_2D,                     // viewType
-            m_format,                                  // format
-            VkComponentMapping{
-                // components
-                VK_COMPONENT_SWIZZLE_IDENTITY,  // r
-                VK_COMPONENT_SWIZZLE_IDENTITY,  // g
-                VK_COMPONENT_SWIZZLE_IDENTITY,  // b
-                VK_COMPONENT_SWIZZLE_IDENTITY   // a
-            },
-            VkImageSubresourceRange{
-                VK_IMAGE_ASPECT_COLOR_BIT,  // aspectMask
-                0,                          // baseMipLevel
-                1,                          // levelCount
-                0,                          // baseArrayLayer
-                1                           // layerCount
-            },
+            .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+            .pNext = nullptr,
+            .flags = VkImageViewCreateFlags(),
+            .image = image.getHandle(),
+            .viewType = VK_IMAGE_VIEW_TYPE_2D,
+            .format = m_format,
+            .components =
+                {
+                    .r = VK_COMPONENT_SWIZZLE_IDENTITY,
+                    .g = VK_COMPONENT_SWIZZLE_IDENTITY,
+                    .b = VK_COMPONENT_SWIZZLE_IDENTITY,
+                    .a = VK_COMPONENT_SWIZZLE_IDENTITY,
+                },
+            .subresourceRange =
+                {
+                    .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                    .baseMipLevel = 0,
+                    .levelCount = 1,
+                    .baseArrayLayer = 0,
+                    .layerCount = 1,
+                },
         };
 
         result = vkCreateImageView(context.getVulkanDevice(), &imageViewCreateInfo, nullptr, &image.getView());
@@ -246,11 +247,9 @@ Vector<Vk_Image>& Vk_SwapChain::getImages() {
 }
 
 uint32 Vk_SwapChain::getNumImages(const VkSurfaceCapabilitiesKHR& surfaceCapabilities) {
-    // Set of images defined in a swap chain may not always be available for
-    // application to render to:
+    // Set of images defined in a swap chain may not always be available for application to render to:
     // One may be displayed and one may wait in a queue to be presented
-    // If application wants to use more images at the same time it must ask
-    // for more images
+    // If application wants to use more images at the same time it must ask for more images
     uint32 imageCount = surfaceCapabilities.minImageCount + 1;
     if (surfaceCapabilities.maxImageCount > 0 && imageCount > surfaceCapabilities.maxImageCount) {
         imageCount = surfaceCapabilities.maxImageCount;
@@ -259,15 +258,13 @@ uint32 Vk_SwapChain::getNumImages(const VkSurfaceCapabilitiesKHR& surfaceCapabil
 }
 
 VkSurfaceFormatKHR Vk_SwapChain::getFormat(const Vector<VkSurfaceFormatKHR>& surfaceFormats) {
-    // If the list contains only one entry with undefined format
-    // it means that there are no preferred surface formats and any can be
-    // chosen
+    // If the list contains only one entry with undefined format it means that there are no preferred surface formats
+    // and any can be chosen
     if (surfaceFormats.size() == 1 && surfaceFormats[0].format == VK_FORMAT_UNDEFINED) {
         return {VK_FORMAT_R8G8B8A8_UNORM, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR};
     }
 
-    // Check if list contains most widely used R8 G8 B8 A8 format
-    // with nonlinear color space
+    // Check if list contains most widely used R8 G8 B8 A8 format with nonlinear color space
     for (const VkSurfaceFormatKHR& surfaceFormat : surfaceFormats) {
         if (surfaceFormat.format == VK_FORMAT_R8G8B8A8_UNORM) {
             return surfaceFormat;
@@ -291,15 +288,13 @@ VkExtent2D Vk_SwapChain::getExtent(const VkSurfaceCapabilitiesKHR& surfaceCapabi
         return swapChainExtent;
     }
 
-    // Most of the cases we define size of the swap_chain images equal to
-    // current window's size
+    // Most of the cases we define size of the swap_chain images equal to current window's size
     return surfaceCapabilities.currentExtent;
 }
 
 VkImageUsageFlags Vk_SwapChain::getUsageFlags(const VkSurfaceCapabilitiesKHR& surfaceCapabilities) {
     // Color attachment flag must always be supported
-    // We can define other usage flags but we always need to check if they
-    // are supported
+    // We can define other usage flags but we always need to check if they are supported
     if (surfaceCapabilities.supportedUsageFlags & VK_IMAGE_USAGE_TRANSFER_DST_BIT) {
         return VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
     }
@@ -307,15 +302,12 @@ VkImageUsageFlags Vk_SwapChain::getUsageFlags(const VkSurfaceCapabilitiesKHR& su
 }
 
 VkSurfaceTransformFlagBitsKHR Vk_SwapChain::getTransform(const VkSurfaceCapabilitiesKHR& surfaceCapabilities) {
-    // Sometimes images must be transformed before they are presented (i.e.
-    // due to device's orienation being other than default orientation)
-    // If the specified transform is other than current transform,
-    // presentation engine will transform image during presentation operation;
-    // this operation
-    // may hit performance on some platforms
-    // Here we don't want any transformations to occur so if the identity
-    // transform is supported use it otherwise just use the same transform
-    // as current transform
+    // Sometimes images must be transformed before they are presented (i.e due to device's orienation being other than
+    // default orientation)
+    // If the specified transform is other than current transform, presentation engine will transform image during
+    // presentation operation; This operation may hit performance on some platforms
+    // Here we don't want any transformations to occur so if the identity transform is supported use it otherwise just
+    // use the same transform as current transform
     if (surfaceCapabilities.supportedTransforms & VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR) {
         return VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
     }

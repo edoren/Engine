@@ -42,10 +42,10 @@ bool Vk_Utilities::AllocateMemory(VkDeviceMemory* memory,
         if ((memoryRequirements.memoryTypeBits & (1 << i)) &&
             (physicalMemoryProperties.memoryTypes[i].propertyFlags & memoryProperties)) {
             VkMemoryAllocateInfo memoryAllocateInfo = {
-                VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,  // sType
-                nullptr,                                 // pNext
-                memoryRequirements.size,                 // allocationSize
-                i                                        // memoryTypeIndex
+                .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+                .pNext = nullptr,
+                .allocationSize = memoryRequirements.size,
+                .memoryTypeIndex = i,
             };
             result = vkAllocateMemory(device, &memoryAllocateInfo, nullptr, memory);
             if (result == VK_SUCCESS) {
@@ -65,11 +65,11 @@ bool Vk_Utilities::AllocateCommandBuffers(VkCommandPool& cmdPool, uint32_t count
 
     // Allocate space in the pool for the buffer
     VkCommandBufferAllocateInfo cmdBufferAllocateInfo = {
-        VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,  // sType
-        nullptr,                                         // pNext
-        cmdPool,                                         // commandPool
-        VK_COMMAND_BUFFER_LEVEL_PRIMARY,                 // level
-        count                                            // bufferCount
+        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+        .pNext = nullptr,
+        .commandPool = cmdPool,
+        .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+        .commandBufferCount = count,
     };
     result = vkAllocateCommandBuffers(device, &cmdBufferAllocateInfo, commandBuffer);
     if (result != VK_SUCCESS) {
@@ -85,9 +85,9 @@ bool Vk_Utilities::CreateVulkanSemaphore(VkSemaphore* semaphore) {
     VkDevice& device = context.getVulkanDevice();
 
     VkSemaphoreCreateInfo semaphoreCreateInfo = {
-        VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,  // sType
-        nullptr,                                  // pNext
-        VkSemaphoreCreateFlags()                  // flags
+        .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = VkSemaphoreCreateFlags(),
     };
 
     VkResult result = vkCreateSemaphore(device, &semaphoreCreateInfo, nullptr, semaphore);
@@ -106,9 +106,9 @@ bool Vk_Utilities::CreateVulkanFence(VkFenceCreateFlags flags, VkFence* fence) {
     VkDevice& device = context.getVulkanDevice();
 
     VkFenceCreateInfo fenceCreateInfo = {
-        VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,  // sType
-        nullptr,                              // pNext
-        flags                                 // flags
+        .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = flags,
     };
 
     result = vkCreateFence(device, &fenceCreateInfo, nullptr, fence);
