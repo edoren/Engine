@@ -13,11 +13,11 @@ TEST_CASE("Calling utf::GetEncodingSize", "[UTF]") {
 }
 
 TEST_CASE("Calling utf::UtfToUtf", "[UTF]") {
-    std::basic_string<char> smiley8 = u8"\U0001F600\U00005730\u00F1\u0041";   // "😀地ñA"
+    std::basic_string<char8> smiley8 = u8"\U0001F600\U00005730\u00F1\u0041";   // "😀地ñA"
     std::basic_string<char16> smiley16 = u"\U0001F600\U00005730\u00F1\u0041";  // "😀地ñA"
     std::basic_string<char32> smiley32 = U"\U0001F600\U00005730\u00F1\u0041";  // "😀地ñA"
 
-    std::basic_string<char> output8;
+    std::basic_string<char8> output8;
     std::basic_string<char16> output16;
     std::basic_string<char32> output32;
 
@@ -91,7 +91,7 @@ TEST_CASE("Calling utf::GetCodePoint", "[UTF]") {
 TEST_CASE("Calling utf::Next", "[UTF]") {
     SECTION("Should return the next code unit") {
         {
-            std::basic_string<char> smiley = u8"\U0001F600\U0001F603\U00005730";  // "😀😃地"
+            std::basic_string<char8> smiley = u8"\U0001F600\U0001F603\U00005730";  // "😀😃地"
 
             auto begin = smiley.begin();
             auto end = smiley.end();
@@ -141,7 +141,7 @@ TEST_CASE("Calling utf::Next", "[UTF]") {
     }
 
     SECTION("Should return end if the end of the string has been reached") {
-        std::basic_string<char> smiley8 = u8"\U0001F600";   // "😀"
+        std::basic_string<char8> smiley8 = u8"\U0001F600";   // "😀"
         std::basic_string<char16> smiley16 = u"\U0001F600";  // "😀"
         std::basic_string<char32> smiley32 = U"\U0001F600";  // "😀"
 
@@ -181,7 +181,7 @@ TEST_CASE("Calling utf::Next", "[UTF]") {
     }
 
     SECTION("Should return begin if an encoding error occured") {
-        std::basic_string<char> smiley8 = u8"\U0001F600\U0001F603";   // "😀😃"
+        std::basic_string<char8> smiley8 = u8"\U0001F600\U0001F603";   // "😀😃"
         std::basic_string<char16> smiley16 = u"\U0001F600\U0001F603";  // "😀😃"
 
         {
@@ -210,7 +210,7 @@ TEST_CASE("Calling utf::Next", "[UTF]") {
 TEST_CASE("Calling utf::Prior", "[UTF]") {
     SECTION("Should return the prior UTF-8 code unit") {
         {
-            std::basic_string<char> smiley = u8"\U0001F600\U0001F603\U00005730";  // "😀😃地"
+            std::basic_string<char8> smiley = u8"\U0001F600\U0001F603\U00005730";  // "😀😃地"
 
             auto begin = smiley.begin();
             auto end = smiley.end();
@@ -260,7 +260,7 @@ TEST_CASE("Calling utf::Prior", "[UTF]") {
     }
 
     SECTION("Should return begin if the start of the string has been reached") {
-        std::basic_string<char> smiley8 = u8"\U0001F600";   // "😀"
+        std::basic_string<char8> smiley8 = u8"\U0001F600";   // "😀"
         std::basic_string<char16> smiley16 = u"\U0001F600";  // "😀"
         std::basic_string<char32> smiley32 = U"\U0001F600";  // "😀"
 
@@ -300,7 +300,7 @@ TEST_CASE("Calling utf::Prior", "[UTF]") {
     }
 
     SECTION("Should return end if an encoding error occured") {
-        std::basic_string<char> smiley8 = u8"\U0001F600\U0001F603";   // "😀😃"
+        std::basic_string<char8> smiley8 = u8"\U0001F600\U0001F603";   // "😀😃"
         std::basic_string<char16> smiley16 = u"\U0001F600\U0001F603";  // "😀😃"
 
         {
@@ -327,7 +327,7 @@ TEST_CASE("Calling utf::Prior", "[UTF]") {
 }
 
 TEST_CASE("Calling utf::ForEach", "[UTF]") {
-    std::basic_string<char> smiley8 = u8"\U0001F600\U00005730\u00F1\u0041";   // "😀地ñA"
+    std::basic_string<char8> smiley8 = u8"\U0001F600\U00005730\u00F1\u0041";   // "😀地ñA"
     std::basic_string<char16> smiley16 = u"\U0001F600\U00005730\u00F1\u0041";  // "😀地ñA"
     std::basic_string<char32> smiley32 = U"\U0001F600\U00005730\u00F1\u0041";  // "😀地ñA"
 
@@ -378,11 +378,11 @@ TEST_CASE("Calling utf::ForEach", "[UTF]") {
 }
 
 TEST_CASE("Calling utf::GetSize", "[UTF]") {
-    std::basic_string<char> smiley8 = u8"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606";  // "😀😃😄😁😆"
+    std::basic_string<char8> smiley8 = u8"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606";  // "😀😃😄😁😆"
     std::basic_string<char16> smiley16 = u"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606";  // "😀😃😄😁😆"
     std::basic_string<char32> smiley32 = U"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606";  // "😀😃😄😁😆"
 
-    std::basic_string<char> elements8 = u8"\U00006C34\U0000706B\U00005730\U000098A8\U00007A7A";   // "水火地風空"
+    std::basic_string<char8> elements8 = u8"\U00006C34\U0000706B\U00005730\U000098A8\U00007A7A";   // "水火地風空"
     std::basic_string<char16> elements16 = u"\U00006C34\U0000706B\U00005730\U000098A8\U00007A7A";  // "水火地風空"
     std::basic_string<char32> elements32 = U"\U00006C34\U0000706B\U00005730\U000098A8\U00007A7A";  // "水火地風空"
 
@@ -397,7 +397,7 @@ TEST_CASE("Calling utf::GetSize", "[UTF]") {
 }
 
 TEST_CASE("Calling utf::IsValid", "[UTF]") {
-    std::basic_string<char> smiley8 = u8"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606";  // "😀😃😄😁😆"
+    std::basic_string<char8> smiley8 = u8"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606";  // "😀😃😄😁😆"
     std::basic_string<char16> smiley16 = u"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606";  // "😀😃😄😁😆"
     std::basic_string<char32> smiley32 = U"\U0001F600\U0001F603\U0001F604\U0001F601\U0001F606";  // "😀😃😄😁😆"
 

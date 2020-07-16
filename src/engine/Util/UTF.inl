@@ -681,6 +681,8 @@ constexpr size_t GetEncodingSize(Encoding encoding) {
             return 2;
         case Encoding::UTF_32:
             return 4;
+        default:
+            return 1;  // Should not be reached
     }
 }
 
