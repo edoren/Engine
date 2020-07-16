@@ -63,6 +63,8 @@ String::String(const char* utf8String) {
     }
 }
 
+String::String(const char8* utf8String) : String(reinterpret_cast<const char*>(utf8String)) {}
+
 String::String(const char16* utf16String) {
     if (utf16String && utf16String[0] != 0) {
         // Find the lenght
@@ -110,6 +112,16 @@ String::String(std::basic_string<char>&& utf8String) {
     if (!utf8String.empty()) {
         if (utf::IsValid<utf::UTF_8>(utf8String.cbegin(), utf8String.cend())) {
             m_string = std::move(utf8String);
+        } else {
+            ENGINE_THROW(std::runtime_error("invalid utf8 convertion."));
+        }
+    };
+}
+
+String::String(const std::basic_string<char8>& utf8String) {
+    if (!utf8String.empty()) {
+        if (utf::IsValid<utf::UTF_8>(utf8String.cbegin(), utf8String.cend())) {
+            m_string.assign(reinterpret_cast<const char*>(utf8String.data()), utf8String.size());
         } else {
             ENGINE_THROW(std::runtime_error("invalid utf8 convertion."));
         }
@@ -233,6 +245,11 @@ String& String::operator+=(const String& right) {
 
 String& String::operator+=(const char* right) {
     m_string += right;
+    return *this;
+}
+
+String& String::operator+=(const char8* right) {
+    m_string += reinterpret_cast<const char*>(right);
     return *this;
 }
 
@@ -516,23 +533,7 @@ bool operator==(const String& left, const String& right) {
     return left.m_string == right.m_string;
 }
 
-bool operator==(const String& left, const char* right) {
-    return left.m_string == right;
-}
-
-bool operator==(const char* left, const String& right) {
-    return left == right.m_string;
-}
-
 bool operator!=(const String& left, const String& right) {
-    return !(left == right);
-}
-
-bool operator!=(const String& left, const char* right) {
-    return !(left == right);
-}
-
-bool operator!=(const char* left, const String& right) {
     return !(left == right);
 }
 
@@ -540,23 +541,7 @@ bool operator<(const String& left, const String& right) {
     return left.m_string < right.m_string;
 }
 
-bool operator<(const String& left, const char* right) {
-    return left.m_string < right;
-}
-
-bool operator<(const char* left, const String& right) {
-    return left < right.m_string;
-}
-
 bool operator>(const String& left, const String& right) {
-    return right < left;
-}
-
-bool operator>(const String& left, const char* right) {
-    return right < left;
-}
-
-bool operator>(const char* left, const String& right) {
     return right < left;
 }
 
@@ -564,24 +549,106 @@ bool operator<=(const String& left, const String& right) {
     return !(right < left);
 }
 
-bool operator<=(const String& left, const char* right) {
-    return !(right < left);
-}
-
-bool operator<=(const char* left, const String& right) {
-    return !(right < left);
-}
-
 bool operator>=(const String& left, const String& right) {
     return !(left < right);
+}
+
+bool operator==(const String& left, const char* right) {
+    return left.m_string == right;
+}
+
+bool operator!=(const String& left, const char* right) {
+    return !(left == right);
+}
+
+bool operator<(const String& left, const char* right) {
+    return left.m_string < right;
+}
+
+bool operator>(const String& left, const char* right) {
+    return right < left;
+}
+
+bool operator<=(const String& left, const char* right) {
+    return !(right < left);
 }
 
 bool operator>=(const String& left, const char* right) {
     return !(left < right);
 }
 
+bool operator==(const char* left, const String& right) {
+    return left == right.m_string;
+}
+
+bool operator!=(const char* left, const String& right) {
+    return !(left == right);
+}
+
+bool operator<(const char* left, const String& right) {
+    return left < right.m_string;
+}
+
+bool operator>(const char* left, const String& right) {
+    return right < left;
+}
+
+bool operator<=(const char* left, const String& right) {
+    return !(right < left);
+}
+
 bool operator>=(const char* left, const String& right) {
     return !(left < right);
+}
+
+
+bool operator==(const String& left, const char8* right) {
+    return left.m_string == reinterpret_cast<const char*>(right);
+}
+
+bool operator!=(const String& left, const char8* right) {
+    return !(left == reinterpret_cast<const char*>(right));
+}
+
+bool operator<(const String& left, const char8* right) {
+    return left.m_string < reinterpret_cast<const char*>(right);
+}
+
+bool operator>(const String& left, const char8* right) {
+    return reinterpret_cast<const char*>(right) < left;
+}
+
+bool operator<=(const String& left, const char8* right) {
+    return !(reinterpret_cast<const char*>(right) < left);
+}
+
+bool operator>=(const String& left, const char8* right) {
+    return !(left < reinterpret_cast<const char*>(right));
+}
+
+
+bool operator==(const char8* left, const String& right) {
+    return reinterpret_cast<const char*>(left) == right.m_string;
+}
+
+bool operator!=(const char8* left, const String& right) {
+    return !(reinterpret_cast<const char*>(left) == right);
+}
+
+bool operator<(const char8* left, const String& right) {
+    return reinterpret_cast<const char*>(left) < right.m_string;
+}
+
+bool operator>(const char8* left, const String& right) {
+    return right < reinterpret_cast<const char*>(left);
+}
+
+bool operator<=(const char8* left, const String& right) {
+    return !(right < reinterpret_cast<const char*>(left));
+}
+
+bool operator>=(const char8* left, const String& right) {
+    return !(reinterpret_cast<const char*>(left) < right);
 }
 
 String operator+(const String& left, const String& right) {
@@ -595,6 +662,16 @@ String operator+(const String& left, const char* right) {
 }
 
 String operator+(const char* left, const String& right) {
+    String string = left;
+    return string += right;
+}
+
+String operator+(const String& left, const char8* right) {
+    String string = left;
+    return string += right;
+}
+
+String operator+(const char8* left, const String& right) {
     String string = left;
     return string += right;
 }

@@ -31,6 +31,7 @@
 #include <System/StringView.hpp>
 #include <Util/UTF.hpp>
 
+#include <compare>
 #include <sstream>
 #include <string>
 
@@ -71,7 +72,7 @@ public:
     // Types
     ////////////////////////////////////////////////////////////
     using size_type = size_t;                                              ///< Size type
-    using const_iterator = utf::Iterator<utf::UTF_8, const char*>;        ///< Read-only iterator type
+    using const_iterator = utf::Iterator<utf::UTF_8, const char*>;         ///< Read-only iterator type
     using iterator = const_iterator;                                       ///< Iterator type
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;  ///< Read-only reverse iterator type
     using reverse_iterator = std::reverse_iterator<iterator>;              ///< Reverse iterator type
@@ -117,6 +118,13 @@ public:
     String(const char* utf8String);
 
     /**
+     * @brief Construct from a null-terminated (value 0) UTF-8 string
+     *
+     * @param utf8String UTF-8 string to assign
+     */
+    String(const char8* utf8String);
+
+    /**
      * @brief Construct from a null-terminated (value 0) UTF-16 string
      *
      * @param utf16String UTF-8 string to assign
@@ -150,6 +158,13 @@ public:
      * @param utf8String UTF-8 string to move
      */
     String(std::basic_string<char>&& utf8String);
+
+    /**
+     * @brief Construct from an UTF-8 string
+     *
+     * @param utf8String UTF-8 string to assign
+     */
+    String(const std::basic_string<char8>& utf8String);
 
     /**
      * @brief Construct from a UTF-16 string
@@ -235,7 +250,7 @@ public:
               typename = std::enable_if_t<type::is_forward_iterator<It>::value &&
                                           sizeof(type::iterator_underlying_type_t<It>) == sizeof(char)>>
     static String FromUtf8(It begin, It end) {
-        return FromUtf8(const_cast<const char*>(&(*begin)), const_cast<const char*>(&(*end)));
+        return FromUtf8(reinterpret_cast<const char*>(&(*begin)), reinterpret_cast<const char*>(&(*end)));
     }
 
     /**
@@ -477,6 +492,16 @@ public:
      * @return Reference to self
      */
     String& operator+=(const char* right);
+
+    /**
+     * @brief Overload of += operator to append an UTF-8 null
+     *        terminated string
+     *
+     * @param right String to append
+     *
+     * @return Reference to self
+     */
+    String& operator+=(const char8* right);
 
     /**
      * @brief Overload of += operator to append a single ASCII
@@ -785,11 +810,15 @@ public:
 
 private:
     friend ENGINE_API bool operator==(const String& left, const String& right);
-    friend ENGINE_API bool operator==(const String& left, const char* right);
-    friend ENGINE_API bool operator==(const char* left, const String& right);
     friend ENGINE_API bool operator<(const String& left, const String& right);
+    friend ENGINE_API bool operator==(const String& left, const char* right);
     friend ENGINE_API bool operator<(const String& left, const char* right);
+    friend ENGINE_API bool operator==(const char* left, const String& right);
     friend ENGINE_API bool operator<(const char* left, const String& right);
+    friend ENGINE_API bool operator==(const String& left, const char8* right);
+    friend ENGINE_API bool operator<(const String& left, const char8* right);
+    friend ENGINE_API bool operator==(const char8* left, const String& right);
+    friend ENGINE_API bool operator<(const char8* left, const String& right);
 
     ////////////////////////////////////////////////////////////
     // Member data
@@ -810,6 +839,61 @@ ENGINE_API bool operator==(const String& left, const String& right);
 
 /**
  * @relates String
+ * @brief Overload of != operator to compare two UTF-8 strings
+ *
+ * @param left  Left operand (a String)
+ * @param right Right operand (a String)
+ *
+ * @return True if both strings are different
+ */
+ENGINE_API bool operator!=(const String& left, const String& right);
+
+/**
+ * @relates String
+ * @brief Overload of < operator to compare two UTF-8 strings
+ *
+ * @param left  Left operand (a String)
+ * @param right Right operand (a String)
+ *
+ * @return True if `left` is lexicographically before `right`
+ */
+ENGINE_API bool operator<(const String& left, const String& right);
+
+/**
+ * @relates String
+ * @brief Overload of > operator to compare two UTF-8 strings
+ *
+ * @param left  Left operand (a String)
+ * @param right Right operand (a String)
+ *
+ * @return True if `left` is lexicographically after `right`
+ */
+ENGINE_API bool operator>(const String& left, const String& right);
+
+/**
+ * @relates String
+ * @brief Overload of <= operator to compare two UTF-8 strings
+ *
+ * @param left  Left operand (a String)
+ * @param right Right operand (a String)
+ *
+ * @return True if `left` is lexicographically before or equivalent to \a
+ *        right
+ */
+ENGINE_API bool operator<=(const String& left, const String& right);
+/**
+ * @relates String
+ * @brief Overload of >= operator to compare two UTF-8 strings
+ *
+ * @param left  Left operand (a String)
+ * @param right Right operand (a String)
+ *
+ * @return True if `left` is lexicographically after or equivalent to `right`
+ */
+ENGINE_API bool operator>=(const String& left, const String& right);
+
+/**
+ * @relates String
  * @brief Overload of == operator to compare a UTF-8 strings and a null
  *        terminated (value 0) UTF-8 string
  *
@@ -819,29 +903,6 @@ ENGINE_API bool operator==(const String& left, const String& right);
  * @return True if both strings are equal
  */
 ENGINE_API bool operator==(const String& left, const char* right);
-
-/**
- * @relates String
- * @brief Overload of == operator to compare a UTF-8 strings and a null
- *        terminated (value 0) UTF-8 string
- *
- * @param left  Left operand (a null terminated UTF-8 string)
- * @param right Right operand (a String)
- *
- * @return True if both strings are equal
- */
-ENGINE_API bool operator==(const char* left, const String& right);
-
-/**
- * @relates String
- * @brief Overload of != operator to compare two UTF-8 strings
- *
- * @param left  Left operand (a String)
- * @param right Right operand (a String)
- *
- * @return True if both strings are different
- */
-ENGINE_API bool operator!=(const String& left, const String& right);
 
 /**
  * @relates String
@@ -857,29 +918,6 @@ ENGINE_API bool operator!=(const String& left, const char* right);
 
 /**
  * @relates String
- * @brief Overload of != operator to compare a UTF-8 strings and a null
- *        terminated (value 0) UTF-8 string
- *
- * @param left  Left operand (a null terminated UTF-8 string)
- * @param right Right operand (a String)
- *
- * @return True if both strings are equal
- */
-ENGINE_API bool operator!=(const char* left, const String& right);
-
-/**
- * @relates String
- * @brief Overload of < operator to compare two UTF-8 strings
- *
- * @param left  Left operand (a String)
- * @param right Right operand (a String)
- *
- * @return True if `left` is lexicographically before `right`
- */
-ENGINE_API bool operator<(const String& left, const String& right);
-
-/**
- * @relates String
  * @brief Overload of < operator to compare a UTF-8 strings and a null
  *        terminated (value 0) UTF-8 string
  *
@@ -892,29 +930,6 @@ ENGINE_API bool operator<(const String& left, const char* right);
 
 /**
  * @relates String
- * @brief Overload of < operator to compare a UTF-8 strings and a null
- *        terminated (value 0) UTF-8 string
- *
- * @param left  Left operand (a null terminated UTF-8 string)
- * @param right Right operand (a String)
- *
- * @return True if `left` is lexicographically before `right`
- */
-ENGINE_API bool operator<(const char* left, const String& right);
-
-/**
- * @relates String
- * @brief Overload of > operator to compare two UTF-8 strings
- *
- * @param left  Left operand (a String)
- * @param right Right operand (a String)
- *
- * @return True if `left` is lexicographically after `right`
- */
-ENGINE_API bool operator>(const String& left, const String& right);
-
-/**
- * @relates String
  * @brief Overload of > operator to compare a UTF-8 strings and a null
  *        terminated (value 0) UTF-8 string
  *
@@ -924,30 +939,6 @@ ENGINE_API bool operator>(const String& left, const String& right);
  * @return True if `left` is lexicographically after `right`
  */
 ENGINE_API bool operator>(const String& left, const char* right);
-
-/**
- * @relates String
- * @brief Overload of > operator to compare a UTF-8 strings and a null
- *        terminated (value 0) UTF-8 string
- *
- * @param left  Left operand (a null terminated UTF-8 string)
- * @param right Right operand (a String)
- *
- * @return True if `left` is lexicographically after `right`
- */
-ENGINE_API bool operator>(const char* left, const String& right);
-
-/**
- * @relates String
- * @brief Overload of <= operator to compare two UTF-8 strings
- *
- * @param left  Left operand (a String)
- * @param right Right operand (a String)
- *
- * @return True if `left` is lexicographically before or equivalent to \a
- *        right
- */
-ENGINE_API bool operator<=(const String& left, const String& right);
 
 /**
  * @relates String
@@ -964,6 +955,66 @@ ENGINE_API bool operator<=(const String& left, const char* right);
 
 /**
  * @relates String
+ * @brief Overload of >= operator to compare a UTF-8 strings and a null
+ *        terminated (value 0) UTF-8 string
+ *
+ * @param left  Left operand (a String)
+ * @param right Right operand (a null terminated UTF-8 string)
+ *
+ * @return True if `left` is lexicographically after or equivalent to `right`
+ */
+ENGINE_API bool operator>=(const String& left, const char* right);
+
+/**
+ * @relates String
+ * @brief Overload of == operator to compare a UTF-8 strings and a null
+ *        terminated (value 0) UTF-8 string
+ *
+ * @param left  Left operand (a null terminated UTF-8 string)
+ * @param right Right operand (a String)
+ *
+ * @return True if both strings are equal
+ */
+ENGINE_API bool operator==(const char* left, const String& right);
+
+/**
+ * @relates String
+ * @brief Overload of != operator to compare a UTF-8 strings and a null
+ *        terminated (value 0) UTF-8 string
+ *
+ * @param left  Left operand (a null terminated UTF-8 string)
+ * @param right Right operand (a String)
+ *
+ * @return True if both strings are equal
+ */
+ENGINE_API bool operator!=(const char* left, const String& right);
+
+/**
+ * @relates String
+ * @brief Overload of < operator to compare a UTF-8 strings and a null
+ *        terminated (value 0) UTF-8 string
+ *
+ * @param left  Left operand (a null terminated UTF-8 string)
+ * @param right Right operand (a String)
+ *
+ * @return True if `left` is lexicographically before `right`
+ */
+ENGINE_API bool operator<(const char* left, const String& right);
+
+/**
+ * @relates String
+ * @brief Overload of > operator to compare a UTF-8 strings and a null
+ *        terminated (value 0) UTF-8 string
+ *
+ * @param left  Left operand (a null terminated UTF-8 string)
+ * @param right Right operand (a String)
+ *
+ * @return True if `left` is lexicographically after `right`
+ */
+ENGINE_API bool operator>(const char* left, const String& right);
+
+/**
+ * @relates String
  * @brief Overload of <= operator to compare a UTF-8 strings and a null
  *        terminated (value 0) UTF-8 string
  *
@@ -977,29 +1028,6 @@ ENGINE_API bool operator<=(const char* left, const String& right);
 
 /**
  * @relates String
- * @brief Overload of >= operator to compare two UTF-8 strings
- *
- * @param left  Left operand (a String)
- * @param right Right operand (a String)
- *
- * @return True if `left` is lexicographically after or equivalent to `right`
- */
-ENGINE_API bool operator>=(const String& left, const String& right);
-
-/**
- * @relates String
- * @brief Overload of >= operator to compare a UTF-8 strings and a null
- *        terminated (value 0) UTF-8 string
- *
- * @param left  Left operand (a String)
- * @param right Right operand (a null terminated UTF-8 string)
- *
- * @return True if `left` is lexicographically after or equivalent to `right`
- */
-ENGINE_API bool operator>=(const String& left, const char* right);
-
-/**
- * @relates String
  * @brief Overload of >= operator to compare a UTF-8 strings and a null
  *        terminated (value 0) UTF-8 string
  *
@@ -1009,6 +1037,66 @@ ENGINE_API bool operator>=(const String& left, const char* right);
  * @return True if `left` is lexicographically after or equivalent to `right`
  */
 ENGINE_API bool operator>=(const char* left, const String& right);
+
+/**
+ * @copydoc bool operator==(const String& left, const char* right)
+ */
+ENGINE_API bool operator==(const String& left, const char8* right);
+
+/**
+ * @copydoc bool operator!=(const String& left, const char* right)
+ */
+ENGINE_API bool operator!=(const String& left, const char8* right);
+
+/**
+ * @copydoc bool operator<(const String& left, const char* right)
+ */
+ENGINE_API bool operator<(const String& left, const char8* right);
+
+/**
+ * @copydoc bool operator>(const String& left, const char* right)
+ */
+ENGINE_API bool operator>(const String& left, const char8* right);
+
+/**
+ * @copydoc bool operator<=(const String& left, const char* right)
+ */
+ENGINE_API bool operator<=(const String& left, const char8* right);
+
+/**
+ * @copydoc bool operator>=(const String& left, const char* right)
+ */
+ENGINE_API bool operator>=(const String& left, const char8* right);
+
+/**
+ * @copydoc bool operator==(const char* left, const String& right)
+ */
+ENGINE_API bool operator==(const char8* left, const String& right);
+
+/**
+ * @copydoc bool operator!=(const char* left, const String& right)
+ */
+ENGINE_API bool operator!=(const char8* left, const String& right);
+
+/**
+ * @copydoc bool operator<(const char* left, const String& right)
+ */
+ENGINE_API bool operator<(const char8* left, const String& right);
+
+/**
+ * @copydoc bool operator>(const char* left, const String& right)
+ */
+ENGINE_API bool operator>(const char8* left, const String& right);
+
+/**
+ * @copydoc bool operator<=(const char* left, const String& right)
+ */
+ENGINE_API bool operator<=(const char8* left, const String& right);
+
+/**
+ * @copydoc bool operator>=(const char* left, const String& right)
+ */
+ENGINE_API bool operator>=(const char8* left, const String& right);
 
 /**
  * @relates String
@@ -1044,6 +1132,16 @@ ENGINE_API String operator+(const String& left, const char* right);
  * @return Concatenated string
  */
 ENGINE_API String operator+(const char* left, const String& right);
+
+/**
+ * @copydoc String operator+(const String& left, const char* right)
+ */
+ENGINE_API String operator+(const String& left, const char8* right);
+
+/**
+ * @copydoc String operator+(const char* left, const String& right)
+ */
+ENGINE_API String operator+(const char8* left, const String& right);
 
 /**
  * @relates String

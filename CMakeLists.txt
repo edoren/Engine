@@ -42,8 +42,8 @@ include("Macros")
 ###############################################################################
 ## Compiler configuration
 
-# Require C++17 support
-set(CMAKE_CXX_STANDARD 17)
+# Require C++20 support
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Enable Unicode in Windows

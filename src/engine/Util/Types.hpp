@@ -20,7 +20,7 @@ using uintptr = uintptr_t;
 using byte = uint8;
 
 // Char types for UTF-8, UTF-16 and UTF-32 respectively
-// using char = char;
+using char8 = char8_t;
 using char16 = char16_t;
 using char32 = char32_t;
 
