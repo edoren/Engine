@@ -78,24 +78,24 @@ bool Vk_Texture2D::createSampler() {
 
     // TODO: This should be configurable from the Renderer instance
     VkSamplerCreateInfo samplerCreateInfo = {
-        VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,    // sType
-        nullptr,                                  // pNext
-        0,                                        // flags
-        VK_FILTER_LINEAR,                         // magFilter
-        VK_FILTER_LINEAR,                         // minFilter
-        VK_SAMPLER_MIPMAP_MODE_NEAREST,           // mipmapMode
-        VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,    // addressModeU
-        VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,    // addressModeV
-        VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,    // addressModeW
-        0.0F,                                     // mipLodBias
-        anisotropyEnable,                         // anisotropyEnable
-        maxAnisotropy,                            // maxAnisotropy
-        VK_FALSE,                                 // compareEnable
-        VK_COMPARE_OP_ALWAYS,                     // compareOp
-        0.0F,                                     // minLod
-        0.0F,                                     // maxLod
-        VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK,  // borderColor
-        VK_FALSE                                  // unnormalizedCoordinates
+        .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .magFilter = VK_FILTER_LINEAR,
+        .minFilter = VK_FILTER_LINEAR,
+        .mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST,
+        .addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+        .addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+        .addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+        .mipLodBias = 0.0F,
+        .anisotropyEnable = anisotropyEnable,
+        .maxAnisotropy = maxAnisotropy,
+        .compareEnable = VK_FALSE,
+        .compareOp = VK_COMPARE_OP_ALWAYS,
+        .minLod = 0.0F,
+        .maxLod = 0.0F,
+        .borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK,
+        .unnormalizedCoordinates = VK_FALSE,
     };
 
     VkResult result = vkCreateSampler(device, &samplerCreateInfo, nullptr, &m_sampler);
@@ -126,24 +126,23 @@ bool Vk_Texture2D::copyTextureData(const Image& img) {
     std::memcpy(stagingBufferMemoryPointer, img.getData(), img.getDataSize());
 
     VkMappedMemoryRange flushRange = {
-        VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,  // sType
-        nullptr,                                // pNext
-        m_stagingBuffer.getMemory(),            // memory
-        0,                                      // offset
-        img.getDataSize()                       // size
+        .sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,
+        .pNext = nullptr,
+        .memory = m_stagingBuffer.getMemory(),
+        .offset = 0,
+        .size = img.getDataSize(),
     };
     vkFlushMappedMemoryRanges(device, 1, &flushRange);
 
     vkUnmapMemory(device, m_stagingBuffer.getMemory());
 
-    // Prepare command buffer to copy data from staging buffer to a vertex
-    // buffer
+    // Prepare command buffer to copy data from staging buffer to a vertex buffer
     VkCommandBufferAllocateInfo allocInfo = {
-        VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,  // sType
-        nullptr,                                         // pNext
-        context.getGraphicsQueueCmdPool(),               // commandPool
-        VK_COMMAND_BUFFER_LEVEL_PRIMARY,                 // level
-        1                                                // commandBufferCount
+        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+        .pNext = nullptr,
+        .commandPool = context.getGraphicsQueueCmdPool(),
+        .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+        .commandBufferCount = 1,
     };
 
     VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
@@ -154,93 +153,92 @@ bool Vk_Texture2D::copyTextureData(const Image& img) {
     }
 
     VkCommandBufferBeginInfo commandBufferBeginInfo = {
-        VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,  // sType
-        nullptr,                                      // pNext
-        VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,  // flags
-        nullptr                                       // pInheritanceInfo
+        .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+        .pNext = nullptr,
+        .flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
+        .pInheritanceInfo = nullptr,
     };
 
     vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo);
 
     VkImageSubresourceRange imageSubresourceRange = {
-        VK_IMAGE_ASPECT_COLOR_BIT,  // aspectMask
-        0,                          // baseMipLevel
-        1,                          // levelCount
-        0,                          // baseArrayLayer
-        1                           // layerCount
+        .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+        .baseMipLevel = 0,
+        .levelCount = 1,
+        .baseArrayLayer = 0,
+        .layerCount = 1,
     };
 
     VkImageMemoryBarrier imageMemoryBarrierFromUndefinedToTransferDst = {
-        VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,  // sType
-        nullptr,                                 // pNext
-        0,                                       // srcAccessMask
-        VK_ACCESS_TRANSFER_WRITE_BIT,            // dstAccessMask
-        VK_IMAGE_LAYOUT_UNDEFINED,               // oldLayout
-        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,    // newLayout
-        VK_QUEUE_FAMILY_IGNORED,                 // srcQueueFamilyIndex
-        VK_QUEUE_FAMILY_IGNORED,                 // dstQueueFamilyIndex
-        m_image.getHandle(),                     // image
-        imageSubresourceRange                    // subresourceRange
+        .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+        .pNext = nullptr,
+        .srcAccessMask = 0,
+        .dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+        .oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
+        .newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+        .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+        .image = m_image.getHandle(),
+        .subresourceRange = imageSubresourceRange,
     };
     vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0, 0,
                          nullptr, 0, nullptr, 1, &imageMemoryBarrierFromUndefinedToTransferDst);
 
     VkBufferImageCopy bufferImageCopyInfo = {
-        0,  // bufferOffset
-        0,  // bufferRowLength
-        0,  // bufferImageHeight
-        {
-            // imageSubresource
-            VK_IMAGE_ASPECT_COLOR_BIT,  // aspectMask
-            0,                          // mipLevel
-            0,                          // baseArrayLayer
-            1                           // layerCount
-        },
-        {
-            // VkOffset3D imageOffset
-            0,  // x
-            0,  // y
-            0   // z
-        },
-        {
-            // VkExtent3D imageExtent
-            img.getSize().x,  // width
-            img.getSize().y,  // height
-            1                 // depth
-        },
+        .bufferOffset = 0,
+        .bufferRowLength = 0,
+        .bufferImageHeight = 0,
+        .imageSubresource =
+            {
+                .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                .mipLevel = 0,
+                .baseArrayLayer = 0,
+                .layerCount = 1,
+            },
+        .imageOffset =
+            {
+                .x = 0,
+                .y = 0,
+                .z = 0,
+            },
+        .imageExtent =
+            {
+                .width = img.getSize().x,
+                .height = img.getSize().y,
+                .depth = 1,
+            },
     };
     vkCmdCopyBufferToImage(commandBuffer, m_stagingBuffer.getHandle(), m_image.getHandle(),
                            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &bufferImageCopyInfo);
 
     VkImageMemoryBarrier imageMemoryBarrierFromTransferToShaderRead = {
-        VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,    // sType
-        nullptr,                                   // pNext
-        VK_ACCESS_TRANSFER_WRITE_BIT,              // srcAccessMask
-        VK_ACCESS_SHADER_READ_BIT,                 // dstAccessMask
-        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,      // oldLayout
-        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,  // newLayout
-        VK_QUEUE_FAMILY_IGNORED,                   // srcQueueFamilyIndex
-        VK_QUEUE_FAMILY_IGNORED,                   // dstQueueFamilyIndex
-        m_image.getHandle(),                       // image
-        imageSubresourceRange                      // subresourceRange
+        .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+        .pNext = nullptr,
+        .srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
+        .dstAccessMask = VK_ACCESS_SHADER_READ_BIT,
+        .oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+        .newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+        .srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+        .dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED,
+        .image = m_image.getHandle(),
+        .subresourceRange = imageSubresourceRange,
     };
     vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0, 0,
                          nullptr, 0, nullptr, 1, &imageMemoryBarrierFromTransferToShaderRead);
 
     vkEndCommandBuffer(commandBuffer);
 
-    // Submit command buffer and copy data from staging buffer to a vertex
-    // buffer
+    // Submit command buffer and copy data from staging buffer to a vertex buffer
     VkSubmitInfo submitInfo = {
-        VK_STRUCTURE_TYPE_SUBMIT_INFO,  // sType
-        nullptr,                        // pNext
-        0,                              // waitSemaphoreCount
-        nullptr,                        // pWaitSemaphores
-        nullptr,                        // pWaitDstStageMask;
-        1,                              // commandBufferCount
-        &commandBuffer,                 // pCommandBuffers
-        0,                              // signalSemaphoreCount
-        nullptr                         // pSignalSemaphores
+        .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+        .pNext = nullptr,
+        .waitSemaphoreCount = 0,
+        .pWaitSemaphores = nullptr,
+        .pWaitDstStageMask = nullptr,
+        .commandBufferCount = 1,
+        .pCommandBuffers = &commandBuffer,
+        .signalSemaphoreCount = 0,
+        .pSignalSemaphores = nullptr,
     };
 
     result = vkQueueSubmit(graphicsQueue.handle, 1, &submitInfo, VK_NULL_HANDLE);
@@ -252,7 +250,7 @@ bool Vk_Texture2D::copyTextureData(const Image& img) {
     vkQueueWaitIdle(graphicsQueue.handle);
 
     return true;
-}
+}  // namespace engine::plugin::vulkan
 
 bool Vk_Texture2D::allocateDescriptorSet() {
     Vk_Context& context = Vk_Context::GetInstance();
@@ -263,11 +261,11 @@ bool Vk_Texture2D::allocateDescriptorSet() {
     VkResult result = VK_SUCCESS;
 
     VkDescriptorSetAllocateInfo descriptorSetAllocateInfo = {
-        VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,  // sType
-        nullptr,                                         // pNext
-        textureManager->getDescriptorPool(),             // descriptorPool
-        1,                                               // descriptorSetCount
-        &textureManager->getDescriptorSetLayout()        // pSetLayouts
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+        .pNext = nullptr,
+        .descriptorPool = textureManager->getDescriptorPool(),
+        .descriptorSetCount = 1,
+        .pSetLayouts = &textureManager->getDescriptorSetLayout(),
     };
 
     result = vkAllocateDescriptorSets(device, &descriptorSetAllocateInfo, &m_descriptorSet);
@@ -280,29 +278,28 @@ bool Vk_Texture2D::allocateDescriptorSet() {
 }
 
 bool Vk_Texture2D::updateDescriptorSet() {
-    // This tell the driver which resources are going to be used by the
-    // descriptor set
+    // This tell the driver which resources are going to be used by the descriptor set
 
     Vk_Context& context = Vk_Context::GetInstance();
     VkDevice& device = context.getVulkanDevice();
 
     VkDescriptorImageInfo imageInfo = {
-        m_sampler,                                // sampler
-        m_image.getView(),                        // imageView
-        VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL  // imageLayout
+        .sampler = m_sampler,
+        .imageView = m_image.getView(),
+        .imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
     };
 
     VkWriteDescriptorSet descriptorWrites = {
-        VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,     // sType
-        nullptr,                                    // pNext
-        m_descriptorSet,                            // dstSet
-        0,                                          // dstBinding
-        0,                                          // dstArrayElement
-        1,                                          // descriptorCount
-        VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,  // descriptorType
-        &imageInfo,                                 // pImageInfo
-        nullptr,                                    // pBufferInfo
-        nullptr                                     // pTexelBufferView
+        .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+        .pNext = nullptr,
+        .dstSet = m_descriptorSet,
+        .dstBinding = 0,
+        .dstArrayElement = 0,
+        .descriptorCount = 1,
+        .descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
+        .pImageInfo = &imageInfo,
+        .pBufferInfo = nullptr,
+        .pTexelBufferView = nullptr,
     };
 
     vkUpdateDescriptorSets(device, 1, &descriptorWrites, 0, nullptr);

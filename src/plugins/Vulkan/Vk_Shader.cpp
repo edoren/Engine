@@ -57,11 +57,11 @@ bool Vk_Shader::loadFromMemory(const byte* source, size_t sourceSize, ShaderType
     VkResult result = VK_SUCCESS;
 
     VkShaderModuleCreateInfo shaderModuleCreateInfo = {
-        VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,  // sType
-        nullptr,                                      // pNext
-        VkShaderModuleCreateFlags(),                  // flags
-        sourceSize,                                   // codeSize
-        reinterpret_cast<const uint32_t*>(source)     // pCode
+        .sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = VkShaderModuleCreateFlags(),
+        .codeSize = sourceSize,
+        .pCode = reinterpret_cast<const uint32_t*>(source),
     };
 
     VkDevice& device = Vk_Context::GetInstance().getVulkanDevice();
@@ -178,21 +178,21 @@ bool Vk_Shader::createUboDescriptorSetLayout() {
             }
 
             layoutBindings.push_back({
-                uboBindingPosition,          // binding
-                descriptorType,              // descriptorType
-                1,                           // descriptorCount
-                VK_SHADER_STAGE_VERTEX_BIT,  // stageFlags
-                nullptr                      // pImmutableSamplers
+                .binding = uboBindingPosition,
+                .descriptorType = descriptorType,
+                .descriptorCount = 1,
+                .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+                .pImmutableSamplers = nullptr,
             });
         }
     }
 
     VkDescriptorSetLayoutCreateInfo descriptorSetLayoutCreateInfo = {
-        VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,  // sType
-        nullptr,                                              // pNext
-        0,                                                    // flags
-        static_cast<uint32>(layoutBindings.size()),           // bindingCount
-        layoutBindings.data()                                 // pBindings
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .bindingCount = static_cast<uint32>(layoutBindings.size()),
+        .pBindings = layoutBindings.data(),
     };
 
     result = vkCreateDescriptorSetLayout(device, &descriptorSetLayoutCreateInfo, nullptr, &m_uboDescriptorSetLayout);
@@ -211,11 +211,11 @@ bool Vk_Shader::allocateUboDescriptorSet() {
     VkResult result = VK_SUCCESS;
 
     VkDescriptorSetAllocateInfo descriptorSetAllocateInfo = {
-        VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,  // sType
-        nullptr,                                         // pNext
-        context.getUboDescriptorPool(),                  // descriptorPool
-        1,                                               // descriptorSetCount
-        &m_uboDescriptorSetLayout                        // pSetLayouts
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+        .pNext = nullptr,
+        .descriptorPool = context.getUboDescriptorPool(),
+        .descriptorSetCount = 1,
+        .pSetLayouts = &m_uboDescriptorSetLayout,
     };
 
     result = vkAllocateDescriptorSets(device, &descriptorSetAllocateInfo, &m_uboDescriptorSet);
@@ -235,41 +235,41 @@ bool Vk_Shader::updateUboDescriptorSet() {
 
     std::array<VkDescriptorBufferInfo, 2> bufferInfos = {{
         {
-            m_uniformBuffers.staticBuffer.getHandle(),  // buffer
-            0,                                          // offset
-            VK_WHOLE_SIZE                               // range
+            .buffer = m_uniformBuffers.staticBuffer.getHandle(),
+            .offset = 0,
+            .range = VK_WHOLE_SIZE,
         },
         {
-            m_uniformBuffers.dynamicBuffer.getHandle(),  // buffer
-            0,                                           // offset
-            VK_WHOLE_SIZE                                // range
+            .buffer = m_uniformBuffers.dynamicBuffer.getHandle(),
+            .offset = 0,
+            .range = VK_WHOLE_SIZE,
         },
     }};
 
     std::array<VkWriteDescriptorSet, 2> descriptorWrites = {{
         {
-            VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,  // sType
-            nullptr,                                 // pNext
-            m_uboDescriptorSet,                      // dstSet
-            0,                                       // dstBinding
-            0,                                       // dstArrayElement
-            1,                                       // descriptorCount
-            VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,       // descriptorType
-            nullptr,                                 // pImageInfo
-            &bufferInfos[0],                         // pBufferInfo
-            nullptr                                  // pTexelBufferView
+            .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+            .pNext = nullptr,
+            .dstSet = m_uboDescriptorSet,
+            .dstBinding = 0,
+            .dstArrayElement = 0,
+            .descriptorCount = 1,
+            .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+            .pImageInfo = nullptr,
+            .pBufferInfo = &bufferInfos[0],
+            .pTexelBufferView = nullptr,
         },
         {
-            VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,     // sType
-            nullptr,                                    // pNext
-            m_uboDescriptorSet,                         // dstSet
-            1,                                          // dstBinding
-            0,                                          // dstArrayElement
-            1,                                          // descriptorCount
-            VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,  // descriptorType
-            nullptr,                                    // pImageInfo
-            &bufferInfos[1],                            // pBufferInfo
-            nullptr                                     // pTexelBufferView
+            .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+            .pNext = nullptr,
+            .dstSet = m_uboDescriptorSet,
+            .dstBinding = 1,
+            .dstArrayElement = 0,
+            .descriptorCount = 1,
+            .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,
+            .pImageInfo = nullptr,
+            .pBufferInfo = &bufferInfos[1],
+            .pTexelBufferView = nullptr,
         },
     }};
 
@@ -331,11 +331,11 @@ bool Vk_Shader::uploadUniformBuffers() {
         std::memcpy(data, m_uboDynamic.getData(), m_uboDynamic.getDataSize());
 
         VkMappedMemoryRange memoryRange = {
-            VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,       // sType;
-            nullptr,                                     // pNext;
-            m_uniformBuffers.dynamicBuffer.getMemory(),  // memory;
-            0,                                           // offset;
-            m_uboDynamic.getDataSize()                   // size;
+            .sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE,
+            .pNext = nullptr,
+            .memory = m_uniformBuffers.dynamicBuffer.getMemory(),
+            .offset = 0,
+            .size = m_uboDynamic.getDataSize(),
         };
         vkFlushMappedMemoryRanges(device, 1, &memoryRange);
 

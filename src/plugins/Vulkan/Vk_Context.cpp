@@ -81,7 +81,7 @@ Vk_Context::Vk_Context()
         m_validationLayersEnabled(false){
 #endif
 
-}  // namespace plugin::vulkan
+}  // namespace engine::plugin::vulkan
 
 Vk_Context::~Vk_Context() {
     shutdown();
@@ -153,12 +153,12 @@ bool Vk_Context::initialize() {
         // Create the debug callback with desired settings
         if (vkCreateDebugReportCallbackEXT) {
             VkDebugReportCallbackCreateInfoEXT createInfo = {
-                VK_STRUCTURE_TYPE_DEBUG_REPORT_CREATE_INFO_EXT,  // sType
-                nullptr,                                         // pNext
-                (VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT |
-                 VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT),  // flags
-                DebugReportCallback,                            // pfnCallback
-                nullptr                                         // pUserData
+                .sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CREATE_INFO_EXT,
+                .pNext = nullptr,
+                .flags = (VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT |
+                          VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT),
+                .pfnCallback = DebugReportCallback,
+                .pUserData = nullptr,
             };
 
             vkCreateDebugReportCallbackEXT(m_instance, &createInfo, nullptr, &m_debugReportCallback);
@@ -240,13 +240,13 @@ const VkPhysicalDeviceFeatures& Vk_Context::getEnabledFeatures() {
 bool Vk_Context::createInstance() {
     // Define the application information
     VkApplicationInfo appInfo = {
-        VK_STRUCTURE_TYPE_APPLICATION_INFO,  // sType
-        nullptr,                             // pNext
-        "Engine",                            // pApplicationName
-        VK_MAKE_VERSION(1, 0, 0),            // applicationVersion
-        "Engine",                            // pEngineName
-        VK_MAKE_VERSION(1, 0, 0),            // engineVersion
-        VK_MAKE_VERSION(1, 0, 0)             // apiVersion
+        .sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
+        .pNext = nullptr,
+        .pApplicationName = "Engine",
+        .applicationVersion = VK_MAKE_VERSION(1, 0, 0),
+        .pEngineName = "Engine",
+        .engineVersion = VK_MAKE_VERSION(1, 0, 0),
+        .apiVersion = VK_MAKE_VERSION(1, 0, 0),
     };
 
     // Check that all the instance extensions are supported
@@ -257,14 +257,14 @@ bool Vk_Context::createInstance() {
 
     // Define all the information for the instance
     VkInstanceCreateInfo createInfo = {
-        VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,            // sType
-        nullptr,                                           // pNext
-        VkInstanceCreateFlags(),                           //  flags
-        &appInfo,                                          //  pApplicationInfo
-        static_cast<uint32>(m_validationLayers.size()),    //  enabledLayerCount
-        m_validationLayers.data(),                         //  ppEnabledLayerNames
-        static_cast<uint32>(m_instanceExtensions.size()),  //  enabledExtensionCount
-        m_instanceExtensions.data()                        //  ppEnabledExtensionNames
+        .sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = VkInstanceCreateFlags(),
+        .pApplicationInfo = &appInfo,
+        .enabledLayerCount = static_cast<uint32>(m_validationLayers.size()),
+        .ppEnabledLayerNames = m_validationLayers.data(),
+        .enabledExtensionCount = static_cast<uint32>(m_instanceExtensions.size()),
+        .ppEnabledExtensionNames = m_instanceExtensions.data(),
     };
 
     // Create the Vulkan instance based on the provided info
@@ -310,12 +310,12 @@ bool Vk_Context::createDevice() {
     Vector<float> queuePriorities = {1.0F};
     Vector<VkDeviceQueueCreateInfo> queueCreateInfos;
     queueCreateInfos.push_back({
-        VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,   // sType
-        nullptr,                                      // pNext
-        VkDeviceQueueCreateFlags(),                   // flags
-        m_graphicsQueue.familyIndex,                  // queueFamilyIndex
-        static_cast<uint32>(queuePriorities.size()),  // queueCount
-        queuePriorities.data()                        // pQueuePriorities
+        .sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = VkDeviceQueueCreateFlags(),
+        .queueFamilyIndex = m_graphicsQueue.familyIndex,
+        .queueCount = static_cast<uint32>(queuePriorities.size()),
+        .pQueuePriorities = queuePriorities.data(),
     });
 
     // TODO: Configure this in runtime
@@ -324,16 +324,16 @@ bool Vk_Context::createDevice() {
 
     // Define all the information for the logical device
     VkDeviceCreateInfo deviceCreateInfo = {
-        VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,            // sType
-        nullptr,                                         // pNext
-        VkDeviceCreateFlags(),                           // flags
-        static_cast<uint32>(queueCreateInfos.size()),    // queueCreateInfoCount
-        queueCreateInfos.data(),                         // pQueueCreateInfos
-        static_cast<uint32>(m_validationLayers.size()),  // enabledLayerCount
-        m_validationLayers.data(),                       // ppEnabledLayerNames
-        static_cast<uint32>(m_deviceExtensions.size()),  // enabledExtensionCount
-        m_deviceExtensions.data(),                       // ppEnabledExtensionNames
-        &m_enabledFeatures                               // pEnabledFeatures
+        .sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = VkDeviceCreateFlags(),
+        .queueCreateInfoCount = static_cast<uint32>(queueCreateInfos.size()),
+        .pQueueCreateInfos = queueCreateInfos.data(),
+        .enabledLayerCount = static_cast<uint32>(m_validationLayers.size()),
+        .ppEnabledLayerNames = m_validationLayers.data(),
+        .enabledExtensionCount = static_cast<uint32>(m_deviceExtensions.size()),
+        .ppEnabledExtensionNames = m_deviceExtensions.data(),
+        .pEnabledFeatures = &m_enabledFeatures,
     };
 
     // Create the logical device based on the retrived info
@@ -518,10 +518,10 @@ bool Vk_Context::createVulkanCommandPool(QueueParameters& queue, VkCommandPool* 
 
     // Create the pool for the command buffers
     VkCommandPoolCreateInfo cmdPoolCreateInfo = {
-        VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,                                                // sType
-        nullptr,                                                                                   // pNext
-        (VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT | VK_COMMAND_POOL_CREATE_TRANSIENT_BIT),  // flags
-        queue.familyIndex                                                                          // queueFamilyIndex
+        .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = (VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT | VK_COMMAND_POOL_CREATE_TRANSIENT_BIT),
+        .queueFamilyIndex = queue.familyIndex,
     };
 
     result = vkCreateCommandPool(m_device, &cmdPoolCreateInfo, nullptr, cmdPool);
@@ -537,14 +537,8 @@ bool Vk_Context::createUboDescriptorPool() {
     VkResult result = VK_SUCCESS;
 
     std::array<VkDescriptorPoolSize, 2> poolSizes = {{
-        {
-            VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,  // type
-            sMaxUBODescriptorSets               // descriptorCount
-        },
-        {
-            VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC,  // type
-            sMaxUBODynamicDescriptorSets                // descriptorCount
-        },
+        {.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = sMaxUBODescriptorSets},
+        {.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, .descriptorCount = sMaxUBODynamicDescriptorSets},
     }};
 
     uint32 maxSets = 0;
@@ -553,12 +547,12 @@ bool Vk_Context::createUboDescriptorPool() {
     }
 
     VkDescriptorPoolCreateInfo descriptorPoolCreateInfo = {
-        VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,  // sType
-        nullptr,                                        // pNext
-        0,                                              // flags
-        maxSets,                                        // maxSets
-        static_cast<uint32>(poolSizes.size()),          // poolSizeCount
-        poolSizes.data()                                // pPoolSizes
+        .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = 0,
+        .maxSets = maxSets,
+        .poolSizeCount = static_cast<uint32>(poolSizes.size()),
+        .pPoolSizes = poolSizes.data(),
     };
 
     result = vkCreateDescriptorPool(m_device, &descriptorPoolCreateInfo, nullptr, &m_uboDescriptorPool);
@@ -570,4 +564,4 @@ bool Vk_Context::createUboDescriptorPool() {
     return true;
 }
 
-}  // namespace plugin::vulkan
+}  // namespace engine::plugin::vulkan
