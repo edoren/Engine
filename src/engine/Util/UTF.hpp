@@ -72,10 +72,10 @@ public:
      * @param begin The begin of the iterator
      * @param end The end of the iterator
      *
-     * @tparam Iter TODO
+     * @tparam Iter The type of the iterator
      */
     template <typename Iter>
-    explicit constexpr CodeUnit(Iter begin, Iter end);
+    constexpr CodeUnit(Iter begin, Iter end);
 
     /**
      * @brief Create an unit from a range
@@ -90,10 +90,10 @@ public:
      * @param begin The begin of the iterator
      * @param size The size of the iterator
      *
-     * @tparam Iter TODO
+     * @tparam Iter The type of the iterator
      */
     template <typename Iter>
-    explicit constexpr CodeUnit(const Iter begin, size_type size);
+    constexpr CodeUnit(const Iter begin, size_type size);
 
     /**
      * @brief Copy contructor
@@ -192,7 +192,7 @@ private:
  * @brief Helper class that holds the begin and end to an iterator/pointer of a CodeUnit
  *
  * @tparam Base The encoding for the UTF support. See @ref Encoding.
- * @tparam T The type of the iterator
+ * @tparam Iter The type of the iterator
  */
 template <Encoding Base,
           typename Iter =
@@ -226,8 +226,6 @@ public:
      *
      * @param begin The begin of the code unit
      * @param end The end of the code unit
-     *
-     * @tparam Iter TODO
      */
     constexpr CodeUnitRange(const Iter begin, const Iter end);
 
