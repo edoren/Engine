@@ -450,7 +450,7 @@ bool Vk_Context::checkValidationLayerSupport() const {
         return false;
     }
 
-    Vector<const char*> availableLayerList = avaliableLayers.map([](const auto& layer) { return layer.layerName; });
+    Vector<const char*> availableLayerList = avaliableLayers.map([](auto& layer) { return layer.layerName; });
     LogInfo(sTag, "Available Layers: {}", availableLayerList);
 
     // Check that all the validation layers exists
