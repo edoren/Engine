@@ -68,32 +68,29 @@ String::String(const char8* utf8String) : String(reinterpret_cast<const char*>(u
 String::String(const char16* utf16String) {
     if (utf16String && utf16String[0] != 0) {
         // Find the lenght
-        const char16* it = utf16String;
-        while (*(++it) != 0) {
-        }
-        size_type length = it - utf16String;
-        utf::UtfToUtf<utf::UTF_16, utf::UTF_8>(utf16String, utf16String + length, &m_string);
+        const char16* utf16StringEnd = utf16String;
+        while (*(++utf16StringEnd) != 0) {}
+        utf::UtfToUtf<utf::UTF_16, utf::UTF_8>(utf16String, utf16StringEnd, &m_string);
     }
 }
 
 String::String(const char32* utf32String) {
     if (utf32String && utf32String[0] != 0) {
         // Find the lenght
-        const char32* it = utf32String;
-        while (*(++it) != 0) {
-        }
-        size_type length = it - utf32String;
-        utf::UtfToUtf<utf::UTF_32, utf::UTF_8>(utf32String, utf32String + length, &m_string);
+        const char32* utf32StringEnd = utf32String;
+        while (*(++utf32StringEnd) != 0) {}
+        utf::UtfToUtf<utf::UTF_32, utf::UTF_8>(utf32String, utf32StringEnd, &m_string);
     }
 }
 
 String::String(const wchar* wideString) {
     if (wideString && wideString[0] != 0) {
-        size_type length = std::wcslen(wideString);
+        const wchar* wideStringEnd = wideString;
+        while (*(++wideStringEnd) != 0) {}
 #if PLATFORM_IS(PLATFORM_WINDOWS)
-        utf::UtfToUtf<utf::UTF_16, utf::UTF_8>(wideString, wideString + length, &m_string);
+        utf::UtfToUtf<utf::UTF_16, utf::UTF_8>(wideString, wideStringEnd, &m_string);
 #else
-        utf::UtfToUtf<utf::UTF_32, utf::UTF_8>(wideString, wideString + length, &m_string);
+        utf::UtfToUtf<utf::UTF_32, utf::UTF_8>(wideString, wideStringEnd, &m_string);
 #endif
     }
 }
@@ -292,134 +289,96 @@ bool String::isEmpty() const {
 }
 
 void String::erase(size_type position, size_type count) {
-    // Iterate to the start codepoint
-    auto startIt(m_string.begin());
-    for (size_type i = 0; i < position; i++) {
-        auto nextIt = utf::Next<utf::UTF_8>(startIt, m_string.end());
-        if (nextIt == m_string.end()) {
-            ENGINE_THROW(std::out_of_range("the specified position is out of the string range"));
-        }
-        startIt = nextIt;
+    size_type utf8StrSize = getSize();
+    if ((position + count) > utf8StrSize) {
+        ENGINE_THROW(std::out_of_range("the specified position is out of the string range"));
     }
+
+    // Iterate to the start and end codepoint
+    auto startIt = begin() + position;
+    auto endIt = startIt + count;
+
     // Iterate to the end codepoint
-    auto endIt(startIt);
-    for (size_type i = 0; i < count; i++) {
-        endIt = utf::Next<utf::UTF_8>(endIt, m_string.end());
-        if (endIt == m_string.end()) {
-            break;
-        }
-    }
-    m_string.erase(startIt, endIt);
+    auto erasePos = startIt.getPtr() - m_string.data();
+    auto eraseCount = endIt.getPtr() - startIt.getPtr();
+    m_string.erase(erasePos, eraseCount);
 }
 
-void String::insert(size_type position, const String& str) {
-    // Iterate to the start codepoint
-    auto startIt(m_string.begin());
-    for (size_type i = 0; i < position; i++) {
-        auto nextIt = utf::Next<utf::UTF_8>(startIt, m_string.end());
-        if (nextIt == m_string.end()) {
-            ENGINE_THROW(std::out_of_range("the specified position is out of the string range"));
-        }
-        startIt = nextIt;
+void String::insert(size_type position, const StringView& str) {
+    size_type utf8StrSize = getSize();
+    if (position >= utf8StrSize) {
+        ENGINE_THROW(std::out_of_range("the specified position is out of the string range"));
     }
-    m_string.insert(startIt, str.m_string.cbegin(), str.m_string.cend());
+
+    // Iterate to the start codepoint
+    auto startIt = begin() + position;
+
+    // Insert the data in the correct position
+    auto insertPos = startIt.getPtr() - m_string.data();
+    m_string.insert(insertPos, str.getData(), str.getDataSize());
 }
 
-String::size_type String::find(const String& str, size_type start) const {
-    // Iterate to the start codepoint
-    auto startIt(m_string.cbegin());
-    for (size_type i = 0; i < start; i++) {
-        startIt = utf::Next<utf::UTF_8>(startIt, m_string.cend());
-        if (startIt == m_string.cend()) {
-            return sInvalidPos;
-        }
+String::size_type String::find(const StringView& str, size_type start) const {
+    // Check the size is not past the max code units
+    if (start >= getSize()) {
+        return sInvalidPos;
     }
     // Find the string
-    auto findIt(std::search(startIt, m_string.cend(), str.m_string.cbegin(), str.m_string.cend()));
-    return (findIt == m_string.cend()) ? sInvalidPos : utf::GetSize<utf::UTF_8>(m_string.cbegin(), findIt);
+    auto findIt = std::search(cbegin() + start, cend(), str.cbegin(), str.cend());
+    return (findIt == cend()) ? sInvalidPos : (findIt - cbegin());
 }
 
-String::size_type String::findFirstOf(const String& str, size_type pos) const {
-    size_t strSize = getSize();
+String::size_type String::findFirstOf(const StringView& str, size_type pos) const {
+    if (pos >= getSize()) {
+        return sInvalidPos;
+    }
 
-    if (pos >= strSize) {
+    // Find one of the UTF-8 codepoints
+    for (auto it = cbegin() + pos; it != cend(); ++it) {
+        auto found = std::find(str.cbegin(), str.cend(), *it);
+        if (found != str.cend()) {
+            return it - cbegin();
+        }
+    }
+    return sInvalidPos;
+}
+
+String::size_type String::findLastOf(const StringView& str, size_type pos) const {
+    size_type utf8StrSize = getSize();
+    if (pos != sInvalidPos && pos >= utf8StrSize) {
         return sInvalidPos;
     }
 
     // Iterate to the start codepoint
-    auto startIt(m_string.cbegin());
-    for (size_type i = 0; i < pos; i++) {
-        startIt = utf::Next<utf::UTF_8>(startIt, m_string.cend());
-        if (startIt == m_string.cend()) {
-            return sInvalidPos;
-        }
+    auto startIt = crbegin();
+    if (pos != sInvalidPos) {
+        startIt += (utf8StrSize - pos - 1);
     }
 
     // Find one of the UTF-8 codepoints
-    auto endIt(startIt);
-    while (true) {
-        if (startIt == m_string.cend()) {
-            return sInvalidPos;
-        }
-        endIt = utf::Next<utf::UTF_8>(endIt, m_string.cend());
-        auto findIt(std::search(str.m_string.cbegin(), str.m_string.cend(), startIt, endIt));
-        if (findIt != str.m_string.cend()) {
-            return utf::GetSize<utf::UTF_8>(m_string.cbegin(), startIt);
-        }
-        startIt = endIt;
-    }
-}
-
-String::size_type String::findLastOf(const String& str, size_type pos) const {
-    // Iterate to the start codepoint
-    auto startIt(m_string.cbegin());
-    if (pos == sInvalidPos) {
-        startIt = m_string.cend();
-    } else {
-        for (size_type i = 0; i < pos + 1; i++) {
-            startIt = utf::Next<utf::UTF_8>(startIt, m_string.cend());
-            if (startIt == m_string.cend()) {
-                break;
-            }
+    for (auto it = startIt; it != crend(); ++it) {
+        auto found = std::find(str.cbegin(), str.cend(), *it);
+        if (found != str.cend()) {
+            return crend() - it;
         }
     }
-
-    // Find one of the UTF-8 codepoints
-    auto endIt(startIt);
-    while (true) {
-        if (startIt == m_string.cbegin()) {
-            return sInvalidPos;
-        }
-        endIt = utf::Prior<utf::UTF_8>(endIt, m_string.cbegin());
-        auto findIt(std::search(str.m_string.cbegin(), str.m_string.cend(), endIt, startIt));
-        if (findIt != str.m_string.cend()) {
-            return utf::GetSize<utf::UTF_8>(m_string.cbegin(), endIt);
-        }
-        startIt = endIt;
-    }
-
     return sInvalidPos;
 }
 
-void String::replace(size_type position, size_type length, const String& replaceWith) {
-    // Iterate to the start codepoint
-    auto startIt(m_string.begin());
-    for (size_type i = 0; i < position; i++) {
-        auto nextIt = utf::Next<utf::UTF_8>(startIt, m_string.end());
-        if (nextIt == m_string.end()) {
-            ENGINE_THROW(std::out_of_range("the specified position is out of the string range"));
-        }
-        startIt = nextIt;
+void String::replace(size_type position, size_type length, const StringView& replaceWith) {
+    size_type utf8StrSize = getSize();
+    if ((position + length) > utf8StrSize) {
+        ENGINE_THROW(std::out_of_range("the specified position is out of the string range"));
     }
+
+    // Iterate to the start and end codepoint
+    auto startIt = cbegin() + position;
+    auto endIt = startIt + length;
+
     // Iterate to the end codepoint
-    auto endIt(startIt);
-    for (size_type i = 0; i < length; i++) {
-        endIt = utf::Next<utf::UTF_8>(endIt, m_string.end());
-        if (endIt == m_string.end()) {
-            break;
-        }
-    }
-    m_string.replace(startIt, endIt, replaceWith.m_string);
+    auto replacePos = startIt.getPtr() - m_string.data();
+    auto replaceCount = endIt.getPtr() - startIt.getPtr();
+    m_string.replace(replacePos, replaceCount, replaceWith.getData(), replaceWith.getDataSize());
 }
 
 void String::replace(uint32 searchFor, uint32 replaceWith) {
@@ -439,50 +398,38 @@ void String::replace(uint32 searchFor, uint32 replaceWith) {
     }
 }
 
-void String::replace(const String& searchFor, const String& replaceWith) {
-    size_type step = replaceWith.m_string.size();
-    size_type len = searchFor.m_string.size();
+void String::replace(const StringView& searchFor, const StringView& replaceWith) {
+    size_type step = replaceWith.getSize();
     // Start the iterator at the beginning of the sequence
     size_t findItPos = 0;
     // Replace each occurrence of search
     while (true) {
-        // Search the existence of the string searchFor in the range
-        // [m_string.begin() + find_it_pos, m_string.end())
-        auto findIt(std::search(m_string.begin() + findItPos, m_string.end(), searchFor.m_string.cbegin(),
-                                searchFor.m_string.cend()));
+        // Search the existence of the string searchFor in the range [begin() + find_it_pos, end())
+        auto findIt = std::search(begin() + findItPos, end(), searchFor.cbegin(), searchFor.cend());
         // Check if we reach the end of the string
-        if (findIt == m_string.end()) {
+        if (findIt == end()) {
             return;
         }
-        // Retrieve the current iterator position
-        findItPos = findIt - m_string.begin();
-        // Replace all the range between [find_it, find_it + len) with the
-        // string in replaceWith
-        m_string.replace(findIt, findIt + len, replaceWith.m_string);
+        // Replace all the range between [find_it, find_it + len) with the string in replaceWith
+        auto stringPos = findIt.getPtr() - m_string.data();
+        m_string.replace(stringPos, searchFor.getDataSize(), replaceWith.getData(), replaceWith.getDataSize());
         // Add an additional step to continue the search
         findItPos += step;
     }
 }
 
 String String::subString(size_type position, size_type length) const {
-    // Iterate to the start codepoint
-    auto startIt(m_string.begin());
-    for (size_type i = 0; i < position; i++) {
-        auto nextIt = utf::Next<utf::UTF_8>(startIt, m_string.end());
-        if (nextIt == m_string.end()) {
-            ENGINE_THROW(std::out_of_range("the specified position is out of the string range"));
-        }
-        startIt = nextIt;
+    size_type utf8StrSize = getSize();
+    if ((position + length) > utf8StrSize) {
+        ENGINE_THROW(std::out_of_range("the specified position is out of the string range"));
     }
-    // Iterate to the end codepoint
-    auto endIt(startIt);
-    for (size_type i = 0; i < length; i++) {
-        endIt = utf::Next<utf::UTF_8>(endIt, m_string.end());
-        if (endIt == m_string.end()) {
-            break;
-        }
-    }
-    return String::FromUtf8(&(*startIt), &(*endIt));
+
+    // Iterate to the start and end codepoint
+    auto startIt = cbegin() + position;
+    auto endIt = startIt + length;
+
+    // Create a new string with given range
+    return String::FromUtf8(startIt.getPtr(), endIt.getPtr());
 }
 
 const char* String::getData() const {
@@ -495,38 +442,46 @@ typename String::size_type String::getDataSize() const {
 
 String::iterator String::begin() {
     auto maxRange = std::make_pair(m_string.data(), m_string.data() + m_string.size());
-    return String::iterator(maxRange, maxRange.first);
+    return iterator(maxRange, maxRange.first);
 }
 
 String::const_iterator String::cbegin() const {
     auto maxRange = std::make_pair(m_string.data(), m_string.data() + m_string.size());
-    return String::const_iterator(maxRange, maxRange.first);
+    return const_iterator(maxRange, maxRange.first);
 }
 
 String::iterator String::end() {
     auto maxRange = std::make_pair(m_string.data(), m_string.data() + m_string.size());
-    return String::iterator(maxRange, maxRange.second);
+    return iterator(maxRange, maxRange.second);
 }
 
 String::const_iterator String::cend() const {
     auto maxRange = std::make_pair(m_string.data(), m_string.data() + m_string.size());
-    return String::const_iterator(maxRange, maxRange.second);
+    return const_iterator(maxRange, maxRange.second);
 }
 
 String::reverse_iterator String::rbegin() {
-    return std::reverse_iterator(end());
+    auto maxRange = std::make_pair(m_string.data(), m_string.data() + m_string.size());
+    auto* begin = utf::Prior<utf::UTF_8>(maxRange.second, maxRange.first);
+    return reverse_iterator(maxRange, begin);
 }
 
 String::const_reverse_iterator String::crbegin() const {
-    return std::reverse_iterator(cend());
+    auto maxRange = std::make_pair(m_string.data(), m_string.data() + m_string.size());
+    const auto* begin = utf::Prior<utf::UTF_8>(maxRange.second, maxRange.first);
+    return const_reverse_iterator(maxRange, begin);
 }
 
 String::reverse_iterator String::rend() {
-    return std::reverse_iterator(begin());
+    auto maxRange = std::make_pair(m_string.data(), m_string.data() + m_string.size());
+    auto* end = m_string.data();
+    return reverse_iterator(maxRange, end);
 }
 
 String::const_reverse_iterator String::crend() const {
-    return std::reverse_iterator(cbegin());
+    auto maxRange = std::make_pair(m_string.data(), m_string.data() + m_string.size());
+    const auto* end = m_string.data();
+    return const_reverse_iterator(maxRange, end);
 }
 
 bool operator==(const String& left, const String& right) {
@@ -601,7 +556,6 @@ bool operator>=(const char* left, const String& right) {
     return !(left < right);
 }
 
-
 bool operator==(const String& left, const char8* right) {
     return left.m_string == reinterpret_cast<const char*>(right);
 }
@@ -625,7 +579,6 @@ bool operator<=(const String& left, const char8* right) {
 bool operator>=(const String& left, const char8* right) {
     return !(left < reinterpret_cast<const char*>(right));
 }
-
 
 bool operator==(const char8* left, const String& right) {
     return reinterpret_cast<const char*>(left) == right.m_string;

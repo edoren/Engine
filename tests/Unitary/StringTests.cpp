@@ -77,8 +77,8 @@ TEST_CASE("String::find", "[String]") {
     String elements = u8"\U00006C34\U00003001\U0000706B\U00003001\U00005730\U00003001\U000098A8\U00003001\U00007A7A";
 
     SECTION("must be able to find any UTF-8 string") {
-        size_t location = elements.find(u8"\U000098A8", 0);  // "風"
-        REQUIRE(location == 6);
+        size_t location = elements.find(u8"\U00003001\U000098A8\U00003001", 0);  // "、風、"
+        REQUIRE(location == 5);
     }
     SECTION("if no start is specified it start from the beginning") {
         size_t location = elements.find(u8"\U00006C34");  // "水"
@@ -265,7 +265,7 @@ TEST_CASE("String::iterator reverse", "[String]") {
     SECTION("must be able to iterate backwards correctly through the UTF-8 string") {
         size_t count = 0;
         for (auto it = elements.rbegin(); it != elements.rend(); ++it) {
-            char32 codePoint = it->get().getCodePoint();
+            char32 codePoint = (*it).get().getCodePoint();
             if (count == 0) {
                 REQUIRE(codePoint == 0x3001);
             } else if (count == 1) {

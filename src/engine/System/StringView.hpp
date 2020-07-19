@@ -16,11 +16,11 @@ public:
     ////////////////////////////////////////////////////////////
     // Types
     ////////////////////////////////////////////////////////////
-    using size_type = size_t;                                              ///< Size type
-    using const_iterator = utf::Iterator<utf::UTF_8, const char*>;        ///< Read-only iterator type
-    using iterator = const_iterator;                                       ///< Iterator type
-    using const_reverse_iterator = std::reverse_iterator<const_iterator>;  ///< Read-only reverse iterator type
-    using reverse_iterator = std::reverse_iterator<iterator>;              ///< Reverse iterator type
+    using size_type = size_t;                                                      ///< Size type
+    using const_iterator = utf::Iterator<utf::UTF_8, const char*>;                 ///< Read-only iterator type
+    using iterator = const_iterator;                                               ///< Iterator type
+    using const_reverse_iterator = utf::ReverseIterator<utf::UTF_8, const char*>;  ///< Read-only reverse iterator type
+    using reverse_iterator = const_reverse_iterator;                               ///< Reverse iterator type
 
     ////////////////////////////////////////////////////////////
     // Static member data
@@ -40,6 +40,22 @@ public:
      * @param utf8String UTF-8 string to view
      */
     constexpr StringView(const char* utf8String);
+
+    /**
+     * @brief Construct a string view from a null-terminated (value 0) UTF-8 string
+     *
+     * @note No UTF-8 validation is performed
+     *
+     * @param utf8String UTF-8 string to view
+     */
+    constexpr StringView(const char* utf8String, size_type size);
+
+    /**
+     * @brief Construct a string view from a null-terminated (value 0) UTF-8 string
+     *
+     * @param utf8String UTF-8 string to view
+     */
+    StringView(const char8* utf8String);
 
     /**
      * @brief Construct a string view from an String
@@ -86,6 +102,15 @@ public:
      * @return Reference to self
      */
     constexpr StringView& operator=(const char* right);
+
+    /**
+     * @brief Overload of assignment operator
+     *
+     * @param right Instance to assign
+     *
+     * @return Reference to self
+     */
+    StringView& operator=(const char8* right);
 
     /**
      * @brief Overload of [] operator to access a character by its position
@@ -258,7 +283,7 @@ public:
      *
      * @see rend
      */
-    reverse_iterator rbegin();
+    constexpr reverse_iterator rbegin();
 
     /**
      * @brief Return an iterator to the reverse beginning of the string
@@ -271,7 +296,7 @@ public:
      *
      * @see crend
      */
-    const_reverse_iterator crbegin() const;
+    constexpr const_reverse_iterator crbegin() const;
 
     /**
      * @brief Return an iterator to the reverse end of the string
@@ -282,7 +307,7 @@ public:
      *
      * @see rbegin
      */
-    reverse_iterator rend();
+    constexpr reverse_iterator rend();
 
     /**
      * @brief Return an iterator to the end of the string
@@ -293,14 +318,14 @@ public:
      *
      * @see crbegin
      */
-    const_reverse_iterator crend() const;
+    constexpr const_reverse_iterator crend() const;
 
 private:
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
     const char* m_data = {nullptr};  ///< The begining of the string view
-    size_type m_size = {0};           ///< The size of the string view
+    size_type m_size = {0};          ///< The size of the string view
 };
 
 /**
