@@ -15,10 +15,10 @@ public:
     using std::vector<T, Allocator>::operator[];
 
     template <typename Func>
-    auto map(Func transform) const -> Vector<decltype(transform(this->front()))>;
+    auto map(Func transform) const -> Vector<std::invoke_result_t<decltype(transform), const T&>>;
 
     template <typename Func>
-    auto mapIndexed(Func transform) const -> Vector<decltype(transform(this->front()))>;
+    auto mapIndexed(Func transform) const -> Vector<std::invoke_result_t<decltype(transform), size_t, const T&>>;
 
     template <typename Func>
     auto filter(Func predicate) const -> Vector<T>;
@@ -27,7 +27,10 @@ public:
     auto filterIndexed(Func predicate) const -> Vector<T>;
 
     template <typename Func>
-    auto find(Func predicate) const -> std::optional<T>;
+    auto find(Func predicate) -> T*;
+
+    template <typename Func>
+    auto find(Func predicate) const -> const T*;
 
     template <typename Func>
     auto forEach(Func predicate);
@@ -40,6 +43,26 @@ public:
 
     template <typename Func>
     auto forEachIndexed(Func predicate) const;
+
+    auto first() -> T&;
+
+    auto first() const -> const T&;
+
+    template <typename Func>
+    auto first(Func predicate) -> T&;
+
+    template <typename Func>
+    auto first(Func predicate) const -> const T&;
+
+    auto firstOrNull() -> T*;
+
+    auto firstOrNull() const -> const T*;
+
+    template <typename Func>
+    auto firstOrNull(Func predicate) -> T*;
+
+    template <typename Func>
+    auto firstOrNull(Func predicate) const -> const T*;
 };
 
 }  // namespace engine
