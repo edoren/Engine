@@ -22,6 +22,8 @@ constexpr StringView::StringView(const char* utf8String) {
     }
 }
 
+constexpr StringView::StringView(const char* utf8String, size_type size) : m_data(utf8String), m_size(size) {}
+
 constexpr StringView& StringView::operator=(const StringView& right) = default;
 
 constexpr StringView& StringView::operator=(const char* right) {
@@ -54,102 +56,64 @@ constexpr bool StringView::isEmpty() const {
 }
 
 constexpr StringView::size_type StringView::find(const StringView& str, size_type start) const {
-    // Iterate to the start codepoint
-    const auto* startIt(m_data);
-    for (size_type i = 0; i < start; i++) {
-        startIt = utf::Next<utf::UTF_8>(startIt, m_data + m_size);
-        if (startIt == m_data + m_size) {
-            return sInvalidPos;
-        }
+    // Check the size is not past the max code units
+    if (start >= getSize()) {
+        return sInvalidPos;
     }
     // Find the string
-    const auto* findIt(std::search(startIt, m_data + m_size, str.m_data, str.m_data + m_size));
-    return (findIt == m_data + m_size) ? sInvalidPos : utf::GetSize<utf::UTF_8>(m_data, findIt);
+    auto findIt = std::search(cbegin() + start, cend(), str.cbegin(), str.cend());
+    return (findIt == cend()) ? sInvalidPos : (findIt - cbegin());
 }
 
 constexpr StringView::size_type StringView::findFirstOf(const StringView& str, size_type pos) const {
-    size_type strSize = getSize();
+    if (pos >= getSize()) {
+        return sInvalidPos;
+    }
 
-    if (pos >= strSize) {
+    // Find one of the UTF-8 codepoints
+    for (auto it = cbegin() + pos; it != cend(); ++it) {
+        auto found = std::find(str.cbegin(), str.cend(), *it);
+        if (found != str.cend()) {
+            return it - cbegin();
+        }
+    }
+    return sInvalidPos;
+}
+
+constexpr StringView::size_type StringView::findLastOf(const StringView& str, size_type pos) const {
+    size_type utf8StrSize = getSize();
+    if (pos != sInvalidPos && pos >= utf8StrSize) {
         return sInvalidPos;
     }
 
     // Iterate to the start codepoint
-    const auto* startIt(m_data);
-    for (size_type i = 0; i < pos; i++) {
-        startIt = utf::Next<utf::UTF_8>(startIt, m_data + m_size);
-        if (startIt == m_data + m_size) {
-            return sInvalidPos;
-        }
+    auto startIt = crbegin();
+    if (pos != sInvalidPos) {
+        startIt += (utf8StrSize - pos - 1);
     }
 
     // Find one of the UTF-8 codepoints
-    const auto* endIt(startIt);
-    while (true) {
-        if (startIt == m_data + m_size) {
-            return sInvalidPos;
-        }
-        endIt = utf::Next<utf::UTF_8>(endIt, m_data + m_size);
-        const auto* findIt(std::search(str.m_data, str.m_data + m_size, startIt, endIt));
-        if (findIt != str.m_data + m_size) {
-            return utf::GetSize<utf::UTF_8>(m_data, startIt);
-        }
-        startIt = endIt;
-    }
-}
-
-constexpr StringView::size_type StringView::findLastOf(const StringView& str, size_type pos) const {
-    // Iterate to the start codepoint
-    const auto* startIt(m_data);
-    if (pos == sInvalidPos) {
-        startIt = m_data + m_size;
-    } else {
-        for (size_type i = 0; i < pos + 1; i++) {
-            startIt = utf::Next<utf::UTF_8>(startIt, m_data + m_size);
-            if (startIt == m_data + m_size) {
-                break;
-            }
+    for (auto it = startIt; it != crend(); ++it) {
+        auto found = std::find(str.cbegin(), str.cend(), *it);
+        if (found != str.cend()) {
+            return crend() - it;
         }
     }
-
-    // Find one of the UTF-8 codepoints
-    const auto* endIt(startIt);
-    while (true) {
-        if (startIt == m_data) {
-            return sInvalidPos;
-        }
-        endIt = utf::Prior<utf::UTF_8>(endIt, m_data);
-        const auto* findIt(std::search(str.m_data, str.m_data + m_size, endIt, startIt));
-        if (findIt != str.m_data + m_size) {
-            return utf::GetSize<utf::UTF_8>(m_data, endIt);
-        }
-        startIt = endIt;
-    }
-
     return sInvalidPos;
 }
 
 constexpr StringView StringView::subString(size_type position, size_type length) const {
-    // Iterate to the start codepoint
-    const auto* startIt(m_data);
-    for (size_type i = 0; i < position; i++) {
-        startIt = utf::Next<utf::UTF_8>(startIt, m_data + m_size);
-        if (startIt == m_data + m_size) {
-            ENGINE_THROW(std::out_of_range("the specified position is out of the string range"));
-        }
+    size_type utf8StrSize = getSize();
+    if ((position + length) > utf8StrSize) {
+        ENGINE_THROW(std::out_of_range("the specified position is out of the string range"));
     }
-    // Iterate to the end codepoint
-    const auto* endIt(startIt);
-    for (size_type i = 0; i < length; i++) {
-        endIt = utf::Next<utf::UTF_8>(endIt, m_data + m_size);
-        if (endIt == m_data + m_size) {
-            break;
-        }
-    }
-    StringView result;
-    result.m_data = startIt;
-    result.m_size = endIt - startIt;
-    return result;
+
+    // Iterate to the start and end codepoint
+    auto startIt = cbegin() + position;
+    auto endIt = startIt + length;
+
+    // Create a new string view with given range
+    return StringView(startIt.getPtr(), endIt.getPtr() - startIt.getPtr());
 }
 
 constexpr const char* StringView::getData() const {
@@ -176,8 +140,33 @@ constexpr StringView::const_iterator StringView::cend() const {
     return StringView::iterator(std::make_pair(m_data, m_data + m_size), m_data + m_size);
 }
 
+constexpr StringView::reverse_iterator StringView::rbegin() {
+    auto maxRange = std::make_pair(m_data, m_data + m_size);
+    auto* begin = utf::Prior<utf::UTF_8>(maxRange.second, maxRange.first);
+    return reverse_iterator(maxRange, begin);
+}
+
+constexpr StringView::const_reverse_iterator StringView::crbegin() const {
+    auto maxRange = std::make_pair(m_data, m_data + m_size);
+    const auto* begin = utf::Prior<utf::UTF_8>(maxRange.second, maxRange.first);
+    return const_reverse_iterator(maxRange, begin);
+}
+
+constexpr StringView::reverse_iterator StringView::rend() {
+    auto maxRange = std::make_pair(m_data, m_data + m_size);
+    auto* end = m_data;
+    return reverse_iterator(maxRange, end);
+}
+
+constexpr StringView::const_reverse_iterator StringView::crend() const {
+    auto maxRange = std::make_pair(m_data, m_data + m_size);
+    const auto* end = m_data;
+    return const_reverse_iterator(maxRange, end);
+}
+
 inline bool operator==(const StringView& left, const StringView& right) {
-    return left.getSize() == right.getSize() && std::memcmp(left.getData(), right.getData(), right.getSize()) == 0;
+    return left.getSize() == right.getSize() &&
+           std::equal(left.getData(), left.getData() + left.getSize(), right.getData()) == 0;
 }
 
 inline bool operator!=(const StringView& left, const StringView& right) {

@@ -71,11 +71,11 @@ public:
     ////////////////////////////////////////////////////////////
     // Types
     ////////////////////////////////////////////////////////////
-    using size_type = size_t;                                              ///< Size type
-    using const_iterator = utf::Iterator<utf::UTF_8, const char*>;         ///< Read-only iterator type
-    using iterator = const_iterator;                                       ///< Iterator type
-    using const_reverse_iterator = std::reverse_iterator<const_iterator>;  ///< Read-only reverse iterator type
-    using reverse_iterator = std::reverse_iterator<iterator>;              ///< Reverse iterator type
+    using size_type = size_t;                                                      ///< Size type
+    using const_iterator = utf::Iterator<utf::UTF_8, const char*>;                 ///< Read-only iterator type
+    using iterator = const_iterator;                                               ///< Iterator type
+    using const_reverse_iterator = utf::ReverseIterator<utf::UTF_8, const char*>;  ///< Read-only reverse iterator type
+    using reverse_iterator = const_reverse_iterator;                               ///< Reverse iterator type
 
     ////////////////////////////////////////////////////////////
     // Static member data
@@ -590,7 +590,7 @@ public:
      * @param position Position of insertion
      * @param str      Characters to insert
      */
-    void insert(size_type position, const String& str);
+    void insert(size_type position, const StringView& str);
 
     /**
      * @brief Find a sequence of one or more characters in
@@ -605,7 +605,7 @@ public:
      * @return Position of `str` in the string, or @ref sInvalidPos
      *         if not found
      */
-    size_type find(const String& str, size_type start = 0) const;
+    size_type find(const StringView& str, size_type start = 0) const;
 
     /**
      * @brief Finds the first character equal to one of the
@@ -615,13 +615,13 @@ public:
      * one of the characters in `str`. The search considers
      * only the interval [`pos`, `getSize()`]
      *
-     * @param str   Characters to find
+     * @param str Characters to find
      * @param pos Where to begin searching
      *
      * @return Position of the first character of `str` found
      *        in the string, or @ref sInvalidPos if not found
      */
-    size_type findFirstOf(const String& str, size_type pos = 0) const;
+    size_type findFirstOf(const StringView& str, size_type pos = 0) const;
 
     /**
      * @brief Finds the last character equal to one of the
@@ -631,13 +631,13 @@ public:
      * one of the characters in `str`. The search considers
      * only the interval [`0`, `pos`]
      *
-     * @param str   Characters to find
-     * @param pos Where to begin searching
+     * @param str Characters to find
+     * @param pos Position of the last character in the string to be considered in the search
      *
      * @return Position of the last character of `str` found
      *         in the string, or @ref sInvalidPos if not found
      */
-    size_type findLastOf(const String& str, size_type pos = sInvalidPos) const;
+    size_type findLastOf(const StringView& str, size_type pos = sInvalidPos) const;
 
     /**
      * @brief Replace a SubString with another string
@@ -651,7 +651,7 @@ public:
      *                    end of the string.
      * @param replaceWith String that replaces the given SubString.
      */
-    void replace(size_type position, size_type length, const String& replaceWith);
+    void replace(size_type position, size_type length, const StringView& replaceWith);
 
     /**
      * @brief Replace all occurrences of an Unicode code point with other
@@ -675,7 +675,7 @@ public:
      * @param searchFor   The value being searched for
      * @param replaceWith The value that replaces found `searchFor` values
      */
-    void replace(const String& searchFor, const String& replaceWith);
+    void replace(const StringView& searchFor, const StringView& replaceWith);
 
     /**
      * @brief Return a part of the string
