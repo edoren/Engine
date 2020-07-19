@@ -11,6 +11,32 @@ namespace engine::utf {
 ////////////////////////////////////////////////////////////////////////////////
 namespace internal {
 
+template <Encoding Base, typename Iter>
+constexpr size_t GetUnitSize(Iter begin) {
+    if constexpr (Base == UTF_8) {
+        if ((*begin & 0x80) == 0x00) {
+            return 1;
+        }
+        if ((*begin & 0xE0) == 0xC0) {
+            return 2;
+        }
+        if ((*begin & 0xF0) == 0xE0) {
+            return 3;
+        }
+        if ((*begin & 0xF8) == 0xF0) {
+            return 4;
+        }
+    } else if constexpr (Base == UTF_16) {
+        if ((*begin & 0xFC00) == 0xD800) {
+            return 2;
+        }
+        return 1;
+    } else if constexpr (Base == UTF_32) {
+        return 1;
+    }
+    return 1;  // Should not be reached
+}
+
 template <typename Iter>
 constexpr char32 GetCodePoint8(Iter begin, Iter end) {
     static_assert(type::is_forward_iterator_v<Iter>, "Value should be a forward iterator");
@@ -24,18 +50,7 @@ constexpr char32 GetCodePoint8(Iter begin, Iter end) {
 
     char32 unicodeCodePoint = 0;
 
-    // TODO: Repeated code with utf::CodeUnit::getSize
-    size_t size = 1;
-    if ((*begin & 0x80) == 0x00) {
-        size = 1;
-    } else if ((*begin & 0xE0) == 0xC0) {
-        size = 2;
-    } else if ((*begin & 0xF0) == 0xE0) {
-        size = 3;
-    } else {
-        ENGINE_ASSERT((*begin & 0xF8) == 0xF0, "Error getting UTF-8 size");
-        size = 4;
-    }
+    size_t size = GetUnitSize<UTF_8>(begin);
 
     switch (size) {
         case 4:
@@ -70,11 +85,7 @@ constexpr char32 GetCodePoint16(Iter begin, Iter end) {
     ENGINE_ASSERT((end - begin) != 0, "UTF-16 should have minimum one code unit");
     ENGINE_ASSERT((end - begin) <= 2, "UTF-16 should have maximum two code units");
 
-    // TODO: Repeated code with utf::CodeUnit::getSize
-    size_t size = 1;
-    if ((*begin & 0xFC00) == 0xD800) {
-        size = 2;
-    }
+    size_t size = GetUnitSize<UTF_16>(begin);
 
     char32 unicodeCodePoint = 0;
 
@@ -113,101 +124,88 @@ constexpr Iter Next8(Iter begin, Iter end) {
     static_assert(sizeof(type::iterator_underlying_type_t<Iter>) == sizeof(char),
                   "Iterator internal type has an invalid size");
 
-    Iter s = begin;
+    size_t size = GetUnitSize<UTF_8>(begin);
 
-    if ((*s & 0xF8) == 0xF0) {
-        // Verify out of range
-        if ((s + 4) > end) {
-            return s;
-        }
+    // Verify out of range
+    if ((begin + size) > end) {
+        return begin;
+    }
 
+    if (size == 4) {
         // Verify invalid range from 0xF5 to 0xF7
-        if (*s >= 0xF5 && *s <= 0xF7) {
-            return s;
+        if (*begin >= 0xF5 && *begin <= 0xF7) {
+            return begin;
         }
 
         // Ensure that the top 5 bits of this 4-byte UTF-8
         // codepoint were not 0, as then we could have used
         // one of the smaller encodings
-        if ((*s & 0x07) == 0 && (*(s + 1) & 0x30) == 0) {
-            return s;
+        if ((*begin & 0x07) == 0 && (*(begin + 1) & 0x30) == 0) {
+            return begin;
         }
 
         // Ensure each of the 3 following bytes in this 4-byte
         // UTF-8 codepoint began with 0b10xxxxx
         for (int32 i = 1; i < 3; i++) {
-            if ((*(s + i) & 0xC0) != 0x80) {
-                return s;
+            if ((*(begin + i) & 0xC0) != 0x80) {
+                return begin;
             }
         }
 
         // 4-byte UTF-8 code point (began with 0b11110xxx)
-        return s + 4;
+        return begin + 4;
     }
 
-    if ((*s & 0xF0) == 0xE0) {
-        // Verify out of range
-        if ((s + 3) > end) {
-            return s;
-        }
-
+    if ((*begin & 0xF0) == 0xE0) {
         // Ensure that the top 5 bits of this 3-byte UTF-8
         // codepoint were not 0, as then we could have used
         // one of the smaller encodings
-        if ((*s & 0x0f) == 0 && (*(s + 1) & 0x20) == 0) {
-            return s;
+        if ((*begin & 0x0f) == 0 && (*(begin + 1) & 0x20) == 0) {
+            return begin;
         }
 
         // Ensure each of the 2 following bytes in this 3-byte
         // UTF-8 codepoint began with 0b10xxxxxx
         for (int32 i = 1; i < 2; i++) {
-            if ((*(s + i) & 0xC0) != 0x80) {
-                return s;
+            if ((*(begin + i) & 0xC0) != 0x80) {
+                return begin;
             }
         }
 
         // 3-byte UTF-8 code point (began with 0b1110xxxx)
-        return s + 3;
+        return begin + 3;
     }
 
-    if ((*s & 0xE0) == 0xC0) {
-        // Verify out of range
-        if ((s + 2) > end) {
-            return s;
-        }
-
+    if ((*begin & 0xE0) == 0xC0) {
         // Ensure that the top 4 bits of this 2-byte UTF-8
         // codepoint were not 0, as then we could have used
         // one of the smaller encodings
-        if ((*s & 0x1e) == 0) {
-            return s;
+        if ((*begin & 0x1e) == 0) {
+            return begin;
         }
 
         // Verify invalid 0xC0 and 0xC1 codepoints
-        if (*s == 0xC0 || *s == 0xC1) {
-            return s;
+        if (*begin == 0xC0 || *begin == 0xC1) {
+            return begin;
         }
 
         // Ensure the 1 following byte in this 2-byte
         // UTF-8 codepoint began with 0b10xxxxxx
-        if ((*(s + 1) & 0xC0) != 0x80) {
-            return s;
+        if ((*(begin + 1) & 0xC0) != 0x80) {
+            return begin;
         }
 
         // 2-byte UTF-8 code point (began with 0b110xxxxx)
-        return s + 2;
+        return begin + 2;
     }
 
     // 1-byte ascii (began with 0b0xxxxxxx)
-    if ((*s & 0x80) == 0x00) {
-        if ((s + 1) > end) {  // Verify out of range
-            return s;
-        }
-        return s + 1;
+    if ((*begin & 0x80) == 0x00) {
+        return begin + 1;
     }
 
     // We have an invalid 0b1xxxxxxx UTF-8 code point entry
-    return s;
+    return begin;
 }
 
 template <typename Iter>
@@ -218,27 +216,26 @@ constexpr Iter Next16(Iter begin, Iter end) {
     static_assert(sizeof(type::iterator_underlying_type_t<Iter>) == sizeof(char16),
                   "Iterator internal type has an invalid size");
 
-    Iter s = begin;
+    size_t size = GetUnitSize<UTF_16>(begin);
+
+    // Verify out of range
+    if ((begin + size) > end) {
+        return begin;
+    }
 
     // Check the range is between 0x0000 to 0xD7FF and 0xE000 to 0xFFFF
-    if ((*s >= 0x0000 && *s <= 0xD7FF) || (*s >= 0xE000 && *s <= 0xFFFF)) {
-        if ((s + 1) > end) {  // Verify out of range
-            return s;
-        }
-        return s + 1;
+    if ((*begin >= 0x0000 && *begin <= 0xD7FF) || (*begin >= 0xE000 && *begin <= 0xFFFF)) {
+        return begin + 1;
     }
 
     // Check the first 16 bit code unit to be 0b110110yyyyyyyyyy
     // Check the second 16 bit code unit to be 0b110111xxxxxxxxxx
-    if ((*s & 0xFC00) == 0xD800 && (*(s + 1) & 0xFC00) == 0xDC00) {
-        if ((s + 2) > end) {  // Verify out of range
-            return s;
-        }
-        return s + 2;
+    if ((*begin & 0xFC00) == 0xD800 && (*(begin + 1) & 0xFC00) == 0xDC00) {
+        return begin + 2;
     }
 
     // We have an invalid UTF-16 code point entry
-    return s;
+    return begin;
 }
 
 template <typename Iter>
@@ -249,19 +246,19 @@ constexpr Iter Next32(Iter begin, Iter end) {
     static_assert(sizeof(type::iterator_underlying_type_t<Iter>) == sizeof(char32),
                   "Iterator internal type has an invalid size");
 
-    Iter s = begin;
-
-    // Check that the first 11 bits are zero. 0b00000000000xxxxxxxxxxxxxxxxxxxxx
-    if ((*s & 0xFFE00000) != 0) {
-        return s;
-    }
+    size_t size = GetUnitSize<UTF_32>(begin);
 
     // Verify out of range
-    if ((s + 1) > end) {
-        return s;
+    if ((begin + size) > end) {
+        return begin;
     }
 
-    return s + 1;
+    // Check that the first 11 bits are zero. 0b00000000000xxxxxxxxxxxxxxxxxxxxx
+    if ((*begin & 0xFFE00000) == 0) {
+        return begin + 1;
+    }
+
+    return begin;
 }
 
 template <typename Iter>
@@ -321,6 +318,23 @@ constexpr Iter Prior32(Iter end, Iter begin) {
     ENGINE_ASSERT((end - begin) >= 0, "The end iterator should be same or higher that the begin iterator");
 
     return end - 1;
+}
+
+template <Encoding Base, typename T>
+constexpr std::pair<T, T> GetRangeTemp(const std::pair<T, T>& maxRange, const T& begin) {
+    // Post end iterator
+    if (begin >= maxRange.second) {
+        return std::make_pair(maxRange.second, maxRange.second + 1);
+    }
+
+    // Prior begin iterator
+    if (begin < maxRange.first) {  // End of iterator
+        return std::make_pair(maxRange.first - 1, maxRange.first);
+    }
+
+    const auto* end = begin + GetUnitSize<Base>(begin);
+
+    return std::make_pair(begin, end);
 }
 
 }  // namespace internal
@@ -390,7 +404,7 @@ constexpr CodeUnit<Base>::CodeUnit(Iter begin, const size_type size) {
 
     m_unit.fill(0x0);
     if (size != 0) {
-        std::memcpy(m_unit.data(), pBegin, sizeof(CodeUnit::value_type) * size);
+        std::copy(pBegin, pBegin + size, m_unit.data());
     }
 }
 
@@ -418,26 +432,7 @@ constexpr const typename CodeUnit<Base>::data_type& CodeUnit<Base>::getData() co
 
 template <Encoding Base>
 constexpr typename CodeUnit<Base>::size_type CodeUnit<Base>::getSize() const {
-    if constexpr (Base == UTF_8) {
-        if ((m_unit[0] & 0x80) == 0x00) {
-            return 1;
-        }
-        if ((m_unit[0] & 0xE0) == 0xC0) {
-            return 2;
-        }
-        if ((m_unit[0] & 0xF0) == 0xE0) {
-            return 3;
-        }
-        ENGINE_ASSERT((m_unit[0] & 0xF8) == 0xF0, "Error getting UTF-8 size");
-        return 4;
-    } else if constexpr (Base == UTF_16) {
-        if ((m_unit[0] & 0xFC00) == 0xD800) {
-            return 2;
-        }
-        return 1;
-    } else if constexpr (Base == UTF_32) {
-        return m_unit.size();
-    }
+    return internal::GetUnitSize<Base>(&m_unit[0]);
 }
 
 template <Encoding Base>
@@ -447,7 +442,7 @@ constexpr bool CodeUnit<Base>::operator==(const CodeUnit& right) const {
 
 template <Encoding Base>
 constexpr bool CodeUnit<Base>::operator==(const data_type& right) const {
-    return std::memcmp(m_unit.data(), right.data(), 4) == 0;
+    return std::equal(m_unit.data(), m_unit.data() + 4, right.data());
 }
 
 template <Encoding Base>
@@ -520,40 +515,7 @@ constexpr bool CodeUnitRange<Base, Iter>::operator!=(const CodeUnitRange<Base, I
 template <Encoding Base, typename T>
 constexpr Iterator<Base, T>::Iterator(std::pair<pointed_type, pointed_type> maxRange, pointed_type begin)
       : m_maxRange(std::move(maxRange)) {
-    // Post end iterator
-    if (begin >= maxRange.second) {
-        m_ref = std::make_pair(maxRange.second, maxRange.second + 1);
-        return;
-    }
-
-    // Prior begin iterator
-    if (begin < maxRange.first) {  // End of iterator
-        m_ref = std::make_pair(maxRange.first - 1, maxRange.first);
-        return;
-    }
-
-    const auto* end = begin;
-    if constexpr (Base == UTF_8) {
-        if ((*begin & 0x80) == 0x00) {
-            end += 1;
-        } else if ((*begin & 0xE0) == 0xC0) {
-            end += 2;
-        } else if ((*begin & 0xF0) == 0xE0) {
-            end += 3;
-        } else if ((*begin & 0xF8) == 0xF0) {
-            end += 4;
-        }
-    } else if constexpr (Base == UTF_16) {
-        if ((*begin >= 0x0000 && *begin <= 0xD7FF) || (*begin >= 0xE000 && *begin <= 0xFFFF)) {
-            end += 1;
-        } else if (*begin >= 0x010000 && *begin <= 0x10FFFF) {
-            end += 2;
-        }
-    } else if constexpr (Base == UTF_32) {
-        end += 1;
-    }
-
-    m_ref = std::make_pair(begin, end);
+    m_ref = internal::GetRangeTemp<Base>(maxRange, begin);
 }
 
 template <Encoding Base, typename T>
@@ -617,6 +579,19 @@ constexpr Iterator<Base, T> Iterator<Base, T>::operator-(size_type num) {
 }
 
 template <Encoding Base, typename T>
+constexpr typename Iterator<Base, T>::size_type Iterator<Base, T>::operator-(const Iterator& other) {
+    // TODO: Improve this iteration for edge cases
+    // Check if already on the end
+    size_type count = 0;
+    const auto* newBegin = m_ref.begin();
+    while (newBegin != other.m_ref.begin()) {
+        newBegin = Prior<Base>(newBegin, m_maxRange.first);
+        count++;
+    }
+    return count;
+}
+
+template <Encoding Base, typename T>
 constexpr Iterator<Base, T>& Iterator<Base, T>::operator-=(size_type num) {
     *this = *this - num;
     return *this;
@@ -666,6 +641,144 @@ constexpr bool Iterator<Base, T>::operator!=(const Iterator& other) const {
 
 template <Encoding Base, typename T>
 constexpr typename Iterator<Base, T>::pointed_type Iterator<Base, T>::getPtr() const {
+    return m_ref.getRange().first;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// ReverseIterator
+////////////////////////////////////////////////////////////////////////////////
+
+template <Encoding Base, typename T>
+constexpr ReverseIterator<Base, T>::ReverseIterator(std::pair<pointed_type, pointed_type> maxRange, pointed_type begin)
+      : m_maxRange(std::move(maxRange)) {
+    m_ref = internal::GetRangeTemp<Base>(maxRange, begin);
+}
+
+template <Encoding Base, typename T>
+constexpr typename ReverseIterator<Base, T>::reference ReverseIterator<Base, T>::operator*() {
+    return m_ref;
+}
+
+template <Encoding Base, typename T>
+constexpr typename ReverseIterator<Base, T>::pointer ReverseIterator<Base, T>::operator->() {
+    return &m_ref;
+}
+
+template <Encoding Base, typename T>
+constexpr ReverseIterator<Base, T> ReverseIterator<Base, T>::operator+(size_type num) {
+    // TODO: Improve this iteration for edge cases
+    // Check if already on the end
+    const auto* newBegin = m_ref.begin();
+    for (size_type i = 0; i < num; i++) {
+        const auto* it = Prior<Base>(newBegin, m_maxRange.first);
+        if (it == newBegin) {
+            // Error getting next
+            return ReverseIterator(m_maxRange, m_maxRange.first - 1);
+        }
+        newBegin = it;
+    }
+    return ReverseIterator(m_maxRange, newBegin);
+}
+
+template <Encoding Base, typename T>
+constexpr ReverseIterator<Base, T>& ReverseIterator<Base, T>::operator+=(size_type num) {
+    *this = *this + num;
+    return *this;
+}
+
+template <Encoding Base, typename T>
+constexpr ReverseIterator<Base, T>& ReverseIterator<Base, T>::operator++() {
+    return *this += 1;
+}
+
+template <Encoding Base, typename T>
+constexpr ReverseIterator<Base, T> ReverseIterator<Base, T>::operator++(int) {
+    ReverseIterator temp(*this);
+    *this += 1;
+    return temp;
+}
+
+template <Encoding Base, typename T>
+constexpr ReverseIterator<Base, T> ReverseIterator<Base, T>::operator-(size_type num) {
+    // TODO: Improve this iteration for edge cases
+    // Check if already on the end
+    const auto* newBegin = m_ref.begin();
+    for (size_type i = 0; i < num; i++) {
+        const auto* it = Next<Base>(newBegin, m_maxRange.end);
+        if (it == newBegin) {
+            // Error getting next
+            auto last = Prior<Base>(m_maxRange.second, m_maxRange.begin);
+            return ReverseIterator(m_maxRange, last);
+        }
+        newBegin = it;
+    }
+    return ReverseIterator(m_maxRange, newBegin);
+}
+
+template <Encoding Base, typename T>
+constexpr typename ReverseIterator<Base, T>::size_type ReverseIterator<Base, T>::operator-(
+    const ReverseIterator& other) {
+    // TODO: Improve this iteration for edge cases
+    // Check if already on the end
+    size_type count = 0;
+    const auto* newBegin = m_ref.begin();
+    while (newBegin != other.m_ref.begin()) {
+        newBegin = Next<Base>(newBegin, m_maxRange.second);
+        count++;
+    }
+    return count;
+}
+
+template <Encoding Base, typename T>
+constexpr ReverseIterator<Base, T>& ReverseIterator<Base, T>::operator-=(size_type num) {
+    *this = *this - num;
+    return *this;
+}
+
+template <Encoding Base, typename T>
+constexpr ReverseIterator<Base, T>& ReverseIterator<Base, T>::operator--() {
+    return *this -= 1;
+}
+
+template <Encoding Base, typename T>
+constexpr ReverseIterator<Base, T> ReverseIterator<Base, T>::operator--(int) {
+    ReverseIterator temp(*this);
+    *this -= 1;
+    return temp;
+}
+
+template <Encoding Base, typename T>
+constexpr bool ReverseIterator<Base, T>::operator<(const ReverseIterator& other) const {
+    return m_ref.getRange() < other.m_ref.getRange();
+}
+
+template <Encoding Base, typename T>
+constexpr bool ReverseIterator<Base, T>::operator>(const ReverseIterator& other) const {
+    return other < *this;
+}
+
+template <Encoding Base, typename T>
+constexpr bool ReverseIterator<Base, T>::operator<=(const ReverseIterator& other) const {
+    return !(other < *this);
+}
+
+template <Encoding Base, typename T>
+constexpr bool ReverseIterator<Base, T>::operator>=(const ReverseIterator& other) const {
+    return !(*this < other);
+}
+
+template <Encoding Base, typename T>
+constexpr bool ReverseIterator<Base, T>::operator==(const ReverseIterator& other) const {
+    return m_ref.getRange() == other.m_ref.getRange() && m_maxRange == other.m_maxRange;
+}
+
+template <Encoding Base, typename T>
+constexpr bool ReverseIterator<Base, T>::operator!=(const ReverseIterator& other) const {
+    return !(*this == other);
+}
+
+template <Encoding Base, typename T>
+constexpr typename ReverseIterator<Base, T>::pointed_type ReverseIterator<Base, T>::getPtr() const {
     return m_ref.getRange().first;
 }
 

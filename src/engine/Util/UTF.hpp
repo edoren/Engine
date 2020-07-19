@@ -93,7 +93,7 @@ public:
      * @tparam Iter The type of the iterator
      */
     template <typename Iter>
-    constexpr CodeUnit(const Iter begin, size_type size);
+    constexpr CodeUnit(Iter begin, size_type size);
 
     /**
      * @brief Copy contructor
@@ -227,7 +227,7 @@ public:
      * @param begin The begin of the code unit
      * @param end The end of the code unit
      */
-    constexpr CodeUnitRange(const Iter begin, const Iter end);
+    constexpr CodeUnitRange(Iter begin, Iter end);
 
     /**
      * @brief Copy constructor
@@ -331,7 +331,7 @@ class Iterator {
 public:
     using size_type = size_t;                                   ///< The size type
     using difference_type = std::ptrdiff_t;                     ///< The difference type
-    using value_type = CodeUnitRange<Base, Iter>;                  ///< The value type
+    using value_type = CodeUnitRange<Base, Iter>;               ///< The value type
     using pointer = value_type*;                                ///< The pointer type
     using reference = value_type&;                              ///< The reference type
     using iterator_category = std::bidirectional_iterator_tag;  ///< The category of the iterator
@@ -433,6 +433,14 @@ public:
     constexpr Iterator operator-(size_type num);
 
     /**
+     * @brief Subtraction operator
+     *
+     * @param num The number to decrease
+     * @return A new iterator pointing a previous code unit
+     */
+    constexpr size_type operator-(const Iterator& other);
+
+    /**
      * @brief Subtraction assignment operator
      *
      * @param num The number to decrease
@@ -502,6 +510,209 @@ public:
      * @return Pointer to the start of the code unit
      */
     constexpr Iterator<Base, Iter>::pointed_type getPtr() const;
+
+private:
+    std::pair<pointed_type, pointed_type> m_maxRange;
+    value_type m_ref;
+};
+
+/**
+ * @brief Read-only reverse iterator class for an UTF sequence
+ *
+ * @tparam Base The encoding for the UTF support. See @ref Encoding.
+ * @tparam T The internal type for the unit pointer, by default char, char16 or char32 for UTF-8, UTF-16 and UTF-32
+ *           respectively
+ */
+template <Encoding Base, typename Iter>
+class ReverseIterator {
+    static_assert(type::is_forward_iterator_v<Iter>, "Value should be a forward iterator");
+    static_assert(std::is_integral<type::iterator_underlying_type_t<Iter>>::value,
+                  "ReverseIterator internal type should be an integer");
+    static_assert(sizeof(type::iterator_underlying_type_t<Iter>) == GetEncodingSize(Base),
+                  "ReverseIterator internal type has an invalid size");
+
+public:
+    using size_type = size_t;                                   ///< The size type
+    using difference_type = std::ptrdiff_t;                     ///< The difference type
+    using value_type = CodeUnitRange<Base, Iter>;               ///< The value type
+    using pointer = value_type*;                                ///< The pointer type
+    using reference = value_type&;                              ///< The reference type
+    using iterator_category = std::bidirectional_iterator_tag;  ///< The category of the iterator
+    using pointed_type = typename value_type::pointed_type;     ///< @copydoc value_type::pointed_type
+
+    /**
+     * @brief Constructs a new ReverseIterator object
+     *
+     * @param maxRange The continuos range the ReverseIterator is working on
+     * @param begin The start of the code unit
+     */
+    constexpr ReverseIterator(std::pair<pointed_type, pointed_type> maxRange, pointed_type begin);
+
+    /**
+     * @brief Copy constructor
+     *
+     * @param other The other iterator to copy
+     */
+    constexpr ReverseIterator(const ReverseIterator& other) = default;
+
+    /**
+     * @brief Move constructor
+     *
+     * @param other The other iterator to move into
+     */
+    constexpr ReverseIterator(ReverseIterator&& other) noexcept = default;
+
+    /**
+     * @brief Destructor
+     */
+    ~ReverseIterator() = default;
+
+    /**
+     * @brief Copy operator
+     *
+     * @param other The other iterator to copy
+     * @return Reference to self
+     */
+    constexpr ReverseIterator& operator=(const ReverseIterator& other) = default;
+
+    /**
+     * @brief Move operator
+     *
+     * @param other The other iterator to move into
+     * @return Reference to self
+     */
+    constexpr ReverseIterator& operator=(ReverseIterator&& other) noexcept = default;
+
+    /**
+     * @brief Dereference operator
+     *
+     * @return Reference to the internal code unit range
+     */
+    constexpr reference operator*();
+
+    /**
+     * @brief Dereference arrow operator
+     *
+     * @return Pointer to the internal code unit range
+     */
+    constexpr pointer operator->();
+
+    /**
+     * @brief Addition operator
+     *
+     * @param num The number to increase
+     * @return A new iterator pointing a next code unit
+     */
+    constexpr ReverseIterator operator+(size_type num);
+
+    /**
+     * @brief Addition assignment operator
+     *
+     * @param num The number to increase
+     * @return The current iterator pointing a next code unit
+     */
+    constexpr ReverseIterator& operator+=(size_type num);
+
+    /**
+     * @brief Pre-increment operator
+     *
+     * @return The current iterator pointing to the next code unit
+     */
+    constexpr ReverseIterator& operator++();
+
+    /**
+     * @brief Post-increment operator
+     *
+     * @return A new iterator pointing to the current code unit
+     */
+    constexpr ReverseIterator operator++(int);
+
+    /**
+     * @brief Subtraction operator
+     *
+     * @param num The number to decrease
+     * @return A new iterator pointing a previous code unit
+     */
+    constexpr ReverseIterator operator-(size_type num);
+
+    /**
+     * @brief Subtraction operator
+     *
+     * @param num The number to decrease
+     * @return A new iterator pointing a previous code unit
+     */
+    constexpr size_type operator-(const ReverseIterator& other);
+
+    /**
+     * @brief Subtraction assignment operator
+     *
+     * @param num The number to decrease
+     * @return The current iterator pointing a previous code unit
+     */
+    constexpr ReverseIterator& operator-=(size_type num);
+
+    /**
+     * @brief Pre-decrement operator
+     *
+     * @return The current iterator pointing to the previous code unit
+     */
+    constexpr ReverseIterator& operator--();
+
+    /**
+     * @brief Post-decrement operator
+     *
+     * @return A new iterator pointing to the current code unit
+     */
+    constexpr ReverseIterator operator--(int);
+
+    /**
+     * @brief Less than operator
+     *
+     * @return true if condition satisfies, false otherwise
+     */
+    constexpr bool operator<(const ReverseIterator& other) const;
+
+    /**
+     * @brief Greater than operator
+     *
+     * @return true if condition satisfies, false otherwise
+     */
+    constexpr bool operator>(const ReverseIterator& other) const;
+
+    /**
+     * @brief Less than or equal operator
+     *
+     * @return true if condition satisfies, false otherwise
+     */
+    constexpr bool operator<=(const ReverseIterator& other) const;
+
+    /**
+     * @brief Greater than or equal operator
+     *
+     * @return true if condition satisfies, false otherwise
+     */
+    constexpr bool operator>=(const ReverseIterator& other) const;
+
+    /**
+     * @brief Equal operator
+     *
+     * @return true if condition satisfies, false otherwise
+     */
+    constexpr bool operator==(const ReverseIterator& other) const;
+
+    /**
+     * @brief Not equal operator
+     *
+     * @return true if condition satisfies, false otherwise
+     */
+    constexpr bool operator!=(const ReverseIterator& other) const;
+
+    /**
+     * @brief Pointer to the start of the pointed code unit
+     *
+     * @return Pointer to the start of the code unit
+     */
+    constexpr ReverseIterator<Base, Iter>::pointed_type getPtr() const;
 
 private:
     std::pair<pointed_type, pointed_type> m_maxRange;
