@@ -188,6 +188,13 @@ public:
     String(const std::basic_string<wchar>& wideString);
 
     /**
+     * @brief Construct from an StringView
+     *
+     * @param stringView String view to assign
+     */
+    String(const StringView& stringView);
+
+    /**
      * @brief Copy constructor
      *
      * @param other Instance to copy

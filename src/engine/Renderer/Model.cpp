@@ -28,7 +28,7 @@ namespace {
 
 const StringView sTag("Model");
 
-const String sRootModelFolder("models");
+const StringView sRootModelFolder("models");
 
 class CustomAssimpIOStream : public Assimp::IOStream {
     friend class CustomAssimpIOSystem;

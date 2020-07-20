@@ -56,7 +56,7 @@ protected:
 
     virtual void useShader(Shader* shader) = 0;
 
-    virtual const String& getShaderFolder() const = 0;
+    virtual const StringView& getShaderFolder() const = 0;
 
     Shader* m_activeShader;
     std::map<String, std::unique_ptr<Shader>> m_shaders;

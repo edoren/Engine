@@ -15,11 +15,11 @@ namespace {
 
 const StringView sTag("TextureManager");
 
-const String sRootTextureFolder("textures");
+const StringView sRootTextureFolder("textures");
 
 }  // namespace
 
-const String TextureManager::sDefaultTextureId("DEFAULT");
+const StringView TextureManager::sDefaultTextureId("DEFAULT");
 
 TextureManager::TextureManager() : m_activeTexture(nullptr) {}
 

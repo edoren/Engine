@@ -17,7 +17,7 @@ class OPENGL_PLUGIN_API GL_Plugin : public Plugin {
 public:
     GL_Plugin();
 
-    const String& getName() const override;
+    const StringView& getName() const override;
 
     void install() override;
 

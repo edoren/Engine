@@ -26,6 +26,7 @@ constexpr size_t GetUnitSize(Iter begin) {
         if ((*begin & 0xF8) == 0xF0) {
             return 4;
         }
+        return 1;  // Should not be reached
     } else if constexpr (Base == UTF_16) {
         if ((*begin & 0xFC00) == 0xD800) {
             return 2;
@@ -34,7 +35,6 @@ constexpr size_t GetUnitSize(Iter begin) {
     } else if constexpr (Base == UTF_32) {
         return 1;
     }
-    return 1;  // Should not be reached
 }
 
 template <typename Iter>

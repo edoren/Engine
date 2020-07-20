@@ -15,7 +15,7 @@ class VULKAN_PLUGIN_API Vk_Plugin : public Plugin {
 public:
     Vk_Plugin();
 
-    const String& getName() const override;
+    const StringView& getName() const override;
 
     void install() override;
 

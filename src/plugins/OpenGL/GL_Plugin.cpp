@@ -7,13 +7,13 @@ namespace engine::plugin::opengl {
 
 namespace {
 
-const String sPluginName("OpenGL");
+const StringView sPluginName("OpenGL");
 
 }  // namespace
 
 GL_Plugin::GL_Plugin() : m_renderer(nullptr), m_shaderManagerDelegate(nullptr), m_textureManagerDelegate(nullptr) {}
 
-const String& GL_Plugin::getName() const {
+const StringView& GL_Plugin::getName() const {
     return sPluginName;
 }
 

@@ -13,7 +13,7 @@ namespace {
 
 // const StringView sTag("Vk_ShaderManager");
 
-const String sShaderFolder("spirv");
+const StringView sShaderFolder("spirv");
 
 Vk_ShaderManager* sDerivedInstance = nullptr;
 
@@ -64,7 +64,7 @@ void Vk_ShaderManager::useShader(Shader* shader) {
     ENGINE_UNUSED(shader);
 }
 
-const String& Vk_ShaderManager::getShaderFolder() const {
+const StringView& Vk_ShaderManager::getShaderFolder() const {
     return sShaderFolder;
 }
 
