@@ -15,7 +15,7 @@ public:
      * @brief Returns the name of the plugin
      * @return String with the name
      */
-    virtual const String& getName() const = 0;
+    virtual const StringView& getName() const = 0;
 
     /**
      * @brief Install a new plugin

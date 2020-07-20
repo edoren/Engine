@@ -141,6 +141,8 @@ String::String(const std::basic_string<wchar>& wideString) {
 #endif
 }
 
+String::String(const StringView& stringView) : m_string(stringView.getData(), stringView.getDataSize()) {}
+
 String::String(const String& other) = default;
 
 String::String(String&& other) noexcept : m_string(std::move(other.m_string)) {}

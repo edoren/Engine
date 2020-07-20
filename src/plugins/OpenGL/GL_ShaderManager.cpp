@@ -13,7 +13,7 @@ namespace {
 
 // const StringView sTag("GL_ShaderManager");
 
-const String sShaderFolder("glsl");
+const StringView sShaderFolder("glsl");
 
 GL_ShaderManager* sDerivedInstance = nullptr;
 
@@ -65,7 +65,7 @@ void GL_ShaderManager::useShader(Shader* shader) {
     castedShader->use();
 }
 
-const String& GL_ShaderManager::getShaderFolder() const {
+const StringView& GL_ShaderManager::getShaderFolder() const {
     return sShaderFolder;
 }
 

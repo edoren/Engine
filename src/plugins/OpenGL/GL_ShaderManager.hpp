@@ -41,7 +41,7 @@ protected:
 
     void useShader(Shader* shader) override;
 
-    const String& getShaderFolder() const override;
+    const StringView& getShaderFolder() const override;
 };
 
 }  // namespace engine::plugin::opengl

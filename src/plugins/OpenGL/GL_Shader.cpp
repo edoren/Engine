@@ -21,10 +21,10 @@ const std::array<GLenum, 3> sGlShaderTypes = {{
 }};
 
 #ifdef OPENGL_USE_GL
-const String sShaderVersion("#version 450 core");
+const StringView sShaderVersion("#version 450 core");
 #else
-const String sShaderVersion("#version 320 es");
-const String sFragmentPrecision("precision highp float;");
+const StringView sShaderVersion("#version 320 es");
+const StringView sFragmentPrecision("precision highp float;");
 #endif
 
 Vector<const char*> sRequiredExtensions = {
@@ -79,7 +79,7 @@ bool GL_Shader::loadFromMemory(const byte* source, size_t sourceSize, ShaderType
     String sourceComplete = sShaderVersion + '\n';
 #ifdef OPENGL_USE_GLES
     if (type == ShaderType::FRAGMENT) {
-        source_complete += sFragmentPrecision + '\n';
+        sourceComplete += sFragmentPrecision + '\n';
     }
 #endif
     for (auto& extension : sRequiredExtensions) {

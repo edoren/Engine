@@ -8,13 +8,13 @@ namespace engine::plugin::vulkan {
 
 namespace {
 
-const String sPluginName("Vulkan");
+const StringView sPluginName("Vulkan");
 
 }  // namespace
 
 Vk_Plugin::Vk_Plugin() : m_renderer(nullptr) {}
 
-const String& Vk_Plugin::getName() const {
+const StringView& Vk_Plugin::getName() const {
     return sPluginName;
 }
 

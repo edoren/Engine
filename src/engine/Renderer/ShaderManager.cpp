@@ -16,9 +16,9 @@ namespace {
 
 const StringView sTag("ShaderManager");
 
-const String sRootShaderFolder("shaders");
+const StringView sRootShaderFolder("shaders");
 
-const String sShaderDescriptorFolder("descriptor");
+const StringView sShaderDescriptorFolder("descriptor");
 
 const std::array<ShaderType, 3> sAvailableShaderTypes = {{
     ShaderType::VERTEX,

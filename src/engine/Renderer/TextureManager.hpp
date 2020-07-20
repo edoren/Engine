@@ -16,7 +16,7 @@ class String;
 
 class ENGINE_API TextureManager : public Singleton<TextureManager> {
 public:
-    static const String sDefaultTextureId;
+    static const StringView sDefaultTextureId;
 
     TextureManager();
 

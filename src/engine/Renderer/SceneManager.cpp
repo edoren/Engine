@@ -13,7 +13,7 @@ namespace {
 
 const StringView sTag("SceneManager");
 
-const String sRootModelFolder("scenes");
+const StringView sRootModelFolder("scenes");
 
 uint32 sSceneIndex(0);
 
