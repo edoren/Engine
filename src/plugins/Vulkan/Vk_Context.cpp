@@ -483,11 +483,11 @@ bool Vk_Context::checkInstanceExtensionsSupport() const {
     }
 
 #if defined(SDL_VIDEO_DRIVER_X11)
-    const char* x11_extension_to_ignore = nullptr;
-    if (CheckExtensionAvailability("VK_KHR_xlib_surface", available_extensions)) {
-        x11_extension_to_ignore = "VK_KHR_xcb_surface";
-    } else if (CheckExtensionAvailability("VK_KHR_xcb_surface", available_extensions)) {
-        x11_extension_to_ignore = "VK_KHR_xlib_surface";
+    const char* x11ExtensionToIgnore = nullptr;
+    if (CheckExtensionAvailability("VK_KHR_xlib_surface", availableExtensions)) {
+        x11ExtensionToIgnore = "VK_KHR_xcb_surface";
+    } else if (CheckExtensionAvailability("VK_KHR_xcb_surface", availableExtensions)) {
+        x11ExtensionToIgnore = "VK_KHR_xlib_surface";
     } else {
         LogError(sTag,
                  "Neither the 'VK_KHR_xlib_surface' extension nor the 'VK_KHR_xcb_surface' extension are supported by "
@@ -500,7 +500,7 @@ bool Vk_Context::checkInstanceExtensionsSupport() const {
     bool allExtensionsFound = true;
     for (const char* instanceExtension : m_instanceExtensions) {
 #if defined(SDL_VIDEO_DRIVER_X11)
-        if (!strcmp(x11_extension_to_ignore, instance_extension)) {
+        if (!strcmp(x11ExtensionToIgnore, instanceExtension)) {
             continue;
         }
 #endif

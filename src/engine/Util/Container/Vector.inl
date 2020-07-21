@@ -3,6 +3,7 @@
 #include <Util/Prerequisites.hpp>
 
 #include <optional>
+#include <stdexcept>
 
 namespace engine {
 
@@ -19,7 +20,8 @@ auto Vector<T, Allocator>::map(Func transform) const -> Vector<std::invoke_resul
 
 template <typename T, typename Allocator>
 template <typename Func>
-auto Vector<T, Allocator>::mapIndexed(Func transform) const -> Vector<std::invoke_result_t<decltype(transform), size_t, const T&>> {
+auto Vector<T, Allocator>::mapIndexed(Func transform) const
+    -> Vector<std::invoke_result_t<decltype(transform), size_t, const T&>> {
     Vector<std::invoke_result_t<decltype(transform), size_t, const T&>> newVec;
     newVec.reserve(this->size());
     for (decltype(this->size()) i = 0; i < this->size(); i++) {
