@@ -606,6 +606,56 @@ bool operator>=(const char8* left, const String& right) {
     return !(reinterpret_cast<const char*>(left) < right);
 }
 
+
+bool operator==(const String& left, const StringView& right) {
+    return left.m_string == right.getData();
+}
+
+bool operator!=(const String& left, const StringView& right) {
+    return !(left == right.getData());
+}
+
+bool operator<(const String& left, const StringView& right) {
+    return left.m_string < right.getData();
+}
+
+bool operator>(const String& left, const StringView& right) {
+    return right.getData() < left;
+}
+
+bool operator<=(const String& left, const StringView& right) {
+    return !(right.getData() < left);
+}
+
+bool operator>=(const String& left, const StringView& right) {
+    return !(left < right.getData());
+}
+
+bool operator==(const StringView& left, const String& right) {
+    return left.getData() == right.m_string;
+}
+
+bool operator!=(const StringView& left, const String& right) {
+    return !(left.getData() == right);
+}
+
+bool operator<(const StringView& left, const String& right) {
+    return left.getData() < right.m_string;
+}
+
+bool operator>(const StringView& left, const String& right) {
+    return right < left.getData();
+}
+
+bool operator<=(const StringView& left, const String& right) {
+    return !(right < left.getData());
+}
+
+bool operator>=(const StringView& left, const String& right) {
+    return !(left.getData() < right);
+}
+
+
 String operator+(const String& left, const String& right) {
     String string = left;
     return string += right;

@@ -19,7 +19,7 @@
 
 namespace engine {
 
-SharedLibrary::SharedLibrary(String name) : m_name(std::move(name)), m_handle(nullptr) {}
+SharedLibrary::SharedLibrary(const StringView& name) : m_name(name), m_handle(nullptr) {}
 
 SharedLibrary::SharedLibrary(SharedLibrary&& other) noexcept {
     m_name = other.m_name;
@@ -73,7 +73,9 @@ String SharedLibrary::getErrorString() {
     FormatMessageW((FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS), NULL,
                    GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPTSTR)&lpMsgBuf, 0, NULL);
     size_t msg_len = std::wcslen(lpMsgBuf);
-    if (msg_len >= 2) msg_len -= 2;  // Remove the /r/n characters
+    if (msg_len >= 2) {
+        msg_len -= 2;  // Remove the /r/n characters
+    }
     String ret = String::FromWide(lpMsgBuf, lpMsgBuf + msg_len);
     LocalFree(lpMsgBuf);
     return ret;
@@ -88,7 +90,7 @@ const String& SharedLibrary::getName() const {
     return m_name;
 }
 
-void* SharedLibrary::getSymbol(const char* name) {
+void* SharedLibrary::getSymbol(const StringView& name) {
     if (m_handle == nullptr) {
         return nullptr;
     }
@@ -96,13 +98,9 @@ void* SharedLibrary::getSymbol(const char* name) {
 #if PLATFORM_IS(PLATFORM_WINDOWS)
     address = GetProcAddress(reinterpret_cast<HMODULE>(m_handle), name);
 #elif PLATFORM_IS(PLATFORM_LINUX | PLATFORM_MACOS | PLATFORM_IOS | PLATFORM_ANDROID)
-    address = dlsym(m_handle, name);
+    address = dlsym(m_handle, name.getData());
 #endif
     return address;
-}
-
-void* SharedLibrary::getSymbol(const String& name) {
-    return getSymbol(name.getData());
 }
 
 }  // namespace engine

@@ -15,8 +15,6 @@ class Vector4;
 
 template <typename T>
 struct Vector4Packed {
-    using data_type = mathfu::VectorPacked<T, 4>;
-
     Vector4Packed() : data() {}
 
     explicit Vector4Packed(const Vector4<T>& vector) {
@@ -24,12 +22,12 @@ struct Vector4Packed {
     }
 
     Vector4Packed& operator=(const Vector4<T>& vector) {
-        vector.Pack(this);
+        vector.pack(this);
         return *this;
     }
 
     union {
-        data_type data;
+        T data[4];
         struct {
             T x, y, z, w;
         };

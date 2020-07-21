@@ -25,8 +25,10 @@ void SharedLibManager::initialize() {}
 
 void SharedLibManager::shutdown() {}
 
-SharedLibrary* SharedLibManager::load(const String& name) {
-    auto it = m_libraries.find(name);
+SharedLibrary* SharedLibManager::load(const StringView& name) {
+    auto it = std::find_if(m_libraries.begin(), m_libraries.end(), [&name](auto& pair) {
+        return pair.first == name;
+    });
 
     if (it != m_libraries.end()) {
         return &(it->second);
