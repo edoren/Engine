@@ -826,6 +826,10 @@ private:
     friend ENGINE_API bool operator<(const String& left, const char8* right);
     friend ENGINE_API bool operator==(const char8* left, const String& right);
     friend ENGINE_API bool operator<(const char8* left, const String& right);
+    friend ENGINE_API bool operator==(const String& left, const StringView& right);
+    friend ENGINE_API bool operator<(const String& left, const StringView& right);
+    friend ENGINE_API bool operator==(const StringView& left, const String& right);
+    friend ENGINE_API bool operator<(const StringView& left, const String& right);
 
     ////////////////////////////////////////////////////////////
     // Member data
@@ -1104,6 +1108,66 @@ ENGINE_API bool operator<=(const char8* left, const String& right);
  * @copydoc bool operator>=(const char* left, const String& right)
  */
 ENGINE_API bool operator>=(const char8* left, const String& right);
+
+/**
+ * @copydoc bool operator==(const String& left, const char* right)
+ */
+ENGINE_API bool operator==(const String& left, const StringView& right);
+
+/**
+ * @copydoc bool operator!=(const String& left, const char* right)
+ */
+ENGINE_API bool operator!=(const String& left, const StringView& right);
+
+/**
+ * @copydoc bool operator<(const String& left, const char* right)
+ */
+ENGINE_API bool operator<(const String& left, const StringView& right);
+
+/**
+ * @copydoc bool operator>(const String& left, const char* right)
+ */
+ENGINE_API bool operator>(const String& left, const StringView& right);
+
+/**
+ * @copydoc bool operator<=(const String& left, const char* right)
+ */
+ENGINE_API bool operator<=(const String& left, const StringView& right);
+
+/**
+ * @copydoc bool operator>=(const String& left, const char* right)
+ */
+ENGINE_API bool operator>=(const String& left, const StringView& right);
+
+/**
+ * @copydoc bool operator==(const char* left, const String& right)
+ */
+ENGINE_API bool operator==(const StringView& left, const String& right);
+
+/**
+ * @copydoc bool operator!=(const char* left, const String& right)
+ */
+ENGINE_API bool operator!=(const StringView& left, const String& right);
+
+/**
+ * @copydoc bool operator<(const char* left, const String& right)
+ */
+ENGINE_API bool operator<(const StringView& left, const String& right);
+
+/**
+ * @copydoc bool operator>(const char* left, const String& right)
+ */
+ENGINE_API bool operator>(const StringView& left, const String& right);
+
+/**
+ * @copydoc bool operator<=(const char* left, const String& right)
+ */
+ENGINE_API bool operator<=(const StringView& left, const String& right);
+
+/**
+ * @copydoc bool operator>=(const char* left, const String& right)
+ */
+ENGINE_API bool operator>=(const StringView& left, const String& right);
 
 /**
  * @relates String

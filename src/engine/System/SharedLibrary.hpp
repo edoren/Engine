@@ -9,7 +9,7 @@ namespace engine {
 
 class ENGINE_API SharedLibrary : NonCopyable {
 public:
-    explicit SharedLibrary(String name);
+    explicit SharedLibrary(const StringView& name);
     SharedLibrary(SharedLibrary&& other) noexcept;
     ~SharedLibrary();
 
@@ -21,8 +21,7 @@ public:
 
     const String& getName() const;
 
-    void* getSymbol(const char* name);
-    void* getSymbol(const String& name);
+    void* getSymbol(const StringView& name);
 
 private:
     String m_name;

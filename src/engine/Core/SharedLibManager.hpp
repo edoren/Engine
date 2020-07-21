@@ -20,7 +20,7 @@ public:
 
     void shutdown();
 
-    SharedLibrary* load(const String& name);
+    SharedLibrary* load(const StringView& name);
 
     void unload(SharedLibrary* lib);
 
