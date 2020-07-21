@@ -22,7 +22,7 @@ public:
 
     explicit inline Matrix2x2(const value_type& s) : m_data(s) {}
 
-    inline Matrix2x2(const Matrix2x2<T>& m) : m_data(m.m_data) {}
+    inline Matrix2x2(const type& m) : m_data(m.m_data) {}
 
     explicit inline Matrix2x2(const data_type& m) : m_data(m) {}
 
@@ -31,6 +31,8 @@ public:
 
     inline Matrix2x2(const col_type& column0, const col_type& column1)
           : Matrix2x2(column0.x, column0.y, column1.x, column1.y) {}
+
+    type& operator=(const type& m) = default;
 
     // Access operators
 

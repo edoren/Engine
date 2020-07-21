@@ -142,7 +142,7 @@ constexpr StringView::const_iterator StringView::cend() const {
 
 constexpr StringView::reverse_iterator StringView::rbegin() {
     auto maxRange = std::make_pair(m_data, m_data + m_size);
-    auto* begin = utf::Prior<utf::UTF_8>(maxRange.second, maxRange.first);
+    const auto* begin = utf::Prior<utf::UTF_8>(maxRange.second, maxRange.first);
     return reverse_iterator(maxRange, begin);
 }
 
@@ -154,7 +154,7 @@ constexpr StringView::const_reverse_iterator StringView::crbegin() const {
 
 constexpr StringView::reverse_iterator StringView::rend() {
     auto maxRange = std::make_pair(m_data, m_data + m_size);
-    auto* end = m_data;
+    const auto* end = m_data;
     return reverse_iterator(maxRange, end);
 }
 

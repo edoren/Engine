@@ -14,6 +14,11 @@ public:
     using std::vector<T, Allocator>::operator=;
     using std::vector<T, Allocator>::operator[];
 
+    Vector(const Vector& other) = default;
+    Vector& operator=(const Vector& other) = default;
+    Vector(Vector&& other) noexcept = default;
+    Vector& operator=(Vector&& other) noexcept = default;
+
     template <typename Func>
     auto map(Func transform) const -> Vector<std::invoke_result_t<decltype(transform), const T&>>;
 

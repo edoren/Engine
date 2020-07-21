@@ -18,6 +18,8 @@ public:
 
     Time(const Time& other);
 
+    Time& operator=(const Time& other) = default;
+
     /**
      * Static class methods
      */

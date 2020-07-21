@@ -349,7 +349,7 @@ constexpr CodeUnit<Base>::CodeUnit(data_type data) : m_unit(std::move(data)) {}
 template <Encoding Base>
 constexpr CodeUnit<Base>::CodeUnit(char32 codePoint) : m_unit() {
     if constexpr (Base == UTF_8) {
-        if (codePoint >= 0x0000 && codePoint <= 0x007F) {
+        if (codePoint <= 0x007F) {
             m_unit[0] = static_cast<uint8>(codePoint);
         } else if (codePoint >= 0x0080 && codePoint <= 0x07FF) {
             m_unit[0] = static_cast<uint8>(((codePoint & 0x7C0) >> 6) | 0xC0);
@@ -365,7 +365,7 @@ constexpr CodeUnit<Base>::CodeUnit(char32 codePoint) : m_unit() {
             m_unit[3] = static_cast<uint8>((codePoint & 0x3F) | 0x80);
         }
     } else if constexpr (Base == UTF_16) {
-        if ((codePoint >= 0x0000 && codePoint <= 0xD7FF) || (codePoint >= 0xE000 && codePoint <= 0xFFFF)) {
+        if (codePoint <= 0xD7FF || (codePoint >= 0xE000 && codePoint <= 0xFFFF)) {
             m_unit[0] = static_cast<uint16>(codePoint);
         } else if (codePoint >= 0x010000 && codePoint <= 0x10FFFF) {
             char32 u = codePoint - 0x10000;
@@ -499,7 +499,7 @@ template <typename Iter2>
 constexpr bool CodeUnitRange<Base, Iter>::operator==(const CodeUnitRange<Base, Iter2>& other) const {
     size_type size = (m_range.second - m_range.first);
     size_type otherSize = (other.m_range.second - other.m_range.first);
-    return otherSize == size && memcmp(m_range.first, other.m_range.first, size) == 0;
+    return otherSize == size && std::equal(m_range.first, m_range.second, other.m_range.first);
 }
 
 template <Encoding Base, typename Iter>

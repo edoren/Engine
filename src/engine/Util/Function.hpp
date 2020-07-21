@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <cstdlib>
+#include <cstddef>
 
 #include <type_traits>
 #include <utility>

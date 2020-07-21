@@ -25,7 +25,7 @@ public:
 
     explicit inline Matrix3x3(const value_type& s) : m_data(s) {}
 
-    inline Matrix3x3(const Matrix3x3<T>& m) : m_data(m.m_data) {}
+    inline Matrix3x3(const type& m) : m_data(m.m_data) {}
 
     explicit inline Matrix3x3(const data_type& m) : m_data(m) {}
 
@@ -50,6 +50,8 @@ public:
                       column2.x,
                       column2.y,
                       column2.z) {}
+
+    type& operator=(const type& m) = default;
 
     // Access operators
 

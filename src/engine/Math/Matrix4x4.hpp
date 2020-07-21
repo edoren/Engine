@@ -64,6 +64,8 @@ public:
                       column3.z,
                       column3.w) {}
 
+    type& operator=(const type& m) = default;
+
     // Access operators
 
     inline value_type& operator()(const size_t row, const size_t column) {
