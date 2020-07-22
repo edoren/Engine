@@ -487,174 +487,60 @@ String::const_reverse_iterator String::crend() const {
 }
 
 bool operator==(const String& left, const String& right) {
-    return left.m_string == right.m_string;
+    return StringView(left) == StringView(right);
 }
 
-bool operator!=(const String& left, const String& right) {
-    return !(left == right);
-}
-
-bool operator<(const String& left, const String& right) {
-    return left.m_string < right.m_string;
-}
-
-bool operator>(const String& left, const String& right) {
-    return right < left;
-}
-
-bool operator<=(const String& left, const String& right) {
-    return !(right < left);
-}
-
-bool operator>=(const String& left, const String& right) {
-    return !(left < right);
+std::strong_ordering operator<=>(const String& left, const String& right) {
+    return StringView(left) <=> StringView(right);
 }
 
 bool operator==(const String& left, const char* right) {
-    return left.m_string == right;
+    return StringView(left) == StringView(right);
 }
 
-bool operator!=(const String& left, const char* right) {
-    return !(left == right);
-}
-
-bool operator<(const String& left, const char* right) {
-    return left.m_string < right;
-}
-
-bool operator>(const String& left, const char* right) {
-    return right < left;
-}
-
-bool operator<=(const String& left, const char* right) {
-    return !(right < left);
-}
-
-bool operator>=(const String& left, const char* right) {
-    return !(left < right);
+std::strong_ordering operator<=>(const String& left, const char* right) {
+    return StringView(left) <=> StringView(right);
 }
 
 bool operator==(const char* left, const String& right) {
-    return left == right.m_string;
+    return StringView(left) == StringView(right);
 }
 
-bool operator!=(const char* left, const String& right) {
-    return !(left == right);
-}
-
-bool operator<(const char* left, const String& right) {
-    return left < right.m_string;
-}
-
-bool operator>(const char* left, const String& right) {
-    return right < left;
-}
-
-bool operator<=(const char* left, const String& right) {
-    return !(right < left);
-}
-
-bool operator>=(const char* left, const String& right) {
-    return !(left < right);
+std::strong_ordering operator<=>(const char* left, const String& right) {
+    return StringView(left) <=> StringView(right);
 }
 
 bool operator==(const String& left, const char8* right) {
-    return left.m_string == reinterpret_cast<const char*>(right);
+    return StringView(left) == StringView(right);
 }
 
-bool operator!=(const String& left, const char8* right) {
-    return !(left == reinterpret_cast<const char*>(right));
-}
-
-bool operator<(const String& left, const char8* right) {
-    return left.m_string < reinterpret_cast<const char*>(right);
-}
-
-bool operator>(const String& left, const char8* right) {
-    return reinterpret_cast<const char*>(right) < left;
-}
-
-bool operator<=(const String& left, const char8* right) {
-    return !(reinterpret_cast<const char*>(right) < left);
-}
-
-bool operator>=(const String& left, const char8* right) {
-    return !(left < reinterpret_cast<const char*>(right));
+std::strong_ordering operator<=>(const String& left, const char8* right) {
+    return StringView(left) <=> StringView(right);
 }
 
 bool operator==(const char8* left, const String& right) {
-    return reinterpret_cast<const char*>(left) == right.m_string;
+    return StringView(left) == StringView(right);
 }
 
-bool operator!=(const char8* left, const String& right) {
-    return !(reinterpret_cast<const char*>(left) == right);
+std::strong_ordering operator<=>(const char8* left, const String& right) {
+    return StringView(left) <=> StringView(right);
 }
-
-bool operator<(const char8* left, const String& right) {
-    return reinterpret_cast<const char*>(left) < right.m_string;
-}
-
-bool operator>(const char8* left, const String& right) {
-    return right < reinterpret_cast<const char*>(left);
-}
-
-bool operator<=(const char8* left, const String& right) {
-    return !(right < reinterpret_cast<const char*>(left));
-}
-
-bool operator>=(const char8* left, const String& right) {
-    return !(reinterpret_cast<const char*>(left) < right);
-}
-
 
 bool operator==(const String& left, const StringView& right) {
-    return left.m_string == right.getData();
+    return StringView(left) == right;
 }
 
-bool operator!=(const String& left, const StringView& right) {
-    return !(left == right.getData());
-}
-
-bool operator<(const String& left, const StringView& right) {
-    return left.m_string < right.getData();
-}
-
-bool operator>(const String& left, const StringView& right) {
-    return right.getData() < left;
-}
-
-bool operator<=(const String& left, const StringView& right) {
-    return !(right.getData() < left);
-}
-
-bool operator>=(const String& left, const StringView& right) {
-    return !(left < right.getData());
+std::strong_ordering operator<=>(const String& left, const StringView& right) {
+    return StringView(left) <=> right;
 }
 
 bool operator==(const StringView& left, const String& right) {
-    return left.getData() == right.m_string;
+    return left == StringView(right);
 }
 
-bool operator!=(const StringView& left, const String& right) {
-    return !(left.getData() == right);
+std::strong_ordering operator<=>(const StringView& left, const String& right) {
+    return left <=> StringView(right);
 }
-
-bool operator<(const StringView& left, const String& right) {
-    return left.getData() < right.m_string;
-}
-
-bool operator>(const StringView& left, const String& right) {
-    return right < left.getData();
-}
-
-bool operator<=(const StringView& left, const String& right) {
-    return !(right < left.getData());
-}
-
-bool operator>=(const StringView& left, const String& right) {
-    return !(left.getData() < right);
-}
-
 
 String operator+(const String& left, const String& right) {
     String string = left;

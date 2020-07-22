@@ -504,8 +504,18 @@ constexpr bool CodeUnitRange<Base, Iter>::operator==(const CodeUnitRange<Base, I
 
 template <Encoding Base, typename Iter>
 template <typename Iter2>
-constexpr bool CodeUnitRange<Base, Iter>::operator!=(const CodeUnitRange<Base, Iter2>& other) const {
-    return !(*this == other);
+constexpr std::strong_ordering CodeUnitRange<Base, Iter>::operator<=>(const CodeUnitRange<Base, Iter2>& other) const {
+    static_assert(Base != UTF_16 || Base != UTF_32, "Unable to compare UTF-16 and UTF-32 lexicographicaly");
+    size_type size = (m_range.second - m_range.first);
+    size_type otherSize = (other.m_range.second - other.m_range.first);
+    if (size < otherSize) {
+        return std::strong_ordering::less;
+    } else if (size > otherSize) {
+        return std::strong_ordering::greater;
+    } else if (std::equal(m_range.first, m_range.second, other.m_range.first)) {
+        return std::strong_ordering::equal;
+    }
+    return std::strong_ordering::equivalent;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -632,11 +642,6 @@ constexpr bool Iterator<Base, T>::operator>=(const Iterator& other) const {
 template <Encoding Base, typename T>
 constexpr bool Iterator<Base, T>::operator==(const Iterator& other) const {
     return m_ref.getRange() == other.m_ref.getRange() && m_maxRange == other.m_maxRange;
-}
-
-template <Encoding Base, typename T>
-constexpr bool Iterator<Base, T>::operator!=(const Iterator& other) const {
-    return !(*this == other);
 }
 
 template <Encoding Base, typename T>
@@ -770,11 +775,6 @@ constexpr bool ReverseIterator<Base, T>::operator>=(const ReverseIterator& other
 template <Encoding Base, typename T>
 constexpr bool ReverseIterator<Base, T>::operator==(const ReverseIterator& other) const {
     return m_ref.getRange() == other.m_ref.getRange() && m_maxRange == other.m_maxRange;
-}
-
-template <Encoding Base, typename T>
-constexpr bool ReverseIterator<Base, T>::operator!=(const ReverseIterator& other) const {
-    return !(*this == other);
 }
 
 template <Encoding Base, typename T>

@@ -337,63 +337,18 @@ private:
  *
  * @return True if both strings are equal
  */
-ENGINE_API bool operator==(const StringView& left, const StringView& right);
+bool operator==(const StringView& left, const StringView& right);
 
 /**
  * @relates String
- * @brief Overload of != operator to compare two StringView
+ * @brief Overload of <=> operator to compare two StringView
  *
  * @param left  Left operand (a StringView)
  * @param right Right operand (a StringView)
  *
  * @return True if both strings are equal
  */
-ENGINE_API bool operator!=(const StringView& left, const StringView& right);
-
-/**
- * @relates String
- * @brief Overload of < operator to compare two StringView
- *
- * @param left  Left operand (a StringView)
- * @param right Right operand (a StringView)
- *
- * @return True if `left` is lexicographically before `right`
- */
-ENGINE_API bool operator<(const StringView& left, const StringView& right);
-
-/**
- * @relates String
- * @brief Overload of > operator to compare two StringView
- *
- * @param left  Left operand (a StringView)
- * @param right Right operand (a StringView)
- *
- * @return True if `left` is lexicographically after `right`
- */
-ENGINE_API bool operator>(const StringView& left, const StringView& right);
-
-/**
- * @relates String
- * @brief Overload of <= operator to compare two StringView
- *
- * @param left  Left operand (a StringView)
- * @param right Right operand (a StringView)
- *
- * @return True if `left` is lexicographically before or equivalent to \a
- *        right
- */
-ENGINE_API bool operator<=(const StringView& left, const StringView& right);
-
-/**
- * @relates String
- * @brief Overload of >= operator to compare two StringView
- *
- * @param left  Left operand (a StringView)
- * @param right Right operand (a StringView)
- *
- * @return True if `left` is lexicographically after or equivalent to `right`
- */
-ENGINE_API bool operator>=(const StringView& left, const StringView& right);
+ENGINE_API std::strong_ordering operator<=>(const StringView& left, const StringView& right);
 
 /**
  * @relates String

@@ -96,7 +96,7 @@ void* SharedLibrary::getSymbol(const StringView& name) {
     }
     void* address = nullptr;
 #if PLATFORM_IS(PLATFORM_WINDOWS)
-    address = GetProcAddress(reinterpret_cast<HMODULE>(m_handle), name);
+    address = GetProcAddress(reinterpret_cast<HMODULE>(m_handle), name.getData());
 #elif PLATFORM_IS(PLATFORM_LINUX | PLATFORM_MACOS | PLATFORM_IOS | PLATFORM_ANDROID)
     address = dlsym(m_handle, name.getData());
 #endif

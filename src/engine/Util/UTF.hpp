@@ -194,9 +194,7 @@ private:
  * @tparam Base The encoding for the UTF support. See @ref Encoding.
  * @tparam Iter The type of the iterator
  */
-template <Encoding Base,
-          typename Iter =
-              std::conditional_t<(Base == UTF_8), char, std::conditional_t<(Base == UTF_16), char16, char32>>>
+template <Encoding Base, typename Iter>
 class CodeUnitRange {
     static_assert(type::is_forward_iterator_v<Iter>, "Value should be a forward iterator");
     static_assert(std::is_integral<type::iterator_underlying_type_t<Iter>>::value,
@@ -207,7 +205,6 @@ class CodeUnitRange {
 public:
     using size_type = size_t;                                   ///< The size type
     using pointed_type = decltype(&(*(std::declval<Iter>())));  ///< The type of the pointed element
-    using value_type = std::decay_t<pointed_type>;              ///< The type of the pointed element
 
     /**
      * @brief Construct a default null initialized range
@@ -302,12 +299,12 @@ public:
     constexpr bool operator==(const CodeUnitRange<Base, Iter2>& other) const;
 
     /**
-     * @brief Not equal operator
+     * @brief Spaceship operator
      *
-     * @return true if condition satisfies, false otherwise
+     * @return TODO
      */
     template <typename Iter2>
-    constexpr bool operator!=(const CodeUnitRange<Base, Iter2>& other) const;
+    constexpr std::strong_ordering operator<=>(const CodeUnitRange<Base, Iter2>& other) const;
 
 private:
     std::pair<pointed_type, pointed_type> m_range;
@@ -496,13 +493,6 @@ public:
      * @return true if condition satisfies, false otherwise
      */
     constexpr bool operator==(const Iterator& other) const;
-
-    /**
-     * @brief Not equal operator
-     *
-     * @return true if condition satisfies, false otherwise
-     */
-    constexpr bool operator!=(const Iterator& other) const;
 
     /**
      * @brief Pointer to the start of the pointed code unit
@@ -699,13 +689,6 @@ public:
      * @return true if condition satisfies, false otherwise
      */
     constexpr bool operator==(const ReverseIterator& other) const;
-
-    /**
-     * @brief Not equal operator
-     *
-     * @return true if condition satisfies, false otherwise
-     */
-    constexpr bool operator!=(const ReverseIterator& other) const;
 
     /**
      * @brief Pointer to the start of the pointed code unit
