@@ -2,6 +2,7 @@
 
 #include <Util/UTF.hpp>
 
+#include <algorithm>
 #include <sstream>
 
 #include <cstring>
@@ -165,28 +166,11 @@ constexpr StringView::const_reverse_iterator StringView::crend() const {
 }
 
 inline bool operator==(const StringView& left, const StringView& right) {
-    return left.getSize() == right.getSize() &&
-           std::equal(left.getData(), left.getData() + left.getSize(), right.getData()) == 0;
+    return std::equal(left.getData(), left.getData() + left.getDataSize(), right.getData());
 }
 
-inline bool operator!=(const StringView& left, const StringView& right) {
-    return !(left == right);
-}
-
-inline bool operator<(const StringView& left, const StringView& right) {
-    return left.getSize() < right.getSize();
-}
-
-inline bool operator>(const StringView& left, const StringView& right) {
-    return right < left;
-}
-
-inline bool operator<=(const StringView& left, const StringView& right) {
-    return !(right < left);
-}
-
-inline bool operator>=(const StringView& left, const StringView& right) {
-    return !(left < right);
+inline std::strong_ordering operator<=>(const StringView& left, const StringView& right) {
+    return std::lexicographical_compare_three_way(left.cbegin(), left.cend(), right.cbegin(), right.cend());
 }
 
 inline std::ostream& operator<<(std::ostream& os, const StringView& str) {

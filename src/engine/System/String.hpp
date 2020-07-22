@@ -816,21 +816,6 @@ public:
     const_reverse_iterator crend() const;
 
 private:
-    friend ENGINE_API bool operator==(const String& left, const String& right);
-    friend ENGINE_API bool operator<(const String& left, const String& right);
-    friend ENGINE_API bool operator==(const String& left, const char* right);
-    friend ENGINE_API bool operator<(const String& left, const char* right);
-    friend ENGINE_API bool operator==(const char* left, const String& right);
-    friend ENGINE_API bool operator<(const char* left, const String& right);
-    friend ENGINE_API bool operator==(const String& left, const char8* right);
-    friend ENGINE_API bool operator<(const String& left, const char8* right);
-    friend ENGINE_API bool operator==(const char8* left, const String& right);
-    friend ENGINE_API bool operator<(const char8* left, const String& right);
-    friend ENGINE_API bool operator==(const String& left, const StringView& right);
-    friend ENGINE_API bool operator<(const String& left, const StringView& right);
-    friend ENGINE_API bool operator==(const StringView& left, const String& right);
-    friend ENGINE_API bool operator<(const StringView& left, const String& right);
-
     ////////////////////////////////////////////////////////////
     // Member data
     ////////////////////////////////////////////////////////////
@@ -850,58 +835,14 @@ ENGINE_API bool operator==(const String& left, const String& right);
 
 /**
  * @relates String
- * @brief Overload of != operator to compare two UTF-8 strings
+ * @brief Overload of == operator to compare two UTF-8 strings
  *
  * @param left  Left operand (a String)
  * @param right Right operand (a String)
  *
- * @return True if both strings are different
+ * @return True if both strings are equal
  */
-ENGINE_API bool operator!=(const String& left, const String& right);
-
-/**
- * @relates String
- * @brief Overload of < operator to compare two UTF-8 strings
- *
- * @param left  Left operand (a String)
- * @param right Right operand (a String)
- *
- * @return True if `left` is lexicographically before `right`
- */
-ENGINE_API bool operator<(const String& left, const String& right);
-
-/**
- * @relates String
- * @brief Overload of > operator to compare two UTF-8 strings
- *
- * @param left  Left operand (a String)
- * @param right Right operand (a String)
- *
- * @return True if `left` is lexicographically after `right`
- */
-ENGINE_API bool operator>(const String& left, const String& right);
-
-/**
- * @relates String
- * @brief Overload of <= operator to compare two UTF-8 strings
- *
- * @param left  Left operand (a String)
- * @param right Right operand (a String)
- *
- * @return True if `left` is lexicographically before or equivalent to \a
- *        right
- */
-ENGINE_API bool operator<=(const String& left, const String& right);
-/**
- * @relates String
- * @brief Overload of >= operator to compare two UTF-8 strings
- *
- * @param left  Left operand (a String)
- * @param right Right operand (a String)
- *
- * @return True if `left` is lexicographically after or equivalent to `right`
- */
-ENGINE_API bool operator>=(const String& left, const String& right);
+ENGINE_API std::strong_ordering operator<=>(const String& left, const String& right);
 
 /**
  * @relates String
@@ -917,7 +858,7 @@ ENGINE_API bool operator==(const String& left, const char* right);
 
 /**
  * @relates String
- * @brief Overload of != operator to compare a UTF-8 strings and a null
+ * @brief Overload of == operator to compare a UTF-8 strings and a null
  *        terminated (value 0) UTF-8 string
  *
  * @param left  Left operand (a String)
@@ -925,56 +866,7 @@ ENGINE_API bool operator==(const String& left, const char* right);
  *
  * @return True if both strings are equal
  */
-ENGINE_API bool operator!=(const String& left, const char* right);
-
-/**
- * @relates String
- * @brief Overload of < operator to compare a UTF-8 strings and a null
- *        terminated (value 0) UTF-8 string
- *
- * @param left  Left operand (a String)
- * @param right Right operand (a null terminated UTF-8 string)
- *
- * @return True if `left` is lexicographically before `right`
- */
-ENGINE_API bool operator<(const String& left, const char* right);
-
-/**
- * @relates String
- * @brief Overload of > operator to compare a UTF-8 strings and a null
- *        terminated (value 0) UTF-8 string
- *
- * @param left  Left operand (a String)
- * @param right Right operand (a null terminated UTF-8 string)
- *
- * @return True if `left` is lexicographically after `right`
- */
-ENGINE_API bool operator>(const String& left, const char* right);
-
-/**
- * @relates String
- * @brief Overload of <= operator to compare a UTF-8 strings and a null
- *        terminated (value 0) UTF-8 string
- *
- * @param left  Left operand (a String)
- * @param right Right operand (a null terminated UTF-8 string)
- *
- * @return True if `left` is lexicographically before or equivalent to \a
- *        right
- */
-ENGINE_API bool operator<=(const String& left, const char* right);
-
-/**
- * @relates String
- * @brief Overload of >= operator to compare a UTF-8 strings and a null
- *        terminated (value 0) UTF-8 string
- *
- * @param left  Left operand (a String)
- * @param right Right operand (a null terminated UTF-8 string)
- *
- * @return True if `left` is lexicographically after or equivalent to `right`
- */
-ENGINE_API bool operator>=(const String& left, const char* right);
+ENGINE_API std::strong_ordering operator<=>(const String& left, const char* right);
 
 /**
  * @relates String
@@ -990,7 +882,7 @@ ENGINE_API bool operator==(const char* left, const String& right);
 
 /**
  * @relates String
- * @brief Overload of != operator to compare a UTF-8 strings and a null
+ * @brief Overload of == operator to compare a UTF-8 strings and a null
  *        terminated (value 0) UTF-8 string
  *
  * @param left  Left operand (a null terminated UTF-8 string)
@@ -998,86 +890,17 @@ ENGINE_API bool operator==(const char* left, const String& right);
  *
  * @return True if both strings are equal
  */
-ENGINE_API bool operator!=(const char* left, const String& right);
+ENGINE_API std::strong_ordering operator<=>(const char* left, const String& right);
 
 /**
- * @relates String
- * @brief Overload of < operator to compare a UTF-8 strings and a null
- *        terminated (value 0) UTF-8 string
- *
- * @param left  Left operand (a null terminated UTF-8 string)
- * @param right Right operand (a String)
- *
- * @return True if `left` is lexicographically before `right`
- */
-ENGINE_API bool operator<(const char* left, const String& right);
-
-/**
- * @relates String
- * @brief Overload of > operator to compare a UTF-8 strings and a null
- *        terminated (value 0) UTF-8 string
- *
- * @param left  Left operand (a null terminated UTF-8 string)
- * @param right Right operand (a String)
- *
- * @return True if `left` is lexicographically after `right`
- */
-ENGINE_API bool operator>(const char* left, const String& right);
-
-/**
- * @relates String
- * @brief Overload of <= operator to compare a UTF-8 strings and a null
- *        terminated (value 0) UTF-8 string
- *
- * @param left  Left operand (a null terminated UTF-8 string)
- * @param right Right operand (a String)
- *
- * @return True if `left` is lexicographically before or equivalent to \a
- *        right
- */
-ENGINE_API bool operator<=(const char* left, const String& right);
-
-/**
- * @relates String
- * @brief Overload of >= operator to compare a UTF-8 strings and a null
- *        terminated (value 0) UTF-8 string
- *
- * @param left  Left operand (a null terminated UTF-8 string)
- * @param right Right operand (a String)
- *
- * @return True if `left` is lexicographically after or equivalent to `right`
- */
-ENGINE_API bool operator>=(const char* left, const String& right);
-
-/**
- * @copydoc bool operator==(const String& left, const char* right)
+ * @copydoc std::strong_ordering operator<=>(const String& left, const char* right)
  */
 ENGINE_API bool operator==(const String& left, const char8* right);
 
 /**
- * @copydoc bool operator!=(const String& left, const char* right)
+ * @copydoc std::strong_ordering operator<=>(const String& left, const char* right)
  */
-ENGINE_API bool operator!=(const String& left, const char8* right);
-
-/**
- * @copydoc bool operator<(const String& left, const char* right)
- */
-ENGINE_API bool operator<(const String& left, const char8* right);
-
-/**
- * @copydoc bool operator>(const String& left, const char* right)
- */
-ENGINE_API bool operator>(const String& left, const char8* right);
-
-/**
- * @copydoc bool operator<=(const String& left, const char* right)
- */
-ENGINE_API bool operator<=(const String& left, const char8* right);
-
-/**
- * @copydoc bool operator>=(const String& left, const char* right)
- */
-ENGINE_API bool operator>=(const String& left, const char8* right);
+ENGINE_API std::strong_ordering operator<=>(const String& left, const char8* right);
 
 /**
  * @copydoc bool operator==(const char* left, const String& right)
@@ -1085,29 +908,9 @@ ENGINE_API bool operator>=(const String& left, const char8* right);
 ENGINE_API bool operator==(const char8* left, const String& right);
 
 /**
- * @copydoc bool operator!=(const char* left, const String& right)
+ * @copydoc std::strong_ordering operator<=>(const char* left, const String& right)
  */
-ENGINE_API bool operator!=(const char8* left, const String& right);
-
-/**
- * @copydoc bool operator<(const char* left, const String& right)
- */
-ENGINE_API bool operator<(const char8* left, const String& right);
-
-/**
- * @copydoc bool operator>(const char* left, const String& right)
- */
-ENGINE_API bool operator>(const char8* left, const String& right);
-
-/**
- * @copydoc bool operator<=(const char* left, const String& right)
- */
-ENGINE_API bool operator<=(const char8* left, const String& right);
-
-/**
- * @copydoc bool operator>=(const char* left, const String& right)
- */
-ENGINE_API bool operator>=(const char8* left, const String& right);
+ENGINE_API std::strong_ordering operator<=>(const char8* left, const String& right);
 
 /**
  * @copydoc bool operator==(const String& left, const char* right)
@@ -1115,29 +918,9 @@ ENGINE_API bool operator>=(const char8* left, const String& right);
 ENGINE_API bool operator==(const String& left, const StringView& right);
 
 /**
- * @copydoc bool operator!=(const String& left, const char* right)
+ * @copydoc std::strong_ordering operator<=>(const String& left, const char* right)
  */
-ENGINE_API bool operator!=(const String& left, const StringView& right);
-
-/**
- * @copydoc bool operator<(const String& left, const char* right)
- */
-ENGINE_API bool operator<(const String& left, const StringView& right);
-
-/**
- * @copydoc bool operator>(const String& left, const char* right)
- */
-ENGINE_API bool operator>(const String& left, const StringView& right);
-
-/**
- * @copydoc bool operator<=(const String& left, const char* right)
- */
-ENGINE_API bool operator<=(const String& left, const StringView& right);
-
-/**
- * @copydoc bool operator>=(const String& left, const char* right)
- */
-ENGINE_API bool operator>=(const String& left, const StringView& right);
+ENGINE_API std::strong_ordering operator<=>(const String& left, const StringView& right);
 
 /**
  * @copydoc bool operator==(const char* left, const String& right)
@@ -1145,29 +928,9 @@ ENGINE_API bool operator>=(const String& left, const StringView& right);
 ENGINE_API bool operator==(const StringView& left, const String& right);
 
 /**
- * @copydoc bool operator!=(const char* left, const String& right)
+ * @copydoc std::strong_ordering operator<=>(const char* left, const String& right)
  */
-ENGINE_API bool operator!=(const StringView& left, const String& right);
-
-/**
- * @copydoc bool operator<(const char* left, const String& right)
- */
-ENGINE_API bool operator<(const StringView& left, const String& right);
-
-/**
- * @copydoc bool operator>(const char* left, const String& right)
- */
-ENGINE_API bool operator>(const StringView& left, const String& right);
-
-/**
- * @copydoc bool operator<=(const char* left, const String& right)
- */
-ENGINE_API bool operator<=(const StringView& left, const String& right);
-
-/**
- * @copydoc bool operator>=(const char* left, const String& right)
- */
-ENGINE_API bool operator>=(const StringView& left, const String& right);
+ENGINE_API std::strong_ordering operator<=>(const StringView& left, const String& right);
 
 /**
  * @relates String
