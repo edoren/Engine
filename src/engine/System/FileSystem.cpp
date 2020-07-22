@@ -40,7 +40,15 @@ FileSystem::FileSystem() {
 
 FileSystem::~FileSystem() = default;
 
-void FileSystem::initialize() {}
+void FileSystem::initialize() {
+    if (sExecutableDirectory.isEmpty()) {
+        char* path = SDL_GetBasePath();
+        if (path) {
+            sExecutableDirectory = path;
+            SDL_free(path);
+        }
+    }
+}
 
 void FileSystem::shutdown() {}
 
@@ -104,13 +112,6 @@ char FileSystem::getOsSeparator() const {
 }
 
 const String& FileSystem::executableDirectory() const {
-    if (sExecutableDirectory.isEmpty()) {
-        char* path = SDL_GetBasePath();
-        if (path) {
-            sExecutableDirectory = path;
-            SDL_free(path);
-        }
-    }
     return sExecutableDirectory;
 }
 
