@@ -2,6 +2,7 @@
 
 #include <Util/Prerequisites.hpp>
 
+#include <compare>
 #include <string>
 
 namespace engine::utf {
@@ -495,27 +496,17 @@ constexpr auto CodeUnitRange<Base, Iter>::getRange() const -> const std::pair<po
 }
 
 template <Encoding Base, typename Iter>
-template <typename Iter2>
-constexpr bool CodeUnitRange<Base, Iter>::operator==(const CodeUnitRange<Base, Iter2>& other) const {
+constexpr bool CodeUnitRange<Base, Iter>::operator==(const CodeUnitRange& other) const {
     size_type size = (m_range.second - m_range.first);
     size_type otherSize = (other.m_range.second - other.m_range.first);
     return otherSize == size && std::equal(m_range.first, m_range.second, other.m_range.first);
 }
 
 template <Encoding Base, typename Iter>
-template <typename Iter2>
-constexpr std::strong_ordering CodeUnitRange<Base, Iter>::operator<=>(const CodeUnitRange<Base, Iter2>& other) const {
+constexpr auto CodeUnitRange<Base, Iter>::operator<=>(const CodeUnitRange& other) const {
     static_assert(Base != UTF_16 || Base != UTF_32, "Unable to compare UTF-16 and UTF-32 lexicographicaly");
-    size_type size = (m_range.second - m_range.first);
-    size_type otherSize = (other.m_range.second - other.m_range.first);
-    if (size < otherSize) {
-        return std::strong_ordering::less;
-    } else if (size > otherSize) {
-        return std::strong_ordering::greater;
-    } else if (std::equal(m_range.first, m_range.second, other.m_range.first)) {
-        return std::strong_ordering::equal;
-    }
-    return std::strong_ordering::equivalent;
+    return std::lexicographical_compare_three_way(m_range.first, m_range.second, other.m_range.first,
+                                                  other.m_range.second);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

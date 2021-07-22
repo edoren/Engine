@@ -3,6 +3,7 @@
 #include <Util/UTF.hpp>
 
 #include <algorithm>
+#include <compare>
 #include <sstream>
 
 #include <cstring>

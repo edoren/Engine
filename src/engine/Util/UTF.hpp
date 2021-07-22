@@ -295,16 +295,14 @@ public:
      *
      * @return true if condition satisfies, false otherwise
      */
-    template <typename Iter2>
-    constexpr bool operator==(const CodeUnitRange<Base, Iter2>& other) const;
+    constexpr bool operator==(const CodeUnitRange& other) const;
 
     /**
      * @brief Spaceship operator
      *
      * @return TODO
      */
-    template <typename Iter2>
-    constexpr std::strong_ordering operator<=>(const CodeUnitRange<Base, Iter2>& other) const;
+    constexpr auto operator<=>(const CodeUnitRange& other) const;
 
 private:
     std::pair<pointed_type, pointed_type> m_range;
